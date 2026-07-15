@@ -15,8 +15,12 @@ SINCE="${2:-}"
 # Read the optional contribution end date.
 UNTIL="${3:-}"
 
-# Read the optional Unity source root.
-CODE_ROOT="${4:-Assets}"
+# Resolve this script's directory so it can be run from any repository folder.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Load project-type and source-root detection.
+# shellcheck source=lib/project-detection.sh
+source "$SCRIPT_DIR/lib/project-detection.sh"
 
 # Define common Unity-generated directories that must be ignored.
 IGNORED_DIRS=(Library Logs Temp Obj Build Builds UserSettings MemoryCaptures .git)
@@ -99,14 +103,26 @@ count_current_files() {
     # Read the file-name pattern.
     local pattern="$1"
 
-    # Find matching files under the configured source root.
-    find "$CODE_ROOT" -type f -iname "$pattern" 2>/dev/null |
+    # Find matching files under the detected source root.
+    analysis_find -type f -iname "$pattern" -print 2>/dev/null |
 
         # Count the results.
         wc -l |
 
         # Remove whitespace from the count.
         trim_count
+}
+
+# Find source files without walking into Git metadata or this run's report.
+analysis_find() {
+    find "$CODE_ROOT" \( \
+            -path "$OUTPUT_DIR" -o \
+            -path "$OUTPUT_DIR/*" -o \
+            -path "./$REPORT_NAME" -o \
+            -path "./$REPORT_NAME/*" -o \
+            -path '*/.git' -o \
+            -path '*/.git/*' \
+        \) -prune -o "$@"
 }
 
 # Count unique historical files matching a lower-case regular expression.
@@ -152,9 +168,6 @@ if [[ -z "$AUTHOR" ]]; then
     echo ""
     echo "Optional date range:"
     echo "  bash dna-analysis.sh \"Author\" \"2017-01-01\" \"2022-12-31\""
-    echo ""
-    echo "Optional custom code root:"
-    echo "  bash dna-analysis.sh \"Author\" \"\" \"\" \"Assets/_Project\""
     echo ""
     echo "Inspect available authors with:"
     echo "  git shortlog -sne --all"
@@ -227,7 +240,11 @@ fi
 # Move to the repository root.
 cd "$REPO_ROOT" || die "Could not enter the repository root."
 
-# Validate the configured source root.
+# Detect the project and select its source root.
+PROJECT_TYPE="$(detect_project_type)"
+CODE_ROOT="$(detect_code_root "$PROJECT_TYPE")"
+
+# Validate the detected source root.
 [[ -d "$CODE_ROOT" ]] || die "Code root not found: $CODE_ROOT"
 
 # Create all output directories.
@@ -246,9 +263,10 @@ mkdir -p \
 # Print the selected configuration.
 echo ""
 echo "================================================================"
-echo "Unity Project and Career Analysis"
+echo "Project and Career Analysis"
 echo "================================================================"
 echo "Repository : $REPO_NAME"
+echo "Type       : $PROJECT_TYPE"
 echo "Author     : $AUTHOR"
 echo "Since      : ${SINCE:-no filter}"
 echo "Until      : ${UNTIL:-no filter}"
@@ -258,7 +276,7 @@ echo "================================================================"
 echo ""
 
 # Print the first progress step.
-echo "[1/12] Reading repository and Unity metadata..."
+echo "[1/12] Reading repository and project metadata..."
 
 # Read the current branch.
 CURRENT_BRANCH="$(git branch --show-current 2>/dev/null || true)"
@@ -304,6 +322,7 @@ COMPANY_NAME="$(
 # Write repository metadata.
 cat > "$PROJECT_DIR/00_repository_information.txt" <<EOF
 Repository name: $REPO_NAME
+Project type: $PROJECT_TYPE
 Product name: ${PRODUCT_NAME:-Unknown}
 Company name: ${COMPANY_NAME:-Unknown}
 Repository root: $REPO_ROOT
@@ -311,7 +330,7 @@ Current branch: ${CURRENT_BRANCH:-Detached HEAD or unavailable}
 HEAD commit: ${HEAD_HASH:-Unavailable}
 Origin remote: ${REMOTE_URL:-Unavailable}
 Unity version: ${UNITY_VERSION:-Unknown}
-Configured code root: $CODE_ROOT
+Detected code root: $CODE_ROOT
 Generated at: $GENERATED_AT
 EOF
 
@@ -347,76 +366,76 @@ find . \
     > "$PROJECT_DIR/01_folder_tree.txt"
 
 # Export primary source directories.
-find "$CODE_ROOT" -mindepth 1 -maxdepth 2 -type d 2>/dev/null |
+analysis_find -mindepth 1 -maxdepth 2 -type d -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/02_main_directories.txt"
 
 # Export scenes.
-find "$CODE_ROOT" -type f -iname '*.unity' 2>/dev/null |
+analysis_find -type f -iname '*.unity' -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/03_scenes.txt"
 
 # Export prefabs.
-find "$CODE_ROOT" -type f -iname '*.prefab' 2>/dev/null |
+analysis_find -type f -iname '*.prefab' -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/04_prefabs.txt"
 
 # Export animation assets.
-find "$CODE_ROOT" -type f \( \
+analysis_find -type f \( \
         -iname '*.anim' -o \
         -iname '*.controller' -o \
         -iname '*.overrideController' \
-    \) 2>/dev/null |
+    \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/05_animation_assets.txt"
 
 # Export shader assets.
-find "$CODE_ROOT" -type f \( \
+analysis_find -type f \( \
         -iname '*.shader' -o \
         -iname '*.hlsl' -o \
         -iname '*.cginc' -o \
         -iname '*.compute' -o \
         -iname '*.shadergraph' \
-    \) 2>/dev/null |
+    \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/06_shader_assets.txt"
 
 # Export assembly definitions.
-find "$CODE_ROOT" -type f \( \
+analysis_find -type f \( \
         -iname '*.asmdef' -o \
         -iname '*.asmref' \
-    \) 2>/dev/null |
+    \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/07_assembly_definitions.txt"
 
 # Export UI Toolkit assets.
-find "$CODE_ROOT" -type f \( \
+analysis_find -type f \( \
         -iname '*.uxml' -o \
         -iname '*.uss' \
-    \) 2>/dev/null |
+    \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/08_ui_toolkit_assets.txt"
 
 # Export Timeline assets.
-find "$CODE_ROOT" -type f -iname '*.playable' 2>/dev/null |
+analysis_find -type f -iname '*.playable' -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/09_timeline_assets.txt"
 
 # Export Resources assets.
-find "$CODE_ROOT" -type f -path '*/Resources/*' 2>/dev/null |
+analysis_find -type f -path '*/Resources/*' -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/10_resources_assets.txt"
 
 # Export Addressables-related assets.
-find "$CODE_ROOT" -type f \( \
+analysis_find -type f \( \
         -path '*Addressable*' -o \
         -iname '*Addressable*' \
-    \) 2>/dev/null |
+    \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/11_addressables_assets.txt"
 
 # Export likely third-party files.
-find "$CODE_ROOT" -type f 2>/dev/null |
+analysis_find -type f -print 2>/dev/null |
     awk -v regex="$THIRD_PARTY_REGEX" '$0 ~ regex' |
     sort \
     > "$PROJECT_DIR/12_likely_third_party_files.txt"
@@ -456,7 +475,7 @@ grep -RInE \
 SYSTEM_KEYWORDS='Player|Character|Movement|Motor|Controller|Camera|Combat|Attack|Weapon|Damage|Health|Ability|Skill|Buff|Debuff|Inventory|Item|Equipment|Quest|Mission|Dialogue|AI|Enemy|NPC|Behavior|State|Pool|Save|Persistence|Database|Network|Multiplayer|Photon|Mirror|Fusion|Netcode|Lobby|Matchmaking|Audio|Music|Localization|Analytics|Telemetry|Achievement|Progress|Tutorial|Onboarding|UI|HUD|Menu|Input|Animation|Timeline|Addressable|Loading|Scene|Spawn|Procedural|Editor|Tool'
 
 # Detect likely gameplay and product-system files by file name.
-find "$CODE_ROOT" -type f -iname '*.cs' 2>/dev/null |
+analysis_find -type f -iname '*.cs' -print 2>/dev/null |
     grep -Ei "$SYSTEM_KEYWORDS" |
     sort \
     > "$PROJECT_DIR/17_likely_system_files.txt" || true
@@ -528,20 +547,20 @@ CURRENT_USS="$(count_current_files '*.uss')"
 
 # Count current C# source lines.
 CURRENT_CS_LINES="$(
-    find "$CODE_ROOT" -type f -iname '*.cs' -print0 2>/dev/null |
+    analysis_find -type f -iname '*.cs' -print0 2>/dev/null |
         xargs -0 cat 2>/dev/null |
         wc -l |
         trim_count
 )"
 
 # Export the largest C# files.
-find "$CODE_ROOT" -type f -iname '*.cs' -exec wc -l {} \; 2>/dev/null |
+analysis_find -type f -iname '*.cs' -exec wc -l {} \; 2>/dev/null |
     sort -rn |
     head -n 150 \
     > "$PROJECT_DIR/23_largest_csharp_files.txt"
 
 # Export C# file counts by directory.
-find "$CODE_ROOT" -type f -iname '*.cs' 2>/dev/null |
+analysis_find -type f -iname '*.cs' -print 2>/dev/null |
     awk -F/ '
         {
             if (NF >= 3) {
@@ -587,7 +606,7 @@ while IFS= read -r source_file; do
     # Preserve the original project path.
     copy_preserving_path "$source_file" "$SOURCE_DIR/all_csharp"
 done < <(
-    find "$CODE_ROOT" -type f -iname '*.cs' 2>/dev/null |
+    analysis_find -type f -iname '*.cs' -print 2>/dev/null |
         sort
 )
 
@@ -596,17 +615,14 @@ while IFS= read -r source_file; do
     # Preserve the original project path.
     copy_preserving_path "$source_file" "$SOURCE_DIR/likely_project_owned"
 done < <(
-    find "$CODE_ROOT" -type f -iname '*.cs' 2>/dev/null |
+    analysis_find -type f -iname '*.cs' -print 2>/dev/null |
         awk -v regex="$THIRD_PARTY_REGEX" '$0 !~ regex' |
         sort
 )
 
-# Copy root documentation.
-find . -maxdepth 2 -type f \( \
-        -iname 'README*' -o \
-        -iname '*.md' \
-    \) 2>/dev/null |
-    while IFS= read -r documentation_file; do
+# Copy tracked documentation without including the report being generated.
+git ls-files -z -- 'README*' '*.md' 2>/dev/null |
+    while IFS= read -r -d '' documentation_file; do
         # Preserve the original documentation path.
         copy_preserving_path "$documentation_file" "$SOURCE_DIR/documentation"
     done
@@ -1023,7 +1039,7 @@ EOF
 cat > "$SUMMARY_DIR/02_analysis_prompt.md" <<'EOF'
 # Analysis Request
 
-Analyze this Unity project export and Git history carefully.
+Analyze this project export and Git history carefully.
 
 Separate:
 
@@ -1078,12 +1094,13 @@ fi
 
 # Write the executive summary.
 cat > "$SUMMARY_DIR/00_executive_summary.txt" <<EOF
-Unity Project and Career Analysis
+Project and Career Analysis
 =================================
 
 Project
 -------
 Repository: $REPO_NAME
+Project type: $PROJECT_TYPE
 Product name: ${PRODUCT_NAME:-Unknown}
 Company name: ${COMPANY_NAME:-Unknown}
 Unity version: ${UNITY_VERSION:-Unknown}
@@ -1131,6 +1148,7 @@ EOF
 
 # Escape JSON values.
 JSON_REPO="$(json_escape "$REPO_NAME")"
+JSON_PROJECT_TYPE="$(json_escape "$PROJECT_TYPE")"
 JSON_PRODUCT="$(json_escape "${PRODUCT_NAME:-Unknown}")"
 JSON_COMPANY="$(json_escape "${COMPANY_NAME:-Unknown}")"
 JSON_AUTHOR="$(json_escape "$AUTHOR")"
@@ -1141,6 +1159,7 @@ JSON_UNITY="$(json_escape "${UNITY_VERSION:-Unknown}")"
 cat > "$DATA_DIR/project_summary.json" <<EOF
 {
   "repository": "$JSON_REPO",
+  "project_type": "$JSON_PROJECT_TYPE",
   "product_name": "$JSON_PRODUCT",
   "company_name": "$JSON_COMPANY",
   "author_filter": "$JSON_AUTHOR",
@@ -1199,9 +1218,10 @@ fi
 
 # Write the main README.
 cat > "$OUTPUT_DIR/README.md" <<EOF
-# Unity Project and Career Analysis
+# Project and Career Analysis
 
 **Repository:** $REPO_NAME  
+**Project type:** $PROJECT_TYPE
 **Product:** ${PRODUCT_NAME:-Unknown}  
 **Selected author:** $AUTHOR  
 **Unity version:** ${UNITY_VERSION:-Unknown}  
@@ -1209,7 +1229,7 @@ cat > "$OUTPUT_DIR/README.md" <<EOF
 
 ## Purpose
 
-This package combines a current Unity project review, an author-specific Git
+This package combines a current project review, an author-specific Git
 contribution report, source-code export, collaboration evidence, and a Notion
 career-journaling guide.
 
