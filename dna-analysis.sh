@@ -157,16 +157,84 @@ count_current_files() {
         trim_count
 }
 
-# Find source files without walking into Git metadata or this run's report.
+# Helper function: build arguments for excluding ignored directories in find.
+build_find_prune_args() {
+    local first=true
+
+    # Add each ignored directory by name.
+    for dir in "${IGNORED_DIRS[@]}"; do
+        if [[ "$first" == true ]]; then
+            printf '-name %s' "$dir"
+            first=false
+        else
+            printf ' -o -name %s' "$dir"
+        fi
+    done
+
+    # Load and add directories from .repodnaignore.
+    if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
+        while IFS= read -r pattern; do
+            # Skip empty lines and comments.
+            [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+
+            # Trim whitespace.
+            pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            [[ -z "$pattern" ]] && continue
+
+            # Only process directory patterns (ending with /)
+            if [[ "$pattern" == */ ]]; then
+                dir="${pattern%/}"
+                printf ' -o -name %s' "$dir"
+            fi
+        done < "$REPO_ROOT/.repodnaignore"
+    fi
+}
+
+# Find source files without walking into ignored directories or this run's report.
 analysis_find() {
     find "$CODE_ROOT" \( \
-            -path "$OUTPUT_DIR" -o \
-            -path "$OUTPUT_DIR/*" -o \
-            -path "./$REPORT_NAME" -o \
-            -path "./$REPORT_NAME/*" -o \
-            -path '*/.git' -o \
-            -path '*/.git/*' \
+            -path '*/.git' -o -path '*/.git/*' -o \
+            -path "$OUTPUT_DIR" -o -path "$OUTPUT_DIR/*" -o \
+            -path "./$REPORT_NAME" -o -path "./$REPORT_NAME/*" -o \
+            \( $(build_find_prune_args) \) \
         \) -prune -o "$@"
+}
+
+# Search source files using grep with proper exclusion handling.
+analysis_grep() {
+    local -a grep_args=()
+    local -a exclude_dirs=()
+
+    # Collect grep arguments and exclude directories.
+    for arg in "$@"; do
+        grep_args+=("$arg")
+    done
+
+    # Exclude ignored directories.
+    for dir in "${IGNORED_DIRS[@]}"; do
+        exclude_dirs+=(--exclude-dir="$dir")
+    done
+
+    # Exclude directories from .repodnaignore.
+    if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
+        while IFS= read -r pattern; do
+            # Skip empty lines and comments.
+            [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+
+            # Trim whitespace.
+            pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            [[ -z "$pattern" ]] && continue
+
+            # Only process directory patterns (ending with /)
+            if [[ "$pattern" == */ ]]; then
+                dir="${pattern%/}"
+                exclude_dirs+=(--exclude-dir="$dir")
+            fi
+        done < "$REPO_ROOT/.repodnaignore"
+    fi
+
+    # Execute grep with exclusions.
+    grep -R "${exclude_dirs[@]}" "${grep_args[@]}" "$CODE_ROOT" 2>/dev/null || true
 }
 
 # Count unique historical files matching a lower-case regular expression.
@@ -385,21 +453,36 @@ cp Packages/packages-lock.json "$PROJECT_DIR/packages/" 2>/dev/null || true
 # Print the second progress step.
 echo "[2/12] Exporting project structure and asset inventories..."
 
-# Export a project tree without requiring the tree command.
+# Export a project tree without requiring the tree command, respecting exclusions.
+# Build prune conditions for find.
+FIND_PRUNE_CONDITIONS=()
+for dir in "${IGNORED_DIRS[@]}"; do
+    FIND_PRUNE_CONDITIONS+=(-name "$dir" -o)
+done
+# Remove trailing -o if any.
+if [[ ${#FIND_PRUNE_CONDITIONS[@]} -gt 0 ]]; then
+    FIND_PRUNE_CONDITIONS=("${FIND_PRUNE_CONDITIONS[@]:0:$((${#FIND_PRUNE_CONDITIONS[@]} - 1))}")
+fi
+# Add .repodnaignore directories.
+if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
+    while IFS= read -r pattern; do
+        [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+        pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [[ -z "$pattern" ]] && continue
+        if [[ "$pattern" == */ ]]; then
+            dir="${pattern%/}"
+            FIND_PRUNE_CONDITIONS+=(-o -name "$dir")
+        fi
+    done < "$REPO_ROOT/.repodnaignore"
+fi
+
 find . \
     -type d \( \
-        -name Library -o \
-        -name Logs -o \
-        -name Temp -o \
-        -name Obj -o \
-        -name Build -o \
-        -name Builds -o \
-        -name UserSettings -o \
-        -name MemoryCaptures -o \
-        -name .git -o \
-        -name "$REPORT_NAME" \
+        -path '*/.git' -o \
+        -path '*/.git/*' -o \
+        "${FIND_PRUNE_CONDITIONS[@]}" \
     \) -prune -o \
-    -print 2>/dev/null |
+    -type f -print 2>/dev/null |
     sed 's|^\./||' |
     sort \
     > "$PROJECT_DIR/01_folder_tree.txt"
@@ -483,32 +566,32 @@ analysis_find -type f -print 2>/dev/null |
 echo "[3/12] Detecting architecture, systems, and technologies..."
 
 # Detect ScriptableObjects.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     'CreateAssetMenu|:[[:space:]]*ScriptableObject' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/13_scriptable_objects.txt" || true
+    > "$PROJECT_DIR/13_scriptable_objects.txt"
 
 # Detect MonoBehaviours.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     ':[[:space:]]*MonoBehaviour' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/14_monobehaviours.txt" || true
+    > "$PROJECT_DIR/14_monobehaviours.txt"
 
 # Detect interfaces.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     '^[[:space:]]*(public|internal|protected|private)?[[:space:]]*interface[[:space:]]+' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/15_interfaces.txt" || true
+    > "$PROJECT_DIR/15_interfaces.txt"
 
 # Detect custom editor tooling.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     'UnityEditor|CustomEditor|PropertyDrawer|EditorWindow|MenuItem' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/16_editor_tooling.txt" || true
+    > "$PROJECT_DIR/16_editor_tooling.txt"
 
 # Define system-related keywords.
 SYSTEM_KEYWORDS='Player|Character|Movement|Motor|Controller|Camera|Combat|Attack|Weapon|Damage|Health|Ability|Skill|Buff|Debuff|Inventory|Item|Equipment|Quest|Mission|Dialogue|AI|Enemy|NPC|Behavior|State|Pool|Save|Persistence|Database|Network|Multiplayer|Photon|Mirror|Fusion|Netcode|Lobby|Matchmaking|Audio|Music|Localization|Analytics|Telemetry|Achievement|Progress|Tutorial|Onboarding|UI|HUD|Menu|Input|Animation|Timeline|Addressable|Loading|Scene|Spawn|Procedural|Editor|Tool'
@@ -520,39 +603,39 @@ analysis_find -type f -iname '*.cs' -print 2>/dev/null |
     > "$PROJECT_DIR/17_likely_system_files.txt" || true
 
 # Detect common architecture patterns.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     'Singleton|StateMachine|IState|Command|Observer|EventBus|ServiceLocator|DependencyInjection|Factory|Builder|Strategy|ObjectPool|Repository|Mediator|MVC|MVVM|Presenter' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/18_architecture_pattern_signals.txt" || true
+    > "$PROJECT_DIR/18_architecture_pattern_signals.txt"
 
 # Detect networking technologies.
-grep -RInEi \
+analysis_grep \
     --include='*.cs' \
+    -InEi \
     'Photon|Mirror|Fusion|Netcode|NetworkBehaviour|NetworkObject|RPC|ClientRpc|ServerRpc|Bolt|FishNet|Steamworks' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/19_networking_signals.txt" || true
+    > "$PROJECT_DIR/19_networking_signals.txt"
 
 # Detect backend and data integrations.
-grep -RInEi \
+analysis_grep \
     --include='*.cs' \
+    -InEi \
     'HttpClient|UnityWebRequest|REST|GraphQL|Firebase|Analytics|Telemetry|WebSocket|Socket|API|JsonUtility|Newtonsoft|SQLite|LiteDB|Realm' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/20_services_and_data_signals.txt" || true
+    > "$PROJECT_DIR/20_services_and_data_signals.txt"
 
 # Detect performance-related techniques.
-grep -RInEi \
+analysis_grep \
     --include='*.cs' \
+    -InEi \
     'Profiler|ObjectPool|pooling|Addressables|async|await|Task|JobHandle|BurstCompile|NativeArray|ECS|EntityManager|GC\.Alloc|Resources\.Unload|AssetBundle' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/21_performance_signals.txt" || true
+    > "$PROJECT_DIR/21_performance_signals.txt"
 
 # Detect technical-debt markers.
-grep -RInE \
+analysis_grep \
     --include='*.cs' \
+    -InE \
     'TODO|FIXME|HACK|XXX' \
-    "$CODE_ROOT" 2>/dev/null \
-    > "$PROJECT_DIR/22_technical_debt_markers.txt" || true
+    > "$PROJECT_DIR/22_technical_debt_markers.txt"
 
 # Print the fourth progress step.
 echo "[4/12] Calculating current project metrics..."

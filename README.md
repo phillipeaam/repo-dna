@@ -63,6 +63,26 @@ RepoDNA can be used for:
 
 ---
 
+# ⚙ Configuration
+
+## Customizing Directory Exclusions
+
+By default, RepoDNA excludes common directories like `Library/`, `Plugins/`, `Build/`, and `.git/`. 
+
+To customize exclusions for your project, create a `.repodnaignore` file in your repository root:
+
+```
+# Project-specific exclusions
+Assets/Plugins/
+Assets/Generated/
+vendor/
+**/*.generated.cs
+```
+
+See [EXCLUSIONS.md](./EXCLUSIONS.md) for detailed configuration documentation.
+
+---
+
 # 🛣 Roadmap
 
 ### Core
