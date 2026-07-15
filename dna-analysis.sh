@@ -6,14 +6,10 @@ set -u
 # Fail a pipeline when any command inside it fails.
 set -o pipefail
 
-# Read the required Git author filter.
-AUTHOR="${1:-}"
-
-# Read the optional contribution start date.
-SINCE="${2:-}"
-
-# Read the optional contribution end date.
-UNTIL="${3:-}"
+# Initialize optional Git-history filters.
+AUTHOR=""
+SINCE=""
+UNTIL=""
 
 # Resolve this script's directory so it can be run from any repository folder.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,6 +35,48 @@ die() {
     # Exit with a failure code.
     exit 1
 }
+
+# Print command-line usage.
+show_usage() {
+    echo "Usage:"
+    echo "  bash dna-analysis.sh [options]"
+    echo ""
+    echo "Options:"
+    echo "  --author <name-or-email>  Analyze one contributor instead of all history."
+    echo "  --since <date>            Include commits on or after this date."
+    echo "  --until <date>            Include commits on or before this date."
+    echo "  -h, --help                Show this help."
+    echo ""
+    echo "Examples:"
+    echo "  bash dna-analysis.sh"
+    echo "  bash dna-analysis.sh --author \"Phillipe Augusto\""
+    echo "  bash dna-analysis.sh --since 2020-01-01 --until 2025-12-31"
+}
+
+# Read named command-line options.
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --author|--since|--until)
+            [[ -n "${2:-}" ]] || die "Option $1 requires a value."
+
+            case "$1" in
+                --author) AUTHOR="$2" ;;
+                --since)  SINCE="$2" ;;
+                --until)  UNTIL="$2" ;;
+            esac
+
+            shift 2
+            ;;
+        -h|--help)
+            show_usage
+            exit 0
+            ;;
+        *)
+            show_usage >&2
+            die "Unknown option: $1"
+            ;;
+    esac
+done
 
 # Return success when a command exists.
 command_exists() {
@@ -77,10 +115,16 @@ html_escape() {
             -e 's/"/\&quot;/g'
 }
 
-# Execute git log using the configured author and date filters.
-author_git_log() {
-    # Query all branches and tags for the selected author.
-    git log --all --author="$AUTHOR" "${DATE_FILTER[@]}" "$@"
+# Execute git log using the configured optional filters.
+analysis_git_log() {
+    local filters=(--all)
+
+    if [[ -n "$AUTHOR" ]]; then
+        filters+=(--author="$AUTHOR")
+    fi
+
+    filters+=("${DATE_FILTER[@]}")
+    git log "${filters[@]}" "$@"
 }
 
 # Copy one file while preserving its relative project path.
@@ -130,8 +174,8 @@ count_historical_files() {
     # Read the regular expression.
     local pattern="$1"
 
-    # List every path changed by the selected author.
-    author_git_log --name-only --pretty=format: 2>/dev/null |
+    # List every path changed in the selected history scope.
+    analysis_git_log --name-only --pretty=format: 2>/dev/null |
 
         # Match paths using a lower-case comparison.
         awk -v regex="$pattern" '
@@ -159,22 +203,6 @@ command_exists git || die "Git is not installed or is not available in PATH."
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
     die "Run this script from inside a Git repository."
-
-# Require an author filter.
-if [[ -z "$AUTHOR" ]]; then
-    # Print usage information.
-    echo "Usage:"
-    echo "  bash dna-analysis.sh \"Author name or e-mail\""
-    echo ""
-    echo "Optional date range:"
-    echo "  bash dna-analysis.sh \"Author\" \"2017-01-01\" \"2022-12-31\""
-    echo ""
-    echo "Inspect available authors with:"
-    echo "  git shortlog -sne --all"
-
-    # Stop because the required argument is missing.
-    exit 1
-fi
 
 # Resolve the repository root.
 REPO_ROOT="$(git rev-parse --show-toplevel)"
@@ -207,7 +235,7 @@ SUMMARY_DIR="$OUTPUT_DIR/summary"
 # Define the project-wide analysis folder.
 PROJECT_DIR="$OUTPUT_DIR/project"
 
-# Define the author contribution folder.
+# Define the Git history and contribution folder.
 CONTRIBUTION_DIR="$OUTPUT_DIR/contribution"
 
 # Define the source export folder.
@@ -235,6 +263,17 @@ fi
 if [[ -n "$UNTIL" ]]; then
     # Append the Git end-date option.
     DATE_FILTER+=(--until="$UNTIL")
+fi
+
+# Describe whether Git history covers the repository or one contributor.
+if [[ -n "$AUTHOR" ]]; then
+    HISTORY_SCOPE="Contributor: $AUTHOR"
+    HISTORY_HEADING="Selected Author Contribution"
+    HISTORY_DESCRIPTION="author-specific Git evidence"
+else
+    HISTORY_SCOPE="Entire repository"
+    HISTORY_HEADING="Repository History"
+    HISTORY_DESCRIPTION="repository-wide Git evidence"
 fi
 
 # Move to the repository root.
@@ -267,7 +306,7 @@ echo "Project and Career Analysis"
 echo "================================================================"
 echo "Repository : $REPO_NAME"
 echo "Type       : $PROJECT_TYPE"
-echo "Author     : $AUTHOR"
+echo "Git scope  : $HISTORY_SCOPE"
 echo "Since      : ${SINCE:-no filter}"
 echo "Until      : ${UNTIL:-no filter}"
 echo "Code root  : $CODE_ROOT"
@@ -639,19 +678,19 @@ find ProjectSettings -maxdepth 1 -type f \( \
     done
 
 # Print the sixth progress step.
-echo "[6/12] Calculating author-specific Git contribution metrics..."
+echo "[6/12] Calculating Git history and contribution metrics..."
 
-# Count commits matching the author filter.
+# Count commits in the selected history scope.
 TOTAL_COMMITS="$(
-    author_git_log --pretty=format:'%H' 2>/dev/null |
+    analysis_git_log --pretty=format:'%H' 2>/dev/null |
         awk 'NF { count++ } END { print count + 0 }'
 )"
 
-# Handle repositories where the author filter matches no commits.
+# Handle history scopes that contain no commits.
 if [[ "$TOTAL_COMMITS" -eq 0 ]]; then
     # Write an explanatory report.
-    cat > "$CONTRIBUTION_DIR/00_no_matching_author.txt" <<EOF
-No commits matched the author filter: $AUTHOR
+    cat > "$CONTRIBUTION_DIR/00_no_matching_commits.txt" <<EOF
+No commits matched the selected history scope: $HISTORY_SCOPE
 
 Inspect available authors with:
 git shortlog -sne --all
@@ -661,7 +700,7 @@ EOF
 else
     # Read the first matching commit.
     FIRST_COMMIT="$(
-        author_git_log \
+        analysis_git_log \
             --reverse \
             --date=short \
             --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null |
@@ -670,32 +709,32 @@ else
 
     # Read the last matching commit.
     LAST_COMMIT="$(
-        author_git_log \
+        analysis_git_log \
             --date=short \
             --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null |
             head -n 1
     )"
 
-    # Read the first contribution date.
+    # Read the first commit date.
     FIRST_DATE="$(
-        author_git_log \
+        analysis_git_log \
             --reverse \
             --date=short \
             --pretty=format:'%ad' 2>/dev/null |
             head -n 1
     )"
 
-    # Read the last contribution date.
+    # Read the last commit date.
     LAST_DATE="$(
-        author_git_log \
+        analysis_git_log \
             --date=short \
             --pretty=format:'%ad' 2>/dev/null |
             head -n 1
     )"
 
-    # Count active contribution days.
+    # Count active commit days.
     ACTIVE_DAYS="$(
-        author_git_log \
+        analysis_git_log \
             --date=short \
             --pretty=format:'%ad' 2>/dev/null |
             sort -u |
@@ -704,7 +743,7 @@ else
 
     # Count unique historical paths changed.
     UNIQUE_FILES="$(
-        author_git_log \
+        analysis_git_log \
             --name-only \
             --pretty=format: 2>/dev/null |
             awk 'NF' |
@@ -715,7 +754,7 @@ else
     # Calculate historical line-change volume.
     read -r LINES_ADDED LINES_REMOVED NET_LINES <<EOF
 $(
-        author_git_log \
+        analysis_git_log \
             --pretty=tformat: \
             --numstat 2>/dev/null |
             awk '
@@ -736,13 +775,13 @@ EOF
 
     # Count merge commits.
     MERGE_COMMITS="$(
-        author_git_log --merges --pretty=format:'%H' 2>/dev/null |
+        analysis_git_log --merges --pretty=format:'%H' 2>/dev/null |
             awk 'NF { count++ } END { print count + 0 }'
     )"
 
     # Count non-merge commits.
     NON_MERGE_COMMITS="$(
-        author_git_log --no-merges --pretty=format:'%H' 2>/dev/null |
+        analysis_git_log --no-merges --pretty=format:'%H' 2>/dev/null |
             awk 'NF { count++ } END { print count + 0 }'
     )"
 
@@ -775,7 +814,7 @@ EOF
 
     # Count historical editor scripts changed.
     HISTORICAL_EDITOR_CS="$(
-        author_git_log --name-only --pretty=format: 2>/dev/null |
+        analysis_git_log --name-only --pretty=format: 2>/dev/null |
             awk '
                 {
                     line = tolower($0)
@@ -790,10 +829,11 @@ EOF
 
     # Write the contribution summary.
     cat > "$CONTRIBUTION_DIR/00_contribution_summary.txt" <<EOF
-Author Contribution Summary
-===========================
+Git History Summary
+===================
 
-Author filter: $AUTHOR
+History scope: $HISTORY_SCOPE
+Author filter: ${AUTHOR:-Not specified}
 Since: ${SINCE:-Not specified}
 Until: ${UNTIL:-Not specified}
 
@@ -803,9 +843,9 @@ $FIRST_COMMIT
 Last matching commit:
 $LAST_COMMIT
 
-First contribution date: ${FIRST_DATE:-N/A}
-Last contribution date: ${LAST_DATE:-N/A}
-Active contribution days: $ACTIVE_DAYS
+First commit date: ${FIRST_DATE:-N/A}
+Last commit date: ${LAST_DATE:-N/A}
+Active commit days: $ACTIVE_DAYS
 
 Total commits: $TOTAL_COMMITS
 Non-merge commits: $NON_MERGE_COMMITS
@@ -829,7 +869,7 @@ Renames, imported packages, generated files, and merges may inflate values.
 EOF
 
     # Export readable commit history.
-    author_git_log \
+    analysis_git_log \
         --date=iso-strict \
         --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null \
         > "$CONTRIBUTION_DIR/01_commits.txt"
@@ -840,7 +880,7 @@ EOF
         echo "Date,Hash,FullHash,AuthorName,AuthorEmail,Subject"
 
         # Convert Git records into escaped CSV rows.
-        author_git_log \
+        analysis_git_log \
             --date=short \
             --pretty=format:'%ad%x09%h%x09%H%x09%an%x09%ae%x09%s' 2>/dev/null |
             awk -F '\t' '
@@ -858,10 +898,10 @@ EOF
                           csv($6)
                 }
             '
-    } > "$DATA_DIR/author_commits.csv"
+    } > "$DATA_DIR/history_commits.csv"
 
     # Count commits by year.
-    author_git_log \
+    analysis_git_log \
         --date=format:'%Y' \
         --pretty=format:'%ad' 2>/dev/null |
         sort |
@@ -870,7 +910,7 @@ EOF
         > "$CONTRIBUTION_DIR/02_commits_by_year.txt"
 
     # Count commits by month.
-    author_git_log \
+    analysis_git_log \
         --date=format:'%Y-%m' \
         --pretty=format:'%ad' 2>/dev/null |
         sort |
@@ -879,7 +919,7 @@ EOF
         > "$CONTRIBUTION_DIR/03_commits_by_month.txt"
 
     # Rank changed files.
-    author_git_log --name-only --pretty=format: 2>/dev/null |
+    analysis_git_log --name-only --pretty=format: 2>/dev/null |
         awk 'NF' |
         sort |
         uniq -c |
@@ -887,7 +927,7 @@ EOF
         > "$CONTRIBUTION_DIR/04_top_changed_files.txt"
 
     # Rank changed directories.
-    author_git_log --name-only --pretty=format: 2>/dev/null |
+    analysis_git_log --name-only --pretty=format: 2>/dev/null |
         awk '
             NF {
                 count = split($0, parts, "/")
@@ -907,7 +947,7 @@ EOF
         > "$CONTRIBUTION_DIR/05_top_changed_directories.txt"
 
     # Rank changed file extensions.
-    author_git_log --name-only --pretty=format: 2>/dev/null |
+    analysis_git_log --name-only --pretty=format: 2>/dev/null |
         awk '
             NF {
                 count = split($0, parts, ".")
@@ -925,7 +965,7 @@ EOF
         > "$CONTRIBUTION_DIR/06_changed_file_extensions.txt"
 
     # Export system-related commit subjects.
-    author_git_log --pretty=format:'%s' 2>/dev/null |
+    analysis_git_log --pretty=format:'%s' 2>/dev/null |
         grep -Ei "$SYSTEM_KEYWORDS" |
         sort \
         > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
@@ -988,7 +1028,8 @@ Combine Git evidence with personal context about responsibilities and ownership.
 Review likely system files, architecture signals, networking signals, service
 signals, top changed files, top changed directories, and exported source code.
 
-Distinguish systems that merely exist from systems the selected author changed.
+Distinguish systems that merely exist from systems changed in the selected
+history scope.
 
 ## ⚙ Engineering Contributions
 
@@ -1044,7 +1085,7 @@ Analyze this project export and Git history carefully.
 Separate:
 
 1. Current project-wide facts
-2. Historical contribution signals for the selected author
+2. Historical contribution signals for the selected history scope
 3. Third-party or generated content
 4. Evidence-supported conclusions
 5. Inferences that must be labeled as inferences
@@ -1076,20 +1117,20 @@ EOF
 # Print the ninth progress step.
 echo "[9/12] Writing summaries and structured data..."
 
-# Build the author-summary fragment.
+# Build the Git-history summary fragment.
 if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
-    # Include author metrics.
+    # Include metrics for the selected history scope.
     CONTRIBUTION_TEXT="Total commits: $TOTAL_COMMITS
-Active contribution days: $ACTIVE_DAYS
-First contribution date: ${FIRST_DATE:-N/A}
-Last contribution date: ${LAST_DATE:-N/A}
+Active commit days: $ACTIVE_DAYS
+First commit date: ${FIRST_DATE:-N/A}
+Last commit date: ${LAST_DATE:-N/A}
 Historical C# paths changed: $HISTORICAL_CS_FILES
 Historical Unity-related paths changed: $HISTORICAL_UNITY_FILES
 Historical scenes changed: $HISTORICAL_SCENES
 Historical prefabs changed: $HISTORICAL_PREFABS"
 else
-    # Explain the missing author match.
-    CONTRIBUTION_TEXT="No commits matched the author filter: $AUTHOR"
+    # Explain the missing history match.
+    CONTRIBUTION_TEXT="No commits matched the selected history scope: $HISTORY_SCOPE"
 fi
 
 # Write the executive summary.
@@ -1120,7 +1161,7 @@ Assembly definitions: $CURRENT_ASMDEFS
 UXML files: $CURRENT_UXML
 USS files: $CURRENT_USS
 
-Selected Author Contribution
+$HISTORY_HEADING
 ----------------------------
 $CONTRIBUTION_TEXT
 
@@ -1162,6 +1203,7 @@ cat > "$DATA_DIR/project_summary.json" <<EOF
   "project_type": "$JSON_PROJECT_TYPE",
   "product_name": "$JSON_PRODUCT",
   "company_name": "$JSON_COMPANY",
+  "history_scope": "$(json_escape "$HISTORY_SCOPE")",
   "author_filter": "$JSON_AUTHOR",
   "generated_at": "$JSON_GENERATED",
   "unity_version": "$JSON_UNITY",
@@ -1190,6 +1232,7 @@ if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
     # Write contribution metrics.
     cat > "$DATA_DIR/contribution_summary.json" <<EOF
 {
+  "history_scope": "$(json_escape "$HISTORY_SCOPE")",
   "author_filter": "$JSON_AUTHOR",
   "since": "$(json_escape "$SINCE")",
   "until": "$(json_escape "$UNTIL")",
@@ -1223,21 +1266,21 @@ cat > "$OUTPUT_DIR/README.md" <<EOF
 **Repository:** $REPO_NAME  
 **Project type:** $PROJECT_TYPE
 **Product:** ${PRODUCT_NAME:-Unknown}  
-**Selected author:** $AUTHOR  
+**Git history scope:** $HISTORY_SCOPE
 **Unity version:** ${UNITY_VERSION:-Unknown}  
 **Generated:** $GENERATED_AT
 
 ## Purpose
 
-This package combines a current project review, an author-specific Git
-contribution report, source-code export, collaboration evidence, and a Notion
+This package combines a current project review, $HISTORY_DESCRIPTION,
+source-code export, collaboration evidence, and a Notion
 career-journaling guide.
 
 ## Main folders
 
 - \`summary/\`: executive summary and Notion analysis guides
 - \`project/\`: current project structure, systems, and technologies
-- \`contribution/\`: author-specific Git evidence
+- \`contribution/\`: $HISTORY_DESCRIPTION
 - \`source/all_csharp/\`: all current C# source
 - \`source/likely_project_owned/\`: source excluding common vendor folders
 - \`source/project_settings/\`: selected Unity settings
@@ -1261,7 +1304,7 @@ EOF
 # Print the tenth progress step.
 echo "[10/12] Creating optional charts..."
 
-# Create charts only when author commit data exists.
+# Create charts only when commit data exists.
 if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
     # Write the Python chart generator.
     cat > "$OUTPUT_DIR/generate_graphs.py" <<'PYTHON'
@@ -1327,7 +1370,7 @@ def main() -> int:
     graphs = base / "graphs"
     graphs.mkdir(parents=True, exist_ok=True)
 
-    months, years = load_commits(base / "data" / "author_commits.csv")
+    months, years = load_commits(base / "data" / "history_commits.csv")
 
     month_labels = sorted(months)
     year_labels = sorted(years)
