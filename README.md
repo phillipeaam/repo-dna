@@ -1,6 +1,13 @@
 # 🧬 RepoDNA
 
-> **Understand the DNA of any software repository.**
+![License](https://img.shields.io/github/license/phillipeaam/repo-dna)
+![GitHub last commit](https://img.shields.io/github/last-commit/phillipeaam/repo-dna)
+![GitHub issues](https://img.shields.io/github/issues/phillipeaam/repo-dna)
+![GitHub stars](https://img.shields.io/github/stars/phillipeaam/repo-dna?style=social)
+
+> **Understand the architecture, evolution and engineering behind any repository.**
+
+![banner.png](banner.png)
 
 RepoDNA is an open-source repository analysis toolkit that combines **source code inspection**, **Git history**, **architecture discovery**, and **technology detection** to generate comprehensive engineering reports.
 
