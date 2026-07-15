@@ -1,51 +1,104 @@
 #!/usr/bin/env bash
 
-# Define the supported project types.
-readonly PROJECT_TYPE_UNITY='Unity'
-readonly PROJECT_TYPE_ANDROID='Android'
-readonly PROJECT_TYPE_FLUTTER='Flutter'
-readonly PROJECT_TYPE_DOTNET='.NET'
-readonly PROJECT_TYPE_UNREAL='Unreal'
-readonly PROJECT_TYPE_GODOT='Godot'
-readonly PROJECT_TYPE_NODE='Node'
-readonly PROJECT_TYPE_PYTHON='Python'
-readonly PROJECT_TYPE_GENERIC='Generic Git repository'
+# Keep detection priority explicit because repositories can match multiple types.
+declare -ar PROJECT_TYPES=(
+    'Unity'
+    'Flutter'
+    'Unreal'
+    'Godot'
+    'Android'
+    '.NET'
+    'Node'
+    'Python'
+)
 
-# Detect the primary project type from well-known repository markers.
-detect_project_type() {
-    if [[ -f ProjectSettings/ProjectVersion.txt ]]; then
-        printf '%s' "$PROJECT_TYPE_UNITY"
-    elif [[ -f pubspec.yaml ]]; then
-        printf '%s' "$PROJECT_TYPE_FLUTTER"
-    elif find . -maxdepth 3 -type f -name '*.uproject' -print -quit 2>/dev/null | grep -q .; then
-        printf '%s' "$PROJECT_TYPE_UNREAL"
-    elif [[ -f project.godot ]]; then
-        printf '%s' "$PROJECT_TYPE_GODOT"
-    elif [[ -f settings.gradle || -f settings.gradle.kts || -f build.gradle || -f build.gradle.kts ]] ||
-         find . -maxdepth 4 -type f -name AndroidManifest.xml -print -quit 2>/dev/null | grep -q .; then
-        printf '%s' "$PROJECT_TYPE_ANDROID"
-    elif find . -maxdepth 3 -type f \( -name '*.sln' -o -name '*.csproj' \) -print -quit 2>/dev/null | grep -q .; then
-        printf '%s' "$PROJECT_TYPE_DOTNET"
-    elif [[ -f package.json ]]; then
-        printf '%s' "$PROJECT_TYPE_NODE"
-    elif [[ -f pyproject.toml || -f requirements.txt ]]; then
-        printf '%s' "$PROJECT_TYPE_PYTHON"
-    else
-        printf '%s' "$PROJECT_TYPE_GENERIC"
-    fi
+# Associate each project type with the function that recognizes it.
+declare -Ar PROJECT_DETECTORS=(
+    [Unity]='is_unity_project'
+    [Flutter]='is_flutter_project'
+    [Unreal]='is_unreal_project'
+    [Godot]='is_godot_project'
+    [Android]='is_android_project'
+    [.NET]='is_dotnet_project'
+    [Node]='is_node_project'
+    [Python]='is_python_project'
+)
+
+# Associate each project type with its preferred source root.
+declare -Ar PROJECT_ROOTS=(
+    [Unity]='Assets'
+    [Flutter]='lib'
+    [Unreal]='Source'
+    [Godot]='.'
+    [Android]='app/src/main'
+    [.NET]='.'
+    [Node]='src'
+    [Python]='src'
+)
+
+readonly GENERIC_PROJECT_TYPE='Generic Git repository'
+
+is_unity_project() {
+    [[ -f ProjectSettings/ProjectVersion.txt ]]
 }
 
-# Pick a useful source root for the detected project type.
+is_flutter_project() {
+    [[ -f pubspec.yaml ]]
+}
+
+is_unreal_project() {
+    find . -maxdepth 3 -type f -name '*.uproject' -print -quit 2>/dev/null |
+        grep -q .
+}
+
+is_godot_project() {
+    [[ -f project.godot ]]
+}
+
+is_android_project() {
+    [[ -f settings.gradle ||
+       -f settings.gradle.kts ||
+       -f build.gradle ||
+       -f build.gradle.kts ]] ||
+        find . -maxdepth 4 -type f -name AndroidManifest.xml -print -quit 2>/dev/null |
+            grep -q .
+}
+
+is_dotnet_project() {
+    find . -maxdepth 3 -type f \( -name '*.sln' -o -name '*.csproj' \) \
+        -print -quit 2>/dev/null |
+        grep -q .
+}
+
+is_node_project() {
+    [[ -f package.json ]]
+}
+
+is_python_project() {
+    [[ -f pyproject.toml || -f requirements.txt ]]
+}
+
+# Detect the first matching project type according to the configured priority.
+detect_project_type() {
+    local project_type
+    local detector
+
+    for project_type in "${PROJECT_TYPES[@]}"; do
+        detector="${PROJECT_DETECTORS[$project_type]}"
+
+        if "$detector"; then
+            printf '%s' "$project_type"
+            return
+        fi
+    done
+
+    printf '%s' "$GENERIC_PROJECT_TYPE"
+}
+
+# Return the preferred root when it exists, otherwise use the repository root.
 detect_code_root() {
     local project_type="$1"
+    local preferred_root="${PROJECT_ROOTS[$project_type]:-.}"
 
-    case "$project_type" in
-        "$PROJECT_TYPE_UNITY")   [[ -d Assets ]] && printf 'Assets' || printf '.' ;;
-        "$PROJECT_TYPE_FLUTTER") [[ -d lib ]] && printf 'lib' || printf '.' ;;
-        "$PROJECT_TYPE_ANDROID") [[ -d app/src/main ]] && printf 'app/src/main' || printf '.' ;;
-        "$PROJECT_TYPE_UNREAL")  [[ -d Source ]] && printf 'Source' || printf '.' ;;
-        "$PROJECT_TYPE_NODE")    [[ -d src ]] && printf 'src' || printf '.' ;;
-        "$PROJECT_TYPE_PYTHON")  [[ -d src ]] && printf 'src' || printf '.' ;;
-        *)                         printf '.' ;;
-    esac
+    [[ -d "$preferred_root" ]] && printf '%s' "$preferred_root" || printf '.'
 }
