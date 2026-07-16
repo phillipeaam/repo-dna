@@ -57,12 +57,25 @@ is_godot_project() {
 }
 
 is_android_project() {
-    [[ -f settings.gradle ||
-       -f settings.gradle.kts ||
-       -f build.gradle ||
-       -f build.gradle.kts ]] ||
-        find . -maxdepth 4 -type f -name AndroidManifest.xml -print -quit 2>/dev/null |
-            grep -q .
+    local match
+
+    match=$(find . -maxdepth 4 -type f \
+        \( \
+            -name AndroidManifest.xml \
+            -o \
+            \( \
+                \( -name settings.gradle \
+                   -o -name settings.gradle.kts \
+                   -o -name build.gradle \
+                   -o -name build.gradle.kts \) \
+                -exec grep -Eq \
+                    'com\.android\.(application|library|test|dynamic-feature|asset-pack)' \
+                    {} \; \
+            \) \
+        \) \
+        -print -quit 2>/dev/null)
+
+    [[ -n "$match" ]]
 }
 
 is_dotnet_project() {
