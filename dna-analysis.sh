@@ -10,6 +10,7 @@ set -o pipefail
 AUTHOR=""
 SINCE=""
 UNTIL=""
+OWNED_ROOTS=()
 
 # Resolve this script's directory so it can be run from any repository folder.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,9 +18,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Load project-type and source-root detection.
 # shellcheck source=lib/project-detection.sh
 source "$SCRIPT_DIR/lib/project-detection.sh"
-
-# Define common third-party folder names.
-THIRD_PARTY_REGEX='(^|/)(Plugins|ThirdParty|Third-Party|External|Vendor|SDK|AssetStore|AssetsStore|Packages)(/|$)'
 
 # Print an error and stop execution.
 die() {
@@ -42,24 +40,27 @@ show_usage() {
     echo "  --author <name-or-email>  Analyze one contributor instead of all history."
     echo "  --since <date>            Include commits on or after this date."
     echo "  --until <date>            Include commits on or before this date."
+    echo "  --owned-root <path>       Mark a path as project-owned (repeatable)."
     echo "  -h, --help                Show this help."
     echo ""
     echo "Examples:"
     echo "  bash dna-analysis.sh"
     echo "  bash dna-analysis.sh --author \"Phillipe Augusto\""
     echo "  bash dna-analysis.sh --since 2020-01-01 --until 2025-12-31"
+    echo "  bash dna-analysis.sh --owned-root Assets/_Project"
 }
 
 # Read named command-line options.
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --author|--since|--until)
+        --author|--since|--until|--owned-root|-owned-root)
             [[ -n "${2:-}" ]] || die "Option $1 requires a value."
 
             case "$1" in
                 --author) AUTHOR="$2" ;;
                 --since)  SINCE="$2" ;;
                 --until)  UNTIL="$2" ;;
+                --owned-root|-owned-root) OWNED_ROOTS+=("${2#./}") ;;
             esac
 
             shift 2
@@ -190,6 +191,10 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 # shellcheck source=lib/exclusions.sh
 source "$SCRIPT_DIR/lib/exclusions.sh"
 
+# Load evidence-based source ownership classification.
+# shellcheck source=lib/ownership.sh
+source "$SCRIPT_DIR/lib/ownership.sh"
+
 # Resolve the repository name.
 REPO_NAME="$(basename "$REPO_ROOT")"
 
@@ -269,12 +274,15 @@ CODE_ROOT="$(detect_code_root "$PROJECT_TYPE")"
 # Validate the detected source root.
 [[ -d "$CODE_ROOT" ]] || die "Code root not found: $CODE_ROOT"
 
+# Collect submodule, assembly-definition, and dependency-manifest signals.
+ownership_initialize
+
 # Create all output directories.
 mkdir -p \
     "$SUMMARY_DIR" \
     "$PROJECT_DIR/packages" \
     "$CONTRIBUTION_DIR" \
-    "$SOURCE_DIR/all_csharp" \
+    "$SOURCE_DIR/reviewable_csharp" \
     "$SOURCE_DIR/likely_project_owned" \
     "$SOURCE_DIR/project_settings" \
     "$SOURCE_DIR/documentation" \
@@ -293,6 +301,7 @@ echo "Git scope  : $HISTORY_SCOPE"
 echo "Since      : ${SINCE:-no filter}"
 echo "Until      : ${UNTIL:-no filter}"
 echo "Code root  : $CODE_ROOT"
+echo "Owned roots: ${OWNED_ROOTS[*]:-automatic classification only}"
 echo "Output     : $OUTPUT_DIR"
 echo "================================================================"
 echo ""
@@ -448,10 +457,17 @@ analysis_find -type f \( \
     > "$PROJECT_DIR/11_addressables_assets.txt"
 
 # Export likely third-party files.
-analysis_find -type f -print 2>/dev/null |
-    awk -v regex="$THIRD_PARTY_REGEX" '$0 ~ regex' |
-    sort \
-    > "$PROJECT_DIR/12_likely_third_party_files.txt"
+while IFS= read -r source_file; do
+    classify_ownership "$source_file"
+    if [[ "$OWNERSHIP_CLASS" == third-party ]]; then
+        printf '%s\t%s confidence\t%s\n' \
+            "$source_file" "$OWNERSHIP_CONFIDENCE" "$OWNERSHIP_REASON"
+    fi
+done < <(analysis_find -type f -print 2>/dev/null) |
+    sort > "$PROJECT_DIR/12_likely_third_party_files.txt"
+
+# Summarize directory ownership with confidence and supporting evidence.
+write_ownership_report "$PROJECT_DIR/12_ownership_classification.txt"
 
 # Print the third progress step.
 echo "[3/12] Detecting architecture, systems, and technologies..."
@@ -614,12 +630,15 @@ EOF
 # Print the fifth progress step.
 echo "[5/12] Exporting source code for detailed review..."
 
-# Copy all current C# files.
+# Copy C# files that are owned or still require human review.
 while IFS= read -r source_file; do
     # Preserve the original project path.
-    copy_preserving_path "$source_file" "$SOURCE_DIR/all_csharp"
+    copy_preserving_path "$source_file" "$SOURCE_DIR/reviewable_csharp"
 done < <(
     analysis_find -type f -iname '*.cs' -print 2>/dev/null |
+        while IFS= read -r source_file; do
+            ownership_is_reviewable "$source_file" && printf '%s\n' "$source_file"
+        done |
         sort
 )
 
@@ -629,7 +648,9 @@ while IFS= read -r source_file; do
     copy_preserving_path "$source_file" "$SOURCE_DIR/likely_project_owned"
 done < <(
     analysis_find -type f -iname '*.cs' -print 2>/dev/null |
-        awk -v regex="$THIRD_PARTY_REGEX" '$0 !~ regex' |
+        while IFS= read -r source_file; do
+            ownership_is_project_owned "$source_file" && printf '%s\n' "$source_file"
+        done |
         sort
 )
 
@@ -1255,8 +1276,8 @@ career-journaling guide.
 - \`summary/\`: executive summary and Notion analysis guides
 - \`project/\`: current project structure, systems, and technologies
 - \`contribution/\`: $HISTORY_DESCRIPTION
-- \`source/all_csharp/\`: all current C# source
-- \`source/likely_project_owned/\`: source excluding common vendor folders
+- \`source/reviewable_csharp/\`: owned and review-required C# source
+- \`source/likely_project_owned/\`: source classified as project-owned
 - \`source/project_settings/\`: selected Unity settings
 - \`data/\`: JSON and CSV exports
 - \`graphs/\`: optional charts
@@ -1270,7 +1291,7 @@ career-journaling guide.
 ## Limitations
 
 - Git change volume is not exclusive authorship.
-- Third-party-folder detection is heuristic.
+- Ownership confidence is evidence-based but still requires human review.
 - Product purpose and personal learning require human context.
 - Review confidential content before sharing.
 EOF

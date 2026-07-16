@@ -88,6 +88,24 @@ vendor/
 
 See [EXCLUSIONS.md](./EXCLUSIONS.md) for detailed configuration documentation.
 
+## Source Ownership
+
+RepoDNA combines known vendor and generated paths, `.asmdef` files, dependency
+manifests, Git submodules, copyright headers, `.repodnaignore`, and Git tracking
+to classify source ownership with a confidence level.
+
+Use `--owned-root` more than once when repository-specific paths are known to be
+project-owned:
+
+```bash
+bash dna-analysis.sh --owned-root Assets/_Project --owned-root Assets/Common
+```
+
+`-owned-root` is accepted as a compatibility alias. Manual owned roots take
+precedence over vendor-name heuristics, but not over generated or ignored paths.
+High-confidence third-party and generated files are not copied into the source
+review folders.
+
 ---
 
 # 🛣 Roadmap

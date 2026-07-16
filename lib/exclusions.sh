@@ -29,6 +29,9 @@ declare -ar IGNORED_DIRS=(
     Builds
     UserSettings
     MemoryCaptures
+    node_modules
+    vendor
+    Packages
     .git
 )
 
