@@ -66,9 +66,13 @@ is_android_project() {
 }
 
 is_dotnet_project() {
-    find . -maxdepth 3 -type f \( -name '*.sln' -o -name '*.csproj' \) \
-        -print -quit 2>/dev/null |
-        grep -q .
+    local match
+
+    match=$(find . -maxdepth 3 -type f \
+        \( -name '*.sln' -o -name '*.csproj' \) \
+        -print -quit 2>/dev/null)
+
+    [[ -n "$match" ]]
 }
 
 is_node_project() {
