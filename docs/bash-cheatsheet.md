@@ -743,6 +743,252 @@ Console.WriteLine(args[0]);
 
 ---
 
+---
+
+# File Descriptors (FD)
+
+***Rule of Thumb: Whenever you see <, >, 2>, 2>&1, <(...), or >(...), you're working with file descriptors and stream redirection.***
+
+In Unix-like systems, everything is treated as a file. Every process starts with three standard file descriptors.
+
+| FD | Name | Purpose |
+|----|------|---------|
+| `0` | Standard Input (`stdin`) | Read input from the user or another process |
+| `1` | Standard Output (`stdout`) | Normal program output |
+| `2` | Standard Error (`stderr`) | Error messages |
+
+---
+
+## Standard Output (stdout)
+
+```bash
+echo "Hello"
+```
+
+Equivalent:
+
+```csharp
+Console.WriteLine("Hello");
+```
+
+---
+
+## Standard Error (stderr)
+
+Send a message to the error stream instead of standard output.
+
+```bash
+printf 'Something went wrong\n' >&2
+```
+
+Equivalent:
+
+```csharp
+Console.Error.WriteLine("Something went wrong");
+```
+
+---
+
+## Redirect stdout
+
+Write normal output to a file.
+
+```bash
+echo "Hello" > output.txt
+```
+
+Equivalent:
+
+```csharp
+File.WriteAllText("output.txt", "Hello");
+```
+
+---
+
+## Append stdout
+
+Append instead of overwriting.
+
+```bash
+echo "Hello" >> output.txt
+```
+
+Equivalent:
+
+```csharp
+File.AppendAllText("output.txt", "Hello");
+```
+
+---
+
+## Redirect stderr
+
+Capture only errors.
+
+```bash
+command 2> errors.log
+```
+
+---
+
+## Redirect stdout and stderr separately
+
+```bash
+command > output.log 2> errors.log
+```
+
+---
+
+## Redirect both stdout and stderr
+
+```bash
+command > all.log 2>&1
+```
+
+Explanation:
+
+```text
+stdout (1) ─┐
+            ├──► all.log
+stderr (2) ┘
+```
+
+---
+
+## Discard output
+
+Ignore all output.
+
+```bash
+command > /dev/null
+```
+
+Ignore only errors.
+
+```bash
+command 2> /dev/null
+```
+
+Ignore everything.
+
+```bash
+command > /dev/null 2>&1
+```
+
+Equivalent:
+
+```csharp
+// Ignore output
+```
+
+---
+
+## Read from stdin
+
+```bash
+read name
+```
+
+Equivalent:
+
+```csharp
+string name = Console.ReadLine();
+```
+
+---
+
+## Here String
+
+Pass a string as standard input.
+
+```bash
+grep "Unity" <<< "$text"
+```
+
+Equivalent:
+
+```csharp
+using var reader = new StringReader(text);
+```
+
+---
+
+## Here Document
+
+Provide multiple lines as input.
+
+```bash
+cat <<EOF
+Hello
+RepoDNA
+EOF
+```
+
+Equivalent:
+
+```csharp
+string text = """
+Hello
+RepoDNA
+""";
+```
+
+---
+
+## Process Substitution
+
+Use the output of a command as if it were a file.
+
+```bash
+diff <(ls dir1) <(ls dir2)
+```
+
+Equivalent:
+
+```csharp
+Compare(
+    Directory.GetFiles("dir1"),
+    Directory.GetFiles("dir2"));
+```
+
+RepoDNA uses this technique:
+
+```bash
+while IFS= read -r dir || [[ -n "$dir" ]]; do
+    ...
+done < <(_load_repodna_ignore_directories)
+```
+
+The command `_load_repodna_ignore_directories` is executed first, and its output becomes the input of the `while` loop.
+
+---
+
+## Common Redirection Operators
+
+| Operator | Meaning |
+|----------|---------|
+| `>` | Redirect stdout (overwrite) |
+| `>>` | Redirect stdout (append) |
+| `2>` | Redirect stderr |
+| `2>>` | Append stderr |
+| `2>&1` | Redirect stderr to stdout |
+| `<` | Read input from file |
+| `<<` | Here Document |
+| `<<<` | Here String |
+| `<(...)` | Process Substitution |
+| `>(...)` | Output Process Substitution |
+
+---
+
+## Notes
+
+- `stdout` and `stderr` are independent streams.
+- `stderr` is typically used for diagnostics and error messages.
+- Redirecting output does **not** automatically redirect errors.
+- Process substitution (`<(...)`) is a Bash feature and is not available in POSIX `sh`.
+
+---
+
 # Bash vs C#
 
 | Bash | C# |
