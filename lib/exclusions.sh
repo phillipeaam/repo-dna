@@ -74,6 +74,21 @@ build_find_prune_predicates() {
         )
     done
 
+    # Never analyze the report directory while it is being generated.
+    if [[ -n "${REPORT_NAME:-}" ]]; then
+        if [[ "$first" == true ]]; then
+            first=false
+        else
+            predicates+=(-o)
+        fi
+
+        predicates+=(
+            -path "*/$REPORT_NAME"
+            -o
+            -path "*/$REPORT_NAME/*"
+        )
+    fi
+
     while IFS= read -r dir || [[ -n "$dir" ]]; do
         # FIX: usa a mesma flag "first" em vez de assumir que o array
         # já tem conteúdo. Assim, se um dia IGNORED_DIRS ficar vazio,

@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+
+"""Render a self-contained HTML dashboard from canonical RepoDNA JSON."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+
+def esc(value: Any) -> str:
+    return (
+        str(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def metric_cards(rows: list[tuple[str, Any]]) -> str:
+    return "".join(
+        f'<article class="metric"><span>{esc(label)}</span><strong>{esc(value)}</strong></article>'
+        for label, value in rows
+    )
+
+
+def table(rows: list[tuple[str, Any]]) -> str:
+    body = "".join(
+        f"<tr><th>{esc(label)}</th><td>{esc(value)}</td></tr>" for label, value in rows
+    )
+    return f'<div class="table-wrap"><table>{body}</table></div>'
+
+
+def labeled(values: dict[str, Any], keys: list[str]) -> list[tuple[str, Any]]:
+    return [(key.replace("_", " ").title(), values[key]) for key in keys]
+
+
+def render(data: dict[str, Any], output_path: Path) -> None:
+    project = data["project"]
+    profile = data.get("analysis_profile", {"unity": False, "csharp": True})
+    metrics = data["current_metrics"]
+    architecture = data["architecture"]
+    technologies = data["technologies"]
+    systems = data["systems"]
+    history = data["history"]
+    collaboration = data["collaboration"]
+    risks = data["risks"]
+    privacy = data["privacy"]
+
+    headline = [
+        ("Commits", history["total_commits"]),
+        ("Contributors", collaboration["contributors"]),
+        ("Security findings", risks["potential_secret_findings"]),
+        ("Ownership reviews", risks["ownership_review_required"]),
+    ]
+    if profile["csharp"]:
+        headline[0:0] = [("C# files", metrics["csharp_files"]), ("C# lines", metrics["csharp_lines"])]
+
+    overview = [
+        ("Repository", project["name"]),
+        ("Project type", project["type"]),
+        ("Code root", project["code_root"]),
+        ("Privacy mode", privacy["mode"]),
+        ("Source included", str(privacy["source_included"]).lower()),
+    ]
+    if profile["unity"]:
+        overview.extend([
+            ("Product", project["product"]),
+            ("Company", project["company"]),
+            ("Unity version", project["unity_version"]),
+        ])
+
+    if profile["unity"]:
+        architecture_keys = list(architecture)
+        technology_keys = list(technologies)
+        system_keys = list(systems)
+    elif profile["csharp"]:
+        architecture_keys = [
+            "interfaces", "architecture_signals", "networking_signals",
+            "services_and_data_signals", "performance_signals", "technical_debt_markers",
+        ]
+        technology_keys = ["dependency_count"]
+        system_keys = ["likely_system_files"]
+    else:
+        architecture_keys = []
+        technology_keys = ["dependency_count"]
+        system_keys = []
+
+    empty = '<p class="empty">No specialized collector is available for this project type yet.</p>'
+    sections = [
+        ("overview", "Project overview", table(overview)),
+        ("architecture", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else empty),
+        ("technologies", "Technologies", table(labeled(technologies, technology_keys))),
+        ("systems", "Systems", table(labeled(systems, system_keys)) if system_keys else empty),
+        ("contribution", "Contribution", table(labeled(history, list(history)))),
+        ("collaboration", "Collaboration", table(labeled(collaboration, list(collaboration)))),
+        ("risks", "Risks", table([
+            ("Potential secret findings", risks["potential_secret_findings"]),
+            ("Ownership review required", risks["ownership_review_required"]),
+        ]) + '<p><a href="../security/potential_secrets.txt">Open redacted security evidence</a></p>'),
+    ]
+    nav = "".join(f'<a href="#{section_id}">{esc(title)}</a>' for section_id, title, _ in sections)
+    content = "".join(
+        f'<section id="{section_id}"><h2>{esc(title)}</h2>{body}</section>'
+        for section_id, title, body in sections
+    )
+
+    document = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(project['name'])} · RepoDNA</title>
+<style>
+:root{{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}}
+*{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}}
+header{{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}}header p{{color:#cbd5e1}}.layout{{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}}
+nav{{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}}nav a{{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}}nav a:hover{{background:#edf3ff;color:var(--brand)}}main{{min-width:0}}.metrics{{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}}.metric,section{{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}}.metric{{padding:1rem}}.metric span{{display:block;color:var(--muted);font-size:.82rem}}.metric strong{{font-size:1.65rem}}section{{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}}h1,h2{{margin-top:0}}h2{{font-size:1.2rem}}.table-wrap{{overflow:auto}}table{{width:100%;border-collapse:collapse}}th,td{{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}}th{{color:var(--muted);font-weight:600;width:55%}}a{{color:var(--brand)}}.empty{{color:var(--muted)}}footer{{color:var(--muted);padding:1rem 0}}
+@media(max-width:760px){{.layout{{display:block;padding:1rem}}nav{{position:static;margin-bottom:1rem;display:flex;overflow:auto}}nav a{{white-space:nowrap}}header{{padding:2rem 1rem}}}}
+@media print{{nav{{display:none}}.layout{{display:block;padding:0}}section,.metric{{box-shadow:none;break-inside:avoid}}body{{background:#fff}}}}
+</style>
+</head>
+<body>
+<header><p>RepoDNA structured report · schema {esc(data['schema_version'])}</p><h1>{esc(project['name'])}</h1><p>{esc(project['type'])} · generated {esc(data['generated_at'])}</p></header>
+<div class="layout"><nav>{nav}</nav><main><div class="metrics">{metric_cards(headline)}</div>{content}<footer>Rendered exclusively from report/data/report.json.</footer></main></div>
+</body></html>"""
+    output_path.write_text(document, encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("json_path", type=Path)
+    parser.add_argument("output_path", type=Path)
+    args = parser.parse_args()
+    with args.json_path.open(encoding="utf-8") as source:
+        data = json.load(source)
+    render(data, args.output_path)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

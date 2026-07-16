@@ -329,6 +329,9 @@ SECURITY_DIR="$OUTPUT_DIR/security"
 REPORT_DIR="$OUTPUT_DIR/report"
 REPORT_DATA_DIR="$REPORT_DIR/data"
 
+# Define Notion-ready structured evidence.
+NOTION_DIR="$OUTPUT_DIR/notion"
+
 # Define the optional graph folder.
 GRAPHS_DIR="$OUTPUT_DIR/graphs"
 
@@ -392,6 +395,7 @@ mkdir -p \
     "$DATA_DIR" \
     "$SECURITY_DIR" \
     "$REPORT_DATA_DIR" \
+    "$NOTION_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
 
@@ -1443,13 +1447,16 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`data/\`: JSON and CSV exports
 - \`security/\`: redacted potential-secret findings
 - \`report/\`: standardized Markdown reports rendered from canonical JSON
+- \`report/index.html\`: self-contained visual dashboard from canonical JSON
+- \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
 - \`graphs/\`: optional charts
 
 ## Start here
 
 1. \`report/index.md\`
-2. \`report/executive-summary.md\`
-3. \`report/data/report.json\`
+2. \`report/index.html\`
+3. \`notion/evidence.json\`
+4. \`report/data/report.json\`
 
 ## Limitations
 
@@ -1577,15 +1584,27 @@ write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
+STRUCTURED_PYTHON=''
 if command_exists python3 && python3 -c 'import sys' >/dev/null 2>&1; then
-    python3 "$SCRIPT_DIR/renderers/markdown.py" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
-        die "Could not render the standardized Markdown reports."
+    STRUCTURED_PYTHON='python3'
 elif command_exists python && python -c 'import sys' >/dev/null 2>&1; then
-    python "$SCRIPT_DIR/renderers/markdown.py" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
+    STRUCTURED_PYTHON='python'
+fi
+
+if [[ -n "$STRUCTURED_PYTHON" ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/markdown.py" \
+        "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
         die "Could not render the standardized Markdown reports."
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
+        "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
+        die "Could not render the HTML report."
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/notion.py" \
+        "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
+        die "Could not render the Notion evidence JSON."
 else
     bash "$SCRIPT_DIR/renderers/markdown.sh" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
         die "Could not render the standardized Markdown reports."
+    echo "Warning: HTML and Notion evidence require an executable Python runtime."
 fi
 
 run_privacy_scan

@@ -64,6 +64,8 @@ PROJECT_TYPE="$(json_value type)"
 PRIVACY_MODE="$(json_value mode)"
 SOURCE_INCLUDED="$(json_value source_included)"
 SCHEMA_VERSION="$(json_value schema_version)"
+UNITY_ANALYSIS="$(json_value unity)"
+CSHARP_ANALYSIS="$(json_value csharp)"
 
 cat > "$OUTPUT_DIR/index.md" <<EOF
 # $PROJECT_NAME report
@@ -90,12 +92,19 @@ cat > "$OUTPUT_DIR/executive-summary.md" <<EOF
 **Source included:** $SOURCE_INCLUDED
 
 EOF
-write_table "$OUTPUT_DIR/executive-summary.md" \
-    'C# files' csharp_files \
-    'C# lines' csharp_lines \
-    'Total commits' total_commits \
-    'Contributors' contributors \
-    'Potential secret findings' potential_secret_findings
+if [[ "$CSHARP_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/executive-summary.md" \
+        'C# files' csharp_files \
+        'C# lines' csharp_lines \
+        'Total commits' total_commits \
+        'Contributors' contributors \
+        'Potential secret findings' potential_secret_findings
+else
+    write_table "$OUTPUT_DIR/executive-summary.md" \
+        'Total commits' total_commits \
+        'Contributors' contributors \
+        'Potential secret findings' potential_secret_findings
+fi
 
 cat > "$OUTPUT_DIR/project-overview.md" <<EOF
 # Project overview
@@ -104,46 +113,64 @@ cat > "$OUTPUT_DIR/project-overview.md" <<EOF
 |---|---|
 | Repository | $PROJECT_NAME |
 | Project type | $PROJECT_TYPE |
-| Product | $(json_value product) |
-| Company | $(json_value company) |
 | Code root | $(json_value code_root) |
-| Unity version | $(json_value unity_version) |
-
-## Current metrics
-
 EOF
-write_table "$OUTPUT_DIR/project-overview.md" \
-    'C# files' csharp_files \
-    'C# lines' csharp_lines \
-    'Scenes' scenes \
-    'Prefabs' prefabs \
-    'Animations' animations \
-    'Animator controllers' animator_controllers \
-    'Shaders' shaders \
-    'Assembly definitions' assembly_definitions \
-    'UXML files' uxml_files \
-    'USS files' uss_files
+if [[ "$UNITY_ANALYSIS" == true ]]; then
+    printf '| Product | %s |\n| Company | %s |\n| Unity version | %s |\n' \
+        "$(json_value product)" "$(json_value company)" "$(json_value unity_version)" \
+        >> "$OUTPUT_DIR/project-overview.md"
+fi
+printf '%s\n\n' '## Current metrics' >> "$OUTPUT_DIR/project-overview.md"
+if [[ "$UNITY_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/project-overview.md" \
+        'C# files' csharp_files 'C# lines' csharp_lines 'Scenes' scenes 'Prefabs' prefabs \
+        'Animations' animations 'Animator controllers' animator_controllers \
+        'Shaders' shaders 'Assembly definitions' assembly_definitions \
+        'UXML files' uxml_files 'USS files' uss_files
+elif [[ "$CSHARP_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/project-overview.md" 'C# files' csharp_files 'C# lines' csharp_lines
+else
+    printf '%s\n' 'No project-specific source metrics are available for this project type yet.' \
+        >> "$OUTPUT_DIR/project-overview.md"
+fi
 
 printf '%s\n\n' '# Architecture' > "$OUTPUT_DIR/architecture.md"
-write_table "$OUTPUT_DIR/architecture.md" \
-    'Scriptable objects' scriptable_objects \
-    'MonoBehaviours' monobehaviours \
-    'Interfaces' interfaces \
-    'Architecture signals' architecture_signals \
-    'Dependency injection signals' dependency_injection_signals
+if [[ "$UNITY_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/architecture.md" \
+        'Scriptable objects' scriptable_objects 'MonoBehaviours' monobehaviours \
+        'Interfaces' interfaces 'Architecture signals' architecture_signals \
+        'Networking signals' networking_signals 'Services and data signals' services_and_data_signals \
+        'Performance signals' performance_signals 'Technical debt markers' technical_debt_markers
+elif [[ "$CSHARP_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/architecture.md" \
+        'Interfaces' interfaces 'Architecture signals' architecture_signals \
+        'Networking signals' networking_signals 'Services and data signals' services_and_data_signals \
+        'Performance signals' performance_signals 'Technical debt markers' technical_debt_markers
+else
+    printf '%s\n' 'No architecture collector is available for this project type yet.' \
+        >> "$OUTPUT_DIR/architecture.md"
+fi
 
 printf '%s\n\n' '# Technologies' > "$OUTPUT_DIR/technologies.md"
-write_table "$OUTPUT_DIR/technologies.md" \
-    'Package entries' package_entries \
-    'Shader files' shader_files \
-    'UI Toolkit files' ui_toolkit_files \
-    'Assembly definitions' assembly_definitions
+if [[ "$UNITY_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/technologies.md" \
+        'Dependencies' dependency_count 'Shader files' shader_files \
+        'UI Toolkit files' ui_toolkit_files 'Assembly definitions' assembly_definitions
+else
+    write_table "$OUTPUT_DIR/technologies.md" 'Dependencies' dependency_count
+fi
 
 printf '%s\n\n' '# Systems' > "$OUTPUT_DIR/systems.md"
-write_table "$OUTPUT_DIR/systems.md" \
-    'Likely system files' likely_system_files \
-    'Resources assets' resources_assets \
-    'Addressables assets' addressables_assets
+if [[ "$UNITY_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/systems.md" \
+        'Likely system files' likely_system_files 'Resources assets' resources_assets \
+        'Addressables assets' addressables_assets
+elif [[ "$CSHARP_ANALYSIS" == true ]]; then
+    write_table "$OUTPUT_DIR/systems.md" 'Likely system files' likely_system_files
+else
+    printf '%s\n' 'No system collector is available for this project type yet.' \
+        >> "$OUTPUT_DIR/systems.md"
+fi
 
 printf '%s\n\n' '# Contribution' > "$OUTPUT_DIR/contribution.md"
 write_table "$OUTPUT_DIR/contribution.md" \
@@ -171,7 +198,9 @@ printf '%s\n' 'See `../security/potential_secrets.txt` and the ownership classif
 cat > "$OUTPUT_DIR/notion-evidence.md" <<'EOF'
 # Notion evidence
 
-Use the pages in this directory as the standardized review entry points. Detailed
-raw evidence remains available in the legacy `project/` and `contribution/`
-directories during the reporting migration.
+Structured evidence is available at `../notion/evidence.json`. It separates
+facts, evidence, inferences, personal data, and claims requiring confirmation.
+
+Detailed raw evidence remains available in the legacy `project/` and
+`contribution/` directories during the reporting migration.
 EOF

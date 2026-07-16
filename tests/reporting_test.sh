@@ -8,7 +8,7 @@ trap 'rm -rf "$TEST_ROOT"' EXIT
 
 cat > "$TEST_ROOT/report.json" <<'JSON'
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "generated_at": "2026-07-16 12:00:00",
   "privacy": {"mode": "strict", "source_included": false},
   "project": {
@@ -18,6 +18,11 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "company": "[redacted]",
     "code_root": ".",
     "unity_version": "Unknown"
+  },
+  "analysis_profile": {
+    "unity": false,
+    "csharp": true,
+    "dependency_manifest": "sample.csproj"
   },
   "current_metrics": {
     "csharp_files": 12,
@@ -36,10 +41,13 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "monobehaviours": 0,
     "interfaces": 4,
     "architecture_signals": 3,
-    "dependency_injection_signals": 1
+    "networking_signals": 1,
+    "services_and_data_signals": 2,
+    "performance_signals": 1,
+    "technical_debt_markers": 0
   },
   "technologies": {
-    "package_entries": 8,
+    "dependency_count": 8,
     "shader_files": 1,
     "ui_toolkit_files": 0,
     "assembly_definitions": 2
@@ -82,6 +90,8 @@ fi
 
 if [[ -n "$PYTHON" ]]; then
     "$PYTHON" "$SOURCE_ROOT/renderers/markdown.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report"
+    "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
+    "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
 else
     bash "$SOURCE_ROOT/renderers/markdown.sh" "$TEST_ROOT/report.json" "$TEST_ROOT/report"
 fi
@@ -107,5 +117,16 @@ grep -q '| Potential secret findings | 1 |' "$TEST_ROOT/report/risks.md" || {
     cat "$TEST_ROOT/report/risks.md" >&2
     exit 1
 }
+! grep -q 'Unity version' "$TEST_ROOT/report/project-overview.md"
+! grep -q '| Scenes |' "$TEST_ROOT/report/project-overview.md"
+
+if [[ -n "$PYTHON" ]]; then
+    grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
+    grep -q 'sample-project' "$TEST_ROOT/report/index.html"
+    ! grep -q 'Unity version' "$TEST_ROOT/report/index.html"
+    grep -q '"classification_model"' "$TEST_ROOT/notion/evidence.json"
+    grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
+    grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
+fi
 
 printf '%s\n' 'structured reporting tests passed'

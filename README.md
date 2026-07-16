@@ -165,6 +165,19 @@ HTML and CSV renderers can consume the same versioned JSON schema. RepoDNA uses
 the Python renderer when available and otherwise falls back to the portable Bash
 renderer.
 
+When Python is available, RepoDNA also generates a self-contained visual report
+at `report/index.html` and Notion-ready structured evidence at
+`notion/evidence.json`. The latter explicitly separates facts, supporting
+evidence, inferences, personal data, and claims that require confirmation.
+
+Reports use the detected analysis profile. Unity-only product metadata, scenes,
+prefabs, ScriptableObjects, MonoBehaviours, shaders, Addressables, and UI Toolkit
+metrics are hidden for non-Unity projects. Unsupported project types receive an
+explicit coverage note instead of a misleading table full of Unity zeroes.
+
+The future ATS résumé design and X-Y-Z evidence contract are documented in
+[`docs/ats-xyz-resume-design.md`](docs/ats-xyz-resume-design.md).
+
 ---
 
 # 🛣 Roadmap

@@ -4,7 +4,13 @@ set -euo pipefail
 
 SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d -p "$SOURCE_ROOT" .privacy-test.XXXXXX)"
-trap 'rm -rf "$TEST_ROOT"' EXIT
+
+cleanup() {
+    cd "$SOURCE_ROOT" || return
+    rm -rf "$TEST_ROOT" 2>/dev/null || true
+}
+
+trap cleanup EXIT
 
 create_fixture() {
     local fixture="$1"
@@ -37,7 +43,9 @@ default_report="$(find_report "$default_fixture")"
 [[ -f "$default_report/security/potential_secrets.txt" ]]
 [[ -f "$default_report/report/data/report.json" ]]
 [[ -f "$default_report/report/index.md" ]]
-grep -q '"schema_version": "1.0"' "$default_report/report/data/report.json"
+grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
+[[ -f "$default_report/report/index.html" ]]
+[[ -f "$default_report/notion/evidence.json" ]]
 grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
 grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
 ! grep -q 'test-secret-value' "$default_report/security/potential_secrets.txt"

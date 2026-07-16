@@ -12,10 +12,55 @@ report_line_count() {
     fi
 }
 
+report_dependency_manifest() {
+    case "$PROJECT_TYPE" in
+        Unity)   [[ -f Packages/manifest.json ]] && printf 'Packages/manifest.json' ;;
+        Node)    [[ -f package.json ]] && printf 'package.json' ;;
+        Python)
+            if [[ -f pyproject.toml ]]; then
+                printf 'pyproject.toml'
+            elif [[ -f requirements.txt ]]; then
+                printf 'requirements.txt'
+            fi
+            ;;
+        Android)
+            if [[ -f build.gradle.kts ]]; then
+                printf 'build.gradle.kts'
+            elif [[ -f build.gradle ]]; then
+                printf 'build.gradle'
+            fi
+            ;;
+        .NET)    find . -maxdepth 2 -type f -name '*.csproj' -print -quit 2>/dev/null ;;
+        Flutter) [[ -f pubspec.yaml ]] && printf 'pubspec.yaml' ;;
+        *)       printf '' ;;
+    esac
+}
+
+report_dependency_count() {
+    local manifest="$1"
+
+    [[ -f "$manifest" ]] || { printf '0'; return; }
+
+    case "$manifest" in
+        *.csproj) grep -Eic '<PackageReference[[:space:]>]' "$manifest" || true ;;
+        requirements.txt) awk 'NF && $0 !~ /^[[:space:]]*#/' "$manifest" | wc -l | tr -d '[:space:]' ;;
+        *) grep -Ec '^[[:space:]]*["[:alnum:]_.@/-]+["[:space:]]*[:=]' "$manifest" || true ;;
+    esac
+}
+
 write_structured_report_json() {
     local output_file="$1"
     local ownership_review_count
     local contributor_count
+    local dependency_manifest
+    local dependency_count
+    local unity_analysis=false
+    local csharp_analysis=false
+
+    [[ "$PROJECT_TYPE" == Unity ]] && unity_analysis=true
+    [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
+    dependency_manifest="$(report_dependency_manifest)"
+    dependency_count="$(report_dependency_count "$dependency_manifest")"
 
     ownership_review_count="$(
         grep -c 'review-required' "$PROJECT_DIR/12_ownership_classification.txt" 2>/dev/null || true
@@ -24,7 +69,7 @@ write_structured_report_json() {
 
     cat > "$output_file" <<EOF
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "generated_at": "$(json_escape "$GENERATED_AT")",
   "privacy": {
     "mode": "$(json_escape "$PRIVACY_MODE")",
@@ -37,6 +82,11 @@ write_structured_report_json() {
     "company": "$(json_escape "$DISPLAY_COMPANY_NAME")",
     "code_root": "$(json_escape "$CODE_ROOT")",
     "unity_version": "$(json_escape "${UNITY_VERSION:-Unknown}")"
+  },
+  "analysis_profile": {
+    "unity": $unity_analysis,
+    "csharp": $csharp_analysis,
+    "dependency_manifest": "$(json_escape "$dependency_manifest")"
   },
   "current_metrics": {
     "csharp_files": ${CURRENT_CS_FILES:-0},
@@ -55,10 +105,13 @@ write_structured_report_json() {
     "monobehaviours": $(report_line_count "$PROJECT_DIR/14_monobehaviours.txt"),
     "interfaces": $(report_line_count "$PROJECT_DIR/15_interfaces.txt"),
     "architecture_signals": $(report_line_count "$PROJECT_DIR/18_architecture_pattern_signals.txt"),
-    "dependency_injection_signals": $(report_line_count "$PROJECT_DIR/19_dependency_injection_signals.txt")
+    "networking_signals": $(report_line_count "$PROJECT_DIR/19_networking_signals.txt"),
+    "services_and_data_signals": $(report_line_count "$PROJECT_DIR/20_services_and_data_signals.txt"),
+    "performance_signals": $(report_line_count "$PROJECT_DIR/21_performance_signals.txt"),
+    "technical_debt_markers": $(report_line_count "$PROJECT_DIR/22_technical_debt_markers.txt")
   },
   "technologies": {
-    "package_entries": $(report_line_count "$PROJECT_DIR/03_packages.txt"),
+    "dependency_count": ${dependency_count:-0},
     "shader_files": ${CURRENT_SHADERS:-0},
     "ui_toolkit_files": $((${CURRENT_UXML:-0} + ${CURRENT_USS:-0})),
     "assembly_definitions": ${CURRENT_ASMDEFS:-0}

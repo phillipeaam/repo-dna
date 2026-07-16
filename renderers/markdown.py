@@ -21,6 +21,10 @@ def table(rows: list[tuple[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def labeled_rows(values: dict[str, Any], keys: list[str]) -> list[tuple[str, Any]]:
+    return [(key.replace("_", " ").title(), values[key]) for key in keys]
+
+
 def write(output_dir: Path, name: str, content: str) -> None:
     (output_dir / name).write_text(content.rstrip() + "\n", encoding="utf-8")
 
@@ -36,6 +40,56 @@ def render(data: dict[str, Any], output_dir: Path) -> None:
     collaboration = data["collaboration"]
     risks = data["risks"]
     privacy = data["privacy"]
+    profile = data.get("analysis_profile", {"unity": False, "csharp": True})
+
+    executive_rows: list[tuple[str, Any]] = []
+    if profile["csharp"]:
+        executive_rows.extend([
+            ("C# files", metrics["csharp_files"]),
+            ("C# lines", metrics["csharp_lines"]),
+        ])
+    executive_rows.extend([
+        ("Total commits", history["total_commits"]),
+        ("Contributors", collaboration["contributors"]),
+        ("Potential secret findings", risks["potential_secret_findings"]),
+    ])
+
+    overview_fields = [
+        ("Repository", project["name"]),
+        ("Project type", project["type"]),
+        ("Code root", f"`{project['code_root']}`"),
+    ]
+    if profile["unity"]:
+        overview_fields.extend([
+            ("Product", project["product"]),
+            ("Company", project["company"]),
+            ("Unity version", project["unity_version"]),
+        ])
+
+    metric_keys: list[str] = []
+    if profile["csharp"]:
+        metric_keys.extend(["csharp_files", "csharp_lines"])
+    if profile["unity"]:
+        metric_keys.extend([
+            "scenes", "prefabs", "animations", "animator_controllers", "shaders",
+            "assembly_definitions", "uxml_files", "uss_files",
+        ])
+
+    if profile["unity"]:
+        architecture_keys = list(architecture)
+        technology_keys = list(technologies)
+        system_keys = list(systems)
+    elif profile["csharp"]:
+        architecture_keys = [
+            "interfaces", "architecture_signals", "networking_signals",
+            "services_and_data_signals", "performance_signals", "technical_debt_markers",
+        ]
+        technology_keys = ["dependency_count"]
+        system_keys = ["likely_system_files"]
+    else:
+        architecture_keys = []
+        technology_keys = ["dependency_count"]
+        system_keys = []
 
     write(
         output_dir,
@@ -66,13 +120,7 @@ Generated from `data/report.json` (schema {data['schema_version']}).
 **Privacy mode:** {privacy['mode']}  
 **Source included:** {str(privacy['source_included']).lower()}
 
-{table([
-    ('C# files', metrics['csharp_files']),
-    ('C# lines', metrics['csharp_lines']),
-    ('Total commits', history['total_commits']),
-    ('Contributors', collaboration['contributors']),
-    ('Potential secret findings', risks['potential_secret_findings']),
-])}
+{table(executive_rows)}
 """,
     )
 
@@ -83,28 +131,25 @@ Generated from `data/report.json` (schema {data['schema_version']}).
 
 | Field | Value |
 |---|---|
-| Repository | {project['name']} |
-| Project type | {project['type']} |
-| Product | {project['product']} |
-| Company | {project['company']} |
-| Code root | `{project['code_root']}` |
-| Unity version | {project['unity_version']} |
+{chr(10).join(f'| {label} | {value} |' for label, value in overview_fields)}
 
 ## Current metrics
 
-{table([(key.replace('_', ' ').title(), value) for key, value in metrics.items()])}
+{table(labeled_rows(metrics, metric_keys)) if metric_keys else 'No project-specific source metrics are available for this project type yet.'}
 """,
     )
 
-    write(output_dir, "architecture.md", "# Architecture\n\n" + table([
-        (key.replace("_", " ").title(), value) for key, value in architecture.items()
-    ]))
-    write(output_dir, "technologies.md", "# Technologies\n\n" + table([
-        (key.replace("_", " ").title(), value) for key, value in technologies.items()
-    ]))
-    write(output_dir, "systems.md", "# Systems\n\n" + table([
-        (key.replace("_", " ").title(), value) for key, value in systems.items()
-    ]))
+    write(output_dir, "architecture.md", "# Architecture\n\n" + (
+        table(labeled_rows(architecture, architecture_keys)) if architecture_keys
+        else "No architecture collector is available for this project type yet."
+    ))
+    write(output_dir, "technologies.md", "# Technologies\n\n" + table(
+        labeled_rows(technologies, technology_keys)
+    ))
+    write(output_dir, "systems.md", "# Systems\n\n" + (
+        table(labeled_rows(systems, system_keys)) if system_keys
+        else "No system collector is available for this project type yet."
+    ))
     write(output_dir, "contribution.md", "# Contribution\n\n" + table([
         (key.replace("_", " ").title(), value) for key, value in history.items()
     ]))
@@ -124,9 +169,11 @@ Generated from `data/report.json` (schema {data['schema_version']}).
         "notion-evidence.md",
         """# Notion evidence
 
-Use the pages in this directory as the standardized review entry points. Detailed
-raw evidence remains available in the legacy `project/` and `contribution/`
-directories during the reporting migration.
+Structured evidence is available at `../notion/evidence.json`. It separates
+facts, evidence, inferences, personal data, and claims requiring confirmation.
+
+Detailed raw evidence remains available in the legacy `project/` and
+`contribution/` directories during the reporting migration.
 """,
     )
 
