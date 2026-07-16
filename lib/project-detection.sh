@@ -76,7 +76,11 @@ is_node_project() {
 }
 
 is_python_project() {
-    [[ -f pyproject.toml || -f requirements.txt ]]
+    [[ -f pyproject.toml ||
+       -f requirements.txt ||
+       -f setup.py ||
+       -f setup.cfg ||
+       -f Pipfile ]]
 }
 
 # Detect the first matching project type according to the configured priority.
