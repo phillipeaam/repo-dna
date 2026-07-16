@@ -138,6 +138,33 @@ passwords, webhook URLs, private package registries, and internal domains or
 private network addresses. Findings contain only the relative path, line number,
 category, and `Value: [REDACTED]`; matched values are never written to the report.
 
+## Structured Reports
+
+RepoDNA writes canonical collected data to `report/data/report.json`. The
+Markdown renderer reads only that JSON and creates:
+
+```text
+report/
+├── index.md
+├── executive-summary.md
+├── project-overview.md
+├── architecture.md
+├── technologies.md
+├── systems.md
+├── contribution.md
+├── collaboration.md
+├── risks.md
+├── notion-evidence.md
+└── data/
+    └── report.json
+```
+
+Legacy evidence files remain available during the migration, but standardized
+Markdown no longer reads Bash variables or collector output directly. Future
+HTML and CSV renderers can consume the same versioned JSON schema. RepoDNA uses
+the Python renderer when available and otherwise falls back to the portable Bash
+renderer.
+
 ---
 
 # 🛣 Roadmap

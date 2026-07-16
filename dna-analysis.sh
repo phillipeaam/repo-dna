@@ -278,6 +278,10 @@ source "$SCRIPT_DIR/lib/ownership.sh"
 # shellcheck source=lib/security.sh
 source "$SCRIPT_DIR/lib/security.sh"
 
+# Load canonical JSON report collection.
+# shellcheck source=lib/reporting.sh
+source "$SCRIPT_DIR/lib/reporting.sh"
+
 # Resolve the repository name.
 REPO_NAME="$(basename "$REPO_ROOT")"
 
@@ -320,6 +324,10 @@ DATA_DIR="$OUTPUT_DIR/data"
 
 # Define the redacted security findings folder.
 SECURITY_DIR="$OUTPUT_DIR/security"
+
+# Define the standardized report and its canonical data folder.
+REPORT_DIR="$OUTPUT_DIR/report"
+REPORT_DATA_DIR="$REPORT_DIR/data"
 
 # Define the optional graph folder.
 GRAPHS_DIR="$OUTPUT_DIR/graphs"
@@ -383,6 +391,7 @@ mkdir -p \
     "$CONTRIBUTION_DIR" \
     "$DATA_DIR" \
     "$SECURITY_DIR" \
+    "$REPORT_DATA_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
 
@@ -1433,13 +1442,14 @@ collaboration evidence, and a Notion career-journaling guide.
 $SOURCE_FOLDER_DESCRIPTION
 - \`data/\`: JSON and CSV exports
 - \`security/\`: redacted potential-secret findings
+- \`report/\`: standardized Markdown reports rendered from canonical JSON
 - \`graphs/\`: optional charts
 
 ## Start here
 
-1. \`summary/00_executive_summary.txt\`
-2. \`summary/01_notion_evidence_guide.md\`
-3. \`summary/02_analysis_prompt.md\`
+1. \`report/index.md\`
+2. \`report/executive-summary.md\`
+3. \`report/data/report.json\`
 
 ## Limitations
 
@@ -1563,6 +1573,21 @@ sanitize_strict_reports
 POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
+
+write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
+    die "Could not create the canonical report JSON."
+
+if command_exists python3 && python3 -c 'import sys' >/dev/null 2>&1; then
+    python3 "$SCRIPT_DIR/renderers/markdown.py" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
+        die "Could not render the standardized Markdown reports."
+elif command_exists python && python -c 'import sys' >/dev/null 2>&1; then
+    python "$SCRIPT_DIR/renderers/markdown.py" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
+        die "Could not render the standardized Markdown reports."
+else
+    bash "$SCRIPT_DIR/renderers/markdown.sh" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
+        die "Could not render the standardized Markdown reports."
+fi
+
 run_privacy_scan
 
 if [[ "$PRIVACY_SCAN_FAILED" == true ]]; then
@@ -1648,7 +1673,11 @@ fi
 
 # Print the main starting point.
 echo "Start here:"
-echo "  $DISPLAY_SUMMARY_PATH/00_executive_summary.txt"
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    echo "  $REPORT_NAME/report/index.md"
+else
+    echo "  $REPORT_DIR/index.md"
+fi
 echo ""
 
 # Print the Notion guide path.
