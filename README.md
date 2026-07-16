@@ -14,6 +14,13 @@ RepoDNA is an open-source repository analysis toolkit that combines **source cod
 Instead of simply counting files or commits, RepoDNA correlates repository structure, source code, technologies, design patterns, and Git history to produce evidence-based reports that help developers understand **what a project is, how it evolved, and where engineering effort was invested.**
 
 ---
+## 📖 Documentation
+
+- [Bash Cheat Sheet](docs/bash-cheatsheet.md)
+- Architecture *(coming soon)*
+- Roadmap
+- Contributing
+---
 
 # ✨ Features
 
