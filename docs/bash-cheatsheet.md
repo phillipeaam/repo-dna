@@ -13,6 +13,7 @@ A quick reference for Bash syntax and commands used throughout the **RepoDNA** c
 - [Files and Directories](#files-and-directories)
 - [Strings](#strings)
 - [Operators](#operators)
+- [Regular Expressions (Regex)](#regular-expressions-regex)
 - [Functions](#functions)
 - [Loops](#loops)
 - [Reading Files](#reading-files)
@@ -115,6 +116,139 @@ if (string.IsNullOrEmpty(author))
 | `!` | Logical NOT | `!` |
 
 ---
+
+# Regular Expressions (Regex)
+
+Bash supports regular expressions using the `=~` operator inside `[[ ]]`.
+
+```bash
+[[ "$text" =~ regex ]]
+```
+
+Equivalent:
+
+```csharp
+Regex.IsMatch(text, @"regex");
+```
+
+---
+
+## Common Patterns
+
+| Regex | Meaning |
+|--------|---------|
+| `^` | Beginning of the line |
+| `$` | End of the line |
+| `.` | Any character |
+| `.*` | Zero or more of any character |
+| `+` | One or more |
+| `*` | Zero or more |
+| `?` | Zero or one |
+| `[abc]` | One of the listed characters |
+| `[^abc]` | Any character except those listed |
+| `[0-9]` | Any digit |
+| `[A-Za-z]` | Any letter |
+| `[[:space:]]` | Any whitespace (space, tab, etc.) |
+| `[[:digit:]]` | Any digit |
+| `[[:alpha:]]` | Any alphabetic character |
+| `[[:alnum:]]` | Any alphanumeric character |
+
+---
+
+## Examples
+
+Check if a filename ends with `.cs`
+
+```bash
+[[ "$file" =~ \.cs$ ]]
+```
+
+Equivalent:
+
+```csharp
+Regex.IsMatch(file, @"\.cs$")
+```
+
+---
+
+Check if a line starts with a comment (`#`)
+
+```bash
+[[ "$line" =~ ^[[:space:]]*# ]]
+```
+
+Equivalent:
+
+```csharp
+Regex.IsMatch(line, @"^\s*#")
+```
+
+---
+
+Check if a string contains only digits
+
+```bash
+[[ "$value" =~ ^[0-9]+$ ]]
+```
+
+Equivalent:
+
+```csharp
+Regex.IsMatch(value, @"^\d+$")
+```
+
+---
+
+Check if a path starts with `Assets/`
+
+```bash
+[[ "$path" =~ ^Assets/ ]]
+```
+
+Equivalent:
+
+```csharp
+Regex.IsMatch(path, @"^Assets/")
+```
+
+---
+
+## Ignoring Comments
+
+A common RepoDNA pattern:
+
+```bash
+[[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+```
+
+Meaning:
+
+> If the line starts with optional whitespace followed by `#`, skip it.
+
+Equivalent:
+
+```csharp
+if (Regex.IsMatch(pattern, @"^\s*#"))
+    continue;
+```
+
+---
+
+## Notes
+
+- `=~` performs **regex matching**, not string comparison.
+- Regex should **not** be quoted:
+  ```bash
+  [[ "$text" =~ ^Player ]]
+  ```
+  ✅ Correct
+
+  ```bash
+  [[ "$text" =~ "^Player" ]]
+  ```
+  ❌ Incorrect (treated as a literal string)
+
+- Bash uses **POSIX Extended Regular Expressions (ERE)**, which differ slightly from .NET regular expressions.
 
 # Functions
 
