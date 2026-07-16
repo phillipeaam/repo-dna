@@ -98,12 +98,8 @@ detect_project_type() {
 
 # Return the preferred root when it exists, otherwise use the repository root.
 detect_code_root() {
-    local project_type="$1"
-    local preferred_root="${PROJECT_ROOTS[$project_type]:-.}"
-    
-    if [[ -d "$preferred_root" ]]; then
-        printf '%s' "$preferred_root"
-    else
-        printf '.'
-    fi
+    local project_type="${1:-}"
+    local preferred_root="${PROJECT_ROOTS["$project_type"]:-.}"
+
+    printf '%s' "$preferred_root"
 }
