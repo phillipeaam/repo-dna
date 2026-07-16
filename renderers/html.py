@@ -41,6 +41,7 @@ def labeled(values: dict[str, Any], keys: list[str]) -> list[tuple[str, Any]]:
 def render(data: dict[str, Any], output_path: Path) -> None:
     project = data["project"]
     profile = data.get("analysis_profile", {"unity": False, "csharp": True})
+    generic = data.get("generic_analysis", {})
     metrics = data["current_metrics"]
     architecture = data["architecture"]
     technologies = data["technologies"]
@@ -56,6 +57,11 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Security findings", risks["potential_secret_findings"]),
         ("Ownership reviews", risks["ownership_review_required"]),
     ]
+    if generic.get("available", True):
+        headline[0:0] = [
+            ("Files", generic.get("file_count", 0)),
+            ("Languages", len(generic.get("languages", []))),
+        ]
     if profile["csharp"]:
         headline[0:0] = [("C# files", metrics["csharp_files"]), ("C# lines", metrics["csharp_lines"])]
 
@@ -90,12 +96,32 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         system_keys = []
 
     empty = '<p class="empty">No specialized collector is available for this project type yet.</p>'
+    inventory = table([
+        ("Files", generic.get("file_count", 0)),
+        ("Languages", len(generic.get("languages", []))),
+        ("Configuration files", len(generic.get("configuration_files", []))),
+        ("Documentation files", len(generic.get("documentation_files", []))),
+        ("Test files", len(generic.get("test_files", []))),
+        ("CI/CD files", len(generic.get("ci_cd_files", []))),
+        ("Docker files", len(generic.get("docker_files", []))),
+    ])
+    language_table = table([
+        (f"{item['name']} ({item['files']} files)", item["lines"])
+        for item in generic.get("languages", [])
+    ]) if generic.get("languages") else empty
+    module_table = table([
+        (item["path"], item["file_count"]) for item in generic.get("possible_modules", [])[:20]
+    ]) if generic.get("possible_modules") else empty
+    hotspot_table = table([
+        (item["path"], f"{item['commits']} commits / {item['churn']} churn")
+        for item in generic.get("git", {}).get("hotspots", [])[:20]
+    ]) if generic.get("git", {}).get("hotspots") else empty
     sections = [
-        ("overview", "Project overview", table(overview)),
-        ("architecture", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else empty),
-        ("technologies", "Technologies", table(labeled(technologies, technology_keys))),
-        ("systems", "Systems", table(labeled(systems, system_keys)) if system_keys else empty),
-        ("contribution", "Contribution", table(labeled(history, list(history)))),
+        ("overview", "Project overview", table(overview) + "<h3>Generic inventory</h3>" + inventory),
+        ("architecture", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else module_table),
+        ("technologies", "Technologies", table(labeled(technologies, technology_keys)) + "<h3>Languages</h3>" + language_table),
+        ("systems", "Systems", table(labeled(systems, system_keys)) if system_keys else module_table),
+        ("contribution", "Contribution", table(labeled(history, list(history))) + "<h3>Hotspots</h3>" + hotspot_table),
         ("collaboration", "Collaboration", table(labeled(collaboration, list(collaboration)))),
         ("risks", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),

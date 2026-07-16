@@ -24,6 +24,34 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "csharp": true,
     "dependency_manifest": "sample.csproj"
   },
+  "generic_analysis": {
+    "schema_version": "1.0",
+    "collector": "generic",
+    "file_count": 25,
+    "language_count": 2,
+    "configuration_file_count": 1,
+    "documentation_file_count": 1,
+    "test_file_count": 3,
+    "ci_cd_file_count": 1,
+    "docker_file_count": 1,
+    "languages": [
+      {"name": "C#", "files": 12, "lines": 340},
+      {"name": "Shell", "files": 2, "lines": 80}
+    ],
+    "largest_files": [],
+    "top_directories": [],
+    "configuration_files": ["sample.csproj"],
+    "documentation_files": ["README.md"],
+    "test_files": ["tests/SampleTests.cs"],
+    "ci_cd_files": [".github/workflows/ci.yml"],
+    "docker_files": ["Dockerfile"],
+    "dependencies": {"manifests": [], "total": 8},
+    "possible_modules": [{"path": "src", "file_count": 12, "languages": {"C#": 12}}],
+    "git": {
+      "hotspots": [{"path": "src/Core.cs", "commits": 5, "churn": 200}],
+      "churn": {"lines_added": 1000, "lines_removed": 400, "total": 1400}
+    }
+  },
   "current_metrics": {
     "csharp_files": 12,
     "csharp_lines": 340,
@@ -113,6 +141,7 @@ done
 grep -q '# sample-project report' "$TEST_ROOT/report/index.md"
 grep -q '| C# files | 12 |' "$TEST_ROOT/report/executive-summary.md"
 grep -q '| Total commits | 42 |' "$TEST_ROOT/report/executive-summary.md"
+grep -q '| Files | 25 |' "$TEST_ROOT/report/executive-summary.md"
 grep -q '| Potential secret findings | 1 |' "$TEST_ROOT/report/risks.md" || {
     cat "$TEST_ROOT/report/risks.md" >&2
     exit 1

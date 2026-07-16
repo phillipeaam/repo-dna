@@ -1581,15 +1581,28 @@ POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
 
-write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
-    die "Could not create the canonical report JSON."
-
 STRUCTURED_PYTHON=''
-if command_exists python3 && python3 -c 'import sys' >/dev/null 2>&1; then
+if [[ -n "${REPO_DNA_PYTHON:-}" ]] &&
+   "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1; then
+    STRUCTURED_PYTHON="$REPO_DNA_PYTHON"
+elif command_exists python3 && python3 -c 'import sys' >/dev/null 2>&1; then
     STRUCTURED_PYTHON='python3'
 elif command_exists python && python -c 'import sys' >/dev/null 2>&1; then
     STRUCTURED_PYTHON='python'
 fi
+
+GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
+if [[ -n "$STRUCTURED_PYTHON" ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
+        "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" --report-name "$REPORT_NAME" ||
+        die "Could not collect the generic repository analysis."
+else
+    printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \
+        > "$GENERIC_ANALYSIS_FILE"
+fi
+
+write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
+    die "Could not create the canonical report JSON."
 
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/markdown.py" \
@@ -1605,6 +1618,10 @@ else
     bash "$SCRIPT_DIR/renderers/markdown.sh" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
         die "Could not render the standardized Markdown reports."
     echo "Warning: HTML and Notion evidence require an executable Python runtime."
+    printf '%s\n' \
+        'HTML was not generated because no executable Python runtime was detected.' \
+        'Set REPO_DNA_PYTHON to the Python executable path and run RepoDNA again.' \
+        > "$REPORT_DIR/HTML_NOT_GENERATED.txt"
 fi
 
 run_privacy_scan

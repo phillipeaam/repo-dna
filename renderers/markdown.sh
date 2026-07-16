@@ -94,6 +94,8 @@ cat > "$OUTPUT_DIR/executive-summary.md" <<EOF
 EOF
 if [[ "$CSHARP_ANALYSIS" == true ]]; then
     write_table "$OUTPUT_DIR/executive-summary.md" \
+        'Files' file_count \
+        'Languages' language_count \
         'C# files' csharp_files \
         'C# lines' csharp_lines \
         'Total commits' total_commits \
@@ -101,6 +103,8 @@ if [[ "$CSHARP_ANALYSIS" == true ]]; then
         'Potential secret findings' potential_secret_findings
 else
     write_table "$OUTPUT_DIR/executive-summary.md" \
+        'Files' file_count \
+        'Languages' language_count \
         'Total commits' total_commits \
         'Contributors' contributors \
         'Potential secret findings' potential_secret_findings
@@ -133,6 +137,12 @@ else
     printf '%s\n' 'No project-specific source metrics are available for this project type yet.' \
         >> "$OUTPUT_DIR/project-overview.md"
 fi
+printf '%s\n\n' '## Generic repository inventory' >> "$OUTPUT_DIR/project-overview.md"
+write_table "$OUTPUT_DIR/project-overview.md" \
+    'Files' file_count 'Languages' language_count \
+    'Configuration files' configuration_file_count \
+    'Documentation files' documentation_file_count \
+    'Test files' test_file_count 'CI/CD files' ci_cd_file_count 'Docker files' docker_file_count
 
 printf '%s\n\n' '# Architecture' > "$OUTPUT_DIR/architecture.md"
 if [[ "$UNITY_ANALYSIS" == true ]]; then

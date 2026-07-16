@@ -27,6 +27,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     technologies = data["technologies"]
     systems = data["systems"]
     collaboration = data["collaboration"]
+    generic = data.get("generic_analysis", {})
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -51,6 +52,11 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "report/data/report.json#/technologies/dependency_count",
             "medium",
         ))
+    for language in generic.get("languages", []):
+        technology_facts.append(fact(
+            f"{language['name']} appears in {language['files']} files with approximately {language['lines']} lines.",
+            "report/data/report.json#/generic_analysis/languages",
+        ))
 
     major_systems: list[dict[str, Any]] = []
     if systems["likely_system_files"] > 0:
@@ -61,6 +67,19 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "evidence": ["report/data/report.json#/systems/likely_system_files"],
             "files": [],
             "commits": [],
+            "author_involvement": "unknown",
+            "confirmation_required": True,
+        })
+    for module in generic.get("possible_modules", [])[:20]:
+        major_systems.append({
+            "name": module["path"],
+            "kind": "inference",
+            "confidence": "medium",
+            "evidence": ["report/data/report.json#/generic_analysis/possible_modules"],
+            "files": [],
+            "commits": [],
+            "file_count": module["file_count"],
+            "languages": module["languages"],
             "author_involvement": "unknown",
             "confirmation_required": True,
         })

@@ -175,6 +175,18 @@ prefabs, ScriptableObjects, MonoBehaviours, shaders, Addressables, and UI Toolki
 metrics are hidden for non-Unity projects. Unsupported project types receive an
 explicit coverage note instead of a misleading table full of Unity zeroes.
 
+The stack-neutral collector always writes
+`report/data/generic-analysis.json`. It inventories languages and extensions,
+file and line counts, largest files, directories, configuration, documentation,
+tests, CI/CD, Docker, dependency manifests, contributors, branches, tags,
+release tags, temporal history, churn, frequently changed files, hotspots, and
+possible modules. This dataset is embedded into the canonical `report.json` and
+is the fallback for unknown stacks.
+
+If Python is not detected, Markdown still uses the Bash fallback and
+`report/HTML_NOT_GENERATED.txt` explains why HTML and Notion evidence were
+skipped. `REPO_DNA_PYTHON=/path/to/python` can explicitly select the runtime.
+
 The future ATS résumé design and X-Y-Z evidence contract are documented in
 [`docs/ats-xyz-resume-design.md`](docs/ats-xyz-resume-design.md).
 

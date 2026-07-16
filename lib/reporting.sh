@@ -56,11 +56,17 @@ write_structured_report_json() {
     local dependency_count
     local unity_analysis=false
     local csharp_analysis=false
+    local generic_analysis_json
 
     [[ "$PROJECT_TYPE" == Unity ]] && unity_analysis=true
     [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
     dependency_manifest="$(report_dependency_manifest)"
     dependency_count="$(report_dependency_count "$dependency_manifest")"
+    if [[ -f "${GENERIC_ANALYSIS_FILE:-}" ]]; then
+        generic_analysis_json="$(cat "$GENERIC_ANALYSIS_FILE")"
+    else
+        generic_analysis_json='{"available":false,"reason":"generic collector output missing"}'
+    fi
 
     ownership_review_count="$(
         grep -c 'review-required' "$PROJECT_DIR/12_ownership_classification.txt" 2>/dev/null || true
@@ -88,6 +94,7 @@ write_structured_report_json() {
     "csharp": $csharp_analysis,
     "dependency_manifest": "$(json_escape "$dependency_manifest")"
   },
+  "generic_analysis": $generic_analysis_json,
   "current_metrics": {
     "csharp_files": ${CURRENT_CS_FILES:-0},
     "csharp_lines": ${CURRENT_CS_LINES:-0},

@@ -41,8 +41,14 @@ def render(data: dict[str, Any], output_dir: Path) -> None:
     risks = data["risks"]
     privacy = data["privacy"]
     profile = data.get("analysis_profile", {"unity": False, "csharp": True})
+    generic = data.get("generic_analysis", {})
 
     executive_rows: list[tuple[str, Any]] = []
+    if generic.get("available", True):
+        executive_rows.extend([
+            ("Files", generic.get("file_count", 0)),
+            ("Languages", len(generic.get("languages", []))),
+        ])
     if profile["csharp"]:
         executive_rows.extend([
             ("C# files", metrics["csharp_files"]),
@@ -91,6 +97,27 @@ def render(data: dict[str, Any], output_dir: Path) -> None:
         technology_keys = ["dependency_count"]
         system_keys = []
 
+    generic_inventory = [
+        ("Files", generic.get("file_count", 0)),
+        ("Languages", len(generic.get("languages", []))),
+        ("Configuration files", len(generic.get("configuration_files", []))),
+        ("Documentation files", len(generic.get("documentation_files", []))),
+        ("Test files", len(generic.get("test_files", []))),
+        ("CI/CD files", len(generic.get("ci_cd_files", []))),
+        ("Docker files", len(generic.get("docker_files", []))),
+    ]
+    language_rows = [
+        (f"{item['name']} ({item['files']} files)", item["lines"])
+        for item in generic.get("languages", [])
+    ]
+    module_rows = [
+        (item["path"], item["file_count"]) for item in generic.get("possible_modules", [])[:20]
+    ]
+    hotspot_rows = [
+        (item["path"], f"{item['commits']} commits / {item['churn']} churn")
+        for item in generic.get("git", {}).get("hotspots", [])[:20]
+    ]
+
     write(
         output_dir,
         "index.md",
@@ -135,24 +162,28 @@ Generated from `data/report.json` (schema {data['schema_version']}).
 
 ## Current metrics
 
-{table(labeled_rows(metrics, metric_keys)) if metric_keys else 'No project-specific source metrics are available for this project type yet.'}
+{table(labeled_rows(metrics, metric_keys)) if metric_keys else 'No specialized source metrics are available for this project type.'}
+
+## Generic repository inventory
+
+{table(generic_inventory)}
 """,
     )
 
     write(output_dir, "architecture.md", "# Architecture\n\n" + (
         table(labeled_rows(architecture, architecture_keys)) if architecture_keys
-        else "No architecture collector is available for this project type yet."
+        else ("## Possible modules\n\n" + table(module_rows) if module_rows else "No module candidates were detected.")
     ))
     write(output_dir, "technologies.md", "# Technologies\n\n" + table(
         labeled_rows(technologies, technology_keys)
-    ))
+    ) + ("\n\n## Languages\n\n" + table(language_rows) if language_rows else ""))
     write(output_dir, "systems.md", "# Systems\n\n" + (
         table(labeled_rows(systems, system_keys)) if system_keys
-        else "No system collector is available for this project type yet."
+        else ("## Possible modules\n\n" + table(module_rows) if module_rows else "No system or module candidates were detected.")
     ))
     write(output_dir, "contribution.md", "# Contribution\n\n" + table([
         (key.replace("_", " ").title(), value) for key, value in history.items()
-    ]))
+    ]) + ("\n\n## Hotspots\n\n" + table(hotspot_rows) if hotspot_rows else ""))
     write(output_dir, "collaboration.md", "# Collaboration\n\n" + table([
         (key.replace("_", " ").title(), value) for key, value in collaboration.items()
     ]))

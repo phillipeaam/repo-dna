@@ -15,11 +15,12 @@ trap cleanup EXIT
 create_fixture() {
     local fixture="$1"
 
-    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/src"
+    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/collectors" "$fixture/src"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/lib/"*.sh "$fixture/lib/"
     cp "$SOURCE_ROOT/utils/"*.sh "$fixture/utils/"
     cp "$SOURCE_ROOT/renderers/"*.py "$SOURCE_ROOT/renderers/"*.sh "$fixture/renderers/"
+    cp "$SOURCE_ROOT/collectors/"*.py "$fixture/collectors/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
     printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/Example.cs"
 
@@ -42,8 +43,10 @@ default_report="$(find_report "$default_fixture")"
 [[ -n "$default_report" ]]
 [[ -f "$default_report/security/potential_secrets.txt" ]]
 [[ -f "$default_report/report/data/report.json" ]]
+[[ -f "$default_report/report/data/generic-analysis.json" ]]
 [[ -f "$default_report/report/index.md" ]]
 grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
+grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/index.html" ]]
 [[ -f "$default_report/notion/evidence.json" ]]
 grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
