@@ -9,6 +9,7 @@ A quick reference for Bash syntax and commands used throughout the **RepoDNA** c
 # Table of Contents
 
 - [Variables](#variables)
+- [Variable Declaration (`declare`)](#variable-declaration-declare)
 - [Parameter Expansion](#parameter-expansion)
 - [Conditions](#conditions)
 - [Files and Directories](#files-and-directories)
@@ -40,6 +41,237 @@ Equivalent (C#):
 string name = "RepoDNA";
 Console.WriteLine(name);
 ```
+
+---
+
+# Variable Declaration (`declare`)
+
+The `declare` builtin allows variables to have attributes such as arrays, integers, read-only, or name references.
+
+General syntax:
+
+```bash
+declare [options] variable=value
+```
+
+---
+
+## Common Options
+
+| Option | Meaning | Example |
+|---------|---------|---------|
+| `-a` | Indexed array | `declare -a files` |
+| `-A` | Associative array (dictionary) | `declare -A map` |
+| `-i` | Integer variable | `declare -i count=10` |
+| `-r` | Read-only variable | `declare -r VERSION="1.0"` |
+| `-x` | Export variable to child processes | `declare -x PATH` |
+| `-n` | Name reference (reference another variable) | `declare -n ref=array` |
+| `-p` | Print variable declaration | `declare -p PATH` |
+
+---
+
+## Read-only Array
+
+```bash
+declare -ar IGNORED_DIRS=(
+    Library
+    Temp
+    Logs
+)
+```
+
+Meaning:
+
+- `-a` → Indexed array
+- `-r` → Read-only
+
+The array cannot be modified later.
+
+Equivalent (conceptually):
+
+```csharp
+readonly string[] ignoredDirs =
+{
+    "Library",
+    "Temp",
+    "Logs"
+};
+```
+
+---
+
+## Indexed Array
+
+```bash
+declare -a files
+
+files+=("Player.cs")
+files+=("Enemy.cs")
+```
+
+Equivalent:
+
+```csharp
+var files = new List<string>();
+
+files.Add("Player.cs");
+files.Add("Enemy.cs");
+```
+
+---
+
+## Associative Array
+
+```bash
+declare -A extensions
+
+extensions[Unity]=".cs"
+extensions[Android]=".kt"
+```
+
+Equivalent:
+
+```csharp
+var extensions = new Dictionary<string, string>();
+
+extensions["Unity"] = ".cs";
+extensions["Android"] = ".kt";
+```
+
+---
+
+## Integer Variable
+
+```bash
+declare -i count=5
+
+count+=3
+```
+
+Output:
+
+```text
+8
+```
+
+Without `-i`, Bash treats variables as strings.
+
+Equivalent:
+
+```csharp
+int count = 5;
+count += 3;
+```
+
+---
+
+## Read-only Variable
+
+```bash
+declare -r VERSION="1.0"
+```
+
+Trying to modify it:
+
+```bash
+VERSION="2.0"
+```
+
+Produces:
+
+```text
+bash: VERSION: readonly variable
+```
+
+Equivalent:
+
+```csharp
+const string VERSION = "1.0";
+```
+
+---
+
+## Name Reference (`-n`)
+
+A name reference points to another variable.
+
+```bash
+declare -n ref=array
+```
+
+Now:
+
+```bash
+ref+=("Player.cs")
+```
+
+actually modifies:
+
+```bash
+array
+```
+
+RepoDNA uses this pattern:
+
+```bash
+build_find_prune_predicates() {
+    local -n predicates="$1"
+
+    predicates+=(
+        -path "*/Library"
+    )
+}
+```
+
+Usage:
+
+```bash
+local -a prune=()
+
+build_find_prune_predicates prune
+```
+
+After the function returns:
+
+```bash
+echo "${prune[@]}"
+```
+
+contains all generated predicates.
+
+Equivalent (conceptually):
+
+```csharp
+void Build(ref List<string> predicates)
+{
+    predicates.Add("...");
+}
+```
+
+---
+
+## Print Variable Information
+
+```bash
+declare -p IGNORED_DIRS
+```
+
+Output:
+
+```text
+declare -ar IGNORED_DIRS=([0]="Library" [1]="Temp")
+```
+
+Useful for debugging.
+
+---
+
+## Notes
+
+- `declare` is a Bash builtin.
+- `local` supports most of the same options inside functions.
+- `declare -n` requires **Bash 4.3+**.
+- Arrays are one of Bash's most powerful features and should be preferred over building command strings.
 
 ---
 
@@ -740,8 +972,6 @@ Console.WriteLine(args[0]);
 | `tar` | Archive files |
 | `zip` | Compress files |
 | `git` | Version control |
-
----
 
 ---
 
