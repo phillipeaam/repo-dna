@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 
-# Directory exclusion system for DNA analysis
-# Provides centralized functions to filter out ignored directories
-# and respect .repodnaignore patterns across all file operations
+# Directory exclusion system for RepoDNA.
+# Centralizes directory filtering for file discovery and text searches.
 
-# Source string utilities if available (provides string_trim)
-if [[ -n "${REPO_ROOT:-}" && -f "${REPO_ROOT}/utils/strings.sh" ]]; then
+# Ensure the repository root is available.
+[[ -n "${REPO_ROOT:-}" ]] || {
+    printf 'REPO_ROOT is not defined.\n' >&2
+    return 1 2>/dev/null || exit 1
+}
+
+# Load required string utilities.
+if [[ -f "${REPO_ROOT}/utils/strings.sh" ]]; then
     # shellcheck source=/dev/null
     source "${REPO_ROOT}/utils/strings.sh"
+else
+    printf 'Missing utility: %s\n' \
+        "${REPO_ROOT}/utils/strings.sh" >&2
+
+    return 1 2>/dev/null || exit 1
 fi
 
-# Define common directories to ignore across all projects.
-# These are typically generated, cached, or third-party directories.
+# Define directories ignored in every analysis.
 declare -ar IGNORED_DIRS=(
     Library
     Logs
@@ -24,19 +33,18 @@ declare -ar IGNORED_DIRS=(
     .git
 )
 
-# Helper: Load directory patterns from .repodnaignore file.
-# Internal use only - parses .repodnaignore for directory patterns.
+# Load directory entries from .repodnaignore.
 _load_repodna_ignore_directories() {
     local config_file="${REPO_ROOT}/.repodnaignore"
+    local pattern
 
     [[ -f "$config_file" ]] || return 0
 
     while IFS= read -r pattern || [[ -n "$pattern" ]]; do
-        [[ -z "$pattern" ]] && continue
-        [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-
         pattern="$(string_trim "$pattern")"
+
         [[ -z "$pattern" ]] && continue
+        [[ "$pattern" =~ ^# ]] && continue
 
         if [[ "$pattern" == */ ]]; then
             printf '%s\n' "${pattern%/}"
@@ -44,53 +52,46 @@ _load_repodna_ignore_directories() {
     done < "$config_file"
 }
 
-# Helper: Build find predicates from IGNORED_DIRS and .repodnaignore.
-# Internal use only - used by analysis_find().
-_build_find_prune_predicates() {
+# Append find-compatible prune predicates to the array named by $1.
+build_find_prune_predicates() {
+    local -n predicates="$1"
+    local dir
     local first=true
 
     for dir in "${IGNORED_DIRS[@]}"; do
         if [[ "$first" == true ]]; then
-            printf '-name %s' "$dir"
             first=false
         else
-            printf ' -o -name %s' "$dir"
+            predicates+=(-o)
         fi
+
+        predicates+=(
+            -path "*/$dir"
+            -o
+            -path "*/$dir/*"
+        )
     done
 
     while IFS= read -r dir || [[ -n "$dir" ]]; do
-        printf ' -o -name %s' "$dir"
-    done < <(_load_repodna_ignore_directories)
-}
-
-# Build find predicate arguments for paths to exclude.
-# Returns -path and -path/* patterns suitable for find -prune.
-# This is more precise than -name for complex paths.
-build_find_prune_predicates() {
-    local -n predicates=$1
-    local dir
-
-    predicates+=(
-        -path '*/.git'
-        -o
-        -path '*/.git/*'
-    )
-
-    for dir in "${IGNORED_DIRS[@]}"; do
         predicates+=(
             -o
             -path "*/$dir"
             -o
             -path "*/$dir/*"
         )
-    done
+    done < <(_load_repodna_ignore_directories)
 }
 
-# Find source files while respecting all exclusion rules.
-# All directories in IGNORED_DIRS and .repodnaignore are pruned.
-# Usage: analysis_find -- -type f -iname '*.cs' -print
+# Find files while pruning all ignored directories.
+# Usage: analysis_find -type f -iname '*.cs' -print
 analysis_find() {
-    local prune=()
+    local -a prune=()
+
+    [[ -d "${CODE_ROOT:-}" ]] || {
+        printf 'Invalid CODE_ROOT: %s\n' \
+            "${CODE_ROOT:-unset}" >&2
+        return 1
+    }
 
     build_find_prune_predicates prune
 
