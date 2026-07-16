@@ -106,6 +106,31 @@ precedence over vendor-name heuristics, but not over generated or ignored paths.
 High-confidence third-party and generated files are not copied into the source
 review folders.
 
+## Privacy and Source Export
+
+Full C# source is not copied by default. Reports contain metrics, relative paths,
+signatures, classes, namespaces, package information, and Git statistics.
+
+Source export requires explicit consent:
+
+```bash
+bash dna-analysis.sh --include-source
+```
+
+For professional or confidential repositories, strict privacy mode takes
+precedence over every source-export option:
+
+```bash
+bash dna-analysis.sh --privacy-mode strict
+```
+
+Strict mode omits source, documentation and configuration copies, remote URLs,
+e-mails, contributor identities, and commit messages. It redacts absolute paths
+and source-line bodies from detector reports. Before compression, every mode
+scans the generated package for likely secrets; strict mode additionally checks
+for residual e-mails, URLs, and absolute repository paths. A finding blocks
+archive creation and is listed by path in `summary/03_privacy_scan.txt`.
+
 ---
 
 # 🛣 Roadmap

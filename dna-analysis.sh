@@ -11,6 +11,8 @@ AUTHOR=""
 SINCE=""
 UNTIL=""
 OWNED_ROOTS=()
+INCLUDE_SOURCE=false
+PRIVACY_MODE='standard'
 
 # Resolve this script's directory so it can be run from any repository folder.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,6 +43,8 @@ show_usage() {
     echo "  --since <date>            Include commits on or after this date."
     echo "  --until <date>            Include commits on or before this date."
     echo "  --owned-root <path>       Mark a path as project-owned (repeatable)."
+    echo "  --include-source          Copy classified C# source into the report."
+    echo "  --privacy-mode <mode>     Privacy level: standard or strict."
     echo "  -h, --help                Show this help."
     echo ""
     echo "Examples:"
@@ -48,12 +52,14 @@ show_usage() {
     echo "  bash dna-analysis.sh --author \"Phillipe Augusto\""
     echo "  bash dna-analysis.sh --since 2020-01-01 --until 2025-12-31"
     echo "  bash dna-analysis.sh --owned-root Assets/_Project"
+    echo "  bash dna-analysis.sh --include-source"
+    echo "  bash dna-analysis.sh --privacy-mode strict"
 }
 
 # Read named command-line options.
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --author|--since|--until|--owned-root|-owned-root)
+        --author|--since|--until|--owned-root|-owned-root|--privacy-mode)
             [[ -n "${2:-}" ]] || die "Option $1 requires a value."
 
             case "$1" in
@@ -61,9 +67,14 @@ while [[ $# -gt 0 ]]; do
                 --since)  SINCE="$2" ;;
                 --until)  UNTIL="$2" ;;
                 --owned-root|-owned-root) OWNED_ROOTS+=("${2#./}") ;;
+                --privacy-mode) PRIVACY_MODE="$2" ;;
             esac
 
             shift 2
+            ;;
+        --include-source)
+            INCLUDE_SOURCE=true
+            shift
             ;;
         -h|--help)
             show_usage
@@ -75,6 +86,13 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+[[ "$PRIVACY_MODE" == standard || "$PRIVACY_MODE" == strict ]] ||
+    die "Invalid privacy mode: $PRIVACY_MODE (expected standard or strict)."
+
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    INCLUDE_SOURCE=false
+fi
 
 # Return success when a command exists.
 command_exists() {
@@ -138,6 +156,67 @@ copy_preserving_path() {
 
     # Copy the file into the matching relative path.
     cp "$source_file" "$destination_root/$source_file"
+}
+
+# Scan the completed report without copying matched secret values into the result.
+run_privacy_scan() {
+    local findings_file
+    local secret_regex
+    findings_file="$(mktemp)" || die "Could not create the privacy scan workspace."
+    secret_regex='-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[:=][[:space:]]*[^[:space:]]{8,}'
+
+    grep -RIlE -- "$secret_regex" "$OUTPUT_DIR" 2>/dev/null > "$findings_file" || true
+
+    if [[ "$PRIVACY_MODE" == strict ]]; then
+        grep -RIlE -- \
+            '([[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}|https?://|ssh://|git@[^[:space:]]+:)' \
+            "$OUTPUT_DIR" 2>/dev/null >> "$findings_file" || true
+        grep -RIlF -- "$REPO_ROOT" "$OUTPUT_DIR" 2>/dev/null >> "$findings_file" || true
+    fi
+
+    sort -u "$findings_file" -o "$findings_file"
+
+    {
+        printf '%s\n' 'Privacy scan'
+        printf '%s\n' '------------'
+        printf 'Mode: %s\n' "$PRIVACY_MODE"
+
+        if [[ -s "$findings_file" ]]; then
+            PRIVACY_SCAN_FAILED=true
+            printf '%s\n' 'Result: blocked'
+            printf '%s\n' 'Potential sensitive content was found in:'
+            sed "s|^$OUTPUT_DIR/||" "$findings_file"
+        else
+            PRIVACY_SCAN_FAILED=false
+            printf '%s\n' 'Result: passed'
+            printf '%s\n' 'No configured sensitive-content pattern was detected.'
+        fi
+    } > "$SUMMARY_DIR/03_privacy_scan.txt"
+
+    rm -f "$findings_file"
+}
+
+# Remove matched source-line bodies from detector reports in strict mode.
+sanitize_strict_reports() {
+    local report_file
+
+    [[ "$PRIVACY_MODE" == strict ]] || return 0
+
+    for report_file in \
+        "$PROJECT_DIR"/13_*.txt \
+        "$PROJECT_DIR"/14_*.txt \
+        "$PROJECT_DIR"/15_*.txt \
+        "$PROJECT_DIR"/16_*.txt \
+        "$PROJECT_DIR"/17_*.txt \
+        "$PROJECT_DIR"/18_*.txt \
+        "$PROJECT_DIR"/19_*.txt \
+        "$PROJECT_DIR"/20_*.txt \
+        "$PROJECT_DIR"/21_*.txt \
+        "$PROJECT_DIR"/22_*.txt \
+        "$PROJECT_DIR"/23_*.txt; do
+        [[ -f "$report_file" ]] || continue
+        sed -Ei 's/^([^:]+:[0-9]+):.*/\1:[content omitted]/' "$report_file"
+    done
 }
 
 # Count current files matching a case-insensitive name pattern.
@@ -205,8 +284,11 @@ GENERATED_AT="$(date '+%Y-%m-%d %H:%M:%S')"
 TIMESTAMP="$(date '+%Y-%m-%d_%H-%M-%S')"
 
 # Sanitize the repository name.
+REPORT_REPO_NAME="$REPO_NAME"
+[[ "$PRIVACY_MODE" == strict ]] && REPORT_REPO_NAME='repository'
+
 SAFE_REPO_NAME="$(
-    printf '%s' "$REPO_NAME" |
+    printf '%s' "$REPORT_REPO_NAME" |
         tr ' /\\:' '____' |
         tr -cd '[:alnum:]_.-'
 )"
@@ -237,6 +319,16 @@ GRAPHS_DIR="$OUTPUT_DIR/graphs"
 
 # Define the expected ZIP path.
 ZIP_PATH="$REPO_ROOT/${REPORT_NAME}.zip"
+
+DISPLAY_OUTPUT_PATH="$OUTPUT_DIR"
+DISPLAY_SUMMARY_PATH="$SUMMARY_DIR"
+DISPLAY_ZIP_PATH="$ZIP_PATH"
+
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    DISPLAY_OUTPUT_PATH="$REPORT_NAME"
+    DISPLAY_SUMMARY_PATH="$REPORT_NAME/summary"
+    DISPLAY_ZIP_PATH="${REPORT_NAME}.zip"
+fi
 
 # Create the optional Git date-filter array.
 DATE_FILTER=()
@@ -282,13 +374,28 @@ mkdir -p \
     "$SUMMARY_DIR" \
     "$PROJECT_DIR/packages" \
     "$CONTRIBUTION_DIR" \
-    "$SOURCE_DIR/reviewable_csharp" \
-    "$SOURCE_DIR/likely_project_owned" \
-    "$SOURCE_DIR/project_settings" \
-    "$SOURCE_DIR/documentation" \
     "$DATA_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
+
+if [[ "$INCLUDE_SOURCE" == true ]]; then
+    mkdir -p \
+        "$SOURCE_DIR/reviewable_csharp" \
+        "$SOURCE_DIR/likely_project_owned" ||
+        die "Could not create the source export folders."
+fi
+
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    HISTORY_SCOPE='Sanitized Git history'
+    HISTORY_DESCRIPTION='sanitized repository history metrics'
+fi
+
+if [[ "$PRIVACY_MODE" != strict ]]; then
+    mkdir -p \
+        "$SOURCE_DIR/project_settings" \
+        "$SOURCE_DIR/documentation" ||
+        die "Could not create the supporting file folders."
+fi
 
 # Print the selected configuration.
 echo ""
@@ -302,7 +409,9 @@ echo "Since      : ${SINCE:-no filter}"
 echo "Until      : ${UNTIL:-no filter}"
 echo "Code root  : $CODE_ROOT"
 echo "Owned roots: ${OWNED_ROOTS[*]:-automatic classification only}"
-echo "Output     : $OUTPUT_DIR"
+echo "Source     : $INCLUDE_SOURCE"
+echo "Privacy    : $PRIVACY_MODE"
+echo "Output     : $DISPLAY_OUTPUT_PATH"
 echo "================================================================"
 echo ""
 
@@ -317,6 +426,12 @@ HEAD_HASH="$(git rev-parse HEAD 2>/dev/null || true)"
 
 # Read the primary remote URL.
 REMOTE_URL="$(git config --get remote.origin.url 2>/dev/null || true)"
+
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    CURRENT_BRANCH='[redacted]'
+    HEAD_HASH='[redacted]'
+    REMOTE_URL='[redacted]'
+fi
 
 # Read the Unity editor version when available.
 UNITY_VERSION="$(
@@ -350,13 +465,27 @@ COMPANY_NAME="$(
     fi
 )"
 
+DISPLAY_REPO_NAME="$REPO_NAME"
+DISPLAY_REPO_ROOT="$REPO_ROOT"
+DISPLAY_PRODUCT_NAME="${PRODUCT_NAME:-Unknown}"
+DISPLAY_COMPANY_NAME="${COMPANY_NAME:-Unknown}"
+DISPLAY_AUTHOR="${AUTHOR:-Not specified}"
+
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    DISPLAY_REPO_NAME='repository'
+    DISPLAY_REPO_ROOT='[redacted]'
+    DISPLAY_PRODUCT_NAME='[redacted]'
+    DISPLAY_COMPANY_NAME='[redacted]'
+    DISPLAY_AUTHOR='[redacted]'
+fi
+
 # Write repository metadata.
 cat > "$PROJECT_DIR/00_repository_information.txt" <<EOF
-Repository name: $REPO_NAME
+Repository name: $DISPLAY_REPO_NAME
 Project type: $PROJECT_TYPE
-Product name: ${PRODUCT_NAME:-Unknown}
-Company name: ${COMPANY_NAME:-Unknown}
-Repository root: $REPO_ROOT
+Product name: $DISPLAY_PRODUCT_NAME
+Company name: $DISPLAY_COMPANY_NAME
+Repository root: $DISPLAY_REPO_ROOT
 Current branch: ${CURRENT_BRANCH:-Detached HEAD or unavailable}
 HEAD commit: ${HEAD_HASH:-Unavailable}
 Origin remote: ${REMOTE_URL:-Unavailable}
@@ -366,23 +495,17 @@ Generated at: $GENERATED_AT
 EOF
 
 # Copy the Unity version file.
-cp ProjectSettings/ProjectVersion.txt "$PROJECT_DIR/" 2>/dev/null || true
-
-# Copy the package manifest.
-cp Packages/manifest.json "$PROJECT_DIR/packages/" 2>/dev/null || true
-
-# Copy the package lock file.
-cp Packages/packages-lock.json "$PROJECT_DIR/packages/" 2>/dev/null || true
+if [[ "$PRIVACY_MODE" != strict ]]; then
+    cp ProjectSettings/ProjectVersion.txt "$PROJECT_DIR/" 2>/dev/null || true
+    cp Packages/manifest.json "$PROJECT_DIR/packages/" 2>/dev/null || true
+    cp Packages/packages-lock.json "$PROJECT_DIR/packages/" 2>/dev/null || true
+fi
 
 # Print the second progress step.
 echo "[2/12] Exporting project structure and asset inventories..."
 
 # Export a project tree without requiring the tree command, respecting exclusions.
-find . \
-    -type d \( \
-        $(build_find_path_predicates) \
-    \) -prune -o \
-    -type f -print 2>/dev/null |
+analysis_find -type f -print 2>/dev/null |
     sed 's|^\./||' |
     sort \
     > "$PROJECT_DIR/01_folder_tree.txt"
@@ -628,49 +751,45 @@ They may include third-party code, imported assets, examples, and generated file
 EOF
 
 # Print the fifth progress step.
-echo "[5/12] Exporting source code for detailed review..."
+echo "[5/12] Applying source export and privacy policy..."
 
-# Copy C# files that are owned or still require human review.
-while IFS= read -r source_file; do
-    # Preserve the original project path.
-    copy_preserving_path "$source_file" "$SOURCE_DIR/reviewable_csharp"
-done < <(
-    analysis_find -type f -iname '*.cs' -print 2>/dev/null |
-        while IFS= read -r source_file; do
-            ownership_is_reviewable "$source_file" && printf '%s\n' "$source_file"
-        done |
-        sort
-)
+if [[ "$INCLUDE_SOURCE" == true ]]; then
+    while IFS= read -r source_file; do
+        copy_preserving_path "$source_file" "$SOURCE_DIR/reviewable_csharp"
+    done < <(
+        analysis_find -type f -iname '*.cs' -print 2>/dev/null |
+            while IFS= read -r source_file; do
+                ownership_is_reviewable "$source_file" && printf '%s\n' "$source_file"
+            done |
+            sort
+    )
 
-# Copy likely project-owned C# files.
-while IFS= read -r source_file; do
-    # Preserve the original project path.
-    copy_preserving_path "$source_file" "$SOURCE_DIR/likely_project_owned"
-done < <(
-    analysis_find -type f -iname '*.cs' -print 2>/dev/null |
-        while IFS= read -r source_file; do
-            ownership_is_project_owned "$source_file" && printf '%s\n' "$source_file"
-        done |
-        sort
-)
+    while IFS= read -r source_file; do
+        copy_preserving_path "$source_file" "$SOURCE_DIR/likely_project_owned"
+    done < <(
+        analysis_find -type f -iname '*.cs' -print 2>/dev/null |
+            while IFS= read -r source_file; do
+                ownership_is_project_owned "$source_file" && printf '%s\n' "$source_file"
+            done |
+            sort
+    )
+fi
 
-# Copy tracked documentation without including the report being generated.
-git ls-files -z -- 'README*' '*.md' 2>/dev/null |
-    while IFS= read -r -d '' documentation_file; do
-        # Preserve the original documentation path.
-        copy_preserving_path "$documentation_file" "$SOURCE_DIR/documentation"
-    done
+if [[ "$PRIVACY_MODE" != strict ]]; then
+    git ls-files -z -- 'README*' '*.md' 2>/dev/null |
+        while IFS= read -r -d '' documentation_file; do
+            copy_preserving_path "$documentation_file" "$SOURCE_DIR/documentation"
+        done
 
-# Copy useful Unity project settings.
-find ProjectSettings -maxdepth 1 -type f \( \
-        -iname '*.asset' -o \
-        -iname '*.txt' -o \
-        -iname '*.json' \
-    \) 2>/dev/null |
-    while IFS= read -r settings_file; do
-        # Copy the settings file.
-        cp "$settings_file" "$SOURCE_DIR/project_settings/"
-    done
+    find ProjectSettings -maxdepth 1 -type f \( \
+            -iname '*.asset' -o \
+            -iname '*.txt' -o \
+            -iname '*.json' \
+        \) 2>/dev/null |
+        while IFS= read -r settings_file; do
+            cp "$settings_file" "$SOURCE_DIR/project_settings/"
+        done
+fi
 
 # Print the sixth progress step.
 echo "[6/12] Calculating Git history and contribution metrics..."
@@ -709,6 +828,11 @@ else
             --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null |
             head -n 1
     )"
+
+    if [[ "$PRIVACY_MODE" == strict ]]; then
+        FIRST_COMMIT='[commit content omitted in strict privacy mode]'
+        LAST_COMMIT='[commit content omitted in strict privacy mode]'
+    fi
 
     # Read the first commit date.
     FIRST_DATE="$(
@@ -828,7 +952,7 @@ Git History Summary
 ===================
 
 History scope: $HISTORY_SCOPE
-Author filter: ${AUTHOR:-Not specified}
+Author filter: $DISPLAY_AUTHOR
 Since: ${SINCE:-Not specified}
 Until: ${UNTIL:-Not specified}
 
@@ -863,14 +987,15 @@ Git statistics measure historical change volume, not exclusive ownership.
 Renames, imported packages, generated files, and merges may inflate values.
 EOF
 
-    # Export readable commit history.
-    analysis_git_log \
-        --date=iso-strict \
-        --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null \
-        > "$CONTRIBUTION_DIR/01_commits.txt"
+    if [[ "$PRIVACY_MODE" != strict ]]; then
+        # Export readable commit history.
+        analysis_git_log \
+            --date=iso-strict \
+            --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null \
+            > "$CONTRIBUTION_DIR/01_commits.txt"
 
-    # Export commit history as CSV.
-    {
+        # Export commit history as CSV.
+        {
         # Write the CSV header.
         echo "Date,Hash,FullHash,AuthorName,AuthorEmail,Subject"
 
@@ -893,7 +1018,8 @@ EOF
                           csv($6)
                 }
             '
-    } > "$DATA_DIR/history_commits.csv"
+        } > "$DATA_DIR/history_commits.csv"
+    fi
 
     # Count commits by year.
     analysis_git_log \
@@ -959,42 +1085,54 @@ EOF
         sort -nr \
         > "$CONTRIBUTION_DIR/06_changed_file_extensions.txt"
 
-    # Export system-related commit subjects.
-    analysis_git_log --pretty=format:'%s' 2>/dev/null |
-        grep -Ei "$SYSTEM_KEYWORDS" |
-        sort \
-        > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
+    if [[ "$PRIVACY_MODE" != strict ]]; then
+        analysis_git_log --pretty=format:'%s' 2>/dev/null |
+            grep -Ei "$SYSTEM_KEYWORDS" |
+            sort \
+            > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
+    fi
 fi
 
 # Print the seventh progress step.
 echo "[7/12] Exporting collaboration and repository history..."
 
-# Export all contributors.
-git shortlog -sne --all \
-    > "$PROJECT_DIR/26_all_contributors.txt" 2>/dev/null || true
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    git shortlog -sn --all 2>/dev/null |
+        awk '{ printf "Contributor-%d\t%s commits\n", NR, $1 }' \
+        > "$PROJECT_DIR/26_all_contributors.txt"
+    printf 'Branch count: %s\n' "$(git branch -a 2>/dev/null | wc -l | trim_count)" \
+        > "$PROJECT_DIR/27_branches.txt"
+    printf 'Tag count: %s\n' "$(git tag 2>/dev/null | wc -l | trim_count)" \
+        > "$PROJECT_DIR/28_tags.txt"
+    printf '%s\n' '[remote URLs omitted in strict privacy mode]' \
+        > "$PROJECT_DIR/29_remotes.txt"
+else
+    git shortlog -sne --all > "$PROJECT_DIR/26_all_contributors.txt" 2>/dev/null || true
+    git branch -a > "$PROJECT_DIR/27_branches.txt" 2>/dev/null || true
+    git tag --sort=-creatordate > "$PROJECT_DIR/28_tags.txt" 2>/dev/null || true
+    git remote -v > "$PROJECT_DIR/29_remotes.txt" 2>/dev/null || true
+fi
 
-# Export all branches.
-git branch -a \
-    > "$PROJECT_DIR/27_branches.txt" 2>/dev/null || true
+# Export repository status without branch identity in strict mode.
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    printf 'Changed working-tree entries: %s\n' \
+        "$(git status --short 2>/dev/null | wc -l | trim_count)" \
+        > "$PROJECT_DIR/30_repository_status.txt"
+else
+    git status --short --branch \
+        > "$PROJECT_DIR/30_repository_status.txt" 2>/dev/null || true
+fi
 
-# Export all tags.
-git tag --sort=-creatordate \
-    > "$PROJECT_DIR/28_tags.txt" 2>/dev/null || true
-
-# Export remotes.
-git remote -v \
-    > "$PROJECT_DIR/29_remotes.txt" 2>/dev/null || true
-
-# Export repository status.
-git status --short --branch \
-    > "$PROJECT_DIR/30_repository_status.txt" 2>/dev/null || true
-
-# Export merge history.
-git log --all \
-    --merges \
-    --date=short \
-    --pretty=format:'%ad | %h | %an | %s' 2>/dev/null \
-    > "$PROJECT_DIR/31_merge_history.txt" || true
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    printf 'Merge commits: %s\n' "${MERGE_COMMITS:-0}" \
+        > "$PROJECT_DIR/31_merge_history.txt"
+else
+    git log --all \
+        --merges \
+        --date=short \
+        --pretty=format:'%ad | %h | %an | %s' 2>/dev/null \
+        > "$PROJECT_DIR/31_merge_history.txt" || true
+fi
 
 # Print the eighth progress step.
 echo "[8/12] Creating Notion-oriented evidence guides..."
@@ -1135,10 +1273,10 @@ Project and Career Analysis
 
 Project
 -------
-Repository: $REPO_NAME
+Repository: $DISPLAY_REPO_NAME
 Project type: $PROJECT_TYPE
-Product name: ${PRODUCT_NAME:-Unknown}
-Company name: ${COMPANY_NAME:-Unknown}
+Product name: $DISPLAY_PRODUCT_NAME
+Company name: $DISPLAY_COMPANY_NAME
 Unity version: ${UNITY_VERSION:-Unknown}
 Code root: $CODE_ROOT
 Generated at: $GENERATED_AT
@@ -1170,7 +1308,7 @@ Recommended Review Order
 6. contribution/00_contribution_summary.txt
 7. contribution/04_top_changed_files.txt
 8. contribution/05_top_changed_directories.txt
-9. source/likely_project_owned/
+9. project/12_ownership_classification.txt
 10. summary/02_analysis_prompt.md
 
 Warnings
@@ -1183,11 +1321,11 @@ things. Files touched are not the same as files authored.
 EOF
 
 # Escape JSON values.
-JSON_REPO="$(json_escape "$REPO_NAME")"
+JSON_REPO="$(json_escape "$DISPLAY_REPO_NAME")"
 JSON_PROJECT_TYPE="$(json_escape "$PROJECT_TYPE")"
-JSON_PRODUCT="$(json_escape "${PRODUCT_NAME:-Unknown}")"
-JSON_COMPANY="$(json_escape "${COMPANY_NAME:-Unknown}")"
-JSON_AUTHOR="$(json_escape "$AUTHOR")"
+JSON_PRODUCT="$(json_escape "$DISPLAY_PRODUCT_NAME")"
+JSON_COMPANY="$(json_escape "$DISPLAY_COMPANY_NAME")"
+JSON_AUTHOR="$(json_escape "$DISPLAY_AUTHOR")"
 JSON_GENERATED="$(json_escape "$GENERATED_AT")"
 JSON_UNITY="$(json_escape "${UNITY_VERSION:-Unknown}")"
 
@@ -1254,31 +1392,37 @@ if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
 EOF
 fi
 
+# Describe optional folders without claiming that source was copied by default.
+if [[ "$INCLUDE_SOURCE" == true ]]; then
+    SOURCE_FOLDER_DESCRIPTION='- `source/`: explicitly requested classified C# source'
+else
+    SOURCE_FOLDER_DESCRIPTION='- `source/`: omitted (use --include-source outside strict mode)'
+fi
+
 # Write the main README.
 cat > "$OUTPUT_DIR/README.md" <<EOF
 # Project and Career Analysis
 
-**Repository:** $REPO_NAME  
+**Repository:** $DISPLAY_REPO_NAME
 **Project type:** $PROJECT_TYPE
-**Product:** ${PRODUCT_NAME:-Unknown}  
+**Product:** $DISPLAY_PRODUCT_NAME
 **Git history scope:** $HISTORY_SCOPE
 **Unity version:** ${UNITY_VERSION:-Unknown}  
+**Privacy mode:** $PRIVACY_MODE
+**Source included:** $INCLUDE_SOURCE
 **Generated:** $GENERATED_AT
 
 ## Purpose
 
 This package combines a current project review, $HISTORY_DESCRIPTION,
-source-code export, collaboration evidence, and a Notion
-career-journaling guide.
+collaboration evidence, and a Notion career-journaling guide.
 
 ## Main folders
 
 - \`summary/\`: executive summary and Notion analysis guides
 - \`project/\`: current project structure, systems, and technologies
 - \`contribution/\`: $HISTORY_DESCRIPTION
-- \`source/reviewable_csharp/\`: owned and review-required C# source
-- \`source/likely_project_owned/\`: source classified as project-owned
-- \`source/project_settings/\`: selected Unity settings
+$SOURCE_FOLDER_DESCRIPTION
 - \`data/\`: JSON and CSV exports
 - \`graphs/\`: optional charts
 
@@ -1299,8 +1443,8 @@ EOF
 # Print the tenth progress step.
 echo "[10/12] Creating optional charts..."
 
-# Create charts only when commit data exists.
-if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
+# Create charts only when detailed, non-strict commit data exists.
+if [[ "$TOTAL_COMMITS" -gt 0 && "$PRIVACY_MODE" != strict ]]; then
     # Write the Python chart generator.
     cat > "$OUTPUT_DIR/generate_graphs.py" <<'PYTHON'
 from __future__ import annotations
@@ -1403,7 +1547,16 @@ PYTHON
 fi
 
 # Print the eleventh progress step.
-echo "[11/12] Creating the archive..."
+echo "[11/12] Scanning privacy and creating the archive..."
+
+PRIVACY_SCAN_FAILED=false
+sanitize_strict_reports
+run_privacy_scan
+
+if [[ "$PRIVACY_SCAN_FAILED" == true ]]; then
+    echo "Warning: archive creation blocked by the privacy scan."
+    echo "Review summary/03_privacy_scan.txt before compressing the report."
+else
 
 # Remove an older archive with the same name.
 rm -f "$ZIP_PATH"
@@ -1447,6 +1600,7 @@ else
     echo "No supported archive command was found."
     echo "The report folder was generated and can be compressed manually."
 fi
+fi
 
 # Print the twelfth progress step.
 echo "[12/12] Finalizing..."
@@ -1459,36 +1613,38 @@ echo "================================================================"
 
 # Print the report folder path.
 echo "Report folder:"
-echo "  $OUTPUT_DIR"
+echo "  $DISPLAY_OUTPUT_PATH"
 echo ""
 
 # Print the ZIP path when present.
 if [[ -f "$ZIP_PATH" ]]; then
     echo "ZIP archive:"
-    echo "  $ZIP_PATH"
+    echo "  $DISPLAY_ZIP_PATH"
     echo ""
 fi
 
 # Print the tar.gz path when present.
 if [[ -n "${TAR_PATH:-}" && -f "${TAR_PATH:-}" ]]; then
+    DISPLAY_TAR_PATH="$TAR_PATH"
+    [[ "$PRIVACY_MODE" == strict ]] && DISPLAY_TAR_PATH="${TAR_PATH##*/}"
     echo "TAR.GZ archive:"
-    echo "  $TAR_PATH"
+    echo "  $DISPLAY_TAR_PATH"
     echo ""
 fi
 
 # Print the main starting point.
 echo "Start here:"
-echo "  $SUMMARY_DIR/00_executive_summary.txt"
+echo "  $DISPLAY_SUMMARY_PATH/00_executive_summary.txt"
 echo ""
 
 # Print the Notion guide path.
 echo "Notion guide:"
-echo "  $SUMMARY_DIR/01_notion_evidence_guide.md"
+echo "  $DISPLAY_SUMMARY_PATH/01_notion_evidence_guide.md"
 echo ""
 
 # Print the reusable analysis prompt path.
 echo "Analysis prompt:"
-echo "  $SUMMARY_DIR/02_analysis_prompt.md"
+echo "  $DISPLAY_SUMMARY_PATH/02_analysis_prompt.md"
 echo ""
 
 # Print the privacy reminder.
