@@ -47,8 +47,9 @@ is_flutter_project() {
 }
 
 is_unreal_project() {
-    find . -maxdepth 3 -type f -name '*.uproject' -print -quit 2>/dev/null |
-        grep -q .
+    local match
+    match=$(find . -maxdepth 3 -type f -name '*.uproject' -print -quit 2>/dev/null)
+    [[ -n "$match" ]]
 }
 
 is_godot_project() {
