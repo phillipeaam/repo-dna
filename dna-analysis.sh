@@ -18,10 +18,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-detection.sh
 source "$SCRIPT_DIR/lib/project-detection.sh"
 
-# Load directory exclusion management.
-# shellcheck source=lib/exclusions.sh
-source "$SCRIPT_DIR/lib/exclusions.sh"
-
 # Define common third-party folder names.
 THIRD_PARTY_REGEX='(^|/)(Plugins|ThirdParty|Third-Party|External|Vendor|SDK|AssetStore|AssetsStore|Packages)(/|$)'
 
@@ -189,6 +185,10 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 
 # Resolve the repository root.
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Load directory exclusion management after REPO_ROOT is available.
+# shellcheck source=lib/exclusions.sh
+source "$SCRIPT_DIR/lib/exclusions.sh"
 
 # Resolve the repository name.
 REPO_NAME="$(basename "$REPO_ROOT")"
