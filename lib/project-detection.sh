@@ -99,6 +99,10 @@ detect_project_type() {
 detect_code_root() {
     local project_type="$1"
     local preferred_root="${PROJECT_ROOTS[$project_type]:-.}"
-
-    [[ -d "$preferred_root" ]] && printf '%s' "$preferred_root" || printf '.'
+    
+    if [[ -d "$preferred_root" ]]; then
+        printf '%s' "$preferred_root"
+    else
+        printf '.'
+    fi
 }
