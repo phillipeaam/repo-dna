@@ -26,7 +26,7 @@ declare -ar IGNORED_DIRS=(
 
 # Helper: Load directory patterns from .repodnaignore file.
 # Internal use only - parses .repodnaignore for directory patterns.
-_load_repodnaignore_directories() {
+_load_repodna_ignore_directories() {
     local config_file="${REPO_ROOT}/.repodnaignore"
 
     [[ -f "$config_file" ]] || return 0
@@ -60,45 +60,45 @@ _build_find_prune_predicates() {
 
     while IFS= read -r dir || [[ -n "$dir" ]]; do
         printf ' -o -name %s' "$dir"
-    done < <(_load_repodnaignore_directories)
+    done < <(_load_repodna_ignore_directories)
 }
 
 # Build find predicate arguments for paths to exclude.
 # Returns -path and -path/* patterns suitable for find -prune.
 # This is more precise than -name for complex paths.
-build_find_path_predicates() {
-    local first=true
+build_find_prune_predicates() {
+    local -n predicates=$1
     local dir
 
-    # Add Git metadata (always excluded)
-    printf '-path */.git -o -path */.git/*'
-    first=false
+    predicates+=(
+        -path '*/.git'
+        -o
+        -path '*/.git/*'
+    )
 
-    # Add output and report directories (analysis artifacts)
-    printf ' -o -path "%s" -o -path "%s/*"' "$OUTPUT_DIR" "$OUTPUT_DIR"
-    printf ' -o -path "./%s" -o -path "./%s/*"' "$REPORT_NAME" "$REPORT_NAME"
-
-    # Add each directory from IGNORED_DIRS
     for dir in "${IGNORED_DIRS[@]}"; do
-        printf ' -o -path "*/%s" -o -path "*/%s/*"' "$dir" "$dir"
+        predicates+=(
+            -o
+            -path "*/$dir"
+            -o
+            -path "*/$dir/*"
+        )
     done
-
-    # Add each directory from .repodnaignore
-    while IFS= read -r dir || [[ -n "$dir" ]]; do
-        printf ' -o -path "*/%s" -o -path "*/%s/*"' "$dir" "$dir"
-    done < <(_load_repodnaignore_directories)
 }
 
 # Find source files while respecting all exclusion rules.
 # All directories in IGNORED_DIRS and .repodnaignore are pruned.
-# Usage: analysis_find -type f -iname '*.cs' -print
+# Usage: analysis_find -- -type f -iname '*.cs' -print
 analysis_find() {
-    find "$CODE_ROOT" \( \
-            -path '*/.git' -o -path '*/.git/*' -o \
-            -path "$OUTPUT_DIR" -o -path "$OUTPUT_DIR/*" -o \
-            -path "./$REPORT_NAME" -o -path "./$REPORT_NAME/*" -o \
-            \( $(_build_find_prune_predicates) \) \
-        \) -prune -o "$@"
+    local prune=()
+
+    build_find_prune_predicates prune
+
+    find "$CODE_ROOT" \
+        \( "${prune[@]}" \) \
+        -prune \
+        -o \
+        "$@"
 }
 
 # Search recursively while respecting all exclusion rules.
@@ -121,7 +121,7 @@ analysis_grep() {
     # Exclude each directory from .repodnaignore
     while IFS= read -r dir || [[ -n "$dir" ]]; do
         exclude_dirs+=(--exclude-dir="$dir")
-    done < <(_load_repodnaignore_directories)
+    done < <(_load_repodna_ignore_directories)
 
     # Execute grep with all exclusions applied
     grep -R "${exclude_dirs[@]}" "${grep_args[@]}" "$CODE_ROOT" 2>/dev/null || true
