@@ -9,6 +9,7 @@ A quick reference for Bash syntax and commands used throughout the **RepoDNA** c
 # Table of Contents
 
 - [Variables](#variables)
+- [Parameter Expansion](#parameter-expansion)
 - [Conditions](#conditions)
 - [Files and Directories](#files-and-directories)
 - [Strings](#strings)
@@ -39,6 +40,192 @@ Equivalent (C#):
 string name = "RepoDNA";
 Console.WriteLine(name);
 ```
+
+---
+
+# Parameter Expansion
+
+Parameter Expansion is one of Bash's most powerful features. It allows manipulating variables without calling external tools such as `sed`, `awk`, or `cut`, making scripts faster and more idiomatic.
+
+General syntax:
+
+```bash
+${variable<operator>pattern}
+```
+
+---
+
+## Common Operations
+
+| Bash | Meaning | C# Equivalent |
+|------|---------|---------------|
+| `${var}` | Variable value | `variable` |
+| `${#var}` | String length | `variable.Length` |
+| `${var%pattern}` | Remove the shortest matching suffix | `TrimEnd()` / `Substring()` |
+| `${var%%pattern}` | Remove the longest matching suffix | Regex / `LastIndexOf()` |
+| `${var#pattern}` | Remove the shortest matching prefix | `TrimStart()` / `Substring()` |
+| `${var##pattern}` | Remove the longest matching prefix | Regex / `LastIndexOf()` |
+| `${var/p1/p2}` | Replace the first occurrence | `Replace(..., ..., 1)` *(conceptually)* |
+| `${var//p1/p2}` | Replace all occurrences | `Replace()` |
+| `${var:-default}` | Use a default value if empty or unset | `string.IsNullOrEmpty(var) ? default : var` |
+
+---
+
+## Examples
+
+### Remove a trailing slash
+
+```bash
+pattern="Assets/"
+
+echo "${pattern%/}"
+```
+
+Output:
+
+```text
+Assets
+```
+
+Equivalent:
+
+```csharp
+pattern = pattern.TrimEnd('/');
+```
+
+---
+
+### Remove a file extension
+
+```bash
+file="Player.cs"
+
+echo "${file%.cs}"
+```
+
+Output:
+
+```text
+Player
+```
+
+---
+
+### Remove everything after the last slash
+
+```bash
+path="Assets/Scripts/Player.cs"
+
+echo "${path##*/}"
+```
+
+Output:
+
+```text
+Player.cs
+```
+
+Equivalent:
+
+```csharp
+Path.GetFileName(path);
+```
+
+---
+
+### Get the directory name
+
+```bash
+path="Assets/Scripts/Player.cs"
+
+echo "${path%/*}"
+```
+
+Output:
+
+```text
+Assets/Scripts
+```
+
+Equivalent:
+
+```csharp
+Path.GetDirectoryName(path);
+```
+
+---
+
+### Replace all spaces
+
+```bash
+text="Hello World"
+
+echo "${text// /_}"
+```
+
+Output:
+
+```text
+Hello_World
+```
+
+Equivalent:
+
+```csharp
+text.Replace(" ", "_");
+```
+
+---
+
+### Get string length
+
+```bash
+text="RepoDNA"
+
+echo "${#text}"
+```
+
+Output:
+
+```text
+7
+```
+
+Equivalent:
+
+```csharp
+text.Length;
+```
+
+---
+
+## RepoDNA Example
+
+Normalize directory patterns by removing a trailing slash:
+
+```bash
+if [[ "$pattern" == */ ]]; then
+    pattern="${pattern%/}"
+fi
+```
+
+Equivalent:
+
+```csharp
+if (pattern.EndsWith("/"))
+{
+    pattern = pattern.TrimEnd('/');
+}
+```
+
+---
+
+## Notes
+
+- Parameter Expansion is performed by **Bash itself**.
+- No external processes are started.
+- It is generally faster than invoking tools like `sed`, `cut`, or `awk` for simple string manipulation.
+- Pattern matching uses **shell glob patterns**, not regular expressions.
 
 ---
 
