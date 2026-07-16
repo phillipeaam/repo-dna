@@ -5,7 +5,7 @@
 
 # Ensure the repository root is available.
 [[ -n "${REPO_ROOT:-}" ]] || {
-    printf 'REPO_ROOT is not defined.\n' >&2
+    printf '%s\n' 'REPO_ROOT is not defined.' >&2
     return 1 2>/dev/null || exit 1
 }
 
