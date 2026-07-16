@@ -11,7 +11,6 @@
 
 # Load required string utilities.
 if [[ -f "${REPO_ROOT}/utils/strings.sh" ]]; then
-    # shellcheck source=/dev/null
     source "${REPO_ROOT}/utils/strings.sh"
 else
     printf 'Missing utility: %s\n' \
