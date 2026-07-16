@@ -18,8 +18,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-detection.sh
 source "$SCRIPT_DIR/lib/project-detection.sh"
 
-# Define common Unity-generated directories that must be ignored.
-IGNORED_DIRS=(Library Logs Temp Obj Build Builds UserSettings MemoryCaptures .git)
+# Load directory exclusion management.
+# shellcheck source=lib/exclusions.sh
+source "$SCRIPT_DIR/lib/exclusions.sh"
 
 # Define common third-party folder names.
 THIRD_PARTY_REGEX='(^|/)(Plugins|ThirdParty|Third-Party|External|Vendor|SDK|AssetStore|AssetsStore|Packages)(/|$)'
@@ -147,94 +148,8 @@ count_current_files() {
     # Read the file-name pattern.
     local pattern="$1"
 
-    # Find matching files under the detected source root.
-    analysis_find -type f -iname "$pattern" -print 2>/dev/null |
-
-        # Count the results.
-        wc -l |
-
-        # Remove whitespace from the count.
-        trim_count
-}
-
-# Helper function: build arguments for excluding ignored directories in find.
-build_find_prune_args() {
-    local first=true
-
-    # Add each ignored directory by name.
-    for dir in "${IGNORED_DIRS[@]}"; do
-        if [[ "$first" == true ]]; then
-            printf '-name %s' "$dir"
-            first=false
-        else
-            printf ' -o -name %s' "$dir"
-        fi
-    done
-
-    # Load and add directories from .repodnaignore.
-    if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
-        while IFS= read -r pattern; do
-            # Skip empty lines and comments.
-            [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-
-            # Trim whitespace.
-            pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            [[ -z "$pattern" ]] && continue
-
-            # Only process directory patterns (ending with /)
-            if [[ "$pattern" == */ ]]; then
-                dir="${pattern%/}"
-                printf ' -o -name %s' "$dir"
-            fi
-        done < "$REPO_ROOT/.repodnaignore"
-    fi
-}
-
-# Find source files without walking into ignored directories or this run's report.
-analysis_find() {
-    find "$CODE_ROOT" \( \
-            -path '*/.git' -o -path '*/.git/*' -o \
-            -path "$OUTPUT_DIR" -o -path "$OUTPUT_DIR/*" -o \
-            -path "./$REPORT_NAME" -o -path "./$REPORT_NAME/*" -o \
-            \( $(build_find_prune_args) \) \
-        \) -prune -o "$@"
-}
-
-# Search source files using grep with proper exclusion handling.
-analysis_grep() {
-    local -a grep_args=()
-    local -a exclude_dirs=()
-
-    # Collect grep arguments and exclude directories.
-    for arg in "$@"; do
-        grep_args+=("$arg")
-    done
-
-    # Exclude ignored directories.
-    for dir in "${IGNORED_DIRS[@]}"; do
-        exclude_dirs+=(--exclude-dir="$dir")
-    done
-
-    # Exclude directories from .repodnaignore.
-    if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
-        while IFS= read -r pattern; do
-            # Skip empty lines and comments.
-            [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-
-            # Trim whitespace.
-            pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            [[ -z "$pattern" ]] && continue
-
-            # Only process directory patterns (ending with /)
-            if [[ "$pattern" == */ ]]; then
-                dir="${pattern%/}"
-                exclude_dirs+=(--exclude-dir="$dir")
-            fi
-        done < "$REPO_ROOT/.repodnaignore"
-    fi
-
-    # Execute grep with exclusions.
-    grep -R "${exclude_dirs[@]}" "${grep_args[@]}" "$CODE_ROOT" 2>/dev/null || true
+    # Find matching files using the exclusion system.
+    count_files_matching "$pattern"
 }
 
 # Count unique historical files matching a lower-case regular expression.
@@ -454,33 +369,9 @@ cp Packages/packages-lock.json "$PROJECT_DIR/packages/" 2>/dev/null || true
 echo "[2/12] Exporting project structure and asset inventories..."
 
 # Export a project tree without requiring the tree command, respecting exclusions.
-# Build prune conditions for find.
-FIND_PRUNE_CONDITIONS=()
-for dir in "${IGNORED_DIRS[@]}"; do
-    FIND_PRUNE_CONDITIONS+=(-name "$dir" -o)
-done
-# Remove trailing -o if any.
-if [[ ${#FIND_PRUNE_CONDITIONS[@]} -gt 0 ]]; then
-    FIND_PRUNE_CONDITIONS=("${FIND_PRUNE_CONDITIONS[@]:0:$((${#FIND_PRUNE_CONDITIONS[@]} - 1))}")
-fi
-# Add .repodnaignore directories.
-if [[ -f "$REPO_ROOT/.repodnaignore" ]]; then
-    while IFS= read -r pattern; do
-        [[ -z "$pattern" ]] || [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
-        pattern="$(printf '%s' "$pattern" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-        [[ -z "$pattern" ]] && continue
-        if [[ "$pattern" == */ ]]; then
-            dir="${pattern%/}"
-            FIND_PRUNE_CONDITIONS+=(-o -name "$dir")
-        fi
-    done < "$REPO_ROOT/.repodnaignore"
-fi
-
 find . \
     -type d \( \
-        -path '*/.git' -o \
-        -path '*/.git/*' -o \
-        "${FIND_PRUNE_CONDITIONS[@]}" \
+        $(build_find_path_predicates) \
     \) -prune -o \
     -type f -print 2>/dev/null |
     sed 's|^\./||' |
