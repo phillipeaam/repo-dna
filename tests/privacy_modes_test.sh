@@ -33,6 +33,10 @@ create_fixture "$default_fixture"
 (cd "$default_fixture" && bash ./dna-analysis.sh >/dev/null)
 default_report="$(find_report "$default_fixture")"
 [[ -n "$default_report" ]]
+[[ -f "$default_report/security/potential_secrets.txt" ]]
+grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
+grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
+! grep -q 'test-secret-value' "$default_report/security/potential_secrets.txt"
 ! find "$default_report/source" -type f -name '*.cs' -print -quit 2>/dev/null | grep -q .
 printf '%s\n' 'default mode passed'
 

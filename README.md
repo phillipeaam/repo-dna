@@ -131,6 +131,13 @@ scans the generated package for likely secrets; strict mode additionally checks
 for residual e-mails, URLs, and absolute repository paths. A finding blocks
 archive creation and is listed by path in `summary/03_privacy_scan.txt`.
 
+Every run also creates `security/potential_secrets.txt`. This report checks
+analyzable files, including relevant untracked files, for possible API keys, Bearer tokens, private keys,
+connection strings, Firebase and AWS credentials, authenticated Git remotes,
+passwords, webhook URLs, private package registries, and internal domains or
+private network addresses. Findings contain only the relative path, line number,
+category, and `Value: [REDACTED]`; matched values are never written to the report.
+
 ---
 
 # 🛣 Roadmap

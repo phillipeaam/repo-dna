@@ -274,6 +274,10 @@ source "$SCRIPT_DIR/lib/exclusions.sh"
 # shellcheck source=lib/ownership.sh
 source "$SCRIPT_DIR/lib/ownership.sh"
 
+# Load sensitive-data detection without exposing matched values.
+# shellcheck source=lib/security.sh
+source "$SCRIPT_DIR/lib/security.sh"
+
 # Resolve the repository name.
 REPO_NAME="$(basename "$REPO_ROOT")"
 
@@ -313,6 +317,9 @@ SOURCE_DIR="$OUTPUT_DIR/source"
 
 # Define the structured data folder.
 DATA_DIR="$OUTPUT_DIR/data"
+
+# Define the redacted security findings folder.
+SECURITY_DIR="$OUTPUT_DIR/security"
 
 # Define the optional graph folder.
 GRAPHS_DIR="$OUTPUT_DIR/graphs"
@@ -375,6 +382,7 @@ mkdir -p \
     "$PROJECT_DIR/packages" \
     "$CONTRIBUTION_DIR" \
     "$DATA_DIR" \
+    "$SECURITY_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
 
@@ -1424,6 +1432,7 @@ collaboration evidence, and a Notion career-journaling guide.
 - \`contribution/\`: $HISTORY_DESCRIPTION
 $SOURCE_FOLDER_DESCRIPTION
 - \`data/\`: JSON and CSV exports
+- \`security/\`: redacted potential-secret findings
 - \`graphs/\`: optional charts
 
 ## Start here
@@ -1551,6 +1560,9 @@ echo "[11/12] Scanning privacy and creating the archive..."
 
 PRIVACY_SCAN_FAILED=false
 sanitize_strict_reports
+POTENTIAL_SECRET_COUNT=0
+write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
+    die "Could not create the potential secrets report."
 run_privacy_scan
 
 if [[ "$PRIVACY_SCAN_FAILED" == true ]]; then
@@ -1601,6 +1613,8 @@ else
     echo "The report folder was generated and can be compressed manually."
 fi
 fi
+
+echo "Potential secret findings: $POTENTIAL_SECRET_COUNT"
 
 # Print the twelfth progress step.
 echo "[12/12] Finalizing..."
