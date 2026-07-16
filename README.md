@@ -7,7 +7,7 @@
 
 > **Understand the architecture, evolution and engineering behind any repository.**
 
-![banner.png](banner.png)
+![banner.png](assets/images/banner.png)
 
 RepoDNA is an open-source repository analysis toolkit that combines **source code inspection**, **Git history**, **architecture discovery**, and **technology detection** to generate comprehensive engineering reports.
 
