@@ -229,6 +229,121 @@ if (pattern.EndsWith("/"))
 
 ---
 
+## Default Values
+
+Parameter Expansion can also provide fallback values when variables are **unset** or **empty**.
+
+### Use a default value
+
+```bash
+echo "${name:-Guest}"
+```
+
+If `name` is unset or empty:
+
+```text
+Guest
+```
+
+Equivalent:
+
+```csharp
+Console.WriteLine(string.IsNullOrEmpty(name) ? "Guest" : name);
+```
+
+---
+
+### Example
+
+```bash
+username=""
+echo "${username:-anonymous}"
+```
+
+Output:
+
+```text
+anonymous
+```
+
+---
+
+### Provide a default path
+
+```bash
+OUTPUT_DIR="${OUTPUT_DIR:-./output}"
+```
+
+Equivalent:
+
+```csharp
+OUTPUT_DIR = string.IsNullOrEmpty(OUTPUT_DIR)
+    ? "./output"
+    : OUTPUT_DIR;
+```
+
+---
+
+## Related Operators
+
+| Bash | Meaning | Notes |
+|------|---------|-------|
+| `${var:-default}` | Use `default` if variable is unset **or** empty | Does **not** modify the variable |
+| `${var-default}` | Use `default` only if variable is unset | Empty string is considered a valid value |
+| `${var:=default}` | Assign `default` if variable is unset or empty | Updates the variable |
+| `${var=default}` | Assign `default` only if variable is unset | Empty string is preserved |
+| `${var:?message}` | Abort with an error if variable is unset or empty | Useful for required configuration |
+| `${var:+value}` | Use `value` only if variable is set and not empty | Commonly used for optional arguments |
+
+---
+
+### Assign a default value
+
+```bash
+LOG_LEVEL="${LOG_LEVEL:=INFO}"
+```
+
+If `LOG_LEVEL` was empty or unset:
+
+```text
+INFO
+```
+
+After expansion:
+
+```bash
+echo "$LOG_LEVEL"
+```
+
+Output:
+
+```text
+INFO
+```
+
+---
+
+### Require a variable
+
+```bash
+: "${REPO_ROOT:?REPO_ROOT must be defined}"
+```
+
+If `REPO_ROOT` is missing:
+
+```text
+bash: REPO_ROOT: REPO_ROOT must be defined
+```
+
+Equivalent:
+
+```csharp
+if (string.IsNullOrEmpty(REPO_ROOT))
+    throw new InvalidOperationException("REPO_ROOT must be defined");
+```
+
+---
+
 # Conditions
 
 ```bash
