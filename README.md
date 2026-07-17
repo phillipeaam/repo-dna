@@ -98,11 +98,32 @@ Without it, these languages safely use `heuristic-fallback` and the report
 identifies the unavailable parser. Heuristic results are never described as AST
 findings.
 
+## Specialized framework adapters
+
+Framework analysis runs above the language parsers and correlates declared
+dependencies, imports, parsed symbols, calls, and conventional repository paths.
+The first supported adapters are:
+
+- Unity;
+- ASP.NET Core;
+- Spring;
+- Android;
+- Flutter;
+- React;
+- Next.js.
+
+Each finding includes its framework family, evidence score, confidence,
+languages, detected concepts, supporting files, and individual evidence rows.
+A framework name is reported only after reaching the minimum evidence threshold;
+medium-confidence findings remain explicitly reviewable. Framework detection
+does not claim that runtime configuration is valid or that a feature is complete.
+
 ---
 ## 📖 Documentation
 
 - [Bash Cheat Sheet](docs/bash-cheatsheet.md)
 - [Architecture](docs/architecture.md)
+- [Framework analysis methodology](docs/framework-analysis.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)

@@ -257,14 +257,25 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for item in analysis.get("architecture", {}).get("parser_coverage", [])
     ]
     parser_table = data_table(["Language", "Mode", "Parser", "AST files", "Fallback files", "Parse errors"], parser_rows, {3, 4, 5}) if parser_rows else empty
+    framework_analysis = analysis.get("frameworks", {})
+    framework_rows = [
+        [item["name"], item["family"], item["confidence"], item["score"], ", ".join(item.get("languages", [])), ", ".join(item.get("concepts", []))]
+        for item in framework_analysis.get("detected", [])
+    ]
+    framework_table = data_table(
+        ["Framework", "Family", "Confidence", "Evidence score", "Languages", "Detected concepts"], framework_rows, {3}
+    ) if framework_rows else '<p class="empty">No supported framework reached the evidence threshold.</p>'
     architecture_body = table(labeled(architecture, architecture_keys)) if architecture_keys else (
         '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
     )
     architecture_body += "<h3>Multi-language design-pattern signals</h3>" + pattern_table
     architecture_body += "<h3>Parser coverage</h3>" + parser_table
+    architecture_body += "<h3>Specialized framework adapters</h3>" + framework_table
+    architecture_body += '<p class="note">Framework confidence combines dependency manifests, imports, parsed symbols, calls, and conventional paths. It does not prove runtime configuration.</p>'
     systems_body = table(labeled(systems, system_keys)) if system_keys else ""
     systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
+    systems_body += "<h3>Framework concepts</h3>" + framework_table
     hotspot_explanation = '<p class="note">Composite hotspots rank files that may deserve attention by combining change frequency, code churn, current size, number of authors, and recency. A higher score suggests relevance or maintenance risk; it does not prove poor code quality.</p>'
 
     quality = analysis.get("quality", {})
@@ -338,6 +349,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         f"{architecture.get('architecture_signals', 0)} pattern signals and {architecture.get('interfaces', 0)} interfaces"
         if profile["csharp"] else f"{len(generic.get('possible_modules', []))} module candidates"
     )
+    if framework_analysis.get("count", 0):
+        architecture_evidence += f"; {framework_analysis['count']} specialized framework adapters matched"
     system_evidence = (
         f"{systems.get('likely_system_files', 0)} likely system files"
         if profile["csharp"] else f"{len(system_rows)} systems inferred from Git paths"

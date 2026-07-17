@@ -335,6 +335,9 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
         system["name"] = f"Module-{index}"
         system["path"] = f"Module-{index}"
         system["dependency_manifests"] = []
+    for framework in analysis.get("frameworks", {}).get("detected", []):
+        framework["evidence"] = []
+        framework["files"] = []
     analysis["quality"]["coverage"]["evidence_files"] = []
     analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
     analysis["quality"]["licenses"]["license_files"] = []

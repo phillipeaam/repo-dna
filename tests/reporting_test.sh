@@ -69,6 +69,12 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "complexity": {"method": "estimated", "files_analyzed": 12, "average": 4.5, "maximum": 21, "high_complexity_files": [], "high_complexity_functions": []}
       },
       "systems": [{"name": "Data/Persistence", "confidence": "high", "file_count": 6, "symbol_count": 8, "import_references": 12, "languages": {"C#": 6}}],
+      "frameworks": {
+        "count": 1,
+        "method": "weighted evidence",
+        "detected": [{"name": "ASP.NET Core", "family": "web framework", "confidence": "high", "score": 11, "languages": ["C#"], "concepts": ["HTTP controllers", "HTTP pipeline"], "evidence": [], "files": []}],
+        "limitations": []
+      },
       "quality": {
         "coverage": {"status": "not_detected", "line_coverage_percent": null},
         "vulnerabilities": {"status": "not_scanned"},
@@ -206,6 +212,10 @@ grep -q 'does not necessarily represent unique' "$TEST_ROOT/report/technologies.
 grep -q 'Data/Persistence' "$TEST_ROOT/report/systems.html"
 grep -q 'Parser coverage' "$TEST_ROOT/report/architecture.html"
 grep -q 'heuristic-fallback' "$TEST_ROOT/report/architecture.html"
+grep -q 'Specialized framework adapters' "$TEST_ROOT/report/architecture.html"
+grep -q 'ASP.NET Core' "$TEST_ROOT/report/architecture.html"
+grep -q 'Framework concepts' "$TEST_ROOT/report/systems.html"
+grep -q 'specialized framework adapters matched' "$TEST_ROOT/report/executive-summary.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"

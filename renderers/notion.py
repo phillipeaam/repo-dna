@@ -28,6 +28,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     systems = data["systems"]
     collaboration = data["collaboration"]
     generic = data.get("generic_analysis", {})
+    framework_findings = generic.get("analysis", {}).get("frameworks", {}).get("detected", [])
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -56,6 +57,12 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         technology_facts.append(fact(
             f"{language['name']} appears in {language['files']} files with approximately {language['lines']} lines.",
             "report/data/report.json#/generic_analysis/languages",
+        ))
+    for framework in framework_findings:
+        technology_facts.append(fact(
+            f"{framework['name']} framework evidence was detected with {framework['confidence']} confidence.",
+            "report/data/report.json#/generic_analysis/analysis/frameworks",
+            framework["confidence"],
         ))
 
     major_systems: list[dict[str, Any]] = []

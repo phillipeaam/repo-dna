@@ -50,6 +50,13 @@ with an explicit fallback status. Future Tree-sitter adapters must extend the
 registry and language specification rather than add parser-specific fields
 directly to `generic.py`.
 
+Framework analysis is isolated under `collectors/frameworks/`. Adapters consume
+only structured collector facts—dependencies, imports, symbols, calls, languages,
+and paths—and return weighted evidence through one shared contract. They do not
+read report files or add framework conditions to the generic collector. The HTML
+renderer presents detected frameworks in Architecture and their concepts in
+Systems; Notion evidence records them as repository technology facts.
+
 `renderers/portfolio.py` creates an approval-gated portfolio draft. Repository
 facts remain unapproved unless their claim IDs are explicitly listed in a
 portfolio confirmation profile. Personal profiles are not accepted in strict
