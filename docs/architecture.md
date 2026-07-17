@@ -43,7 +43,7 @@ health model. It does not write presentation files.
 
 Language parsing is isolated under `collectors/languages/`. The registry selects
 the strongest available analyzer and publishes parser coverage. Python uses the
-standard-library AST. JavaScript, TypeScript, and C# use language-specific
+standard-library AST. JavaScript, TypeScript, C#, Java, Kotlin, Dart, Go, and Rust use language-specific
 Tree-sitter grammars through the shared `SourceAnalysis` contract. Missing
 optional grammars and syntactically invalid files retain the heuristic analyzer
 with an explicit fallback status. Future Tree-sitter adapters must extend the

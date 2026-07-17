@@ -43,6 +43,11 @@ tree_sitter_samples = {
     "JavaScript": ('import api from "./api"; class UserRepository { find(id) { if (id) return api.get(id); } }', "./api", "UserRepository.find", "api.get"),
     "TypeScript": ('import { Client } from "./client"; interface Store { get(id: string): string; } class StoreService { load(id: string) { if (id) return Client.fetch(id); return null; } }', "./client", "StoreService.load", "Client.fetch"),
     "C#": ('using System.Net.Http; class UserRepository { int Get(int id) { if (id > 0) return Create(id); return 0; } }', "System.Net.Http", "UserRepository.Get", "Create"),
+    "Java": ('import java.util.List; interface Store { String get(int id); } class UserRepository implements Store { String get(int id) { if (id > 0) return load(id); return null; } }', "java.util.List", "UserRepository.get", "load"),
+    "Kotlin": ('import kotlinx.coroutines.flow.Flow\ninterface Store { fun get(id: Int): String }\nclass UserRepository: Store { override fun get(id: Int): String { if (id > 0) return load(id); return "" } }\n', "kotlinx.coroutines.flow.Flow", "UserRepository.get", "load"),
+    "Dart": ("import 'package:http/http.dart'; abstract class Store { String get(int id); } class UserRepository implements Store { String get(int id) { if (id > 0) return load(id); return ''; } }", "package:http/http.dart", "UserRepository.get", "load"),
+    "Go": ('package data\nimport "net/http"\ntype Store interface { Get(id int) string }\ntype UserRepository struct {}\nfunc (r *UserRepository) Get(id int) string { if id > 0 { return load(id) }; return "" }', "net/http", "UserRepository.Get", "load"),
+    "Rust": ('use std::collections::HashMap; trait Store { fn get(&self, id: i32) -> String; } struct UserRepository {} impl Store for UserRepository { fn get(&self, id: i32) -> String { if id > 0 { return load(id); } String::new() } }', "std::collections::HashMap", "UserRepository.get", "load"),
 }
 for language, (sample, imported, function, target) in tree_sitter_samples.items():
     parsed = analyze_source(language, sample)
@@ -55,6 +60,7 @@ for language, (sample, imported, function, target) in tree_sitter_samples.items(
     assert any(item["name"] == function for item in parsed["functions"])
     assert any(item["target"] == target for item in parsed["calls"])
     assert any(item["estimated_cyclomatic_complexity"] >= 2 for item in parsed["functions"])
+    assert any(item["parameters"] >= 1 for item in parsed["functions"])
 PY
 
 printf '%s\n' 'AST analysis tests passed'

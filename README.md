@@ -78,7 +78,7 @@ Repository
 
 RepoDNA now has a language-analyzer contract under `collectors/languages/`.
 Python source is parsed with the standard-library AST. JavaScript, TypeScript,
-and C# use optional Tree-sitter grammar adapters. These analyzers produce
+C#, Java, Kotlin, Dart, Go, and Rust use optional Tree-sitter grammar adapters. These analyzers produce
 structured classes, functions, qualified methods, parameters, imports, calls,
 per-function complexity, and pattern evidence.
 
@@ -94,10 +94,9 @@ Install the optional grammar bundle with:
 python -m pip install -r requirements-ast.txt
 ```
 
-Without it, JavaScript, TypeScript, and C# safely use `heuristic-fallback` and
-the report identifies the unavailable parser. Java, Kotlin, Dart, Go, and Rust
-remain the next Tree-sitter priorities; heuristic results are never described
-as AST findings.
+Without it, these languages safely use `heuristic-fallback` and the report
+identifies the unavailable parser. Heuristic results are never described as AST
+findings.
 
 ---
 ## 📖 Documentation
@@ -168,7 +167,8 @@ RepoDNA requires:
 - Bash (Git Bash on Windows);
 - Python 3.11 or newer for generic collection and HTML/Notion report rendering;
 - `matplotlib` for commit-history charts.
-- the packages in `requirements-ast.txt` for JavaScript, TypeScript, and C#
+- the packages in `requirements-ast.txt` for JavaScript, TypeScript, C#, Java,
+  Kotlin, Dart, Go, and Rust
   syntax-tree analysis (optional; heuristics remain available without them).
 
 Check the installation with:
@@ -420,8 +420,7 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 - [x] Stack-neutral language, dependency and repository inventory
 - [x] Git contribution, churn, hotspot and collaboration analysis
 - [x] Structured JSON and HTML report generation
-- [x] AST analysis for Python, JavaScript, TypeScript, and C#
-- [ ] Tree-sitter architecture analysis for Java, Kotlin, Dart, Go, and Rust
+- [x] AST analysis for Python, JavaScript, TypeScript, C#, Java, Kotlin, Dart, Go, and Rust
 
 ### Project detection
 
