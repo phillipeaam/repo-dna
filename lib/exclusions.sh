@@ -20,7 +20,7 @@ else
 fi
 
 # Define directories ignored in every analysis.
-declare -ar IGNORED_DIRS=(
+declare -gar IGNORED_DIRS=(
     Library
     Logs
     Temp

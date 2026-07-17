@@ -2,11 +2,11 @@
 
 # Evidence-based source ownership classification.
 
-declare -a OWNERSHIP_SUBMODULE_ROOTS=()
-declare -a OWNERSHIP_ASMDEF_ROOTS=()
-declare -a OWNERSHIP_DEPENDENCY_ROOTS=()
-declare -a OWNERSHIP_IGNORED_ROOTS=()
-declare -A OWNERSHIP_TRACKED_PATHS=()
+declare -ga OWNERSHIP_SUBMODULE_ROOTS=()
+declare -ga OWNERSHIP_ASMDEF_ROOTS=()
+declare -ga OWNERSHIP_DEPENDENCY_ROOTS=()
+declare -ga OWNERSHIP_IGNORED_ROOTS=()
+declare -gA OWNERSHIP_TRACKED_PATHS=()
 
 ownership_normalize_path() {
     local path="${1#./}"

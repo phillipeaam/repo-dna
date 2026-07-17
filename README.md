@@ -220,6 +220,29 @@ HTML/Notion presentation in `renderers/`. Specialized analyzers execute only for
 matching project profiles, so generic repositories do not receive empty Unity
 inventories.
 
+The entrypoint is intentionally limited to 200 lines. Pipeline modules only
+declare functions when sourced; their filenames do not control execution order.
+`dna-analysis.sh` explicitly orchestrates those functions after loading:
+
+```text
+src/pipeline/
+├── architecture.sh
+├── charts.sh
+├── collaboration.sh
+├── context.sh
+├── git-history.sh
+├── guides.sh
+├── inventory.sh
+├── metadata.sh
+├── metrics.sh
+├── security-archive.sh
+├── source-policy.sh
+└── structured-reports.sh
+```
+
+`tests/architecture_test.sh` enforces the 200-line limit, verifies every sourced
+module exists, and checks its Bash syntax.
+
 Python 3 is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable
 runtime. `matplotlib` is required for the optional PNG charts; the HTML reports

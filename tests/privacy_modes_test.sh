@@ -15,7 +15,7 @@ trap cleanup EXIT
 create_fixture() {
     local fixture="$1"
 
-    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/collectors" "$fixture/src/core" "$fixture/src/reports" "$fixture/src/analyzers" "$fixture/src/code"
+    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/collectors" "$fixture/src/core" "$fixture/src/reports" "$fixture/src/analyzers" "$fixture/src/pipeline" "$fixture/src/code"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/lib/"*.sh "$fixture/lib/"
     cp "$SOURCE_ROOT/utils/"*.sh "$fixture/utils/"
@@ -24,6 +24,7 @@ create_fixture() {
     cp "$SOURCE_ROOT/src/core/"*.sh "$fixture/src/core/"
     cp "$SOURCE_ROOT/src/reports/"*.py "$fixture/src/reports/"
     cp "$SOURCE_ROOT/src/analyzers/"*.sh "$fixture/src/analyzers/"
+    cp "$SOURCE_ROOT/src/pipeline/"*.sh "$fixture/src/pipeline/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
     printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/code/Example.cs"
 
