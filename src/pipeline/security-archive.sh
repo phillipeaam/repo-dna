@@ -28,6 +28,9 @@ write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/notion.py" \
     "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
     die "Could not render the Notion evidence JSON."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/llm_evidence.py" \
+    "$REPORT_DATA_DIR/report.json" "$LLM_DIR/evidence.json" ||
+    die "Could not render the LLM evidence JSON."
 
 PORTFOLIO_ARGS=()
 [[ -z "$PORTFOLIO_PROFILE" ]] || PORTFOLIO_ARGS+=(--confirmations "$PORTFOLIO_PROFILE")

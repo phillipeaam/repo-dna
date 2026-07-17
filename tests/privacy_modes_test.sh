@@ -48,6 +48,8 @@ grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
 grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/executive-summary.html" ]]
 [[ -f "$default_report/notion/evidence.json" ]]
+[[ -f "$default_report/llm/evidence.json" ]]
+grep -q '"artifact_type": "repodna_llm_evidence"' "$default_report/llm/evidence.json"
 grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
 grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
 ! grep -q 'test-secret-value' "$default_report/security/potential_secrets.txt"
@@ -70,11 +72,14 @@ strict_report="$(find_report "$strict_fixture")"
 [[ -n "$strict_report" ]]
 [[ ! -d "$strict_report/source" ]]
 [[ ! -f "$strict_report/data/history_commits.csv" ]]
+[[ -f "$strict_report/llm/evidence.json" ]]
+grep -q '"mode": "strict"' "$strict_report/llm/evidence.json"
 grep -q 'Origin remote: \[redacted\]' "$strict_report/project/00_repository_information.txt"
 grep -q 'Result: passed' "$strict_report/summary/03_privacy_scan.txt"
 ! grep -RFiq 'private@example.test' "$strict_report"
 ! grep -RFiq 'https://example.test/private/repository.git' "$strict_report"
 ! grep -RFiq 'Confidential project setup' "$strict_report"
+! grep -Fqi 'private@example.test' "$strict_report/llm/evidence.json"
 printf '%s\n' 'strict mode passed'
 
 printf '%s\n' 'privacy mode tests passed'

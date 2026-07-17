@@ -28,7 +28,7 @@ One command creates a timestamped analysis package containing:
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - redacted potential-secret findings and a pre-archive privacy scan;
-- structured JSON for automation and Notion-oriented evidence;
+- structured JSON for automation, Notion, and provenance-aware LLM evidence;
 - optional charts and explicitly opted-in source exports.
 
 The default export does **not** copy full source code. Source inclusion requires
@@ -45,7 +45,7 @@ sensitive content from the shareable package.
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
 | Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
-| Reporting | Produces navigable HTML, canonical JSON, Git CSV data, Notion evidence, security reports, and optional PNG charts. |
+| Reporting | Produces navigable HTML, canonical JSON, Git CSV data, Notion evidence, an LLM-ready evidence package, security reports, and optional PNG charts. |
 
 ## Analysis flow
 
@@ -54,7 +54,7 @@ Repository
     -> project detector and analysis profile
     -> generic and specialized collectors
     -> canonical report/data/report.json
-    -> HTML and Notion renderers
+    -> HTML, Notion, portfolio, and LLM evidence renderers
     -> privacy scan
     -> ZIP/TAR archive when the scan passes
 ```
@@ -72,6 +72,7 @@ Repository
 | Collaboration | Contributors, co-authored commits, and files shared across authors. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
+| LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
 | Quality and compliance | Complexity plus imported coverage, test, linter, security-scanner, and license evidence. |
 | Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
@@ -132,6 +133,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Author and system activity ownership](docs/author-system-ownership.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
+- [LLM evidence package](docs/llm-evidence.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
@@ -377,6 +379,9 @@ Every page links to the other report sections and can be opened locally without
 a web server. Notion-ready structured evidence remains available at
 `notion/evidence.json`; it explicitly separates facts, supporting evidence,
 inferences, personal data, and claims that require confirmation.
+The consolidated `llm/evidence.json` adds a machine-readable usage contract,
+stable evidence IDs, JSON Pointer provenance, caveats, unknowns, and bounded
+lists suitable for an LLM context window.
 
 Reports use the detected analysis profile. Unity-only product metadata, scenes,
 prefabs, ScriptableObjects, MonoBehaviours, shaders, Addressables, and UI Toolkit

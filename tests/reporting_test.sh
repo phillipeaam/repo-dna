@@ -200,6 +200,24 @@ fi
 }
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
 "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
+"$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json"
+"$PYTHON" - "$TEST_ROOT/llm/evidence.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+items = data["evidence_items"]
+assert data["evidence_summary"]["items"] == len(items)
+assert sum(data["evidence_summary"]["by_kind"].values()) == len(items)
+assert all(item["evidence"] for item in items)
+assert all(row["source"] == "report/data/report.json" and row["pointer"].startswith("#/") for item in items for row in item["evidence"])
+candidate = next(item for item in items if item["kind"] == "candidate")
+assert candidate["confirmation_required"] is True
+assert candidate["id"] == "achievement-system-data-persistence"
+assert data["human_confirmation"]["achievement_status"] == "candidates_generated"
+assert "Reduce persistence branching" not in Path(sys.argv[1]).read_text(encoding="utf-8")
+PY
 "$PYTHON" "$SOURCE_ROOT/renderers/portfolio.py" "$TEST_ROOT/report.json" "$TEST_ROOT/portfolio/draft.json" "$TEST_ROOT/portfolio/index.html"
 cat > "$TEST_ROOT/confirmations.json" <<'JSON'
 {
@@ -321,5 +339,12 @@ grep -q 'href="technologies.html"' "$TEST_ROOT/report/architecture.html"
 grep -q '"classification_model"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
+grep -q '"artifact_type": "repodna_llm_evidence"' "$TEST_ROOT/llm/evidence.json"
+grep -q '"llm_contract"' "$TEST_ROOT/llm/evidence.json"
+grep -q '"kind": "inference"' "$TEST_ROOT/llm/evidence.json"
+grep -q '"kind": "candidate"' "$TEST_ROOT/llm/evidence.json"
+grep -q 'report/data/report.json' "$TEST_ROOT/llm/evidence.json"
+grep -q 'system-data-persistence' "$TEST_ROOT/llm/evidence.json"
+grep -q 'Never convert inference or candidate into fact' "$TEST_ROOT/llm/evidence.json"
 
 printf '%s\n' 'structured reporting tests passed'

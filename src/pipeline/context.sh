@@ -85,6 +85,9 @@ REPORT_DATA_DIR="$REPORT_DIR/data"
 # Define Notion-ready structured evidence.
 NOTION_DIR="$OUTPUT_DIR/notion"
 
+# Define the compact evidence package prepared for downstream LLMs.
+LLM_DIR="$OUTPUT_DIR/llm"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -152,6 +155,7 @@ mkdir -p \
     "$SECURITY_DIR" \
     "$REPORT_DATA_DIR" \
     "$NOTION_DIR" \
+    "$LLM_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

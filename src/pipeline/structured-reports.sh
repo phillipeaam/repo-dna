@@ -205,6 +205,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`report/\`: standardized HTML reports rendered from canonical JSON
 - \`report/index.html\`: navigation entry point for the HTML report set
 - \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
+- \`llm/evidence.json\`: compact, provenance-rich evidence prepared for LLM use
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 
@@ -212,7 +213,8 @@ $SOURCE_FOLDER_DESCRIPTION
 
 1. \`report/index.html\`
 2. \`notion/evidence.json\`
-3. \`report/data/report.json\`
+3. \`llm/evidence.json\`
+4. \`report/data/report.json\`
 
 ## Limitations
 
