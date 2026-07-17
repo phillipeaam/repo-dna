@@ -265,6 +265,36 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     framework_table = data_table(
         ["Framework", "Family", "Confidence", "Evidence score", "Languages", "Detected concepts"], framework_rows, {3}
     ) if framework_rows else '<p class="empty">No supported framework reached the evidence threshold.</p>'
+    graphs = analysis.get("graphs", {})
+    graph_summary = graphs.get("summary", {})
+    module_graph = graphs.get("module_graph", {})
+    dependency_graph = graphs.get("dependency_graph", {})
+    file_graph = graphs.get("file_graph", {})
+    module_rows = [
+        [item["id"], item.get("files", 0), item.get("fan_in", 0), item.get("fan_out", 0)]
+        for item in sorted(module_graph.get("nodes", []), key=lambda row: (-(row.get("fan_in", 0) + row.get("fan_out", 0)), row["id"]))[:50]
+    ]
+    module_edge_rows = [[item["source"], item["target"], item["references"]] for item in module_graph.get("edges", [])[:100]]
+    dependency_rows = [
+        [item["id"], "yes" if item.get("declared") else "no", item.get("import_references", 0), item.get("source_modules", 0), ", ".join(item.get("manifests", []))]
+        for item in sorted(dependency_graph.get("nodes", []), key=lambda row: (-row.get("import_references", 0), row["id"]))[:100]
+    ]
+    unresolved_rows = [[item["source"], item["import"]] for item in file_graph.get("unresolved", [])[:100]]
+    cycle_rows = [[index, " → ".join(cycle)] for index, cycle in enumerate(module_graph.get("cycles", []), 1)]
+    graphs_body = table([
+        ("Source files", graph_summary.get("files", 0)), ("Imports", graph_summary.get("imports", 0)),
+        ("Resolved internal edges", graph_summary.get("internal_edges", 0)),
+        ("External references", graph_summary.get("external_references", 0)),
+        ("Unresolved imports", graph_summary.get("unresolved_imports", 0)),
+        ("Directory modules", graph_summary.get("modules", 0)), ("Module edges", graph_summary.get("module_edges", 0)),
+        ("Dependency nodes", graph_summary.get("dependency_nodes", 0)), ("Module cycles", graph_summary.get("cycles", 0)),
+    ])
+    graphs_body += '<p class="note">Fan-in counts incoming module dependencies; fan-out counts outgoing dependencies. External packages and unresolved relative imports are kept separate from internal edges.</p>'
+    graphs_body += "<h3>Module coupling</h3>" + (data_table(["Module", "Files", "Fan-in", "Fan-out"], module_rows, {1, 2, 3}) if module_rows else empty)
+    graphs_body += "<h3>Resolved module edges</h3>" + (data_table(["Source module", "Target module", "References"], module_edge_rows, {2}) if module_edge_rows else empty)
+    graphs_body += "<h3>External dependency graph</h3>" + (data_table(["Dependency", "Declared", "Import references", "Source modules", "Manifests"], dependency_rows, {2, 3}) if dependency_rows else empty)
+    graphs_body += "<h3>Module cycles</h3>" + (data_table(["#", "Strongly connected modules"], cycle_rows, {0}) if cycle_rows else '<p class="empty">No module cycles were detected.</p>')
+    graphs_body += "<h3>Unresolved relative imports</h3>" + (data_table(["Source", "Import"], unresolved_rows) if unresolved_rows else '<p class="empty">No unresolved relative imports were detected.</p>')
     architecture_body = table(labeled(architecture, architecture_keys)) if architecture_keys else (
         '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
     )
@@ -367,6 +397,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ["Git contribution analysis", "Completed", f"{history.get('total_commits', 0)} commits; {generic.get('git', {}).get('churn', {}).get('total', 0)} lines of churn"],
         ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals"],
         ["Design pattern detection", design_status, design_evidence],
+        ["Module and dependency graphs", "Completed", f"{graph_summary.get('internal_edges', 0)} internal edges; {graph_summary.get('dependency_nodes', 0)} dependency nodes; {graph_summary.get('cycles', 0)} module cycles"],
         ["Engineering signals", "Completed", f"{generic.get('test_file_count', 0)} tests; {generic.get('ci_cd_file_count', 0)} CI/CD; {generic.get('docker_file_count', 0)} Docker; {generic.get('documentation_file_count', 0)} documentation files"],
         ["Report generation", "Completed", "HTML report suite, canonical JSON, Git CSV data, and optional charts"],
         ["Portfolio and documentation support", "Completed", f"{len(notion_facts)} repository facts and {len(notion['personal_confirmation_required'])} personal confirmation prompts"],
@@ -378,6 +409,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("architecture.html", "Architecture", architecture_body),
         ("technologies.html", "Technologies", technology_body),
         ("systems.html", "Systems", systems_body),
+        ("graphs.html", "Module and dependency graphs", graphs_body),
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),

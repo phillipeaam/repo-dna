@@ -124,6 +124,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Bash Cheat Sheet](docs/bash-cheatsheet.md)
 - [Architecture](docs/architecture.md)
 - [Framework analysis methodology](docs/framework-analysis.md)
+- [Module and dependency graphs](docs/dependency-graphs.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)
@@ -467,7 +468,7 @@ generic analyzer until a dedicated analyzer is implemented.
 
 ### Advanced Analysis
 
-- [ ] Dependency graph
+- [x] Resolved file, module, and external dependency graphs
 - [ ] Architecture diagrams
 - [ ] Complexity analysis
 - [x] Evidence-based code ownership classification

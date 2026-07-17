@@ -11,6 +11,7 @@ from typing import Any
 from languages import analyze_source
 from languages.registry import parser_status
 from frameworks import analyze_frameworks
+from graphs import build_graphs
 
 
 SOURCE_LANGUAGES = {
@@ -352,6 +353,7 @@ def build_narrative_facts(generic: dict[str, Any], code: dict[str, Any], systems
 def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     code = analyze_code(root, generic["_files"])
     frameworks = analyze_frameworks(generic["_files"], code, generic["dependencies"])
+    graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
     quality = {
         "code": code,
@@ -378,6 +380,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         },
         "systems": systems,
         "frameworks": frameworks,
+        "graphs": graphs,
         "quality": quality | {"code": {"complexity": code["complexity"]}},
         "health": health,
         "narrative_facts": build_narrative_facts(generic, code, systems),

@@ -57,6 +57,12 @@ read report files or add framework conditions to the generic collector. The HTML
 renderer presents detected frameworks in Architecture and their concepts in
 Systems; Notion evidence records them as repository technology facts.
 
+Import resolution and graph construction live under `collectors/graphs/`.
+Resolvers consume parsed imports and repository metadata, classify each edge as
+internal, external, or unresolved, and publish file, directory-module, and
+external-dependency graphs. Renderers consume those graphs without performing
+path resolution themselves.
+
 `renderers/portfolio.py` creates an approval-gated portfolio draft. Repository
 facts remain unapproved unless their claim IDs are explicitly listed in a
 portfolio confirmation profile. Personal profiles are not accepted in strict

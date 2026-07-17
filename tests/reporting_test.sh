@@ -75,6 +75,14 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "detected": [{"name": "ASP.NET Core", "family": "web framework", "confidence": "high", "score": 11, "languages": ["C#"], "concepts": ["HTTP controllers", "HTTP pipeline"], "evidence": [], "files": []}],
         "limitations": []
       },
+      "graphs": {
+        "summary": {"files": 12, "imports": 20, "internal_edges": 8, "external_references": 10, "unresolved_imports": 2, "modules": 3, "module_edges": 4, "dependency_nodes": 6, "cycles": 1},
+        "file_graph": {"nodes": [], "edges": [], "unresolved": [{"source": "src/App.cs", "import": "./Missing"}]},
+        "module_graph": {"nodes": [{"id": "src", "files": 10, "fan_in": 2, "fan_out": 3}], "edges": [{"source": "src", "target": "tests", "references": 2}], "cycles": [["src", "tests"]]},
+        "dependency_graph": {"nodes": [{"id": "Microsoft.AspNetCore.Mvc", "declared": true, "import_references": 4, "source_modules": 1, "manifests": ["App.csproj"]}], "edges": []},
+        "method": "language-aware",
+        "limitations": []
+      },
       "quality": {
         "coverage": {"status": "not_detected", "line_coverage_percent": null},
         "vulnerabilities": {"status": "not_scanned"},
@@ -179,6 +187,7 @@ for report_name in \
     architecture.html \
     technologies.html \
     systems.html \
+    graphs.html \
     contribution.html \
     collaboration.html \
     quality.html \
@@ -215,6 +224,11 @@ grep -q 'heuristic-fallback' "$TEST_ROOT/report/architecture.html"
 grep -q 'Specialized framework adapters' "$TEST_ROOT/report/architecture.html"
 grep -q 'ASP.NET Core' "$TEST_ROOT/report/architecture.html"
 grep -q 'Framework concepts' "$TEST_ROOT/report/systems.html"
+grep -q 'Module coupling' "$TEST_ROOT/report/graphs.html"
+grep -q 'Microsoft.AspNetCore.Mvc' "$TEST_ROOT/report/graphs.html"
+grep -q 'Strongly connected modules' "$TEST_ROOT/report/graphs.html"
+grep -q './Missing' "$TEST_ROOT/report/graphs.html"
+grep -q 'Module and dependency graphs' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'specialized framework adapters matched' "$TEST_ROOT/report/executive-summary.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"

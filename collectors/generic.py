@@ -338,6 +338,10 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     for framework in analysis.get("frameworks", {}).get("detected", []):
         framework["evidence"] = []
         framework["files"] = []
+    graphs = analysis.get("graphs", {})
+    graphs["file_graph"] = {"nodes": [], "edges": [], "unresolved": []}
+    graphs["module_graph"] = {"nodes": [], "edges": [], "cycles": []}
+    graphs["dependency_graph"] = {"nodes": [], "edges": []}
     analysis["quality"]["coverage"]["evidence_files"] = []
     analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
     analysis["quality"]["licenses"]["license_files"] = []
