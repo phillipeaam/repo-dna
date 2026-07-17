@@ -14,6 +14,7 @@ from frameworks import analyze_frameworks
 from graphs import build_graphs
 from architecture import analyze_architecture
 from quality import import_quality_results
+from author_system_ownership import analyze_author_system_ownership
 
 
 SOURCE_LANGUAGES = {
@@ -338,6 +339,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
+    author_system_ownership = analyze_author_system_ownership(systems, generic["git"])
     imported_quality = import_quality_results(root, generic["dependencies"])
     quality = {
         "code": code,
@@ -366,6 +368,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
             "complexity": code["complexity"],
         },
         "systems": systems,
+        "author_system_ownership": author_system_ownership,
         "frameworks": frameworks,
         "graphs": graphs,
         "quality": quality | {"code": {"complexity": code["complexity"]}},

@@ -30,6 +30,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     generic = data.get("generic_analysis", {})
     framework_findings = generic.get("analysis", {}).get("frameworks", {}).get("detected", [])
     quality_findings = generic.get("analysis", {}).get("quality", {})
+    activity_ownership = generic.get("analysis", {}).get("author_system_ownership", {})
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -151,6 +152,17 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
                 f"Git history lists {collaboration['contributors']} contributor entries.",
                 "report/data/report.json#/collaboration/contributors",
             )
+        ] + [
+            {
+                "kind": "inference",
+                "statement": f"{item['author']} ranks #{item['rank_in_system']} by historical file-touch activity in {item['system']}, with {item['commits']} commit touches across {item['files_touched']} files.",
+                "evidence": ["report/data/report.json#/generic_analysis/analysis/author_system_ownership"],
+                "confidence": item["confidence"],
+                "system_activity_share_percent": item.get("system_activity_share_percent"),
+                "author_focus_percent": item.get("author_focus_percent"),
+                "confirmation_required": True,
+            }
+            for item in activity_ownership.get("relationships", [])[:50]
         ],
         "personal_data": [],
         "claims_requiring_confirmation": [

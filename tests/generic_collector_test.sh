@@ -88,6 +88,11 @@ assert analysis["code"]["importing_file_count"] >= 1
 assert analysis["code"]["call_count"] >= 1
 assert any(item["name"] == "FeatureRepository.feature" for item in analysis["code"]["complexity"]["high_complexity_functions"]) is False
 assert any(item["name"] == "src" for item in analysis["systems"])
+activity_ownership = analysis["author_system_ownership"]
+assert activity_ownership["status"] == "assessed"
+assert activity_ownership["summary"]["authors"] == 2
+assert any(item["author"] == "Canonical Developer" and item["system"] == "src" for item in activity_ownership["relationships"])
+assert all(item["system_activity_share_percent"] is not None for item in activity_ownership["relationships"])
 assert analysis["quality"]["coverage"]["status"] == "not_found"
 assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
 assert analysis["health"]["version"] == "1.1"
@@ -106,6 +111,9 @@ assert data["git"]["author_filter"] == "Focused Developer"
 assert data["git"]["contributors"] == [{"name": "Focused Developer", "commits": 1}], data["git"]["contributors"]
 assert data["git"]["churn"]["total"] > 0
 assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "commits": 1}]
+ownership = data["analysis"]["author_system_ownership"]
+assert {item["author"] for item in ownership["relationships"]} == {"Focused Developer"}
+assert all(item["system_activity_share_percent"] is None for item in ownership["relationships"])
 PY
 
 python - "$TEST_ROOT/generic-analysis-strict.json" <<'PY'
@@ -122,6 +130,10 @@ assert data["git"]["branches"] == []
 assert data["git"]["tags"] == []
 assert all(item["path"].startswith("File-") for item in data["git"]["hotspots"])
 assert all(item["name"].startswith("Module-") for item in data["analysis"]["systems"])
+ownership = data["analysis"]["author_system_ownership"]
+assert all(item["author"].startswith("Contributor-") for item in ownership["relationships"])
+assert all(item["system"].startswith("Module-") for item in ownership["relationships"])
+assert "Canonical Developer" not in text
 PY
 
 printf '%s\n' 'generic collector tests passed'

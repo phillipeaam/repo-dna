@@ -73,6 +73,14 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "complexity": {"method": "estimated", "files_analyzed": 12, "average": 4.5, "maximum": 21, "high_complexity_files": [], "high_complexity_functions": []}
       },
       "systems": [{"name": "Data/Persistence", "confidence": "high", "file_count": 6, "symbol_count": 8, "import_references": 12, "languages": {"C#": 6}}],
+      "author_system_ownership": {
+        "status": "assessed",
+        "summary": {"authors": 2, "systems": 1, "relationships": 2, "high_confidence_relationships": 1},
+        "relationships": [
+          {"author": "Developer One", "system": "Data/Persistence", "rank_in_system": 1, "commits": 24, "churn": 1800, "files_touched": 8, "system_activity_share_percent": 80.0, "author_focus_percent": 60.0, "confidence": "high", "confidence_score": 100, "system_confidence": "high"},
+          {"author": "Developer Two", "system": "Data/Persistence", "rank_in_system": 2, "commits": 6, "churn": 300, "files_touched": 3, "system_activity_share_percent": 20.0, "author_focus_percent": 35.0, "confidence": "medium", "confidence_score": 63, "system_confidence": "high"}
+        ]
+      },
       "frameworks": {
         "count": 1,
         "method": "weighted evidence",
@@ -256,6 +264,9 @@ grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><
 grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'paginated contributor directory' "$TEST_ROOT/report/collaboration.html"
+grep -q 'Author and system activity ownership' "$TEST_ROOT/report/collaboration.html"
+grep -q '80.00%' "$TEST_ROOT/report/collaboration.html"
+grep -q 'historical activity ownership' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'Page 1 of 1' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"

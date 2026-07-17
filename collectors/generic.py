@@ -186,6 +186,8 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
     current_commit_files: set[str] = set()
     current_commit_systems: set[str] = set()
     file_authors: dict[str, set[str]] = defaultdict(set)
+    file_author_commits: dict[str, Counter[str]] = defaultdict(Counter)
+    file_author_churn: dict[str, Counter[str]] = defaultdict(Counter)
     last_changed: dict[str, str] = {}
     coauthors: Counter[tuple[str, str]] = Counter()
     system_months: dict[str, Counter[str]] = defaultdict(Counter)
@@ -210,6 +212,8 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
             added, removed, file_path = int(parts[0]), int(parts[1]), parts[2]
             current_commit_files.add(file_path)
             file_authors[file_path].add(current_author)
+            file_author_commits[file_path][current_author] += 1
+            file_author_churn[file_path][current_author] += added + removed
             last_changed.setdefault(file_path, current_date)
             current_commit_systems.add(system_for_path(file_path))
             churn[file_path] += added + removed
@@ -278,6 +282,13 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
             {"path": path, "commits": count} for path, count in change_commits.most_common(50)
         ],
         "hotspots": hotspots[:50],
+        "_file_author_activity": {
+            path: {
+                author: {"commits": commits, "churn": file_author_churn[path][author]}
+                for author, commits in authors.items()
+            }
+            for path, authors in file_author_commits.items()
+        },
     }
 
 
@@ -310,6 +321,17 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     anonymize_paths(git_data["hotspots"])
 
     analysis = result["analysis"]
+    system_name_map = {system["name"]: f"Module-{index}" for index, system in enumerate(analysis["systems"], 1)}
+    ownership = analysis.get("author_system_ownership", {})
+    author_name_map = {
+        name: f"Contributor-{index}"
+        for index, name in enumerate(sorted({item["author"] for item in ownership.get("relationships", [])}), 1)
+    }
+    for item in ownership.get("relationships", []):
+        item["author"] = author_name_map[item["author"]]
+        item["system"] = system_name_map.get(item["system"], "Module")
+    if ownership.get("author_filter"):
+        ownership["author_filter"] = "Selected contributor"
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",
@@ -465,6 +487,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     }
     result["analysis"] = analyze_repository(root, result)
     result.pop("_files")
+    result["git"].pop("_file_author_activity", None)
     if privacy_mode == "strict":
         sanitize_strict_result(result)
     return result

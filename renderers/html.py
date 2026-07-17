@@ -231,6 +231,21 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for system, periods in git_data.get("system_evolution", {}).items()
         for month, count in periods.items()
     ]) if git_data.get("system_evolution") else empty
+    ownership = analysis.get("author_system_ownership", {})
+    ownership_rows = [
+        [
+            item["system"], item["rank_in_system"], item["author"], item["commits"], item["churn"], item["files_touched"],
+            f"{item['system_activity_share_percent']:.2f}%" if item.get("system_activity_share_percent") is not None else "Unavailable in filtered scope",
+            f"{item.get('author_focus_percent', 0):.2f}%", item["confidence"], item["confidence_score"], item.get("system_confidence", "unknown"),
+        ]
+        for item in ownership.get("relationships", [])
+    ]
+    ownership_table = data_table(
+        ["System", "Rank", "Author", "Commits", "Churn", "Files", "Share of system activity", "Author focus", "Confidence", "Confidence score", "System confidence"],
+        ownership_rows,
+        {1, 3, 4, 5, 6, 7, 9},
+    ) if ownership_rows else '<p class="empty">Insufficient Git evidence to infer author-to-system activity.</p>'
+    ownership_note = '<p class="note">This is approximate historical activity ownership, not proof of responsibility or authorship. Share of system activity compares author-file commit touches inside a system. Author focus shows how much of that author\'s system activity occurred there. Confidence reflects evidence volume; it is not confidence in personal or business ownership.</p>'
     reference_table = table([
         ("Branches", git_data.get("branches_count", 0)),
         ("Tags", git_data.get("tags_count", 0)),
@@ -468,7 +483,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("systems.html", "Systems", systems_body),
         ("graphs.html", "Module and dependency graphs", graphs_body),
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
-        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
+        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),
         ("narrative.html", "Evidence-based narrative", narrative_body),
