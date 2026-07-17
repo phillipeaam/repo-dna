@@ -82,14 +82,15 @@ def canonical_author(name: str, email: str, names: dict[str, str], emails: dict[
 
 def system_for_path(path: str) -> str:
     lowered = path.casefold()
+    tokens = set(re.findall(r"[a-z0-9]+", lowered))
     groups = {
-        "Combat": ("combat", "attack", "weapon", "damage", "health", "ability"),
-        "UI": ("/ui/", "menu", "hud", "view", "screen", "widget"),
+        "Combat": ("combat", "attack", "weapon", "damage", "ability", "buff", "debuff"),
+        "UI": ("ui", "menu", "hud", "view", "screen", "widget"),
         "Networking": ("network", "multiplayer", "photon", "socket", "lobby", "api"),
         "Data/Persistence": ("data", "save", "persist", "database", "storage", "repository"),
         "Tests": ("test", "spec"),
     }
-    return next((group for group, terms in groups.items() if any(term in lowered for term in terms)), "Other")
+    return next((group for group, terms in groups.items() if any(term in tokens for term in terms)), "Other")
 
 
 def is_text(path: Path) -> bool:

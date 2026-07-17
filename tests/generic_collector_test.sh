@@ -19,6 +19,7 @@ printf '%s\n' 'def test_feature():' '    assert True' > "$TEST_ROOT/tests/test_f
 printf '%s\n' 'def save_data():' '    return True' > "$TEST_ROOT/src/data/save.py"
 printf '%s\n' 'class DataRepository:' '    pass' > "$TEST_ROOT/src/data/repository.py"
 printf '%s\n' '# Sample project' > "$TEST_ROOT/README.md"
+printf '%s\n' '# Repository health score' > "$TEST_ROOT/docs/health-score.md"
 printf '%s\n' 'requests==2.32.0' > "$TEST_ROOT/requirements.txt"
 printf '%s\n' 'FROM python:3.13-slim' > "$TEST_ROOT/Dockerfile"
 printf '%s\n' 'name: CI' 'on: [push]' > "$TEST_ROOT/.github/workflows/ci.yml"
@@ -64,6 +65,7 @@ assert data["git"]["hotspots"][0]["path"] == "src/main.py"
 assert {"current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
 assert data["git"]["coauthorship"][0]["commits"] == 1
 assert sum(data["git"]["system_evolution"]["Data/Persistence"].values()) == 1
+assert "Combat" not in data["git"]["system_evolution"]
 assert any(item["path"] == "src" for item in data["possible_modules"])
 analysis = data["analysis"]
 assert "Python" in analysis["architecture"]["languages_analyzed"]
