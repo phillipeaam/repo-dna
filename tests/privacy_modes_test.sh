@@ -49,6 +49,7 @@ grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/executive-summary.html" ]]
 [[ -f "$default_report/notion/evidence.json" ]]
 [[ -f "$default_report/llm/evidence.json" ]]
+[[ -f "$default_report/llm/schema.json" ]]
 grep -q '"artifact_type": "repodna_llm_evidence"' "$default_report/llm/evidence.json"
 grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
 grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
@@ -73,6 +74,7 @@ strict_report="$(find_report "$strict_fixture")"
 [[ ! -d "$strict_report/source" ]]
 [[ ! -f "$strict_report/data/history_commits.csv" ]]
 [[ -f "$strict_report/llm/evidence.json" ]]
+[[ -f "$strict_report/llm/schema.json" ]]
 grep -q '"mode": "strict"' "$strict_report/llm/evidence.json"
 grep -q 'Origin remote: \[redacted\]' "$strict_report/project/00_repository_information.txt"
 grep -q 'Result: passed' "$strict_report/summary/03_privacy_scan.txt"

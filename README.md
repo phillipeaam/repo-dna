@@ -200,7 +200,8 @@ RepoDNA requires:
 - Git;
 - Bash (Git Bash on Windows);
 - Python 3.11 or newer for generic collection and HTML/Notion report rendering;
-- `matplotlib` for commit-history charts.
+- the packages in `requirements-reporting.txt` for required JSON Schema
+  validation and optional commit-history charts;
 - the packages in `requirements-ast.txt` for JavaScript, TypeScript, C#, Java,
   Kotlin, Dart, Go, and Rust
   syntax-tree analysis (optional; heuristics remain available without them).
@@ -211,13 +212,14 @@ Check the installation with:
 git --version
 bash --version
 python --version
+python -c "import jsonschema; print(jsonschema.__version__)"
 python -c "import matplotlib; print(matplotlib.__version__)"
 ```
 
-Install the chart dependency with:
+Install reporting dependencies and optional AST adapters with:
 
 ```bash
-python -m pip install matplotlib
+python -m pip install -r requirements-reporting.txt
 python -m pip install -r requirements-ast.txt
 ```
 

@@ -200,15 +200,22 @@ fi
 }
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
 "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
-"$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json"
+"$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json" --schema "$SOURCE_ROOT/schemas/llm-evidence-1.0.0.schema.json"
 "$PYTHON" - "$TEST_ROOT/llm/evidence.json" <<'PY'
 import json
 import sys
+from copy import deepcopy
 from pathlib import Path
+from jsonschema import Draft202012Validator
 
 data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+schema = json.loads(Path("schemas/llm-evidence-1.0.0.schema.json").read_text(encoding="utf-8"))
+Draft202012Validator.check_schema(schema)
+validator = Draft202012Validator(schema)
+assert not list(validator.iter_errors(data))
 items = data["evidence_items"]
 assert data["evidence_summary"]["items"] == len(items)
+assert data["schema_version"] == "1.0.0" and data["$schema"] == "./schema.json"
 assert sum(data["evidence_summary"]["by_kind"].values()) == len(items)
 assert all(item["evidence"] for item in items)
 assert all(row["source"] == "report/data/report.json" and row["pointer"].startswith("#/") for item in items for row in item["evidence"])
@@ -217,6 +224,9 @@ assert candidate["confirmation_required"] is True
 assert candidate["id"] == "achievement-system-data-persistence"
 assert data["human_confirmation"]["achievement_status"] == "candidates_generated"
 assert "Reduce persistence branching" not in Path(sys.argv[1]).read_text(encoding="utf-8")
+invalid = deepcopy(data)
+invalid["schema_version"] = "9.9.9"
+assert any(list(error.absolute_path) == ["schema_version"] for error in validator.iter_errors(invalid))
 PY
 "$PYTHON" "$SOURCE_ROOT/renderers/portfolio.py" "$TEST_ROOT/report.json" "$TEST_ROOT/portfolio/draft.json" "$TEST_ROOT/portfolio/index.html"
 cat > "$TEST_ROOT/confirmations.json" <<'JSON'
@@ -340,6 +350,7 @@ grep -q '"classification_model"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"artifact_type": "repodna_llm_evidence"' "$TEST_ROOT/llm/evidence.json"
+grep -q '"schema_version": "1.0.0"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"llm_contract"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"kind": "inference"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"kind": "candidate"' "$TEST_ROOT/llm/evidence.json"

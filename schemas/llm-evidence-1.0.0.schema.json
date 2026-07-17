@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/llm-evidence-1.0.0.schema.json",
+  "title": "RepoDNA LLM Evidence Contract",
+  "description": "Versioned, provenance-rich evidence prepared for downstream language models.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema", "schema_version", "artifact_type", "generated_at", "privacy",
+    "repository", "llm_contract", "evidence_summary", "evidence_items",
+    "unknowns", "human_confirmation", "source_manifest", "truncation"
+  ],
+  "properties": {
+    "$schema": {"const": "./schema.json"},
+    "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_llm_evidence"},
+    "generated_at": {"type": ["string", "null"]},
+    "privacy": {"type": "object"},
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "code_root"],
+      "properties": {
+        "name": {"type": ["string", "null"]},
+        "type": {"type": ["string", "null"]},
+        "code_root": {"type": ["string", "null"]}
+      }
+    },
+    "llm_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "rules", "citation_format"],
+      "properties": {
+        "purpose": {"type": "string", "minLength": 1},
+        "rules": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "citation_format": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "by_kind", "by_category"],
+      "properties": {
+        "items": {"type": "integer", "minimum": 0},
+        "by_kind": {"$ref": "#/$defs/nonNegativeIntegerMap"},
+        "by_category": {"$ref": "#/$defs/nonNegativeIntegerMap"}
+      }
+    },
+    "evidence_items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidenceItem"}
+    },
+    "unknowns": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "human_confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["achievement_status", "questions"],
+      "properties": {
+        "achievement_status": {"type": "string", "minLength": 1},
+        "questions": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "source_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "generic", "notion", "portfolio"],
+      "properties": {
+        "canonical": {"type": "string"},
+        "generic": {"type": "string"},
+        "notion": {"type": "string"},
+        "portfolio": {"type": "string"}
+      }
+    },
+    "truncation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["systems", "author_system_relationships", "technical_contributions", "dependency_review_items", "contributors", "entrypoints", "aggregate_counts_remain_available_in_summary_items"],
+      "properties": {
+        "systems": {"type": "integer", "minimum": 1},
+        "author_system_relationships": {"type": "integer", "minimum": 1},
+        "technical_contributions": {"type": "integer", "minimum": 1},
+        "dependency_review_items": {"type": "integer", "minimum": 1},
+        "contributors": {"type": "integer", "minimum": 1},
+        "entrypoints": {"type": "integer", "minimum": 1},
+        "aggregate_counts_remain_available_in_summary_items": {"const": true}
+      }
+    }
+  },
+  "$defs": {
+    "nonNegativeIntegerMap": {
+      "type": "object",
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "evidencePointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "pointer"],
+      "properties": {
+        "source": {"const": "report/data/report.json"},
+        "pointer": {"type": "string", "pattern": "^#/"}
+      }
+    },
+    "evidenceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "category", "kind", "statement", "confidence", "evidence", "metrics", "caveats", "confirmation_required"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "category": {"enum": ["project", "technology", "architecture", "system", "quality", "security", "health", "contribution", "collaboration", "career"]},
+        "kind": {"enum": ["fact", "inference", "candidate"]},
+        "statement": {"type": "string", "minLength": 1},
+        "confidence": {"enum": ["high", "medium", "low", "unknown"]},
+        "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidencePointer"}},
+        "metrics": {"type": "object"},
+        "caveats": {"type": "array", "items": {"type": "string"}},
+        "confirmation_required": {"type": "boolean"}
+      }
+    }
+  }
+}

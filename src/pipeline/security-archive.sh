@@ -29,8 +29,11 @@ write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
     die "Could not render the Notion evidence JSON."
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/llm_evidence.py" \
-    "$REPORT_DATA_DIR/report.json" "$LLM_DIR/evidence.json" ||
+    "$REPORT_DATA_DIR/report.json" "$LLM_DIR/evidence.json" \
+    --schema "$SCRIPT_DIR/schemas/llm-evidence-1.0.0.schema.json" ||
     die "Could not render the LLM evidence JSON."
+cp "$SCRIPT_DIR/schemas/llm-evidence-1.0.0.schema.json" "$LLM_DIR/schema.json" ||
+    die "Could not copy the versioned LLM evidence schema."
 
 PORTFOLIO_ARGS=()
 [[ -z "$PORTFOLIO_PROFILE" ]] || PORTFOLIO_ARGS+=(--confirmations "$PORTFOLIO_PROFILE")

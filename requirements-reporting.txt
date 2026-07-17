@@ -1,0 +1,5 @@
+# Required for versioned JSON Schema validation of LLM evidence.
+jsonschema>=4.23,<5
+
+# Optional at runtime; only required for PNG chart generation.
+matplotlib>=3.9,<4

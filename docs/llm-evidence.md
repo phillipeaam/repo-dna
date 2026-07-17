@@ -5,6 +5,25 @@ canonical `report/data/report.json`. It is designed for downstream language
 models that need repository context without receiving the entire collector
 payload or full source code.
 
+The contract follows semantic versioning. Version `1.0.0` is defined by
+`schemas/llm-evidence-1.0.0.schema.json` and copied into each export as
+`llm/schema.json`. The evidence document references that packaged schema through
+`"$schema": "./schema.json"`.
+
+Generation validates the complete document with JSON Schema Draft 2020-12 and
+fails before archive creation when the contract is violated. This validation
+requires the Python `jsonschema` package from `requirements-reporting.txt`.
+
+Contract versions follow these compatibility rules:
+
+- major: removes or changes existing fields, meanings, or allowed values;
+- minor: adds optional fields or backward-compatible evidence categories;
+- patch: clarifies descriptions or tightens validation without changing valid
+  document semantics.
+
+Consumers should reject unsupported major versions and may accept newer minor or
+patch versions after validating against the schema packaged with the export.
+
 The package contains:
 
 - an explicit LLM usage contract;

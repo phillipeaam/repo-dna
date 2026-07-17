@@ -38,7 +38,7 @@ def evidence(
         "confidence": confidence,
         "evidence": [{"source": "report/data/report.json", "pointer": pointer} for pointer in pointers],
         "metrics": metrics or {},
-        "caveats": caveats or [],
+        "caveats": [str(item) for item in (caveats or []) if item],
         "confirmation_required": confirmation_required,
     }
 
@@ -215,7 +215,8 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     kind_counts = Counter(item["kind"] for item in items)
     category_counts = Counter(item["category"] for item in items)
     return {
-        "schema_version": "1.0",
+        "$schema": "./schema.json",
+        "schema_version": "1.0.0",
         "artifact_type": "repodna_llm_evidence",
         "generated_at": data.get("generated_at"),
         "privacy": privacy,
@@ -271,9 +272,20 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("json_path", type=Path)
     parser.add_argument("output_path", type=Path)
+    parser.add_argument("--schema", type=Path, required=True)
     args = parser.parse_args()
     data = json.loads(args.json_path.read_text(encoding="utf-8"))
     output = build(data)
+    try:
+        from jsonschema import Draft202012Validator
+    except ImportError as error:
+        raise SystemExit("JSON Schema validation requires: pip install -r requirements-reporting.txt") from error
+    schema = json.loads(args.schema.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    errors = sorted(Draft202012Validator(schema).iter_errors(output), key=lambda item: list(item.absolute_path))
+    if errors:
+        details = "\n".join(f"- /{'/'.join(map(str, item.absolute_path))}: {item.message}" for item in errors[:20])
+        raise SystemExit(f"LLM evidence violates schema {schema.get('$id', args.schema)}:\n{details}")
     args.output_path.parent.mkdir(parents=True, exist_ok=True)
     args.output_path.write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return 0
