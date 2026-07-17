@@ -51,6 +51,10 @@ grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/llm/evidence.json" ]]
 [[ -f "$default_report/llm/schema.json" ]]
 grep -q '"artifact_type": "repodna_llm_evidence"' "$default_report/llm/evidence.json"
+for chart in churn_by_month.png hotspots.png systems.png authors.png system_evolution.png architecture_evolution.png; do
+    [[ -s "$default_report/graphs/$chart" ]]
+    grep -q "$chart" "$default_report/report/charts.html"
+done
 grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
 grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
 ! grep -q 'test-secret-value' "$default_report/security/potential_secrets.txt"

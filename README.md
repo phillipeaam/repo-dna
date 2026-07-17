@@ -29,7 +29,8 @@ One command creates a timestamped analysis package containing:
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation, Notion, and provenance-aware LLM evidence;
-- optional charts and explicitly opted-in source exports.
+- charts for commits, churn, hotspots, systems, authors, and architectural
+  evolution, plus explicitly opted-in source exports.
 
 The default export does **not** copy full source code. Source inclusion requires
 `--include-source`, while `--privacy-mode strict` takes precedence and removes
@@ -134,6 +135,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
+- [Charts and visual evidence](docs/charts.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)

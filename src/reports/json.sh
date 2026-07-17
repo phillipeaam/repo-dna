@@ -78,6 +78,18 @@ write_structured_report_json() {
         chart_items+=('{"title":"Commits by month","path":"../graphs/commits_by_month.png"}')
     [[ ! -f "$GRAPHS_DIR/commits_by_year.png" ]] ||
         chart_items+=('{"title":"Commits by year","path":"../graphs/commits_by_year.png"}')
+    [[ ! -f "$GRAPHS_DIR/churn_by_month.png" ]] ||
+        chart_items+=('{"title":"Churn by month (analyzed contributions)","path":"../graphs/churn_by_month.png"}')
+    [[ ! -f "$GRAPHS_DIR/hotspots.png" ]] ||
+        chart_items+=('{"title":"Composite hotspots","path":"../graphs/hotspots.png"}')
+    [[ ! -f "$GRAPHS_DIR/systems.png" ]] ||
+        chart_items+=('{"title":"Detected systems by source files","path":"../graphs/systems.png"}')
+    [[ ! -f "$GRAPHS_DIR/authors.png" ]] ||
+        chart_items+=('{"title":"Commits by author","path":"../graphs/authors.png"}')
+    [[ ! -f "$GRAPHS_DIR/system_evolution.png" ]] ||
+        chart_items+=('{"title":"System evolution by month","path":"../graphs/system_evolution.png"}')
+    [[ ! -f "$GRAPHS_DIR/architecture_evolution.png" ]] ||
+        chart_items+=('{"title":"Architecture-related change signals","path":"../graphs/architecture_evolution.png"}')
     if ((${#chart_items[@]} > 0)); then
         charts_json="[$(IFS=,; printf '%s' "${chart_items[*]}")]"
     fi

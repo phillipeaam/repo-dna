@@ -23,3 +23,14 @@ fi
 
 # Print the eleventh progress step.
 }
+
+create_analysis_charts() {
+    [[ "$PRIVACY_MODE" == strict ]] && return 0
+    [[ -n "$STRUCTURED_PYTHON" && -f "$GENERIC_ANALYSIS_FILE" ]] || return 0
+    "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1 || return 0
+    MPLBACKEND=Agg MPLCONFIGDIR="$OUTPUT_DIR/.matplotlib" \
+        "$STRUCTURED_PYTHON" "$SCRIPT_DIR/src/reports/charts.py" \
+        "$DATA_DIR/history_commits.csv" "$GRAPHS_DIR" \
+        --analysis-json "$GENERIC_ANALYSIS_FILE" || true
+    rm -rf "$OUTPUT_DIR/.matplotlib"
+}

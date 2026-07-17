@@ -19,6 +19,8 @@ else
         > "$GENERIC_ANALYSIS_FILE"
 fi
 
+create_analysis_charts
+
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
