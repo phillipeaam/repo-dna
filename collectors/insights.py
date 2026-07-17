@@ -13,6 +13,7 @@ from languages.registry import parser_status
 from frameworks import analyze_frameworks
 from graphs import build_graphs
 from architecture import analyze_architecture
+from quality import import_quality_results
 
 
 SOURCE_LANGUAGES = {
@@ -238,42 +239,6 @@ def identify_systems(files: list[dict[str, Any]], code: dict[str, Any], dependen
     return sorted(systems, key=lambda item: (item["symbol_count"] + item["import_references"], item["file_count"]), reverse=True)[:50]
 
 
-def coverage_evidence(root: Path) -> dict[str, Any]:
-    candidates = [
-        root / "coverage-summary.json", root / "coverage" / "coverage-summary.json",
-        root / "coverage.xml", root / "lcov.info", root / ".coverage",
-    ]
-    found = [path.relative_to(root).as_posix() for path in candidates if path.is_file()]
-    percentage = None
-    summary = root / "coverage" / "coverage-summary.json"
-    if summary.is_file():
-        try:
-            data = json.loads(summary.read_text(encoding="utf-8"))
-            percentage = data.get("total", {}).get("lines", {}).get("pct")
-        except (OSError, ValueError, TypeError):
-            pass
-    return {
-        "status": "detected" if found else "not_detected",
-        "line_coverage_percent": percentage,
-        "evidence_files": found,
-        "note": "Absence of a coverage artifact does not prove that coverage is not measured elsewhere.",
-    }
-
-
-def vulnerability_evidence(root: Path, manifest_count: int) -> dict[str, Any]:
-    reports = []
-    for name in ("npm-audit.json", "pip-audit.json", "osv-results.json", "dependency-check-report.json", "trivy-results.json"):
-        if (root / name).is_file():
-            reports.append(name)
-    return {
-        "status": "evidence_detected" if reports else "not_scanned",
-        "findings": None,
-        "scanner_reports": reports,
-        "manifests_available": manifest_count,
-        "note": "RepoDNA does not infer vulnerabilities from package names. Run an ecosystem-aware scanner and provide its report for verified findings.",
-    }
-
-
 def license_evidence(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
     license_paths = [item["path"] for item in files if Path(item["path"]).name.casefold().startswith(("license", "copying", "notice"))]
     detected = "Unknown"
@@ -306,18 +271,34 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
     ci = generic.get("ci_cd_file_count", 0)
     complexity = quality["code"]["complexity"]
     add("Documentation", min(15, 5 + docs * 2) if docs else 0, 15, f"{docs} documentation files")
-    add("Testing evidence", min(20, 5 + tests * 2) if tests else 0, 20, f"{tests} test files; coverage status {quality['coverage']['status']}")
+    test_results = quality["tests"]
+    coverage_result = quality["coverage"]
+    testing_score = min(5, tests) if tests else 0
+    if test_results["status"] == "imported" and test_results.get("total", 0):
+        testing_score += 8 * test_results.get("passed", 0) / test_results["total"]
+    if coverage_result["status"] == "imported" and coverage_result.get("line_coverage_percent") is not None:
+        testing_score += 7 * coverage_result["line_coverage_percent"] / 100
+    add("Testing evidence", min(20, testing_score), 20, f"{tests} test files; test results {test_results['status']}; coverage {coverage_result.get('line_coverage_percent')}%")
     add("Automation", min(15, ci * 8 + generic.get("docker_file_count", 0) * 3), 15, f"{ci} CI/CD files")
     if complexity["average"] is None:
         add("Maintainability", 0, 20, "No supported source files", "not_assessed")
     else:
         avg = complexity["average"]
-        add("Maintainability", max(0, 20 - max(avg - 5, 0)), 20, f"Estimated average file complexity {avg}")
+        base = max(0, 18 - max(avg - 5, 0))
+        lint = quality["linters"]
+        lint_bonus = 2 if lint["status"] == "imported" and lint.get("issues", 0) == 0 else 1 if lint["status"] == "imported" else 0
+        add("Maintainability", min(20, base + lint_bonus), 20, f"Estimated average file complexity {avg}; linter results {lint['status']} with {lint.get('issues', 0)} issues")
     contributors = git_data.get("contributors_count", 0)
     add("Knowledge distribution", min(15, 5 + contributors * 2) if contributors else 0, 15, f"{contributors} contributors in Git history")
     license_name = quality["licenses"]["repository_license"]
     add("Governance", 10 if license_name not in {"Unknown", "Unclassified"} else 2 if license_name == "Unclassified" else 0, 10, f"Repository license: {license_name}")
-    add("Dependency security", 0, 5, quality["vulnerabilities"]["note"], "not_assessed" if quality["vulnerabilities"]["status"] == "not_scanned" else "evidence_available")
+    security = quality["vulnerabilities"]
+    if security["status"] == "imported":
+        severities = security.get("severities", {})
+        penalty = severities.get("critical", 0) * 2 + severities.get("high", 0) + (security.get("findings", 0) - severities.get("critical", 0) - severities.get("high", 0)) * 0.25
+        add("Dependency security", max(0, 5 - penalty), 5, f"Imported {security.get('findings', 0)} findings: {severities}")
+    else:
+        add("Dependency security", 0, 5, security["note"], "not_assessed")
 
     assessed = [item for item in dimensions if item["status"] == "assessed"]
     achieved = sum(item["score"] for item in assessed)
@@ -327,7 +308,7 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
     grade = None if score is None else "A" if score >= 85 else "B" if score >= 70 else "C" if score >= 55 else "D" if score >= 40 else "E"
     return {
         "model": "RepoDNA repository health heuristic",
-        "version": "1.0",
+        "version": "1.1",
         "score": score,
         "grade": grade,
         "assessment_coverage_percent": coverage,
@@ -357,10 +338,10 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
+    imported_quality = import_quality_results(root, len(generic["dependencies"].get("manifests", [])))
     quality = {
         "code": code,
-        "coverage": coverage_evidence(root),
-        "vulnerabilities": vulnerability_evidence(root, len(generic["dependencies"].get("manifests", []))),
+        **imported_quality,
         "licenses": license_evidence(root, generic["_files"]),
     }
     health = health_score(generic, quality, generic["git"])

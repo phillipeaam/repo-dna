@@ -29,6 +29,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     collaboration = data["collaboration"]
     generic = data.get("generic_analysis", {})
     framework_findings = generic.get("analysis", {}).get("frameworks", {}).get("detected", [])
+    quality_findings = generic.get("analysis", {}).get("quality", {})
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -38,6 +39,18 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         project_facts.append(fact(
             f"Current tree contains {metrics['csharp_files']} C# files and {metrics['csharp_lines']} lines.",
             "report/data/report.json#/current_metrics",
+        ))
+    imported_tests = quality_findings.get("tests", {})
+    if imported_tests.get("status") == "imported":
+        project_facts.append(fact(
+            f"Imported test reports contain {imported_tests.get('total', 0)} tests: {imported_tests.get('passed', 0)} passed, {imported_tests.get('failed', 0)} failed, and {imported_tests.get('skipped', 0)} skipped.",
+            "report/data/report.json#/generic_analysis/analysis/quality/tests",
+        ))
+    imported_coverage = quality_findings.get("coverage", {})
+    if imported_coverage.get("status") == "imported" and imported_coverage.get("line_coverage_percent") is not None:
+        project_facts.append(fact(
+            f"Imported coverage reports indicate {imported_coverage['line_coverage_percent']}% line coverage.",
+            "report/data/report.json#/generic_analysis/analysis/quality/coverage",
         ))
 
     technology_facts = [

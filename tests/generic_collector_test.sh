@@ -88,9 +88,9 @@ assert analysis["code"]["importing_file_count"] >= 1
 assert analysis["code"]["call_count"] >= 1
 assert any(item["name"] == "FeatureRepository.feature" for item in analysis["code"]["complexity"]["high_complexity_functions"]) is False
 assert any(item["name"] == "src" for item in analysis["systems"])
-assert analysis["quality"]["coverage"]["status"] == "not_detected"
+assert analysis["quality"]["coverage"]["status"] == "not_found"
 assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
-assert analysis["health"]["version"] == "1.0"
+assert analysis["health"]["version"] == "1.1"
 assert analysis["health"]["score"] is not None
 assert analysis["narrative_facts"]
 PY

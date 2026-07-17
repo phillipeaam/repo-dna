@@ -88,8 +88,10 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "limitations": []
       },
       "quality": {
-        "coverage": {"status": "not_detected", "line_coverage_percent": null},
-        "vulnerabilities": {"status": "not_scanned"},
+        "coverage": {"status": "imported", "line_coverage_percent": 82, "reports": [{"path": "coverage-summary.json", "tool": "Istanbul", "metrics": {"lines": {"percent": 82}, "branches": {"percent": 60}, "functions": {"percent": 75}}}]},
+        "tests": {"status": "imported", "total": 10, "passed": 8, "failed": 1, "errors": 0, "skipped": 1, "reports": [{"path": "junit.xml", "tool": "JUnit XML", "total": 10, "passed": 8, "failed": 1, "errors": 0, "skipped": 1, "duration_seconds": 2.5}]},
+        "linters": {"status": "imported", "issues": 2, "reports": [{"path": "eslint-report.json", "tool": "ESLint", "issues": 2, "affected_files": 1, "severities": {"error": 1, "warning": 1}}]},
+        "vulnerabilities": {"status": "imported", "findings": 1, "reports": [{"path": "npm-audit.json", "tool": "npm audit", "findings": 1, "severities": {"high": 1}}]},
         "licenses": {"repository_license": "MIT", "dependency_license_status": "not_scanned"}
       },
       "health": {
@@ -249,6 +251,14 @@ grep -q 'paginated contributor directory' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'Page 1 of 1' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"
+grep -q 'Imported coverage reports' "$TEST_ROOT/report/quality.html"
+grep -q 'Istanbul' "$TEST_ROOT/report/quality.html"
+grep -q 'Imported test results' "$TEST_ROOT/report/quality.html"
+grep -q 'JUnit XML' "$TEST_ROOT/report/quality.html"
+grep -q 'Imported linter results' "$TEST_ROOT/report/quality.html"
+grep -q 'ESLint' "$TEST_ROOT/report/quality.html"
+grep -q 'Imported scanner results' "$TEST_ROOT/report/quality.html"
+grep -q 'npm audit' "$TEST_ROOT/report/quality.html"
 grep -q 'High-complexity functions (AST)' "$TEST_ROOT/report/quality.html"
 grep -q 'Repository health' "$TEST_ROOT/report/health.html"
 grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"

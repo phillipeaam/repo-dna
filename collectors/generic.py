@@ -352,7 +352,15 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
         architecture["boundaries"]["violations"] = []
         architecture["boundaries"]["cycles"] = []
     analysis["quality"]["coverage"]["evidence_files"] = []
+    analysis["quality"]["coverage"]["reports"] = []
+    analysis["quality"]["coverage"]["parse_errors"] = []
+    analysis["quality"]["tests"]["reports"] = []
+    analysis["quality"]["tests"]["parse_errors"] = []
+    analysis["quality"]["linters"]["reports"] = []
+    analysis["quality"]["linters"]["parse_errors"] = []
     analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
+    analysis["quality"]["vulnerabilities"]["reports"] = []
+    analysis["quality"]["vulnerabilities"]["parse_errors"] = []
     analysis["quality"]["licenses"]["license_files"] = []
 
 

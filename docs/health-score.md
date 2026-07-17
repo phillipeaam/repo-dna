@@ -7,7 +7,7 @@ correctness of the software.
 ## Model contract
 
 - Model: `RepoDNA repository health heuristic`
-- Version: `1.0`
+- Version: `1.1`
 - Scale: 0-100 across assessed dimensions
 - Grades: A (85+), B (70+), C (55+), D (40+), E (below 40)
 - Output: `generic_analysis.analysis.health`
@@ -21,12 +21,12 @@ and lowers assessment coverage. It is never treated as a passing result.
 | Dimension | Maximum | Current evidence |
 |---|---:|---|
 | Documentation | 15 | Detected documentation files |
-| Testing evidence | 20 | Test files and coverage artifacts |
+| Testing evidence | 20 | Test files, imported pass ratio, and imported line coverage |
 | Automation | 15 | CI/CD and Docker files |
-| Maintainability | 20 | Estimated decision-point complexity |
+| Maintainability | 20 | Estimated decision-point complexity and imported linter status |
 | Knowledge distribution | 15 | Contributors visible in Git history |
 | Governance | 10 | Repository license evidence |
-| Dependency security | 5 | External scanner report evidence |
+| Dependency security | 5 | Imported scanner finding counts and severity |
 
 ## Important limitations
 

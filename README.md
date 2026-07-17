@@ -69,7 +69,7 @@ Repository
 | Collaboration | Contributors, co-authored commits, and files shared across authors. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
-| Quality and compliance | Estimated complexity, coverage evidence, vulnerability-scan status, and license evidence. |
+| Quality and compliance | Complexity plus imported coverage, test, linter, security-scanner, and license evidence. |
 | Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
 | Portfolio and CV | Approval-gated claims and X-Y-Z achievement drafts. |
@@ -126,6 +126,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Framework analysis methodology](docs/framework-analysis.md)
 - [Module and dependency graphs](docs/dependency-graphs.md)
 - [Architecture insights methodology](docs/architecture-insights.md)
+- [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)
@@ -474,6 +475,7 @@ generic analyzer and explicit parser/framework coverage.
 - [x] Entrypoint, coupling, cycle, and inferred boundary analysis
 - [ ] Architecture diagrams
 - [x] File and per-function complexity analysis
+- [x] Coverage, test, linter, and security scanner result imports
 - [x] Evidence-based code ownership classification
 - [x] C# design-pattern signals
 - [x] Technical-debt markers

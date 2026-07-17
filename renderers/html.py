@@ -324,6 +324,10 @@ def render(data: dict[str, Any], output_path: Path) -> None:
 
     quality = analysis.get("quality", {})
     complexity = analysis.get("code", {}).get("complexity", {})
+    coverage_result = quality.get("coverage", {})
+    test_result = quality.get("tests", {})
+    linter_result = quality.get("linters", {})
+    scanner_result = quality.get("vulnerabilities", {})
     high_complexity_rows = [
         [item["path"], item["language"], item["estimated_cyclomatic_complexity"], item["decision_points"], item["lines"]]
         for item in complexity.get("high_complexity_files", [])
@@ -339,13 +343,27 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Files analyzed", complexity.get("files_analyzed", 0)),
         ("Average estimated complexity", complexity.get("average") if complexity.get("average") is not None else "Not assessed"),
         ("Maximum estimated complexity", complexity.get("maximum") if complexity.get("maximum") is not None else "Not assessed"),
-        ("Coverage status", quality.get("coverage", {}).get("status", "Not assessed")),
-        ("Line coverage", quality.get("coverage", {}).get("line_coverage_percent") if quality.get("coverage", {}).get("line_coverage_percent") is not None else "Not available"),
-        ("Vulnerability status", quality.get("vulnerabilities", {}).get("status", "Not assessed")),
+        ("Coverage status", coverage_result.get("status", "Not assessed")),
+        ("Line coverage", coverage_result.get("line_coverage_percent") if coverage_result.get("line_coverage_percent") is not None else "Not available"),
+        ("Test results status", test_result.get("status", "Not assessed")),
+        ("Tests passed", test_result.get("passed", 0)),
+        ("Tests failed", test_result.get("failed", 0)),
+        ("Linter status", linter_result.get("status", "Not assessed")),
+        ("Linter issues", linter_result.get("issues", 0)),
+        ("Vulnerability status", scanner_result.get("status", "Not assessed")),
+        ("Imported security findings", scanner_result.get("findings") if scanner_result.get("findings") is not None else "Not available"),
         ("Repository license", quality.get("licenses", {}).get("repository_license", "Unknown")),
         ("Dependency license status", quality.get("licenses", {}).get("dependency_license_status", "Not assessed")),
     ])
     quality_body += '<p class="note">A vulnerability status of not_scanned is not equivalent to zero vulnerabilities. RepoDNA only reports verified scanner evidence.</p>'
+    coverage_rows = [[item["tool"], item["path"], item.get("metrics", {}).get("lines", {}).get("percent"), item.get("metrics", {}).get("branches", {}).get("percent"), item.get("metrics", {}).get("functions", {}).get("percent")] for item in coverage_result.get("reports", [])]
+    test_rows = [[item["tool"], item["path"], item["total"], item["passed"], item["failed"], item["errors"], item["skipped"], item.get("duration_seconds")] for item in test_result.get("reports", [])]
+    linter_rows = [[item["tool"], item["path"], item["issues"], item["affected_files"], ", ".join(f"{key}: {value}" for key, value in item.get("severities", {}).items())] for item in linter_result.get("reports", [])]
+    scanner_rows = [[item["tool"], item["path"], item["findings"], ", ".join(f"{key}: {value}" for key, value in item.get("severities", {}).items())] for item in scanner_result.get("reports", [])]
+    quality_body += "<h3>Imported coverage reports</h3>" + (data_table(["Tool", "Report", "Lines %", "Branches %", "Functions %"], coverage_rows, {2, 3, 4}) if coverage_rows else '<p class="empty">No parseable coverage report was imported.</p>')
+    quality_body += "<h3>Imported test results</h3>" + (data_table(["Tool", "Report", "Total", "Passed", "Failed", "Errors", "Skipped", "Duration seconds"], test_rows, {2, 3, 4, 5, 6, 7}) if test_rows else '<p class="empty">No parseable test-result report was imported.</p>')
+    quality_body += "<h3>Imported linter results</h3>" + (data_table(["Tool", "Report", "Issues", "Affected files", "Severities"], linter_rows, {2, 3}) if linter_rows else '<p class="empty">No parseable linter report was imported.</p>')
+    quality_body += "<h3>Imported scanner results</h3>" + (data_table(["Tool", "Report", "Findings", "Severities"], scanner_rows, {2}) if scanner_rows else '<p class="empty">No parseable security scanner report was imported.</p>')
     quality_body += "<h3>High-complexity candidates</h3>" + complexity_table
     quality_body += "<h3>High-complexity functions (AST)</h3>" + function_complexity_table
 
