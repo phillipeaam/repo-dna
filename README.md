@@ -33,7 +33,7 @@ Instead of simply counting files or commits, RepoDNA correlates repository struc
 - 👥 Collaboration insights
 - 🧠 Design pattern detection
 - ⚙ Engineering signal detection
-- 📄 Markdown, JSON, CSV, and HTML report generation
+- 📄 HTML, JSON, and CSV report generation
 - 📚 Portfolio and documentation support
 
 ---
@@ -71,6 +71,36 @@ RepoDNA can be used for:
 ---
 
 # ⚙ Configuration
+
+## Requirements
+
+RepoDNA requires:
+
+- Git;
+- Bash (Git Bash on Windows);
+- Python 3 for generic collection and HTML/Notion report rendering;
+- `matplotlib` for commit-history charts.
+
+Check the installation with:
+
+```bash
+git --version
+bash --version
+python --version
+python -c "import matplotlib; print(matplotlib.__version__)"
+```
+
+Install the chart dependency with:
+
+```bash
+python -m pip install matplotlib
+```
+
+If Python is installed under a non-standard command, select it explicitly:
+
+```bash
+REPO_DNA_PYTHON=/path/to/python bash ./dna-analysis.sh
+```
 
 ## Customizing Directory Exclusions
 
@@ -140,35 +170,31 @@ category, and `Value: [REDACTED]`; matched values are never written to the repor
 
 ## Structured Reports
 
-RepoDNA writes canonical collected data to `report/data/report.json`. The
-Markdown renderer reads only that JSON and creates:
+RepoDNA writes canonical collected data to `report/data/report.json`. The HTML
+renderer reads only that JSON and creates a linked, self-contained report set:
 
 ```text
 report/
-├── index.md
-├── executive-summary.md
-├── project-overview.md
-├── architecture.md
-├── technologies.md
-├── systems.md
-├── contribution.md
-├── collaboration.md
-├── risks.md
-├── notion-evidence.md
+├── index.html
+├── executive-summary.html
+├── project-overview.html
+├── architecture.html
+├── technologies.html
+├── systems.html
+├── contribution.html
+├── collaboration.html
+├── risks.html
+├── notion-evidence.html
 └── data/
     └── report.json
 ```
 
 Legacy evidence files remain available during the migration, but standardized
-Markdown no longer reads Bash variables or collector output directly. Future
-HTML and CSV renderers can consume the same versioned JSON schema. RepoDNA uses
-the Python renderer when available and otherwise falls back to the portable Bash
-renderer.
-
-When Python is available, RepoDNA also generates a self-contained visual report
-at `report/index.html` and Notion-ready structured evidence at
-`notion/evidence.json`. The latter explicitly separates facts, supporting
-evidence, inferences, personal data, and claims that require confirmation.
+reports are HTML and no longer read Bash variables or collector output directly.
+Every page links to the other report sections and can be opened locally without
+a web server. Notion-ready structured evidence remains available at
+`notion/evidence.json`; it explicitly separates facts, supporting evidence,
+inferences, personal data, and claims that require confirmation.
 
 Reports use the detected analysis profile. Unity-only product metadata, scenes,
 prefabs, ScriptableObjects, MonoBehaviours, shaders, Addressables, and UI Toolkit
@@ -183,9 +209,10 @@ release tags, temporal history, churn, frequently changed files, hotspots, and
 possible modules. This dataset is embedded into the canonical `report.json` and
 is the fallback for unknown stacks.
 
-If Python is not detected, Markdown still uses the Bash fallback and
-`report/HTML_NOT_GENERATED.txt` explains why HTML and Notion evidence were
-skipped. `REPO_DNA_PYTHON=/path/to/python` can explicitly select the runtime.
+Python 3 is required because HTML is now the standard report format. RepoDNA
+stops early with an installation hint when it cannot resolve an executable
+runtime. `matplotlib` is required for the optional PNG charts; the HTML reports
+still work when only that package is unavailable.
 
 The future ATS résumé design and X-Y-Z evidence contract are documented in
 [`docs/ats-xyz-resume-design.md`](docs/ats-xyz-resume-design.md).
@@ -213,8 +240,7 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 
 ### Reports
 
-- [ ] Markdown
-- [ ] HTML
+- [ ] HTML report suite
 - [ ] JSON
 - [ ] CSV
 - [ ] Interactive Dashboard

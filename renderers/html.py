@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Render a self-contained HTML dashboard from canonical RepoDNA JSON."""
+"""Render the standardized HTML report tree from canonical RepoDNA JSON."""
 
 from __future__ import annotations
 
@@ -38,7 +38,34 @@ def labeled(values: dict[str, Any], keys: list[str]) -> list[tuple[str, Any]]:
     return [(key.replace("_", " ").title(), values[key]) for key in keys]
 
 
+STYLES = """
+:root{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}header p{color:#cbd5e1}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}
+nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{font-size:1.65rem}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}a{color:var(--brand)}.empty,footer{color:var(--muted)}footer{padding:1rem 0}
+@media(max-width:760px){.layout{display:block;padding:1rem}nav{position:static;margin-bottom:1rem;display:flex;overflow:auto}nav a{white-space:nowrap}header{padding:2rem 1rem}}
+@media print{nav{display:none}.layout{display:block;padding:0}section,.metric{box-shadow:none;break-inside:avoid}body{background:#fff}}
+"""
+
+
+def page_document(
+    data: dict[str, Any], title: str, body: str, pages: list[tuple[str, str]], active: str
+) -> str:
+    project = data["project"]
+    nav = "".join(
+        f'<a class="{"active" if filename == active else ""}" href="{esc(filename)}">{esc(label)}</a>'
+        for filename, label in pages
+    )
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(title)} · {esc(project['name'])} · RepoDNA</title><style>{STYLES}</style></head>
+<body><header><p>RepoDNA structured report · schema {esc(data['schema_version'])}</p><h1>{esc(title)}</h1><p>{esc(project['name'])} · {esc(project['type'])} · generated {esc(data['generated_at'])}</p></header>
+<div class="layout"><nav>{nav}</nav><main>{body}<footer>Rendered exclusively from data/report.json.</footer></main></div>
+</body></html>"""
+
+
 def render(data: dict[str, Any], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     project = data["project"]
     profile = data.get("analysis_profile", {"unity": False, "csharp": True})
     generic = data.get("generic_analysis", {})
@@ -117,43 +144,34 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for item in generic.get("git", {}).get("hotspots", [])[:20]
     ]) if generic.get("git", {}).get("hotspots") else empty
     sections = [
-        ("overview", "Project overview", table(overview) + "<h3>Generic inventory</h3>" + inventory),
-        ("architecture", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else module_table),
-        ("technologies", "Technologies", table(labeled(technologies, technology_keys)) + "<h3>Languages</h3>" + language_table),
-        ("systems", "Systems", table(labeled(systems, system_keys)) if system_keys else module_table),
-        ("contribution", "Contribution", table(labeled(history, list(history))) + "<h3>Hotspots</h3>" + hotspot_table),
-        ("collaboration", "Collaboration", table(labeled(collaboration, list(collaboration)))),
-        ("risks", "Risks", table([
+        ("project-overview.html", "Project overview", table(overview) + "<h3>Generic inventory</h3>" + inventory),
+        ("architecture.html", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else module_table),
+        ("technologies.html", "Technologies", table(labeled(technologies, technology_keys)) + "<h3>Languages</h3>" + language_table),
+        ("systems.html", "Systems", table(labeled(systems, system_keys)) if system_keys else module_table),
+        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Hotspots</h3>" + hotspot_table),
+        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration)))),
+        ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),
             ("Ownership review required", risks["ownership_review_required"]),
         ]) + '<p><a href="../security/potential_secrets.txt">Open redacted security evidence</a></p>'),
+        ("notion-evidence.html", "Notion evidence", '<p>Structured facts, evidence, inferences, and confirmation prompts are available in <a href="../notion/evidence.json">notion/evidence.json</a>.</p>'),
     ]
-    nav = "".join(f'<a href="#{section_id}">{esc(title)}</a>' for section_id, title, _ in sections)
-    content = "".join(
-        f'<section id="{section_id}"><h2>{esc(title)}</h2>{body}</section>'
-        for section_id, title, body in sections
+    executive_body = '<div class="metrics">' + metric_cards(headline) + "</div>"
+    all_pages = [("index.html", "Home"), ("executive-summary.html", "Executive summary")] + [
+        (filename, title) for filename, title, _ in sections
+    ]
+    links = '<div class="report-links">' + "".join(
+        f'<a href="{esc(filename)}">{esc(title)}</a>' for filename, title in all_pages[1:]
+    ) + "</div>"
+    output_path.write_text(page_document(data, project["name"], executive_body + links, all_pages, "index.html"), encoding="utf-8")
+    (output_path.parent / "executive-summary.html").write_text(
+        page_document(data, "Executive summary", executive_body, all_pages, "executive-summary.html"), encoding="utf-8"
     )
-
-    document = f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{esc(project['name'])} · RepoDNA</title>
-<style>
-:root{{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}}
-*{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}}
-header{{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}}header p{{color:#cbd5e1}}.layout{{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}}
-nav{{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}}nav a{{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}}nav a:hover{{background:#edf3ff;color:var(--brand)}}main{{min-width:0}}.metrics{{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}}.metric,section{{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}}.metric{{padding:1rem}}.metric span{{display:block;color:var(--muted);font-size:.82rem}}.metric strong{{font-size:1.65rem}}section{{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}}h1,h2{{margin-top:0}}h2{{font-size:1.2rem}}.table-wrap{{overflow:auto}}table{{width:100%;border-collapse:collapse}}th,td{{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}}th{{color:var(--muted);font-weight:600;width:55%}}a{{color:var(--brand)}}.empty{{color:var(--muted)}}footer{{color:var(--muted);padding:1rem 0}}
-@media(max-width:760px){{.layout{{display:block;padding:1rem}}nav{{position:static;margin-bottom:1rem;display:flex;overflow:auto}}nav a{{white-space:nowrap}}header{{padding:2rem 1rem}}}}
-@media print{{nav{{display:none}}.layout{{display:block;padding:0}}section,.metric{{box-shadow:none;break-inside:avoid}}body{{background:#fff}}}}
-</style>
-</head>
-<body>
-<header><p>RepoDNA structured report · schema {esc(data['schema_version'])}</p><h1>{esc(project['name'])}</h1><p>{esc(project['type'])} · generated {esc(data['generated_at'])}</p></header>
-<div class="layout"><nav>{nav}</nav><main><div class="metrics">{metric_cards(headline)}</div>{content}<footer>Rendered exclusively from report/data/report.json.</footer></main></div>
-</body></html>"""
-    output_path.write_text(document, encoding="utf-8")
+    for filename, title, body in sections:
+        section_body = f"<section><h2>{esc(title)}</h2>{body}</section>"
+        (output_path.parent / filename).write_text(
+            page_document(data, title, section_body, all_pages, filename), encoding="utf-8"
+        )
 
 
 def main() -> int:

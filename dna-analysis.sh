@@ -305,6 +305,8 @@ command_exists git || die "Git is not installed or is not available in PATH."
 
 # Resolve Python once so collectors, renderers, and charts use the same runtime.
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
+[[ -n "$STRUCTURED_PYTHON" ]] ||
+    die "Python 3 is required to generate the standardized HTML reports. Install Python or set REPO_DNA_PYTHON."
 
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
@@ -1493,17 +1495,16 @@ collaboration evidence, and a Notion career-journaling guide.
 $SOURCE_FOLDER_DESCRIPTION
 - \`data/\`: JSON and CSV exports
 - \`security/\`: redacted potential-secret findings
-- \`report/\`: standardized Markdown reports rendered from canonical JSON
-- \`report/index.html\`: self-contained visual dashboard from canonical JSON
+- \`report/\`: standardized HTML reports rendered from canonical JSON
+- \`report/index.html\`: navigation entry point for the HTML report set
 - \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
 - \`graphs/\`: optional charts
 
 ## Start here
 
-1. \`report/index.md\`
-2. \`report/index.html\`
-3. \`notion/evidence.json\`
-4. \`report/data/report.json\`
+1. \`report/index.html\`
+2. \`notion/evidence.json\`
+3. \`report/data/report.json\`
 
 ## Limitations
 
@@ -1612,7 +1613,9 @@ PYTHON
     if [[ -n "$STRUCTURED_PYTHON" ]] &&
        "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1; then
         # Generate charts without failing the complete report.
-        "$STRUCTURED_PYTHON" "$OUTPUT_DIR/generate_graphs.py" || true
+        MPLBACKEND=Agg MPLCONFIGDIR="$OUTPUT_DIR/.matplotlib" \
+            "$STRUCTURED_PYTHON" "$OUTPUT_DIR/generate_graphs.py" || true
+        rm -rf "$OUTPUT_DIR/.matplotlib"
     else
         # Explain why charts were skipped.
         if [[ -z "$STRUCTURED_PYTHON" ]]; then
@@ -1645,25 +1648,12 @@ fi
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
-if [[ -n "$STRUCTURED_PYTHON" ]]; then
-    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/markdown.py" \
-        "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
-        die "Could not render the standardized Markdown reports."
-    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
-        "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
-        die "Could not render the HTML report."
-    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/notion.py" \
-        "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
-        die "Could not render the Notion evidence JSON."
-else
-    bash "$SCRIPT_DIR/renderers/markdown.sh" "$REPORT_DATA_DIR/report.json" "$REPORT_DIR" ||
-        die "Could not render the standardized Markdown reports."
-    echo "Warning: HTML and Notion evidence require an executable Python runtime."
-    printf '%s\n' \
-        'HTML was not generated because no executable Python runtime was detected.' \
-        'Set REPO_DNA_PYTHON to the Python executable path and run RepoDNA again.' \
-        > "$REPORT_DIR/HTML_NOT_GENERATED.txt"
-fi
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
+    "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
+    die "Could not render the standardized HTML reports."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/notion.py" \
+    "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
+    die "Could not render the Notion evidence JSON."
 
 run_privacy_scan
 
@@ -1754,9 +1744,9 @@ fi
 # Print the main starting point.
 echo "Start here:"
 if [[ "$PRIVACY_MODE" == strict ]]; then
-    echo "  $REPORT_NAME/report/index.md"
+    echo "  $REPORT_NAME/report/index.html"
 else
-    echo "  $REPORT_DIR/index.md"
+    echo "  $REPORT_DIR/index.html"
 fi
 echo ""
 

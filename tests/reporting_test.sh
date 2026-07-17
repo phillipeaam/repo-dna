@@ -116,46 +116,45 @@ else
     PYTHON=''
 fi
 
-if [[ -n "$PYTHON" ]]; then
-    "$PYTHON" "$SOURCE_ROOT/renderers/markdown.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report"
-    "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
-    "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
-else
-    bash "$SOURCE_ROOT/renderers/markdown.sh" "$TEST_ROOT/report.json" "$TEST_ROOT/report"
-fi
+[[ -n "$PYTHON" ]] || {
+    echo "Python is required for structured reporting tests." >&2
+    exit 1
+}
+"$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
+"$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
 
 for report_name in \
-    index.md \
-    executive-summary.md \
-    project-overview.md \
-    architecture.md \
-    technologies.md \
-    systems.md \
-    contribution.md \
-    collaboration.md \
-    risks.md \
-    notion-evidence.md; do
+    index.html \
+    executive-summary.html \
+    project-overview.html \
+    architecture.html \
+    technologies.html \
+    systems.html \
+    contribution.html \
+    collaboration.html \
+    risks.html \
+    notion-evidence.html; do
     [[ -s "$TEST_ROOT/report/$report_name" ]]
 done
 
-grep -q '# sample-project report' "$TEST_ROOT/report/index.md"
-grep -q '| C# files | 12 |' "$TEST_ROOT/report/executive-summary.md"
-grep -q '| Total commits | 42 |' "$TEST_ROOT/report/executive-summary.md"
-grep -q '| Files | 25 |' "$TEST_ROOT/report/executive-summary.md"
-grep -q '| Potential secret findings | 1 |' "$TEST_ROOT/report/risks.md" || {
-    cat "$TEST_ROOT/report/risks.md" >&2
+grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
+grep -q 'C# files</span><strong>12' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Commits</span><strong>42' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Files</span><strong>25' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Potential secret findings</th><td>1' "$TEST_ROOT/report/risks.html" || {
+    cat "$TEST_ROOT/report/risks.html" >&2
     exit 1
 }
-! grep -q 'Unity version' "$TEST_ROOT/report/project-overview.md"
-! grep -q '| Scenes |' "$TEST_ROOT/report/project-overview.md"
+! grep -q 'Unity version' "$TEST_ROOT/report/project-overview.html"
+! grep -q '>Scenes<' "$TEST_ROOT/report/project-overview.html"
 
-if [[ -n "$PYTHON" ]]; then
-    grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
-    grep -q 'sample-project' "$TEST_ROOT/report/index.html"
-    ! grep -q 'Unity version' "$TEST_ROOT/report/index.html"
-    grep -q '"classification_model"' "$TEST_ROOT/notion/evidence.json"
-    grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
-    grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
-fi
+grep -q 'executive-summary.html' "$TEST_ROOT/report/index.html"
+grep -q 'sample-project' "$TEST_ROOT/report/index.html"
+! grep -q 'Unity version' "$TEST_ROOT/report/index.html"
+grep -q 'href="index.html"' "$TEST_ROOT/report/architecture.html"
+grep -q 'href="technologies.html"' "$TEST_ROOT/report/architecture.html"
+grep -q '"classification_model"' "$TEST_ROOT/notion/evidence.json"
+grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
+grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
 
 printf '%s\n' 'structured reporting tests passed'
