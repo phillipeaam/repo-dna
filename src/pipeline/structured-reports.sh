@@ -151,14 +151,19 @@ else
 fi
 
 # Write the main README.
+PROJECT_README_METADATA=''
+if [[ "$PROJECT_TYPE" == Unity ]]; then
+    PROJECT_README_METADATA="**Product:** $DISPLAY_PRODUCT_NAME
+**Company:** $DISPLAY_COMPANY_NAME
+**Unity version:** ${UNITY_VERSION:-Unknown}"
+fi
 cat > "$OUTPUT_DIR/README.md" <<EOF
 # Project and Career Analysis
 
 **Repository:** $DISPLAY_REPO_NAME
 **Project type:** $PROJECT_TYPE
-**Product:** $DISPLAY_PRODUCT_NAME
 **Git history scope:** $HISTORY_SCOPE
-**Unity version:** ${UNITY_VERSION:-Unknown}  
+$PROJECT_README_METADATA
 **Privacy mode:** $PRIVACY_MODE
 **Source included:** $INCLUDE_SOURCE
 **Generated:** $GENERATED_AT

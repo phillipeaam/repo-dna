@@ -1,8 +1,7 @@
 # ==========================================
 # Exclusion patterns for DNA analysis
 # ==========================================
-# Similar to .gitignore, but specific for project analysis
-# Patterns are matched against file paths relative to the project root
+# Directory exclusions for project analysis. Entries must end in /.
 
 # ==========================================
 # Unity specific directories
@@ -32,12 +31,9 @@ AssetsStore/
 Packages/
 
 # ==========================================
-# Generated files and directories
+# Generated directories
 # ==========================================
 
-**/*.generated.cs
-**/*.gen.cs
-**/*_generated.cs
 Generated/
 gen/
 obj/
@@ -47,15 +43,5 @@ bin/
 # Build artifacts and temporary files
 # ==========================================
 
-*.unitypackage
-*.asset.meta
-
-# ==========================================
-# IDE and editor specific
-# ==========================================
-
 .vs/
 .vscode/
-*.swp
-*.swo
-*~

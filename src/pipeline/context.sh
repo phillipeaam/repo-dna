@@ -15,20 +15,20 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # Load directory exclusion management after REPO_ROOT is available.
-# shellcheck source=lib/exclusions.sh
-source "$SCRIPT_DIR/lib/exclusions.sh"
+# shellcheck source=src/core/exclusions.sh
+source "$SCRIPT_DIR/src/core/exclusions.sh"
 
 # Load evidence-based source ownership classification.
-# shellcheck source=lib/ownership.sh
-source "$SCRIPT_DIR/lib/ownership.sh"
+# shellcheck source=src/core/ownership.sh
+source "$SCRIPT_DIR/src/core/ownership.sh"
 
 # Load sensitive-data detection without exposing matched values.
-# shellcheck source=lib/security.sh
-source "$SCRIPT_DIR/lib/security.sh"
+# shellcheck source=src/core/security.sh
+source "$SCRIPT_DIR/src/core/security.sh"
 
 # Load canonical JSON report collection.
-# shellcheck source=lib/reporting.sh
-source "$SCRIPT_DIR/lib/reporting.sh"
+# shellcheck source=src/reports/json.sh
+source "$SCRIPT_DIR/src/reports/json.sh"
 
 # Resolve the repository name.
 REPO_NAME="$(basename "$REPO_ROOT")"

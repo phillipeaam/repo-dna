@@ -11,7 +11,10 @@ The DNA analysis script now uses a **centralized exclusion system** to prevent r
 The script includes a hardcoded list of common directories to ignore:
 
 ```bash
-IGNORED_DIRS=(Library Logs Temp Obj Build Builds UserSettings MemoryCaptures .git)
+IGNORED_DIRS=(
+  Library Logs Temp Obj Build Builds UserSettings MemoryCaptures
+  node_modules vendor Packages .git
+)
 ```
 
 These are automatically excluded from:
@@ -20,7 +23,7 @@ These are automatically excluded from:
 
 ### 2. The `.repodnaignore` File
 
-Create a `.repodnaignore` file in your repository root to add custom exclusions specific to your project analysis. The format is similar to `.gitignore`:
+Create a `.repodnaignore` file in your repository root to add custom directory exclusions. It intentionally supports a smaller contract than `.gitignore`:
 
 **Example `.repodnaignore`:**
 ```
@@ -35,21 +38,19 @@ AssetStore/
 AssetsStore/
 Packages/
 
-# Generated files
-**/*.generated.cs
-**/*.gen.cs
+# Generated directories
 Generated/
 
 # Build outputs
 bin/
 obj/
-*.unitypackage
 ```
 
 **Key Differences from `.gitignore`:**
-- Only directory patterns (ending with `/`) are processed for `grep` exclusions
-- File patterns (like `**/*.generated.cs`) are for documentation purposes
-- The system currently focuses on directory-level exclusions for robustness
+- Only directory entries ending with `/` are supported.
+- File globs and negation rules are not currently supported.
+- Unsupported patterns should not be listed because documentation alone does
+  not exclude content from generated reports.
 
 ## Centralized Functions
 

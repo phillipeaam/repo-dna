@@ -4,6 +4,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/phillipeaam/repo-dna)
 ![GitHub issues](https://img.shields.io/github/issues/phillipeaam/repo-dna)
 ![GitHub stars](https://img.shields.io/github/stars/phillipeaam/repo-dna?style=social)
+![CI](https://github.com/phillipeaam/repo-dna/actions/workflows/ci.yml/badge.svg)
 
 > **Understand the architecture, evolution and engineering behind any repository.**
 
@@ -17,9 +18,10 @@ Instead of simply counting files or commits, RepoDNA correlates repository struc
 ## 📖 Documentation
 
 - [Bash Cheat Sheet](docs/bash-cheatsheet.md)
-- Architecture *(coming soon)*
-- Roadmap
-- Contributing
+- [Architecture](docs/architecture.md)
+- [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
+- [Exclusion rules](EXCLUSIONS.md)
+- [Contributing](CONTRIBUTING.md)
 ---
 
 # ✨ Features
@@ -102,9 +104,22 @@ If Python is installed under a non-standard command, select it explicitly:
 REPO_DNA_PYTHON=/path/to/python bash ./dna-analysis.sh
 ```
 
+## Quick start
+
+Run RepoDNA from the root of the Git repository you want to analyze:
+
+```bash
+bash /path/to/repo-dna/dna-analysis.sh
+```
+
+Use `bash ./dna-analysis.sh --help` from the RepoDNA checkout to list every
+option. Generated reports are written to a timestamped directory in the
+analyzed repository; start with `report/index.html`.
+
 ## Customizing Directory Exclusions
 
-By default, RepoDNA excludes common directories like `Library/`, `Plugins/`, `Build/`, and `.git/`. 
+By default, RepoDNA excludes generated or dependency directories such as
+`Library/`, `Build/`, `node_modules/`, `vendor/`, `Packages/`, and `.git/`.
 
 To customize exclusions for your project, create a `.repodnaignore` file in your repository root:
 
@@ -113,8 +128,10 @@ To customize exclusions for your project, create a `.repodnaignore` file in your
 Assets/Plugins/
 Assets/Generated/
 vendor/
-**/*.generated.cs
 ```
+
+`.repodnaignore` currently supports directory entries ending in `/`. File globs
+and negation rules are not supported yet.
 
 See [EXCLUSIONS.md](./EXCLUSIONS.md) for detailed configuration documentation.
 
@@ -135,6 +152,24 @@ bash dna-analysis.sh --owned-root Assets/_Project --owned-root Assets/Common
 precedence over vendor-name heuristics, but not over generated or ignored paths.
 High-confidence third-party and generated files are not copied into the source
 review folders.
+
+## Author aliases
+
+Git identities can be normalized with an optional `.repodna-authors` file in
+the analyzed repository root. Copy `.repodna-authors.example` and list every
+known name and e-mail under one canonical identity:
+
+```yaml
+Phillipe Augusto:
+  names:
+    - Phillipe Augusto
+    - phillipe
+  emails:
+    - developer@example.com
+```
+
+Standard reports show the canonical contributor name and commit count. Strict
+privacy mode replaces names and does not export e-mail addresses.
 
 ## Privacy and Source Export
 
@@ -243,6 +278,15 @@ src/pipeline/
 `tests/architecture_test.sh` enforces the 200-line limit, verifies every sourced
 module exists, and checks its Bash syntax.
 
+Run the complete local suite with:
+
+```bash
+bash ./tests/run.sh
+```
+
+The same suite runs on Linux for every push and pull request through GitHub
+Actions.
+
 Python 3 is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable
 runtime. `matplotlib` is required for the optional PNG charts; the HTML reports
@@ -257,26 +301,32 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 
 ### Core
 
-- [ ] Repository detection
-- [ ] Multi-language architecture analysis
-- [ ] Git contribution analysis
-- [ ] Report generation
+- [x] Repository and project-type detection
+- [x] Stack-neutral language, dependency and repository inventory
+- [x] Git contribution, churn, hotspot and collaboration analysis
+- [x] Structured JSON and HTML report generation
+- [ ] Language-aware architecture analysis beyond C#
 
-### Supported Platforms
+### Project detection
 
-- [ ] Unity
-- [ ] Unreal Engine
-- [ ] Godot
-- [ ] Android
+- [x] Unity
+- [x] Unreal Engine
+- [x] Godot
+- [x] Android
+- [x] Flutter
+- [x] .NET
+- [x] Node
+- [x] Python
 - [ ] iOS
-- [ ] Flutter
-- [ ] .NET
+
+Unity and C# currently have specialized signals. Other detected stacks use the
+generic analyzer until a dedicated analyzer is implemented.
 
 ### Reports
 
-- [ ] HTML report suite
-- [ ] JSON
-- [ ] CSV
+- [x] HTML report suite
+- [x] Canonical JSON
+- [x] Git history CSV
 - [ ] Interactive Dashboard
 
 ### Advanced Analysis
@@ -284,9 +334,9 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 - [ ] Dependency graph
 - [ ] Architecture diagrams
 - [ ] Complexity analysis
-- [ ] Code ownership analysis
-- [ ] Design pattern detection
-- [ ] Technical debt report
+- [x] Evidence-based code ownership classification
+- [x] C# design-pattern signals
+- [x] Technical-debt markers
 - [ ] AI-powered project summary
 - [ ] Pull Request analysis
 
@@ -306,28 +356,11 @@ Contributions, ideas, feature requests, and bug reports are always welcome.
 
 If you have suggestions for new analyzers, technologies, or report formats, feel free to open an issue or submit a pull request.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture rules and the complete
+validation workflow.
+
 ---
 
 # 📜 License
 
 Distributed under the **MIT License**.
-## Author aliases
-
-Git identities can be normalized with an optional `.repodna-authors` file in
-the analyzed repository root. Copy `.repodna-authors.example` and list every
-known name and e-mail under one canonical identity:
-
-```yaml
-Phillipe Augusto:
-  names:
-    - Phillipe Augusto
-    - phillipe
-  emails:
-    - developer@example.com
-```
-
-Standard reports show the canonical contributor name and commit count. Strict
-privacy mode replaces names and does not export e-mail addresses. The Git
-analysis also reports co-authorship trailers, shared files, branches, tags,
-rename/copy-aware history, system evolution, and composite hotspots combining
-change frequency, churn, current size, author count, and recency.

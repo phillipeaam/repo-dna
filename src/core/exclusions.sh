@@ -9,15 +9,9 @@
     return 1 2>/dev/null || exit 1
 }
 
-# Load required string utilities.
-if [[ -f "${REPO_ROOT}/utils/strings.sh" ]]; then
-    source "${REPO_ROOT}/utils/strings.sh"
-else
-    printf 'Missing utility: %s\n' \
-        "${REPO_ROOT}/utils/strings.sh" >&2
-
-    return 1 2>/dev/null || exit 1
-fi
+# Load required string utilities relative to this module, not the analyzed repo.
+# shellcheck source=src/core/strings.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/strings.sh"
 
 # Define directories ignored in every analysis.
 declare -gar IGNORED_DIRS=(
@@ -90,9 +84,7 @@ build_find_prune_predicates() {
     fi
 
     while IFS= read -r dir || [[ -n "$dir" ]]; do
-        # FIX: usa a mesma flag "first" em vez de assumir que o array
-        # já tem conteúdo. Assim, se um dia IGNORED_DIRS ficar vazio,
-        # o predicado gerado continua uma expressão válida para o find.
+        # Preserve a valid find expression if built-in exclusions become empty.
         if [[ "$first" == true ]]; then
             first=false
         else
@@ -132,14 +124,11 @@ analysis_find() {
 # Only real errors (e.g. invalid CODE_ROOT) are treated as failures here.
 # Usage: analysis_grep --include='*.cs' -InE 'pattern'
 analysis_grep() {
-    # FIX: variáveis de loop agora são "local" para não vazarem
-    # para o escopo global depois que a função termina.
     local -a grep_args=("$@")
     local -a exclude_dirs=()
     local dir
 
-    # FIX: mesma validação de CODE_ROOT que já existia em analysis_find.
-    # Sem isso, CODE_ROOT vazio virava um "grep -R ... ''" silencioso.
+    # Reject an invalid root instead of silently searching an empty path.
     [[ -d "${CODE_ROOT:-}" ]] || {
         printf 'Invalid CODE_ROOT: %s\n' \
             "${CODE_ROOT:-unset}" >&2
@@ -157,9 +146,7 @@ analysis_grep() {
     done < <(_load_repodna_ignore_directories)
 
     # Execute grep with all exclusions applied.
-    # FIX: removido o "|| true" que escondia tanto "sem resultados"
-    # quanto erros reais do grep. Agora o código de saída do grep
-    # é repassado normalmente para quem chamar analysis_grep.
+    # Preserve grep's status so callers can distinguish matches from no matches.
     grep -R "${exclude_dirs[@]}" "${grep_args[@]}" "$CODE_ROOT" 2>/dev/null
 }
 

@@ -7,8 +7,8 @@ cat > "$SUMMARY_DIR/01_notion_evidence_guide.md" <<'EOF'
 
 ## 📚 About the Project
 
-Review repository information, folder structure, scenes, prefabs, package
-manifests, current project metrics, README files, and Unity settings.
+Review repository information, folder structure, dependency manifests, current
+metrics, documentation, configuration, and stack-specific evidence when available.
 
 Describe the product, audience, goals, platforms, scope, and production context.
 Do not infer the complete product purpose from file names alone.
@@ -38,9 +38,8 @@ persistence, integration, platform, release, and production-stability work.
 
 ## 🧠 Technologies
 
-Review package manifests, Unity version, assemblies, shaders, UI Toolkit,
-Timeline, Addressables, networking, services, databases, editor tooling, and
-project settings.
+Review detected languages, dependency manifests, build and CI configuration,
+framework signals, networking, services, databases, tooling, and project settings.
 
 ## 🤝 Collaboration
 

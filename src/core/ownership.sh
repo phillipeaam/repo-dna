@@ -38,6 +38,12 @@ ownership_matches_any_root() {
 ownership_initialize() {
     local path
 
+    OWNERSHIP_SUBMODULE_ROOTS=()
+    OWNERSHIP_ASMDEF_ROOTS=()
+    OWNERSHIP_DEPENDENCY_ROOTS=()
+    OWNERSHIP_IGNORED_ROOTS=()
+    OWNERSHIP_TRACKED_PATHS=()
+
     while IFS= read -r path; do
         [[ -n "$path" ]] && OWNERSHIP_IGNORED_ROOTS+=("$(ownership_normalize_path "$path")")
     done < <(_load_repodna_ignore_directories)
@@ -60,6 +66,7 @@ ownership_initialize() {
     [[ -f Packages/manifest.json ]] && OWNERSHIP_DEPENDENCY_ROOTS+=(Packages)
     [[ -f package.json ]] && OWNERSHIP_DEPENDENCY_ROOTS+=(node_modules)
     [[ -f composer.json ]] && OWNERSHIP_DEPENDENCY_ROOTS+=(vendor)
+    return 0
 }
 
 ownership_is_ignored() {

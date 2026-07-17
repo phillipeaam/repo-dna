@@ -6,7 +6,7 @@ SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d -p "$SOURCE_ROOT" .security-test.XXXXXX)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
-source "$SOURCE_ROOT/lib/security.sh"
+source "$SOURCE_ROOT/src/core/security.sh"
 
 analysis_find() {
     find . "$@"

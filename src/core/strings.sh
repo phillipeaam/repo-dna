@@ -2,7 +2,7 @@
 
 # String utility helpers
 # Safe to source from other scripts. Provides simple string functions
-# used across lib/ modules.
+# used across production modules.
 
 # Trim leading and trailing whitespace from a string argument.
 # Usage: trimmed=$(string_trim "  value  ")

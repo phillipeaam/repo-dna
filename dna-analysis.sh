@@ -13,8 +13,8 @@ EXECUTION_STARTED_AT=$SECONDS
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Load project-type and source-root detection.
-# shellcheck source=lib/project-detection.sh
-source "$SCRIPT_DIR/lib/project-detection.sh"
+# shellcheck source=src/detectors/project-type.sh
+source "$SCRIPT_DIR/src/detectors/project-type.sh"
 # shellcheck source=src/core/runtime.sh
 source "$SCRIPT_DIR/src/core/runtime.sh"
 # shellcheck source=src/core/arguments.sh

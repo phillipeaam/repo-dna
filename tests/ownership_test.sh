@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-set -u
-set -o pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODE_ROOT='.'
 OWNED_ROOTS=(Assets/_Project)
 
-source "$REPO_ROOT/utils/strings.sh"
+source "$REPO_ROOT/src/core/strings.sh"
 
 _load_repodna_ignore_directories() {
     printf '%s\n' 'Ignored'
@@ -17,7 +16,7 @@ analysis_find() {
     find "$CODE_ROOT" "$@"
 }
 
-source "$REPO_ROOT/lib/ownership.sh"
+source "$REPO_ROOT/src/core/ownership.sh"
 
 cd "$REPO_ROOT" || exit 1
 ownership_initialize
@@ -43,7 +42,7 @@ assert_classification Assets/Nested/Ignored/File.cs excluded High
 assert_classification Assets/Generated/File.cs generated High
 assert_classification Assets/_Project/File.cs project-owned High
 assert_classification Assets/Plugins/Photon/File.cs third-party High
-assert_classification lib/project-detection.sh project-owned Low
+assert_classification README.md project-owned Low
 assert_classification Unknown/File.cs review-required Low
 
 ownership_is_reviewable Unknown/File.cs
