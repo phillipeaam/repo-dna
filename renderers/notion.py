@@ -32,6 +32,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     quality_findings = generic.get("analysis", {}).get("quality", {})
     activity_ownership = generic.get("analysis", {}).get("author_system_ownership", {})
     technical_impact = generic.get("git", {}).get("technical_impact", {})
+    achievement_candidates = generic.get("analysis", {}).get("personal_achievement_candidates", {})
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -176,6 +177,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             for item in activity_ownership.get("relationships", [])[:50]
         ],
         "personal_data": [],
+        "personal_achievement_candidates": achievement_candidates,
         "claims_requiring_confirmation": [
             "Personal ownership of any detected system.",
             "Causal product or business impact.",

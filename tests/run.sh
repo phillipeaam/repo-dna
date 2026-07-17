@@ -11,6 +11,7 @@ tests=(
     ownership_test.sh
     author_system_ownership_test.sh
     technical_impact_test.sh
+    achievement_candidates_test.sh
     git_history_test.sh
     security_scan_test.sh
     generic_collector_test.sh

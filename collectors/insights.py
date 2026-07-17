@@ -15,6 +15,7 @@ from graphs import build_graphs
 from architecture import analyze_architecture
 from quality import import_quality_results
 from author_system_ownership import analyze_author_system_ownership
+from achievement_candidates import generate_achievement_candidates
 
 
 SOURCE_LANGUAGES = {
@@ -340,6 +341,11 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
     author_system_ownership = analyze_author_system_ownership(systems, generic["git"])
+    achievement_candidates = generate_achievement_candidates(
+        generic["git"].get("author_filter", ""),
+        generic["git"].get("technical_impact", {}),
+        author_system_ownership,
+    )
     imported_quality = import_quality_results(root, generic["dependencies"])
     quality = {
         "code": code,
@@ -369,6 +375,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         },
         "systems": systems,
         "author_system_ownership": author_system_ownership,
+        "personal_achievement_candidates": achievement_candidates,
         "frameworks": frameworks,
         "graphs": graphs,
         "quality": quality | {"code": {"complexity": code["complexity"]}},

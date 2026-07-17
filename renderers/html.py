@@ -271,6 +271,19 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Estimated complexity increases", impact_summary.get("estimated_complexity_increases", 0)),
     ])
     impact_note = '<p class="note">Before/after lines and estimated complexity cover only source files changed by that commit. Technical signals describe repository changes; they do not prove quality improvement, product impact, business impact, or individual performance.</p>'
+    achievements = analysis.get("personal_achievement_candidates", {})
+    achievement_rows = [
+        [item["title"], item["category"], item["draft_statement"], item["confidence"], "; ".join(item.get("required_confirmations", []))]
+        for item in achievements.get("candidates", [])
+    ]
+    achievement_table = data_table(
+        ["Candidate", "Category", "Evidence-backed draft", "Confidence", "Required confirmation"], achievement_rows
+    ) if achievement_rows else (
+        '<p class="empty">Run RepoDNA with <code>--author &quot;Canonical Author&quot;</code> to generate personally scoped achievement candidates.</p>'
+        if achievements.get("status") == "requires_author_filter"
+        else '<p class="empty">The selected author scope did not provide enough evidence for achievement candidates.</p>'
+    )
+    achievement_note = '<p class="note">Candidates are not confirmed achievements. Git evidence can support scope and technical change, but personal responsibility, intent, outcome, and business impact require confirmation.</p>'
     reference_table = table([
         ("Branches", git_data.get("branches_count", 0)),
         ("Tags", git_data.get("tags_count", 0)),
@@ -507,7 +520,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("technologies.html", "Technologies", technology_body),
         ("systems.html", "Systems", systems_body),
         ("graphs.html", "Module and dependency graphs", graphs_body),
-        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
+        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Personal achievement candidates</h3>" + achievement_table + achievement_note + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),

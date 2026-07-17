@@ -335,6 +335,11 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis = result["analysis"]
     system_name_map = {system["name"]: f"Module-{index}" for index, system in enumerate(analysis["systems"], 1)}
     ownership = analysis.get("author_system_ownership", {})
+    achievement_candidates = analysis.get("personal_achievement_candidates", {})
+    if achievement_candidates.get("candidates"):
+        achievement_candidates["candidates"] = []
+        achievement_candidates["status"] = "redacted_by_privacy_mode"
+        achievement_candidates["author"] = "Selected contributor"
     author_name_map = {
         name: f"Contributor-{index}"
         for index, name in enumerate(sorted({item["author"] for item in ownership.get("relationships", [])}), 1)

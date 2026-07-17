@@ -85,6 +85,10 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
           {"author": "Developer Two", "system": "Data/Persistence", "rank_in_system": 2, "commits": 6, "churn": 300, "files_touched": 3, "system_activity_share_percent": 20.0, "author_focus_percent": 35.0, "confidence": "medium", "confidence_score": 63, "system_confidence": "high"}
         ]
       },
+      "personal_achievement_candidates": {
+        "status": "candidates_generated", "author": "Developer One", "summary": {"candidates": 1, "high_confidence": 1, "medium_confidence": 0, "low_confidence": 0},
+        "candidates": [{"id": "system-data-persistence", "category": "system_contribution", "title": "Contribution to Data/Persistence", "draft_statement": "Contributed historical changes to Data/Persistence across 24 commit touches and 8 files.", "factual_basis": ["60% author focus"], "metrics": {"commit_touches": 24, "files_touched": 8, "churn": 1800, "author_focus_percent": 60.0}, "evidence": ["#/analysis/author_system_ownership"], "confidence": "high", "confirmation_required": true, "required_confirmations": ["Confirm actual responsibility.", "Describe the outcome."], "xyz_inputs": {"accomplished_x": "requires confirmation", "measured_by_y": {"commit_touches": 24}, "by_doing_z": "requires confirmation"}}]
+      },
       "frameworks": {
         "count": 1,
         "method": "weighted evidence",
@@ -265,6 +269,8 @@ grep -q 'specialized framework adapters matched' "$TEST_ROOT/report/executive-su
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
 grep -q 'Technical impact before and after each contribution' "$TEST_ROOT/report/contribution.html"
+grep -q 'Personal achievement candidates' "$TEST_ROOT/report/contribution.html"
+grep -q 'Contribution to Data/Persistence' "$TEST_ROOT/report/contribution.html"
 grep -q 'Reduce persistence branching' "$TEST_ROOT/report/contribution.html"
 grep -q 'estimated_complexity_reduced' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
@@ -296,6 +302,8 @@ grep -q 'commits_by_month.png' "$TEST_ROOT/report/charts.html"
 grep -q 'class="chart"' "$TEST_ROOT/report/charts.html"
 grep -q 'confirmation_required' "$TEST_ROOT/portfolio/draft.json"
 grep -q 'Portfolio and CV evidence draft' "$TEST_ROOT/portfolio/index.html"
+grep -q 'Author-filtered achievement candidates' "$TEST_ROOT/portfolio/index.html"
+grep -q 'system-data-persistence' "$TEST_ROOT/portfolio/draft.json"
 grep -q '"approved_claim_count": 1' "$TEST_ROOT/portfolio/approved.json"
 grep -q 'Confirmed Developer' "$TEST_ROOT/portfolio/approved.json"
 grep -q 'Potential secret findings</th><td class="number">1' "$TEST_ROOT/report/risks.html" || {

@@ -102,6 +102,8 @@ assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
 assert analysis["health"]["version"] == "1.1"
 assert analysis["health"]["score"] is not None
 assert analysis["narrative_facts"]
+assert analysis["personal_achievement_candidates"]["status"] == "requires_author_filter"
+assert analysis["personal_achievement_candidates"]["candidates"] == []
 PY
 
 python - "$TEST_ROOT/generic-analysis-focused.json" <<'PY'
@@ -120,6 +122,11 @@ assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "
 ownership = data["analysis"]["author_system_ownership"]
 assert {item["author"] for item in ownership["relationships"]} == {"Focused Developer"}
 assert all(item["system_activity_share_percent"] is None for item in ownership["relationships"])
+achievements = data["analysis"]["personal_achievement_candidates"]
+assert achievements["status"] == "candidates_generated"
+assert achievements["author"] == "Focused Developer"
+assert any(item["category"] == "system_contribution" for item in achievements["candidates"])
+assert all(item["confirmation_required"] for item in achievements["candidates"])
 PY
 
 python - "$TEST_ROOT/generic-analysis-strict.json" <<'PY'

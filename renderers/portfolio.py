@@ -40,6 +40,21 @@ def build(data: dict[str, Any], confirmations: dict[str, Any]) -> dict[str, Any]
         }
         for index, fact in enumerate(facts)
     ]
+    generated_candidates = [
+        {
+            "id": item["id"],
+            "statement": item["draft_statement"],
+            "title": item["title"],
+            "category": item["category"],
+            "evidence": item["evidence"],
+            "metrics": item["metrics"],
+            "confidence": item["confidence"],
+            "required_confirmations": item["required_confirmations"],
+            "xyz_inputs": item["xyz_inputs"],
+            "approved": item["id"] in approved_ids,
+        }
+        for item in generic.get("analysis", {}).get("personal_achievement_candidates", {}).get("candidates", [])
+    ]
     achievements = []
     for index, item in enumerate(confirmations.get("achievements", [])):
         claim_id = item.get("id", f"achievement-{index + 1}")
@@ -58,7 +73,7 @@ def build(data: dict[str, Any], confirmations: dict[str, Any]) -> dict[str, Any]
             "approved": claim_id in approved_ids,
             "evidence": item.get("evidence", []),
         })
-    all_claims = claims + achievements
+    all_claims = claims + generated_candidates + achievements
     approved = [item for item in all_claims if item["approved"]]
     return {
         "schema_version": "1.0",
@@ -69,6 +84,7 @@ def build(data: dict[str, Any], confirmations: dict[str, Any]) -> dict[str, Any]
         },
         "repository": data["project"]["name"],
         "claims": claims,
+        "achievement_candidates": generated_candidates,
         "xyz_achievements": achievements,
         "approved_claim_count": len(approved),
         "confirmation_required_count": len(all_claims) - len(approved),
@@ -92,6 +108,7 @@ def render_html(draft: dict[str, Any]) -> str:
 <title>Portfolio evidence draft</title><style>body{{max-width:900px;margin:3rem auto;padding:0 1rem;font:16px/1.6 system-ui;color:#182230}}section{{border:1px solid #dce3ea;border-radius:12px;padding:1.2rem;margin:1rem 0}}.approved{{color:#067647}}.review{{color:#b54708}}code{{background:#f2f4f7;padding:.15rem .35rem}}</style></head>
 <body><h1>Portfolio and CV evidence draft</h1><p>Status: <strong>{esc(draft["status"])}</strong>. This document never treats repository inference as personal ownership without approval.</p>
 <section><h2>Repository facts</h2><ul>{items(draft["claims"])}</ul></section>
+<section><h2>Author-filtered achievement candidates</h2><ul>{items(draft["achievement_candidates"])}</ul><p>These are evidence-backed prompts, not confirmed achievements. Complete the missing responsibility, action, and outcome before approval.</p></section>
 <section><h2>X-Y-Z achievements</h2><ul>{items(draft["xyz_achievements"])}</ul></section>
 <section><h2>How to approve</h2><p>Provide a confirmations JSON with personal context and an <code>approved_claims</code> list, then run RepoDNA with <code>--portfolio-profile path/to/confirmations.json</code>.</p></section></body></html>"""
 

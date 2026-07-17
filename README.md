@@ -26,6 +26,7 @@ One command creates a timestamped analysis package containing:
 - ownership classification with confidence and evidence;
 - author-to-system activity ownership with percentages, ranking, and confidence;
 - before/after technical impact signals for individual Git contributions;
+- confirmation-gated personal achievement candidates for an explicit author scope;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation and Notion-oriented evidence;
 - optional charts and explicitly opted-in source exports.
@@ -130,6 +131,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
+- [Personal achievement candidates](docs/achievement-candidates.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
