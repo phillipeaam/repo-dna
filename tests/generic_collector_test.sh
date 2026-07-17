@@ -70,6 +70,10 @@ assert data["git"]["contributors"][0] == {"name": "Canonical Developer", "commit
 assert data["git"]["author_aliases_configured"] >= 3
 assert data["git"]["branches_count"] >= 1
 assert data["git"]["churn"]["total"] > 0
+impact = data["git"]["technical_impact"]
+assert impact["status"] == "assessed" and impact["contributions_analyzed"] == 3
+assert all(item["author"] in {"Canonical Developer", "Focused Developer"} for item in impact["contributions"])
+assert all({"before", "after", "delta", "signals", "measurement_confidence"} <= item.keys() for item in impact["contributions"])
 assert any(item["path"] == "src/main.py" for item in data["git"]["hotspots"])
 assert {"current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
 assert data["git"]["coauthorship"][0]["commits"] == 1
@@ -110,6 +114,8 @@ assert data["git"]["scope"] == "author"
 assert data["git"]["author_filter"] == "Focused Developer"
 assert data["git"]["contributors"] == [{"name": "Focused Developer", "commits": 1}], data["git"]["contributors"]
 assert data["git"]["churn"]["total"] > 0
+assert data["git"]["technical_impact"]["contributions_analyzed"] == 1
+assert data["git"]["technical_impact"]["contributions"][0]["author"] == "Focused Developer"
 assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "commits": 1}]
 ownership = data["analysis"]["author_system_ownership"]
 assert {item["author"] for item in ownership["relationships"]} == {"Focused Developer"}
@@ -130,6 +136,8 @@ assert data["git"]["branches"] == []
 assert data["git"]["tags"] == []
 assert all(item["path"].startswith("File-") for item in data["git"]["hotspots"])
 assert all(item["name"].startswith("Module-") for item in data["analysis"]["systems"])
+assert all(item["subject"] == "[REDACTED]" for item in data["git"]["technical_impact"]["contributions"])
+assert all(item["commit"].startswith("Contribution-") for item in data["git"]["technical_impact"]["contributions"])
 ownership = data["analysis"]["author_system_ownership"]
 assert all(item["author"].startswith("Contributor-") for item in ownership["relationships"])
 assert all(item["system"].startswith("Module-") for item in ownership["relationships"])

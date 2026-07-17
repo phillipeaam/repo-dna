@@ -31,6 +31,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     framework_findings = generic.get("analysis", {}).get("frameworks", {}).get("detected", [])
     quality_findings = generic.get("analysis", {}).get("quality", {})
     activity_ownership = generic.get("analysis", {}).get("author_system_ownership", {})
+    technical_impact = generic.get("git", {}).get("technical_impact", {})
 
     project_facts = [
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
@@ -145,7 +146,17 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "personal_attribution": "unconfirmed",
             "confidence": "high",
             "confirmation_required": True,
-        }],
+        }] + [
+            {
+                "kind": "fact",
+                "statement": f"Commit {item['commit']} changed {item['touched']['files']} files with {item['touched']['churn']} lines of churn; changed-source lines moved from {item['before']['source_lines']} to {item['after']['source_lines']} and estimated complexity moved from {item['before']['estimated_complexity']} to {item['after']['estimated_complexity']}.",
+                "evidence": ["report/data/report.json#/generic_analysis/git/technical_impact"],
+                "author": item["author"], "date": item["date"], "systems": item.get("systems", []),
+                "technical_signals": item.get("signals", []), "confidence": item["measurement_confidence"],
+                "impact_interpretation": "unconfirmed", "confirmation_required": True,
+            }
+            for item in technical_impact.get("contributions", [])[:100]
+        ],
         "technologies": technology_facts,
         "collaboration_signals": [
             fact(

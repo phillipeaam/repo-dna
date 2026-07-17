@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from insights import analyze_repository
+from technical_impact import collect_technical_impact
 
 
 LANGUAGES = {
@@ -170,6 +171,11 @@ def author_scope_args(author_filter: str, name_aliases: dict[str, str], email_al
 def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[str, Any]:
     name_aliases, email_aliases = load_author_aliases(root)
     scope = author_scope_args(author_filter, name_aliases, email_aliases)
+    technical_impact = collect_technical_impact(
+        root,
+        scope,
+        lambda name, email: canonical_author(name, email, name_aliases, email_aliases),
+    )
     identity_rows = [row.split("\t", 1) for row in git(root, "log", "--all", *scope, "--format=%aN%x09%aE").splitlines() if "\t" in row]
     contributor_commits: Counter[str] = Counter(
         canonical_author(name, email, name_aliases, email_aliases) for name, email in identity_rows
@@ -282,6 +288,7 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
             {"path": path, "commits": count} for path, count in change_commits.most_common(50)
         ],
         "hotspots": hotspots[:50],
+        "technical_impact": technical_impact,
         "_file_author_activity": {
             path: {
                 author: {"commits": commits, "churn": file_author_churn[path][author]}
@@ -316,6 +323,11 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     git_data["branches"] = []
     git_data["tags"] = []
     git_data["releases"] = []
+    for index, contribution in enumerate(git_data.get("technical_impact", {}).get("contributions", []), 1):
+        contribution["commit"] = f"Contribution-{index}"
+        contribution["author"] = "Selected contributor" if git_data.get("author_filter") else "Contributor"
+        contribution["subject"] = "[REDACTED]"
+        contribution["systems"] = [f"Module-{system_index}" for system_index, _ in enumerate(contribution.get("systems", []), 1)]
     anonymize_paths(git_data["shared_files"])
     anonymize_paths(git_data["most_changed_files"])
     anonymize_paths(git_data["hotspots"])

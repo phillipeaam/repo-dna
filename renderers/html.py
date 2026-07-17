@@ -246,6 +246,31 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         {1, 3, 4, 5, 6, 7, 9},
     ) if ownership_rows else '<p class="empty">Insufficient Git evidence to infer author-to-system activity.</p>'
     ownership_note = '<p class="note">This is approximate historical activity ownership, not proof of responsibility or authorship. Share of system activity compares author-file commit touches inside a system. Author focus shows how much of that author\'s system activity occurred there. Confidence reflects evidence volume; it is not confidence in personal or business ownership.</p>'
+    technical_impact = git_data.get("technical_impact", {})
+    impact_rows = [
+        [item["date"][:10], item["commit"], item["author"], item["subject"], ", ".join(item.get("systems", [])),
+         item["before"]["source_lines"], item["after"]["source_lines"], item["delta"]["source_lines"],
+         item["before"]["estimated_complexity"], item["after"]["estimated_complexity"], item["delta"]["estimated_complexity"],
+         item["touched"]["test_files"], item["touched"]["dependency_manifests"], item["touched"]["churn"],
+         ", ".join(item.get("signals", [])), item["measurement_confidence"]]
+        for item in technical_impact.get("contributions", [])[:100]
+    ]
+    impact_table = data_table(
+        ["Date", "Commit", "Author", "Contribution", "Systems", "Lines before", "Lines after", "Lines delta", "Complexity before", "Complexity after", "Complexity delta", "Test files", "Dependency manifests", "Churn", "Technical signals", "Confidence"],
+        impact_rows, {5, 6, 7, 8, 9, 10, 11, 12, 13},
+    ) if impact_rows else '<p class="empty">Insufficient first-parent Git history to calculate contribution impact.</p>'
+    impact_summary = technical_impact.get("summary", {})
+    impact_summary_table = table([
+        ("Contributions analyzed", technical_impact.get("contributions_analyzed", 0)),
+        ("Total churn", impact_summary.get("total_churn", 0)),
+        ("Net changed-source lines", impact_summary.get("net_changed_source_lines", 0)),
+        ("Net estimated complexity", impact_summary.get("net_estimated_complexity", 0)),
+        ("Contributions changing tests", impact_summary.get("contributions_changing_tests", 0)),
+        ("Contributions changing dependencies", impact_summary.get("contributions_changing_dependencies", 0)),
+        ("Estimated complexity reductions", impact_summary.get("estimated_complexity_reductions", 0)),
+        ("Estimated complexity increases", impact_summary.get("estimated_complexity_increases", 0)),
+    ])
+    impact_note = '<p class="note">Before/after lines and estimated complexity cover only source files changed by that commit. Technical signals describe repository changes; they do not prove quality improvement, product impact, business impact, or individual performance.</p>'
     reference_table = table([
         ("Branches", git_data.get("branches_count", 0)),
         ("Tags", git_data.get("tags_count", 0)),
@@ -482,7 +507,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("technologies.html", "Technologies", technology_body),
         ("systems.html", "Systems", systems_body),
         ("graphs.html", "Module and dependency graphs", graphs_body),
-        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
+        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),

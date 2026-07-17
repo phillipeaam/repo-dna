@@ -25,6 +25,7 @@ One command creates a timestamped analysis package containing:
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - ownership classification with confidence and evidence;
 - author-to-system activity ownership with percentages, ranking, and confidence;
+- before/after technical impact signals for individual Git contributions;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation and Notion-oriented evidence;
 - optional charts and explicitly opted-in source exports.
@@ -128,6 +129,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Module and dependency graphs](docs/dependency-graphs.md)
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)
+- [Technical impact before and after contributions](docs/technical-impact.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)

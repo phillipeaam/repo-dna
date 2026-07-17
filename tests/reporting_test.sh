@@ -54,6 +54,10 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
       "contributors": [{"name": "Developer One", "commits": 30}, {"name": "Developer Two", "commits": 12}],
       "hotspots": [{"path": "src/Core.cs", "commits": 5, "churn": 200}],
       "system_evolution": {"Data/Persistence": {"2026-01": 4}},
+      "technical_impact": {
+        "status": "assessed", "contributions_analyzed": 1,
+        "contributions": [{"commit": "abc123def456", "date": "2026-01-20T10:00:00Z", "author": "Developer One", "subject": "Reduce persistence branching", "parents": 1, "systems": ["src"], "touched": {"files": 3, "source_files": 2, "test_files": 1, "documentation_files": 0, "configuration_files": 0, "dependency_manifests": 0, "binary_files": 0, "additions": 20, "deletions": 35, "churn": 55}, "before": {"source_lines": 180, "estimated_complexity": 24}, "after": {"source_lines": 165, "estimated_complexity": 20}, "delta": {"source_lines": -15, "estimated_complexity": -4}, "signals": ["tests_changed", "estimated_complexity_reduced"], "measurement_confidence": "high"}]
+      },
       "churn": {"lines_added": 1000, "lines_removed": 400, "total": 1400}
     },
     "analysis": {
@@ -260,6 +264,9 @@ grep -q 'Architectural boundaries' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'specialized framework adapters matched' "$TEST_ROOT/report/executive-summary.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
+grep -q 'Technical impact before and after each contribution' "$TEST_ROOT/report/contribution.html"
+grep -q 'Reduce persistence branching' "$TEST_ROOT/report/contribution.html"
+grep -q 'estimated_complexity_reduced' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
 grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
