@@ -41,6 +41,13 @@ language-aware symbols, imports, architecture and pattern signals, system
 candidates, quality evidence, narrative facts, and the versioned repository
 health model. It does not write presentation files.
 
+Language parsing is isolated under `collectors/languages/`. The registry selects
+the strongest available analyzer and publishes parser coverage. Python uses the
+standard-library AST; unsupported or syntactically invalid files retain the
+existing heuristic analyzer with an explicit fallback status. Future
+Tree-sitter adapters must implement the same source-analysis contract rather
+than add parser-specific fields directly to `generic.py`.
+
 `renderers/portfolio.py` creates an approval-gated portfolio draft. Repository
 facts remain unapproved unless their claim IDs are explicitly listed in a
 portfolio confirmation profile. Personal profiles are not accepted in strict

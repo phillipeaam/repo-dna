@@ -311,12 +311,26 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
 
     analysis = result["analysis"]
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
-        symbol["name"] = f"Symbol-{index}"
-        symbol["path"] = f"File-{index}"
+        sanitized_symbol = {
+            "name": f"Symbol-{index}",
+            "path": f"File-{index}",
+            "language": symbol.get("language", "Unknown"),
+            "kind": symbol.get("kind", "symbol"),
+            "parser": symbol.get("parser", "unknown"),
+        }
+        symbol.clear()
+        symbol.update(sanitized_symbol)
     for index, item in enumerate(analysis["code"]["imports"], 1):
         item["path"] = f"File-{index}"
         item["imports"] = []
     anonymize_paths(analysis["code"]["complexity"]["high_complexity_files"])
+    for index, item in enumerate(analysis["code"]["complexity"].get("high_complexity_functions", []), 1):
+        item["path"] = f"File-{index}"
+        item["name"] = f"Function-{index}"
+    for index, call in enumerate(analysis["code"].get("calls", []), 1):
+        call["path"] = f"File-{index}"
+        call["target"] = f"Call-{index}"
+        call["scope"] = ""
     for index, system in enumerate(analysis["systems"], 1):
         system["name"] = f"Module-{index}"
         system["path"] = f"Module-{index}"

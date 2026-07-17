@@ -8,6 +8,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+from languages import analyze_source
+from languages.registry import parser_status
+
 
 SOURCE_LANGUAGES = {
     "Python", "JavaScript", "TypeScript", "Java", "Kotlin", "Go", "Rust",
@@ -77,11 +80,16 @@ def _matches(pattern: re.Pattern[str], content: str) -> list[str]:
 
 
 def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
-    symbols: list[dict[str, str]] = []
+    symbols: list[dict[str, Any]] = []
     imports_by_file: dict[str, list[str]] = {}
     pattern_counts: Counter[str] = Counter()
+    pattern_basis: dict[str, str] = {}
     complexity_rows: list[dict[str, Any]] = []
+    function_complexity: list[dict[str, Any]] = []
+    calls: list[dict[str, Any]] = []
     language_architecture: dict[str, Counter[str]] = defaultdict(Counter)
+    parser_files: dict[str, Counter[str]] = defaultdict(Counter)
+    parser_errors: Counter[str] = Counter()
 
     for item in files:
         language = item.get("language")
@@ -92,21 +100,41 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
         if not content:
             continue
 
-        symbol_pattern = SYMBOL_PATTERNS.get(language)
-        file_symbols = _matches(symbol_pattern, content) if symbol_pattern else []
-        symbols.extend({"name": name, "path": relative, "language": language} for name in file_symbols[:100])
-
-        import_pattern = IMPORT_PATTERNS.get(language)
-        imports = sorted(set(_matches(import_pattern, content))) if import_pattern else []
+        ast_result = analyze_source(language, content)
+        ast_succeeded = bool(ast_result and not ast_result["parse_errors"])
+        if ast_succeeded and ast_result:
+            parser_files[language]["ast"] += 1
+            for symbol in ast_result["symbols"][:100]:
+                symbols.append({**symbol, "path": relative, "language": language, "parser": ast_result["parser"]})
+            imports = ast_result["imports"]
+            for call in ast_result["calls"]:
+                calls.append({**call, "path": relative, "language": language})
+            for function in ast_result["functions"]:
+                function_complexity.append({**function, "path": relative, "language": language})
+            for pattern in ast_result["design_patterns"]:
+                pattern_counts[pattern["name"]] += pattern["matches"]
+                pattern_basis[pattern["name"]] = pattern["basis"]
+            for signal in ast_result["architecture_signals"]:
+                language_architecture[language][signal] += 1
+            decisions = ast_result["decision_points"]
+        else:
+            parser_files[language]["heuristic"] += 1
+            if ast_result and ast_result["parse_errors"]:
+                parser_errors[language] += len(ast_result["parse_errors"])
+            symbol_pattern = SYMBOL_PATTERNS.get(language)
+            file_symbols = _matches(symbol_pattern, content) if symbol_pattern else []
+            symbols.extend({"name": name, "path": relative, "language": language, "parser": "regex"} for name in file_symbols[:100])
+            import_pattern = IMPORT_PATTERNS.get(language)
+            imports = sorted(set(_matches(import_pattern, content))) if import_pattern else []
+            for pattern_name, pattern in PATTERN_RULES.items():
+                count = len(pattern.findall(content))
+                if count:
+                    pattern_counts[pattern_name] += count
+                    pattern_basis.setdefault(pattern_name, "symbol and naming heuristic")
+            decisions = len(BRANCH_PATTERNS.findall(content))
         if imports:
             imports_by_file[relative] = imports[:100]
 
-        for pattern_name, pattern in PATTERN_RULES.items():
-            count = len(pattern.findall(content))
-            if count:
-                pattern_counts[pattern_name] += count
-
-        decisions = len(BRANCH_PATTERNS.findall(content))
         estimated_complexity = 1 + decisions
         complexity_rows.append({
             "path": relative,
@@ -128,15 +156,26 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
                 language_architecture[language][signal] += 1
 
     complexity_rows.sort(key=lambda row: row["estimated_cyclomatic_complexity"], reverse=True)
+    function_complexity.sort(key=lambda row: row["estimated_cyclomatic_complexity"], reverse=True)
     complexities = [row["estimated_cyclomatic_complexity"] for row in complexity_rows]
+    analyzed_languages = sorted({item.get("language") for item in files if item.get("language") in SOURCE_LANGUAGES})
     return {
-        "languages_analyzed": sorted({item.get("language") for item in files if item.get("language") in SOURCE_LANGUAGES}),
+        "languages_analyzed": analyzed_languages,
+        "parser_coverage": [
+            {
+                **parser_status(language),
+                "ast_files": parser_files[language]["ast"],
+                "heuristic_files": parser_files[language]["heuristic"],
+                "parse_errors": parser_errors[language],
+            }
+            for language in analyzed_languages
+        ],
         "symbols": symbols[:1000],
         "symbol_count": len(symbols),
         "imports": [{"path": path, "imports": values} for path, values in sorted(imports_by_file.items())][:500],
         "importing_file_count": len(imports_by_file),
         "design_patterns": [
-            {"name": name, "matches": count, "confidence": "medium", "basis": "symbol and naming heuristic"}
+            {"name": name, "matches": count, "confidence": "medium", "basis": pattern_basis.get(name, "symbol and naming heuristic")}
             for name, count in pattern_counts.most_common()
         ],
         "architecture_signals": [
@@ -144,12 +183,15 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
             for language, signals in sorted(language_architecture.items())
         ],
         "complexity": {
-            "method": "estimated decision points per file; not an AST-based function metric",
+            "method": "AST per-function complexity where available; heuristic decision points per file otherwise",
             "files_analyzed": len(complexity_rows),
             "average": round(sum(complexities) / len(complexities), 2) if complexities else None,
             "maximum": max(complexities) if complexities else None,
             "high_complexity_files": [row for row in complexity_rows if row["estimated_cyclomatic_complexity"] >= 20][:50],
+            "high_complexity_functions": [row for row in function_complexity if row["estimated_cyclomatic_complexity"] >= 10][:100],
         },
+        "calls": calls[:2000],
+        "call_count": len(calls),
     }
 
 
@@ -290,7 +332,7 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
         "limitations": [
             "The score measures repository evidence, not product quality or team performance.",
             "Unassessed dimensions are excluded from the score and reduce assessment coverage.",
-            "Heuristic complexity is not a replacement for language-native static analysis.",
+            "AST coverage varies by language; heuristic fallback complexity is not equivalent to language-native static analysis.",
         ],
     }
 
@@ -319,6 +361,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     return {
         "architecture": {
             "languages_analyzed": code["languages_analyzed"],
+            "parser_coverage": code["parser_coverage"],
             "signals": code["architecture_signals"],
             "design_patterns": code["design_patterns"],
         },
@@ -327,6 +370,8 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
             "symbols": code["symbols"],
             "importing_file_count": code["importing_file_count"],
             "imports": code["imports"],
+            "call_count": code["call_count"],
+            "calls": code["calls"],
             "complexity": code["complexity"],
         },
         "systems": systems,

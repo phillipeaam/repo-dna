@@ -59,13 +59,14 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "analysis": {
       "architecture": {
         "languages_analyzed": ["C#"],
+        "parser_coverage": [{"language": "C#", "mode": "heuristic-fallback", "parser": "planned-tree-sitter", "ast_files": 0, "heuristic_files": 12, "parse_errors": 0}],
         "signals": [],
         "design_patterns": [{"name": "Repository", "matches": 3, "confidence": "medium", "basis": "symbol and naming heuristic"}]
       },
       "code": {
         "symbol_count": 10,
         "importing_file_count": 4,
-        "complexity": {"method": "estimated", "files_analyzed": 12, "average": 4.5, "maximum": 21, "high_complexity_files": []}
+        "complexity": {"method": "estimated", "files_analyzed": 12, "average": 4.5, "maximum": 21, "high_complexity_files": [], "high_complexity_functions": []}
       },
       "systems": [{"name": "Data/Persistence", "confidence": "high", "file_count": 6, "symbol_count": 8, "import_references": 12, "languages": {"C#": 6}}],
       "quality": {
@@ -131,6 +132,7 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
   },
   "collaboration": {"contributors": 3},
   "risks": {"potential_secret_findings": 1, "ownership_review_required": 2},
+  "visualizations": {"charts": [{"title": "Commits by month", "path": "../graphs/commits_by_month.png"}]},
   "evidence": {
     "legacy_project_directory": "../project",
     "legacy_contribution_directory": "../contribution",
@@ -177,6 +179,7 @@ for report_name in \
     health.html \
     narrative.html \
     portfolio.html \
+    charts.html \
     risks.html \
     notion-evidence.html; do
     [[ -s "$TEST_ROOT/report/$report_name" ]]
@@ -201,6 +204,8 @@ grep -q 'Files</th><td class="number">25' "$TEST_ROOT/report/project-overview.ht
 grep -q 'Declared dependency entries' "$TEST_ROOT/report/technologies.html"
 grep -q 'does not necessarily represent unique' "$TEST_ROOT/report/technologies.html"
 grep -q 'Data/Persistence' "$TEST_ROOT/report/systems.html"
+grep -q 'Parser coverage' "$TEST_ROOT/report/architecture.html"
+grep -q 'heuristic-fallback' "$TEST_ROOT/report/architecture.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
@@ -210,9 +215,12 @@ grep -q 'paginated contributor directory' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'Page 1 of 1' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"
+grep -q 'High-complexity functions (AST)' "$TEST_ROOT/report/quality.html"
 grep -q 'Repository health' "$TEST_ROOT/report/health.html"
 grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"
 grep -q 'portfolio/index.html' "$TEST_ROOT/report/portfolio.html"
+grep -q 'commits_by_month.png' "$TEST_ROOT/report/charts.html"
+grep -q 'class="chart"' "$TEST_ROOT/report/charts.html"
 grep -q 'confirmation_required' "$TEST_ROOT/portfolio/draft.json"
 grep -q 'Portfolio and CV evidence draft' "$TEST_ROOT/portfolio/index.html"
 grep -q '"approved_claim_count": 1' "$TEST_ROOT/portfolio/approved.json"

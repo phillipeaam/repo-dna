@@ -57,6 +57,8 @@ write_structured_report_json() {
     local unity_analysis=false
     local csharp_analysis=false
     local generic_analysis_json
+    local charts_json='[]'
+    local -a chart_items=()
 
     [[ "$PROJECT_TYPE" == Unity ]] && unity_analysis=true
     [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
@@ -72,6 +74,13 @@ write_structured_report_json() {
         grep -c 'review-required' "$PROJECT_DIR/12_ownership_classification.txt" 2>/dev/null || true
     )"
     contributor_count="$(report_line_count "$PROJECT_DIR/26_all_contributors.txt")"
+    [[ ! -f "$GRAPHS_DIR/commits_by_month.png" ]] ||
+        chart_items+=('{"title":"Commits by month","path":"../graphs/commits_by_month.png"}')
+    [[ ! -f "$GRAPHS_DIR/commits_by_year.png" ]] ||
+        chart_items+=('{"title":"Commits by year","path":"../graphs/commits_by_year.png"}')
+    if ((${#chart_items[@]} > 0)); then
+        charts_json="[$(IFS=,; printf '%s' "${chart_items[*]}")]"
+    fi
 
     cat > "$output_file" <<EOF
 {
@@ -146,6 +155,9 @@ write_structured_report_json() {
   "risks": {
     "potential_secret_findings": ${POTENTIAL_SECRET_COUNT:-0},
     "ownership_review_required": ${ownership_review_count:-0}
+  },
+  "visualizations": {
+    "charts": $charts_json
   },
   "evidence": {
     "legacy_project_directory": "../project",

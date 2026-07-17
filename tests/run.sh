@@ -12,6 +12,7 @@ tests=(
     git_history_test.sh
     security_scan_test.sh
     generic_collector_test.sh
+    ast_analysis_test.sh
     reporting_test.sh
     privacy_modes_test.sh
 )

@@ -83,7 +83,7 @@ STYLES = """
 :root{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}header p{color:#cbd5e1}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}
-nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{display:block;text-align:right;font-size:1.65rem;font-variant-numeric:tabular-nums}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}.data-table th{width:auto}td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.note{background:#f8fafc;border-left:4px solid var(--brand);padding:.8rem 1rem;color:var(--muted)}a{color:var(--brand)}.empty{color:var(--muted)}
+nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{display:block;text-align:right;font-size:1.65rem;font-variant-numeric:tabular-nums}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}.data-table th{width:auto}td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.chart{display:block;width:100%;height:auto;margin:1rem 0;border:1px solid var(--line);border-radius:10px}.note{background:#f8fafc;border-left:4px solid var(--brand);padding:.8rem 1rem;color:var(--muted)}a{color:var(--brand)}.empty{color:var(--muted)}
 @media(max-width:760px){.layout{display:block;padding:1rem}nav{position:static;margin-bottom:1rem;display:flex;overflow:auto}nav a{white-space:nowrap}header{padding:2rem 1rem}}
 @media print{nav{display:none}.layout{display:block;padding:0}section,.metric{box-shadow:none;break-inside:avoid}body{background:#fff}}
 """
@@ -119,6 +119,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     collaboration = data["collaboration"]
     risks = data["risks"]
     privacy = data["privacy"]
+    charts = data.get("visualizations", {}).get("charts", [])
 
     headline = [
         ("Commits", history["total_commits"]),
@@ -251,10 +252,16 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for item in analysis.get("architecture", {}).get("design_patterns", [])
     ]
     pattern_table = data_table(["Pattern signal", "Matches", "Confidence", "Basis"], pattern_rows, {1}) if pattern_rows else empty
+    parser_rows = [
+        [item["language"], item["mode"], item["parser"], item.get("ast_files", 0), item.get("heuristic_files", 0), item.get("parse_errors", 0)]
+        for item in analysis.get("architecture", {}).get("parser_coverage", [])
+    ]
+    parser_table = data_table(["Language", "Mode", "Parser", "AST files", "Fallback files", "Parse errors"], parser_rows, {3, 4, 5}) if parser_rows else empty
     architecture_body = table(labeled(architecture, architecture_keys)) if architecture_keys else (
         '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
     )
     architecture_body += "<h3>Multi-language design-pattern signals</h3>" + pattern_table
+    architecture_body += "<h3>Parser coverage</h3>" + parser_table
     systems_body = table(labeled(systems, system_keys)) if system_keys else ""
     systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
@@ -267,6 +274,11 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for item in complexity.get("high_complexity_files", [])
     ]
     complexity_table = data_table(["File", "Language", "Estimated complexity", "Decision points", "Lines"], high_complexity_rows, {2, 3, 4}) if high_complexity_rows else '<p class="empty">No files crossed the current high-complexity threshold.</p>'
+    function_complexity_rows = [
+        [item["path"], item["name"], item["language"], item["estimated_cyclomatic_complexity"], item["decision_points"], item.get("parameters", 0)]
+        for item in complexity.get("high_complexity_functions", [])
+    ]
+    function_complexity_table = data_table(["File", "Function", "Language", "Complexity", "Decision points", "Parameters"], function_complexity_rows, {3, 4, 5}) if function_complexity_rows else '<p class="empty">No AST-analyzed functions crossed the current threshold.</p>'
     quality_body = table([
         ("Complexity method", complexity.get("method", "Not assessed")),
         ("Files analyzed", complexity.get("files_analyzed", 0)),
@@ -280,6 +292,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ])
     quality_body += '<p class="note">A vulnerability status of not_scanned is not equivalent to zero vulnerabilities. RepoDNA only reports verified scanner evidence.</p>'
     quality_body += "<h3>High-complexity candidates</h3>" + complexity_table
+    quality_body += "<h3>High-complexity functions (AST)</h3>" + function_complexity_table
 
     health = analysis.get("health", {})
     health_rows = [
@@ -300,6 +313,10 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         f'<section><p>{esc(item["statement"])}</p><small>Confidence: {esc(item["confidence"])} · Evidence: {esc(item["evidence"])}</small></section>'
         for item in narrative_facts
     ) or empty
+    charts_body = "".join(
+        f'<section><h2>{esc(chart["title"])}</h2><a href="{esc(chart["path"])}"><img class="chart" src="{esc(chart["path"])}" alt="{esc(chart["title"])}"></a></section>'
+        for chart in charts
+    ) or '<p class="empty">No charts were generated. Charts require non-strict Git history data and matplotlib.</p>'
 
     notion = build_notion_evidence(data)
     notion_facts = [item["statement"] for item in notion["about_project"]["facts"]]
@@ -354,6 +371,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("health.html", "Repository health", health_body),
         ("narrative.html", "Evidence-based narrative", narrative_body),
         ("portfolio.html", "Portfolio and CV", '<p>The approval-gated portfolio draft is available at <a href="../portfolio/index.html">portfolio/index.html</a>. Repository facts remain unapproved until explicitly confirmed.</p>'),
+        ("charts.html", "Charts", charts_body),
         ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),
             ("Ownership review required", risks["ownership_review_required"]),

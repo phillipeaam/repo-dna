@@ -37,7 +37,7 @@ sensitive content from the shareable package.
 | Area | Current behavior |
 |---|---|
 | Project detection | Detects Unity, Unreal, Godot, Android, Flutter, .NET, Node, Python, or falls back to a generic Git profile. |
-| Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. |
+| Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. Python receives native AST analysis; other languages currently use an explicit heuristic fallback. |
 | Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
@@ -73,6 +73,24 @@ Repository
 | Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
 | Portfolio and CV | Approval-gated claims and X-Y-Z achievement drafts. |
+
+## AST analysis status
+
+RepoDNA now has a language-analyzer contract under `collectors/languages/`.
+Python source is parsed with the standard-library AST and produces structured
+classes, functions, qualified methods, inheritance, decorators, parameters,
+imports, calls, per-function complexity, and pattern evidence.
+
+Every report exposes parser coverage per language:
+
+- `ast`: a syntax-tree parser analyzed the file;
+- `heuristic-fallback`: the language still uses symbol and naming heuristics;
+- `parse_errors`: AST parsing failed and the safe fallback was used.
+
+JavaScript, TypeScript, C#, Java, Kotlin, Dart, Go, and Rust are registered as
+the next Tree-sitter priorities. They remain explicitly marked as fallback until
+their grammar adapters are implemented and tested; the report does not describe
+heuristic results as AST findings.
 
 ---
 ## 📖 Documentation

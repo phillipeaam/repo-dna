@@ -30,9 +30,10 @@ and lowers assessment coverage. It is never treated as a passing result.
 
 ## Important limitations
 
-Complexity is currently estimated per file using decision-point tokens. It is
-useful for prioritization, but is not equivalent to an AST-based, per-function
-cyclomatic-complexity tool.
+Python complexity is calculated from AST decision nodes at function level and
+aggregated per file. Languages without an AST adapter still use decision-point
+tokens. Both modes are useful for prioritization, but the report exposes parser
+coverage so fallback estimates are not presented as equivalent to AST results.
 
 RepoDNA does not infer vulnerabilities or dependency licenses from package names.
 Without an ecosystem-aware scanner report, dependency security remains

@@ -59,7 +59,7 @@ from pathlib import Path
 data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 assert data["file_count"] >= 7
 assert any(item["name"] == "Python" and item["lines"] >= 5 for item in data["languages"])
-assert "requirements.txt" in data["configuration_files"]
+assert "requirements.txt" in data["configuration_files"], data["configuration_files"]
 assert "README.md" in data["documentation_files"]
 assert "tests/test_feature.py" in data["test_files"]
 assert ".github/workflows/ci.yml" in data["ci_cd_files"]
@@ -78,9 +78,15 @@ assert "Combat" not in data["git"]["system_evolution"]
 assert any(item["path"] == "src" for item in data["possible_modules"])
 analysis = data["analysis"]
 assert "Python" in analysis["architecture"]["languages_analyzed"]
+python_parser = next(item for item in analysis["architecture"]["parser_coverage"] if item["language"] == "Python")
+assert python_parser["mode"] == "ast"
+assert python_parser["ast_files"] >= 1
+assert python_parser["heuristic_files"] == 0
 assert any(item["name"] == "Repository" for item in analysis["architecture"]["design_patterns"])
 assert analysis["code"]["symbol_count"] >= 3
 assert analysis["code"]["importing_file_count"] >= 1
+assert analysis["code"]["call_count"] >= 1
+assert any(item["name"] == "FeatureRepository.feature" for item in analysis["code"]["complexity"]["high_complexity_functions"]) is False
 assert any(item["name"] == "src" for item in analysis["systems"])
 assert analysis["quality"]["coverage"]["status"] == "not_detected"
 assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
@@ -97,7 +103,7 @@ from pathlib import Path
 data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 assert data["git"]["scope"] == "author"
 assert data["git"]["author_filter"] == "Focused Developer"
-assert data["git"]["contributors"] == [{"name": "Focused Developer", "commits": 1}]
+assert data["git"]["contributors"] == [{"name": "Focused Developer", "commits": 1}], data["git"]["contributors"]
 assert data["git"]["churn"]["total"] > 0
 assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "commits": 1}]
 PY

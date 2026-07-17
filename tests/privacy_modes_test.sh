@@ -18,7 +18,7 @@ create_fixture() {
     mkdir -p "$fixture/renderers" "$fixture/collectors" "$fixture/src/code"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/renderers/"*.py "$fixture/renderers/"
-    cp "$SOURCE_ROOT/collectors/"*.py "$fixture/collectors/"
+    cp -R "$SOURCE_ROOT/collectors/." "$fixture/collectors/"
     cp -R "$SOURCE_ROOT/src/." "$fixture/src/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
     printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/code/Example.cs"
