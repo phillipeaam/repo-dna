@@ -200,6 +200,18 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     contributor_table = table([
         (item["name"], item["commits"]) for item in git_data.get("contributors", [])
     ]) if git_data.get("contributors") else empty
+    contributor_page_size = 20
+    contributors = git_data.get("contributors", [])
+    contributor_chunks = [
+        contributors[index:index + contributor_page_size]
+        for index in range(0, len(contributors), contributor_page_size)
+    ] if not git_data.get("author_filter") else []
+    contributor_directory = ""
+    if contributor_chunks:
+        contributor_directory = '<p><a href="contributors-1.html">Open the paginated contributor directory</a> '
+        contributor_directory += f'({len(contributors)} contributors across {len(contributor_chunks)} pages).</p>'
+    elif git_data.get("author_filter"):
+        contributor_directory = f'<p class="note">Contributor data is filtered to: {esc(git_data["author_filter"])}</p>'
     largest_table = data_table(["File", "Size", "Lines"], [
         [item["path"], format_bytes(item["bytes"]), f"{item.get('lines', 0):,}"]
         for item in generic.get("largest_files", [])[:20]
@@ -337,7 +349,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("technologies.html", "Technologies", technology_body),
         ("systems.html", "Systems", systems_body),
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
-        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
+        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),
         ("narrative.html", "Evidence-based narrative", narrative_body),
@@ -372,6 +384,22 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         section_body = f"<section><h2>{esc(title)}</h2>{body}</section>"
         (output_path.parent / filename).write_text(
             page_document(data, title, section_body, all_pages, filename), encoding="utf-8"
+        )
+    for page_index, chunk in enumerate(contributor_chunks, 1):
+        rows = [[(page_index - 1) * contributor_page_size + index, item["name"], item["commits"]] for index, item in enumerate(chunk, 1)]
+        pagination = '<p class="pagination">'
+        if page_index > 1:
+            pagination += f'<a href="contributors-{page_index - 1}.html">Previous</a> '
+        pagination += f'Page {page_index} of {len(contributor_chunks)}'
+        if page_index < len(contributor_chunks):
+            pagination += f' <a href="contributors-{page_index + 1}.html">Next</a>'
+        pagination += '</p>'
+        body = '<section><h2>Contributors</h2>' + pagination
+        body += data_table(["#", "Canonical contributor", "Commits"], rows, {0, 2})
+        body += pagination + '</section>'
+        (output_path.parent / f"contributors-{page_index}.html").write_text(
+            page_document(data, f"Contributors · page {page_index}", body, all_pages, "collaboration.html"),
+            encoding="utf-8",
         )
 
 

@@ -28,7 +28,12 @@ printf '%s\n' \
     '  names:' \
     '    - Generic Tester' \
     '  emails:' \
-    '    - generic@example.test' > "$TEST_ROOT/.repodna-authors"
+    '    - generic@example.test' \
+    'Focused Developer:' \
+    '  names:' \
+    '    - Focus Alias' \
+    '  emails:' \
+    '    - focused@example.test' > "$TEST_ROOT/.repodna-authors"
 
 git -C "$TEST_ROOT" init -q
 git -C "$TEST_ROOT" config user.name 'Generic Tester'
@@ -38,9 +43,13 @@ git -C "$TEST_ROOT" commit -qm 'Initial project'
 printf '%s\n' '# changed' >> "$TEST_ROOT/src/main.py"
 git -C "$TEST_ROOT" add src/main.py
 git -C "$TEST_ROOT" commit -qm 'Change hotspot' -m 'Co-authored-by: Pair Developer <pair@example.test>'
+printf '%s\n' '# focused change' >> "$TEST_ROOT/src/module/feature.py"
+git -C "$TEST_ROOT" add src/module/feature.py
+git -C "$TEST_ROOT" -c user.name='Focus Alias' -c user.email='focused@example.test' commit -qm 'Focused contribution'
 
 python "$SOURCE_ROOT/collectors/generic.py" "$TEST_ROOT" "$TEST_ROOT/generic-analysis.json"
 python "$SOURCE_ROOT/collectors/generic.py" "$TEST_ROOT" "$TEST_ROOT/generic-analysis-strict.json" --privacy-mode strict
+python "$SOURCE_ROOT/collectors/generic.py" "$TEST_ROOT" "$TEST_ROOT/generic-analysis-focused.json" --author 'Focused Developer'
 
 python - "$TEST_ROOT/generic-analysis.json" <<'PY'
 import json
@@ -56,12 +65,12 @@ assert "tests/test_feature.py" in data["test_files"]
 assert ".github/workflows/ci.yml" in data["ci_cd_files"]
 assert "Dockerfile" in data["docker_files"]
 assert data["dependencies"]["total"] == 1
-assert data["git"]["contributors_count"] == 1
+assert data["git"]["contributors_count"] == 2
 assert data["git"]["contributors"][0] == {"name": "Canonical Developer", "commits": 2}
 assert data["git"]["author_aliases_configured"] >= 3
 assert data["git"]["branches_count"] >= 1
 assert data["git"]["churn"]["total"] > 0
-assert data["git"]["hotspots"][0]["path"] == "src/main.py"
+assert any(item["path"] == "src/main.py" for item in data["git"]["hotspots"])
 assert {"current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
 assert data["git"]["coauthorship"][0]["commits"] == 1
 assert sum(data["git"]["system_evolution"]["Data/Persistence"].values()) == 1
@@ -78,6 +87,19 @@ assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
 assert analysis["health"]["version"] == "1.0"
 assert analysis["health"]["score"] is not None
 assert analysis["narrative_facts"]
+PY
+
+python - "$TEST_ROOT/generic-analysis-focused.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert data["git"]["scope"] == "author"
+assert data["git"]["author_filter"] == "Focused Developer"
+assert data["git"]["contributors"] == [{"name": "Focused Developer", "commits": 1}]
+assert data["git"]["churn"]["total"] > 0
+assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "commits": 1}]
 PY
 
 python - "$TEST_ROOT/generic-analysis-strict.json" <<'PY'

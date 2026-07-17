@@ -155,15 +155,28 @@ def dependency_names(path: Path) -> list[str]:
     return []
 
 
-def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
+def author_scope_args(author_filter: str, name_aliases: dict[str, str], email_aliases: dict[str, str]) -> list[str]:
+    if not author_filter:
+        return []
+    requested = author_filter.casefold()
+    identities = {author_filter}
+    for alias, canonical in {**name_aliases, **email_aliases}.items():
+        if requested in {alias, canonical.casefold()}:
+            identities.add(alias)
+    pattern = "|".join(re.escape(identity) for identity in sorted(identities, key=str.casefold))
+    return ["--extended-regexp", f"--author=({pattern})"]
+
+
+def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[str, Any]:
     name_aliases, email_aliases = load_author_aliases(root)
-    identity_rows = [row.split("\t", 1) for row in git(root, "log", "--all", "--format=%aN%x09%aE").splitlines() if "\t" in row]
+    scope = author_scope_args(author_filter, name_aliases, email_aliases)
+    identity_rows = [row.split("\t", 1) for row in git(root, "log", "--all", *scope, "--format=%aN%x09%aE").splitlines() if "\t" in row]
     contributor_commits: Counter[str] = Counter(
         canonical_author(name, email, name_aliases, email_aliases) for name, email in identity_rows
     )
     branches = [line.strip() for line in git(root, "branch", "-a", "--format=%(refname:short)").splitlines() if line.strip()]
     tags = [line.strip() for line in git(root, "tag", "--sort=-creatordate").splitlines() if line.strip()]
-    months = Counter(git(root, "log", "--date=format:%Y-%m", "--pretty=format:%ad").splitlines())
+    months = Counter(git(root, "log", "--all", *scope, "--date=format:%Y-%m", "--pretty=format:%ad").splitlines())
     years = Counter(value[:4] for value in months.elements() if value)
 
     change_commits: Counter[str] = Counter()
@@ -178,7 +191,7 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
     system_months: dict[str, Counter[str]] = defaultdict(Counter)
     current_author = "Unknown"
     current_date = ""
-    log_rows = git(root, "log", "--all", "--find-renames", "--find-copies", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
+    log_rows = git(root, "log", "--all", *scope, "--find-renames", "--find-copies", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
     for line in log_rows.replace("\x00", "\n").splitlines():
         if line.startswith("__REPODNA_COMMIT__\t"):
             change_commits.update(current_commit_files)
@@ -222,7 +235,7 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
         hotspots.append({"path": path, "commits": commits, "churn": churn[path], "current_lines": size_lines, "authors": author_count, "days_since_last_change": days_since, "score": score})
     hotspots.sort(key=lambda item: (item["score"], item["churn"]), reverse=True)
 
-    for record in git(root, "log", "--all", "--format=%aN%x09%aE%x1f%B%x1e").split("\x1e"):
+    for record in git(root, "log", "--all", *scope, "--format=%aN%x09%aE%x1f%B%x1e").split("\x1e"):
         if "\x1f" not in record:
             continue
         identity, body = record.split("\x1f", 1)
@@ -235,6 +248,8 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
             coauthors[tuple(sorted((author, other)))] += 1
 
     return {
+        "author_filter": author_filter,
+        "scope": "author" if author_filter else "repository",
         "contributors_count": len(contributor_commits),
         "contributors": [
             {"name": (f"Contributor-{index + 1}" if privacy_mode == "strict" else name), "commits": commits}
@@ -311,7 +326,7 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis["quality"]["licenses"]["license_files"] = []
 
 
-def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
+def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "") -> dict[str, Any]:
     files: list[dict[str, Any]] = []
     language_files: Counter[str] = Counter()
     language_lines: Counter[str] = Counter()
@@ -400,7 +415,7 @@ def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
         "docker_files": sorted(docker)[:100],
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
         "possible_modules": modules[:50],
-        "git": collect_git(root, privacy_mode),
+        "git": collect_git(root, privacy_mode, author_filter),
         "_files": files,
     }
     result["analysis"] = analyze_repository(root, result)
@@ -416,8 +431,9 @@ def main() -> int:
     parser.add_argument("output", type=Path)
     parser.add_argument("--report-name", default="")
     parser.add_argument("--privacy-mode", choices=("standard", "strict"), default="standard")
+    parser.add_argument("--author", default="")
     args = parser.parse_args()
-    data = collect(args.root.resolve(), args.report_name, args.privacy_mode)
+    data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return 0

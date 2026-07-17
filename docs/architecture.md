@@ -46,6 +46,12 @@ facts remain unapproved unless their claim IDs are explicitly listed in a
 portfolio confirmation profile. Personal profiles are not accepted in strict
 privacy mode.
 
+The generic Git collector receives the same optional author scope as the Bash
+history pipeline. It expands a selected canonical identity through
+`.repodna-authors` before querying Git. Repository-wide reports render the
+canonical contributor list in pages of 20; author-scoped reports do not include
+unrelated contributor identities.
+
 ## Pipeline contract
 
 Each file in `src/pipeline/`:

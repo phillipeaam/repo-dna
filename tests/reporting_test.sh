@@ -48,6 +48,10 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "dependencies": {"manifests": [], "total": 8},
     "possible_modules": [{"path": "src", "file_count": 12, "languages": {"C#": 12}}],
     "git": {
+      "author_filter": "",
+      "scope": "repository",
+      "contributors_count": 2,
+      "contributors": [{"name": "Developer One", "commits": 30}, {"name": "Developer Two", "commits": 12}],
       "hotspots": [{"path": "src/Core.cs", "commits": 5, "churn": 200}],
       "system_evolution": {"Data/Persistence": {"2026-01": 4}},
       "churn": {"lines_added": 1000, "lines_removed": 400, "total": 1400}
@@ -177,6 +181,7 @@ for report_name in \
     notion-evidence.html; do
     [[ -s "$TEST_ROOT/report/$report_name" ]]
 done
+[[ -s "$TEST_ROOT/report/contributors-1.html" ]]
 
 grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
 grep -q 'C# files</span><strong>12' "$TEST_ROOT/report/executive-summary.html"
@@ -201,6 +206,9 @@ grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
 grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
+grep -q 'paginated contributor directory' "$TEST_ROOT/report/collaboration.html"
+grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"
+grep -q 'Page 1 of 1' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"
 grep -q 'Repository health' "$TEST_ROOT/report/health.html"
 grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"

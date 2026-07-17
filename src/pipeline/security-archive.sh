@@ -9,9 +9,10 @@ write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
 
 GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
+    GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
+    [[ -z "$AUTHOR" ]] || GENERIC_COLLECTOR_ARGS+=(--author "$AUTHOR")
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
-        "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" --report-name "$REPORT_NAME" \
-        --privacy-mode "$PRIVACY_MODE" ||
+        "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" "${GENERIC_COLLECTOR_ARGS[@]}" ||
         die "Could not collect the generic repository analysis."
 else
     printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \

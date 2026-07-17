@@ -244,6 +244,16 @@ Phillipe Augusto:
 Standard reports show the canonical contributor name and commit count. Strict
 privacy mode replaces names and does not export e-mail addresses.
 
+Without `--author`, the collaboration report covers the complete Git history
+and creates paginated contributor pages with 20 canonical identities per page.
+With `--author`, Git metrics, churn, hotspots, system evolution, collaboration,
+and contributor presentation are restricted to the selected identity and its
+aliases from `.repodna-authors`:
+
+```bash
+bash ./dna-analysis.sh --author "Phillipe Augusto"
+```
+
 ## Privacy and Source Export
 
 Full C# source is not copied by default. Reports contain metrics, relative paths,
