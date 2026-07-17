@@ -15,6 +15,7 @@ tests=(
     ast_analysis_test.sh
     framework_analysis_test.sh
     module_graph_test.sh
+    architecture_insights_test.sh
     reporting_test.sh
     privacy_modes_test.sh
 )

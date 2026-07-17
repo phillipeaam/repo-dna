@@ -12,6 +12,7 @@ from languages import analyze_source
 from languages.registry import parser_status
 from frameworks import analyze_frameworks
 from graphs import build_graphs
+from architecture import analyze_architecture
 
 
 SOURCE_LANGUAGES = {
@@ -354,6 +355,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     code = analyze_code(root, generic["_files"])
     frameworks = analyze_frameworks(generic["_files"], code, generic["dependencies"])
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
+    architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
     quality = {
         "code": code,
@@ -368,6 +370,10 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
             "parser_coverage": code["parser_coverage"],
             "signals": code["architecture_signals"],
             "design_patterns": code["design_patterns"],
+            "entrypoints": architecture_model["entrypoints"],
+            "coupling": architecture_model["coupling"],
+            "boundaries": architecture_model["boundaries"],
+            "summary": architecture_model["summary"],
         },
         "code": {
             "symbol_count": code["symbol_count"],

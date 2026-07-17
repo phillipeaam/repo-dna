@@ -61,7 +61,11 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "languages_analyzed": ["C#"],
         "parser_coverage": [{"language": "C#", "mode": "heuristic-fallback", "parser": "planned-tree-sitter", "ast_files": 0, "heuristic_files": 12, "parse_errors": 0}],
         "signals": [],
-        "design_patterns": [{"name": "Repository", "matches": 3, "confidence": "medium", "basis": "symbol and naming heuristic"}]
+        "design_patterns": [{"name": "Repository", "matches": 3, "confidence": "medium", "basis": "symbol and naming heuristic"}],
+        "entrypoints": [{"path": "src/Program.cs", "language": "C#", "kind": "application bootstrap", "confidence": "high", "evidence": "ASP.NET host bootstrap"}],
+        "coupling": {"modules": [{"id": "src/domain", "role": "hub", "fan_in": 2, "fan_out": 2, "total_coupling": 4, "instability": 0.5}], "high_coupling": [], "summary": {"assessed_modules": 1, "high_coupling_modules": 1, "maximum_total_coupling": 4}, "method": "fan-in/out"},
+        "boundaries": {"modules": [{"module": "src/domain", "layer": "domain", "confidence": "medium", "evidence": "path token: domain"}], "violations": [{"source": "src/domain", "source_layer": "domain", "target": "src/infrastructure", "target_layer": "infrastructure", "references": 2, "severity": "high", "rule": "domain should not depend on infrastructure", "confidence": "medium"}], "cycles": [{"modules": ["src/domain", "src/infrastructure"], "layers": ["domain", "infrastructure"], "cross_boundary": true, "severity": "high"}], "summary": {"classified_modules": 2, "unclassified_modules": 0, "violations": 1, "cross_boundary_cycles": 1}, "method": "path inference", "limitations": []},
+        "summary": {"entrypoints": 1, "cycles": 1, "high_coupling_modules": 1, "boundary_violations": 1}
       },
       "code": {
         "symbol_count": 10,
@@ -223,12 +227,18 @@ grep -q 'Parser coverage' "$TEST_ROOT/report/architecture.html"
 grep -q 'heuristic-fallback' "$TEST_ROOT/report/architecture.html"
 grep -q 'Specialized framework adapters' "$TEST_ROOT/report/architecture.html"
 grep -q 'ASP.NET Core' "$TEST_ROOT/report/architecture.html"
+grep -q 'Detected entrypoints' "$TEST_ROOT/report/architecture.html"
+grep -q 'src/Program.cs' "$TEST_ROOT/report/architecture.html"
+grep -q 'Module coupling and instability' "$TEST_ROOT/report/architecture.html"
+grep -q 'domain should not depend on infrastructure' "$TEST_ROOT/report/architecture.html"
+grep -q 'Cross-boundary' "$TEST_ROOT/report/architecture.html"
 grep -q 'Framework concepts' "$TEST_ROOT/report/systems.html"
 grep -q 'Module coupling' "$TEST_ROOT/report/graphs.html"
 grep -q 'Microsoft.AspNetCore.Mvc' "$TEST_ROOT/report/graphs.html"
 grep -q 'Strongly connected modules' "$TEST_ROOT/report/graphs.html"
 grep -q './Missing' "$TEST_ROOT/report/graphs.html"
 grep -q 'Module and dependency graphs' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Architectural boundaries' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'specialized framework adapters matched' "$TEST_ROOT/report/executive-summary.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"

@@ -302,6 +302,20 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     architecture_body += "<h3>Parser coverage</h3>" + parser_table
     architecture_body += "<h3>Specialized framework adapters</h3>" + framework_table
     architecture_body += '<p class="note">Framework confidence combines dependency manifests, imports, parsed symbols, calls, and conventional paths. It does not prove runtime configuration.</p>'
+    entrypoint_rows = [[item["path"], item["language"], item["kind"], item["confidence"], item["evidence"]] for item in analysis.get("architecture", {}).get("entrypoints", [])]
+    coupling_analysis = analysis.get("architecture", {}).get("coupling", {})
+    coupling_rows = [[item["id"], item.get("role", "unknown"), item.get("fan_in", 0), item.get("fan_out", 0), item.get("total_coupling", 0), item.get("instability", 0)] for item in coupling_analysis.get("modules", [])[:50]]
+    boundary_analysis = analysis.get("architecture", {}).get("boundaries", {})
+    boundary_rows = [[item["module"], item["layer"], item["confidence"], item["evidence"]] for item in boundary_analysis.get("modules", [])[:100]]
+    violation_rows = [[item["source"], item["source_layer"], item["target"], item["target_layer"], item["references"], item["severity"], item["rule"]] for item in boundary_analysis.get("violations", [])[:100]]
+    architectural_cycle_rows = [[" → ".join(item["modules"]), ", ".join(item["layers"]), "yes" if item["cross_boundary"] else "no", item["severity"]] for item in boundary_analysis.get("cycles", [])]
+    architecture_body += "<h3>Detected entrypoints</h3>" + (data_table(["Path", "Language", "Kind", "Confidence", "Evidence"], entrypoint_rows) if entrypoint_rows else '<p class="empty">No executable or framework entrypoints were detected.</p>')
+    architecture_body += "<h3>Module coupling and instability</h3>" + (data_table(["Module", "Role", "Fan-in", "Fan-out", "Total coupling", "Instability"], coupling_rows, {2, 3, 4, 5}) if coupling_rows else empty)
+    architecture_body += '<p class="note">Instability is fan-out divided by fan-in plus fan-out. Values near zero indicate depended-upon providers; values near one indicate dependency-heavy consumers.</p>'
+    architecture_body += "<h3>Inferred architectural boundaries</h3>" + (data_table(["Module", "Layer", "Confidence", "Evidence"], boundary_rows) if boundary_rows else empty)
+    architecture_body += "<h3>Boundary violations</h3>" + (data_table(["Source", "Layer", "Target", "Target layer", "References", "Severity", "Rule"], violation_rows, {4}) if violation_rows else '<p class="empty">No violations were found among classified module boundaries.</p>')
+    architecture_body += "<h3>Architectural cycles</h3>" + (data_table(["Modules", "Layers", "Cross-boundary", "Severity"], architectural_cycle_rows) if architectural_cycle_rows else '<p class="empty">No module cycles were detected.</p>')
+    architecture_body += '<p class="note">Layers are inferred from directory tokens and require review. A reported violation is an architectural signal, not proof that the repository intended to follow Clean Architecture.</p>'
     systems_body = table(labeled(systems, system_keys)) if system_keys else ""
     systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
@@ -398,6 +412,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals"],
         ["Design pattern detection", design_status, design_evidence],
         ["Module and dependency graphs", "Completed", f"{graph_summary.get('internal_edges', 0)} internal edges; {graph_summary.get('dependency_nodes', 0)} dependency nodes; {graph_summary.get('cycles', 0)} module cycles"],
+        ["Architectural boundaries", "Completed", f"{len(entrypoint_rows)} entrypoints; {len(violation_rows)} inferred boundary violations; {len(architectural_cycle_rows)} assessed cycles"],
         ["Engineering signals", "Completed", f"{generic.get('test_file_count', 0)} tests; {generic.get('ci_cd_file_count', 0)} CI/CD; {generic.get('docker_file_count', 0)} Docker; {generic.get('documentation_file_count', 0)} documentation files"],
         ["Report generation", "Completed", "HTML report suite, canonical JSON, Git CSV data, and optional charts"],
         ["Portfolio and documentation support", "Completed", f"{len(notion_facts)} repository facts and {len(notion['personal_confirmation_required'])} personal confirmation prompts"],

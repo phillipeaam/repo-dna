@@ -125,6 +125,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Architecture](docs/architecture.md)
 - [Framework analysis methodology](docs/framework-analysis.md)
 - [Module and dependency graphs](docs/dependency-graphs.md)
+- [Architecture insights methodology](docs/architecture-insights.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)
@@ -456,8 +457,9 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 - [x] Python
 - [ ] iOS
 
-Unity and C# currently have specialized signals. Other detected stacks use the
-generic analyzer until a dedicated analyzer is implemented.
+Specialized framework evidence is currently available for Unity, ASP.NET Core,
+Spring, Android, Flutter, React, and Next.js. Other detected stacks retain the
+generic analyzer and explicit parser/framework coverage.
 
 ### Reports
 
@@ -469,8 +471,9 @@ generic analyzer until a dedicated analyzer is implemented.
 ### Advanced Analysis
 
 - [x] Resolved file, module, and external dependency graphs
+- [x] Entrypoint, coupling, cycle, and inferred boundary analysis
 - [ ] Architecture diagrams
-- [ ] Complexity analysis
+- [x] File and per-function complexity analysis
 - [x] Evidence-based code ownership classification
 - [x] C# design-pattern signals
 - [x] Technical-debt markers

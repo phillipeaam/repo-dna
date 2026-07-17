@@ -63,6 +63,11 @@ internal, external, or unresolved, and publish file, directory-module, and
 external-dependency graphs. Renderers consume those graphs without performing
 path resolution themselves.
 
+`collectors/architecture/` derives entrypoints, coupling roles, instability,
+cycle severity, inferred layers, and dependency-rule violations from the graph.
+This layer never mutates graph resolution and keeps path-based boundary
+inference explicitly separate from parser-confirmed facts.
+
 `renderers/portfolio.py` creates an approval-gated portfolio draft. Repository
 facts remain unapproved unless their claim IDs are explicitly listed in a
 portfolio confirmation profile. Personal profiles are not accepted in strict

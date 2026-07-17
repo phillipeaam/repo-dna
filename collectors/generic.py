@@ -342,6 +342,15 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     graphs["file_graph"] = {"nodes": [], "edges": [], "unresolved": []}
     graphs["module_graph"] = {"nodes": [], "edges": [], "cycles": []}
     graphs["dependency_graph"] = {"nodes": [], "edges": []}
+    architecture = analysis.get("architecture", {})
+    architecture["entrypoints"] = []
+    if "coupling" in architecture:
+        architecture["coupling"]["modules"] = []
+        architecture["coupling"]["high_coupling"] = []
+    if "boundaries" in architecture:
+        architecture["boundaries"]["modules"] = []
+        architecture["boundaries"]["violations"] = []
+        architecture["boundaries"]["cycles"] = []
     analysis["quality"]["coverage"]["evidence_files"] = []
     analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
     analysis["quality"]["licenses"]["license_files"] = []
