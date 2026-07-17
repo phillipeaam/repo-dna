@@ -11,7 +11,7 @@ printf 'visible\n' > "$TEST_ROOT/src/visible.txt"
 printf 'hidden\n' > "$TEST_ROOT/vendor/dependency.txt"
 printf 'hidden\n' > "$TEST_ROOT/Ignored/custom.txt"
 printf 'hidden\n' > "$TEST_ROOT/generated-report/report.txt"
-printf 'Ignored/\n' > "$TEST_ROOT/.repodnaignore"
+printf 'Ignored/\n' > "$TEST_ROOT/.repodna-ignore"
 
 REPO_ROOT="$TEST_ROOT"
 CODE_ROOT='.'

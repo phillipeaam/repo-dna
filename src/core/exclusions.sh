@@ -29,9 +29,9 @@ declare -gar IGNORED_DIRS=(
     .git
 )
 
-# Load directory entries from .repodnaignore.
+# Load directory entries from .repodna-ignore.
 _load_repodna_ignore_directories() {
-    local config_file="${REPO_ROOT}/.repodnaignore"
+    local config_file="${REPO_ROOT}/.repodna-ignore"
     local pattern
 
     [[ -f "$config_file" ]] || return 0
@@ -119,7 +119,7 @@ analysis_find() {
 }
 
 # Search recursively while respecting all exclusion rules.
-# All directories in IGNORED_DIRS and .repodnaignore are excluded from search.
+# All directories in IGNORED_DIRS and .repodna-ignore are excluded from search.
 # NOTE: like grep itself, this returns non-zero when nothing matches.
 # Only real errors (e.g. invalid CODE_ROOT) are treated as failures here.
 # Usage: analysis_grep --include='*.cs' -InE 'pattern'
@@ -140,7 +140,7 @@ analysis_grep() {
         exclude_dirs+=(--exclude-dir="$dir")
     done
 
-    # Exclude each directory from .repodnaignore
+    # Exclude each directory from .repodna-ignore
     while IFS= read -r dir || [[ -n "$dir" ]]; do
         exclude_dirs+=(--exclude-dir="$dir")
     done < <(_load_repodna_ignore_directories)

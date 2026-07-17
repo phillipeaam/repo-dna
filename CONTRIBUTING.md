@@ -4,7 +4,7 @@
 
 - Git
 - Bash (Git Bash on Windows)
-- Python 3
+- Python 3.11 or newer
 - matplotlib
 
 ## Before changing code

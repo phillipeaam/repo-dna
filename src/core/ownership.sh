@@ -100,7 +100,7 @@ classify_ownership() {
     if ownership_is_ignored "$path"; then
         OWNERSHIP_CLASS='excluded'
         OWNERSHIP_CONFIDENCE='High'
-        OWNERSHIP_REASON='.repodnaignore'
+        OWNERSHIP_REASON='.repodna-ignore'
     elif [[ "$path" =~ (^|/)(Generated|gen|obj|bin)(/|$) ]] ||
          [[ "$path" =~ (\.generated\.cs|\.gen\.cs|_generated\.cs)$ ]]; then
         OWNERSHIP_CLASS='generated'

@@ -143,17 +143,25 @@ grep -q 'C# files</span><strong>12' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Commits</span><strong>42' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Files</span><strong>25' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Repository at a glance' "$TEST_ROOT/report/executive-summary.html"
-grep -q 'Primary language</th><td>C#' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Primary language</th><td class="">C#' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Analysis coverage and evidence' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Automatic project detection' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Detected profile: .NET' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Design pattern detection' "$TEST_ROOT/report/executive-summary.html"
+grep -q '3 C# design-pattern matches' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Portfolio and documentation support' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'File</th><th>Size</th><th>Lines' "$TEST_ROOT/report/project-overview.html"
 grep -q 'class="number">1,234' "$TEST_ROOT/report/project-overview.html"
+grep -q 'Files</th><td class="number">25' "$TEST_ROOT/report/project-overview.html"
 grep -q 'Declared dependency entries' "$TEST_ROOT/report/technologies.html"
 grep -q 'does not necessarily represent unique' "$TEST_ROOT/report/technologies.html"
 grep -q 'Data/Persistence' "$TEST_ROOT/report/systems.html"
 ! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
 grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
+grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
 grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
-grep -q 'Potential secret findings</th><td>1' "$TEST_ROOT/report/risks.html" || {
+grep -q 'Potential secret findings</th><td class="number">1' "$TEST_ROOT/report/risks.html" || {
     cat "$TEST_ROOT/report/risks.html" >&2
     exit 1
 }

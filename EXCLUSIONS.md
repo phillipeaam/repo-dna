@@ -21,11 +21,11 @@ These are automatically excluded from:
 - `find` operations via the `analysis_find()` function
 - `grep` recursive searches via the `analysis_grep()` function
 
-### 2. The `.repodnaignore` File
+### 2. The `.repodna-ignore` File
 
-Create a `.repodnaignore` file in your repository root to add custom directory exclusions. It intentionally supports a smaller contract than `.gitignore`:
+Create a `.repodna-ignore` file in your repository root to add custom directory exclusions. It intentionally supports a smaller contract than `.gitignore`:
 
-**Example `.repodnaignore`:**
+**Example `.repodna-ignore`:**
 ```
 # Third-party and vendor directories
 Plugins/
@@ -67,7 +67,7 @@ analysis_find -type f \( -iname '*.unity' -o -iname '*.prefab' \) -print
 
 **What it excludes:**
 - All directories in `IGNORED_DIRS`
-- All directories listed in `.repodnaignore` (entries ending with `/`)
+- All directories listed in `.repodna-ignore` (entries ending with `/`)
 - Git metadata (`.git/*`)
 - Output directories for this analysis run
 
@@ -85,7 +85,7 @@ analysis_grep \
 
 **What it excludes:**
 - All directories in `IGNORED_DIRS`
-- All directories listed in `.repodnaignore` (entries ending with `/`)
+- All directories listed in `.repodna-ignore` (entries ending with `/`)
 
 ## Benefits
 
@@ -111,7 +111,7 @@ analysis_grep --include='*.cs' -InE 'pattern'  # Uses all exclusions
 
 **Benefits:**
 - ✅ All file discovery uses the same exclusion rules
-- ✅ Easy to customize via `.repodnaignore`
+- ✅ Easy to customize via `.repodna-ignore`
 - ✅ No duplicate analysis of third-party or generated code
 - ✅ Maintainable: add exclusions in one place
 
@@ -165,20 +165,20 @@ done
 
 ## Performance Notes
 
-- The `.repodnaignore` file is read on every function call for consistency
+- The `.repodna-ignore` file is read on every function call for consistency
 - For large exclusion lists, consider batching operations to minimize I/O
 - `grep --exclude-dir` is highly efficient for large codebases
 
 ## Troubleshooting
 
 ### My exclusions aren't working
-1. Check that `.repodnaignore` is in the repository root
+1. Check that `.repodna-ignore` is in the repository root
 2. Ensure directory entries end with `/`
 3. Verify no trailing whitespace in patterns
 4. Lines starting with `#` are treated as comments
 
 ### Still analyzing plugins/generated code
-1. Add the directory to `.repodnaignore` with a trailing `/`
+1. Add the directory to `.repodna-ignore` with a trailing `/`
 2. Or add the directory name to `IGNORED_DIRS` in the script if it's universal
 3. Test with: `analysis_find -type d -name "YourDir"`
 

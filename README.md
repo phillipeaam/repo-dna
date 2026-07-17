@@ -14,6 +14,62 @@ RepoDNA is an open-source repository analysis toolkit that combines **source cod
 
 Instead of simply counting files or commits, RepoDNA correlates repository structure, source code, technologies, design patterns, and Git history to produce evidence-based reports that help developers understand **what a project is, how it evolved, and where engineering effort was invested.**
 
+## What RepoDNA delivers
+
+One command creates a timestamped analysis package containing:
+
+- a linked HTML report that can be opened locally without a server;
+- stack-neutral repository inventory for any Git project;
+- specialized C# and Unity engineering signals when those stacks are detected;
+- Git history, churn, contributors, collaboration signals, and composite hotspots;
+- technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
+- ownership classification with confidence and evidence;
+- redacted potential-secret findings and a pre-archive privacy scan;
+- structured JSON for automation and Notion-oriented evidence;
+- optional charts and explicitly opted-in source exports.
+
+The default export does **not** copy full source code. Source inclusion requires
+`--include-source`, while `--privacy-mode strict` takes precedence and removes
+sensitive content from the shareable package.
+
+## What has been implemented
+
+| Area | Current behavior |
+|---|---|
+| Project detection | Detects Unity, Unreal, Godot, Android, Flutter, .NET, Node, Python, or falls back to a generic Git profile. |
+| Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. |
+| Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
+| C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
+| Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
+| Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
+| Reporting | Produces navigable HTML, canonical JSON, Git CSV data, Notion evidence, security reports, and optional PNG charts. |
+
+## Analysis flow
+
+```text
+Repository
+    -> project detector and analysis profile
+    -> generic and specialized collectors
+    -> canonical report/data/report.json
+    -> HTML and Notion renderers
+    -> privacy scan
+    -> ZIP/TAR archive when the scan passes
+```
+
+## Report tour
+
+| Page | What it shows |
+|---|---|
+| Executive summary | Headline metrics, primary language, tests, dependencies, history period, and churn. |
+| Project overview | Repository profile, inventory, largest files, and main directories. |
+| Architecture | Specialized architecture signals or generic module candidates and language composition. |
+| Technologies | Languages, line counts, dependency declarations, manifests, branches, and tags. |
+| Systems | Confirmed specialized signals or systems inferred from historical paths for review. |
+| Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
+| Collaboration | Contributors, co-authored commits, and files shared across authors. |
+| Risks | Potential secrets and ownership classifications requiring review. |
+| Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
+
 ---
 ## 📖 Documentation
 
@@ -80,7 +136,7 @@ RepoDNA requires:
 
 - Git;
 - Bash (Git Bash on Windows);
-- Python 3 for generic collection and HTML/Notion report rendering;
+- Python 3.11 or newer for generic collection and HTML/Notion report rendering;
 - `matplotlib` for commit-history charts.
 
 Check the installation with:
@@ -121,7 +177,7 @@ analyzed repository; start with `report/index.html`.
 By default, RepoDNA excludes generated or dependency directories such as
 `Library/`, `Build/`, `node_modules/`, `vendor/`, `Packages/`, and `.git/`.
 
-To customize exclusions for your project, create a `.repodnaignore` file in your repository root:
+To customize exclusions for your project, create a `.repodna-ignore` file in your repository root:
 
 ```
 # Project-specific exclusions
@@ -130,7 +186,7 @@ Assets/Generated/
 vendor/
 ```
 
-`.repodnaignore` currently supports directory entries ending in `/`. File globs
+`.repodna-ignore` currently supports directory entries ending in `/`. File globs
 and negation rules are not supported yet.
 
 See [EXCLUSIONS.md](./EXCLUSIONS.md) for detailed configuration documentation.
@@ -138,7 +194,7 @@ See [EXCLUSIONS.md](./EXCLUSIONS.md) for detailed configuration documentation.
 ## Source Ownership
 
 RepoDNA combines known vendor and generated paths, `.asmdef` files, dependency
-manifests, Git submodules, copyright headers, `.repodnaignore`, and Git tracking
+manifests, Git submodules, copyright headers, `.repodna-ignore`, and Git tracking
 to classify source ownership with a confidence level.
 
 Use `--owned-root` more than once when repository-specific paths are known to be
@@ -287,7 +343,7 @@ bash ./tests/run.sh
 The same suite runs on Linux for every push and pull request through GitHub
 Actions.
 
-Python 3 is required because HTML is now the standard report format. RepoDNA
+Python 3.11 or newer is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable
 runtime. `matplotlib` is required for the optional PNG charts; the HTML reports
 still work when only that package is unavailable.

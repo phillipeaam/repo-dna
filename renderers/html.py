@@ -29,9 +29,22 @@ def metric_cards(rows: list[tuple[str, Any]]) -> str:
     )
 
 
+def numeric_value(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def display_value(value: Any) -> str:
+    if isinstance(value, int) and not isinstance(value, bool):
+        return f"{value:,}"
+    if isinstance(value, float):
+        return f"{value:,.2f}"
+    return str(value)
+
+
 def table(rows: list[tuple[str, Any]]) -> str:
     body = "".join(
-        f"<tr><th>{esc(label)}</th><td>{esc(value)}</td></tr>" for label, value in rows
+        f'<tr><th>{esc(label)}</th><td class="{"number" if numeric_value(value) else ""}">{esc(display_value(value))}</td></tr>'
+        for label, value in rows
     )
     return f'<div class="table-wrap"><table>{body}</table></div>'
 
@@ -70,7 +83,7 @@ STYLES = """
 :root{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}header p{color:#cbd5e1}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}
-nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{font-size:1.65rem}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}.data-table th{width:auto}.data-table td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.note{background:#f8fafc;border-left:4px solid var(--brand);padding:.8rem 1rem;color:var(--muted)}a{color:var(--brand)}.empty{color:var(--muted)}
+nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{display:block;text-align:right;font-size:1.65rem;font-variant-numeric:tabular-nums}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}.data-table th{width:auto}td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.note{background:#f8fafc;border-left:4px solid var(--brand);padding:.8rem 1rem;color:var(--muted)}a{color:var(--brand)}.empty{color:var(--muted)}
 @media(max-width:760px){.layout{display:block;padding:1rem}nav{position:static;margin-bottom:1rem;display:flex;overflow:auto}nav a{white-space:nowrap}header{padding:2rem 1rem}}
 @media print{nav{display:none}.layout{display:block;padding:0}section,.metric{box-shadow:none;break-inside:avoid}body{background:#fff}}
 """
@@ -176,10 +189,11 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         [item["path"], item["dependency_count"]]
         for item in generic.get("dependencies", {}).get("manifests", [])
     ]
-    hotspot_table = table([
-        (item["path"], f"score {item.get('score', 'n/a')} · {item['commits']} commits · {item['churn']} churn · {item.get('current_lines', 0)} lines · {item.get('authors', 0)} authors · changed {item.get('days_since_last_change', 0)} days ago")
+    hotspot_table = data_table(
+        ["File", "Score", "Commits", "Churn", "Lines", "Authors", "Days since change"], [
+        [item["path"], item.get("score", "n/a"), item["commits"], item["churn"], item.get("current_lines", 0), item.get("authors", 0), item.get("days_since_last_change", 0)]
         for item in generic.get("git", {}).get("hotspots", [])[:20]
-    ]) if generic.get("git", {}).get("hotspots") else empty
+    ], {1, 2, 3, 4, 5, 6}) if generic.get("git", {}).get("hotspots") else empty
     git_data = generic.get("git", {})
     contributor_table = table([
         (item["name"], item["commits"]) for item in git_data.get("contributors", [])
@@ -241,6 +255,35 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     )
     notion_body += '<p><a href="../notion/evidence.json">Open the complete structured evidence JSON</a></p>'
 
+    language_names = ", ".join(item["name"] for item in generic.get("languages", [])[:5]) or "None detected"
+    architecture_evidence = (
+        f"{architecture.get('architecture_signals', 0)} pattern signals and {architecture.get('interfaces', 0)} interfaces"
+        if profile["csharp"] else f"{len(generic.get('possible_modules', []))} module candidates"
+    )
+    system_evidence = (
+        f"{systems.get('likely_system_files', 0)} likely system files"
+        if profile["csharp"] else f"{len(system_rows)} systems inferred from Git paths"
+    )
+    design_status = "Available" if profile["csharp"] else "Not available for this profile"
+    design_evidence = (
+        f"{architecture.get('architecture_signals', 0)} C# design-pattern matches"
+        if profile["csharp"] else "Only stack-neutral module inference was performed"
+    )
+    capability_rows = [
+        ["Automatic project detection", "Completed", f"Detected profile: {project['type']}"],
+        ["Architecture discovery", "Completed", architecture_evidence],
+        ["Technology inventory", "Completed", f"Languages: {language_names}; {dependency_total} dependency declarations"],
+        ["Gameplay and application systems", "Completed", system_evidence],
+        ["Project metrics", "Completed", f"{generic.get('file_count', 0)} files across {len(generic.get('languages', []))} languages"],
+        ["Git contribution analysis", "Completed", f"{history.get('total_commits', 0)} commits; {generic.get('git', {}).get('churn', {}).get('total', 0)} lines of churn"],
+        ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals"],
+        ["Design pattern detection", design_status, design_evidence],
+        ["Engineering signals", "Completed", f"{generic.get('test_file_count', 0)} tests; {generic.get('ci_cd_file_count', 0)} CI/CD; {generic.get('docker_file_count', 0)} Docker; {generic.get('documentation_file_count', 0)} documentation files"],
+        ["Report generation", "Completed", "HTML report suite, canonical JSON, Git CSV data, and optional charts"],
+        ["Portfolio and documentation support", "Completed", f"{len(notion_facts)} repository facts and {len(notion['personal_confirmation_required'])} personal confirmation prompts"],
+    ]
+    capability_table = data_table(["Analysis capability", "Status", "Evidence produced"], capability_rows)
+
     sections = [
         ("project-overview.html", "Project overview", table(overview) + "<h3>Repository inventory</h3>" + inventory + "<h3>Largest files</h3>" + largest_table + "<h3>Main directories</h3>" + directory_table),
         ("architecture.html", "Architecture", architecture_body),
@@ -263,6 +306,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("History period", f"{history.get('first_date') or 'Unknown'} to {history.get('last_date') or 'Unknown'}"),
         ("Total churn", generic.get("git", {}).get("churn", {}).get("total", 0)),
     ]) + '<p class="note">These are repository signals, not conclusions about business impact, code quality, or personal ownership.</p></section>'
+    executive_body += '<section><h2>Analysis coverage and evidence</h2><p>Each row states what this run actually analyzed. Unsupported specialized analysis is shown explicitly instead of being reported as an empty result.</p>' + capability_table + '</section>'
     all_pages = [("index.html", "Home"), ("executive-summary.html", "Executive summary")] + [
         (filename, title) for filename, title, _ in sections
     ]
