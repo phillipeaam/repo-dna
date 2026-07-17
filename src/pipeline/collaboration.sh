@@ -29,7 +29,7 @@ else
 fi
 
 if [[ "$PRIVACY_MODE" == strict ]]; then
-    printf 'Merge commits: %s\n' "${MERGE_COMMITS:-0}" \
+    printf 'Merge commits: %s\n' "${GIT_HISTORY[merge_commits]:-0}" \
         > "$PROJECT_DIR/31_merge_history.txt"
 else
     git log --all \

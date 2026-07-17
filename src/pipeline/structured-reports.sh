@@ -1,20 +1,56 @@
 write_structured_reports() {
+local CONTRIBUTION_TEXT PROJECT_IDENTITY_TEXT CURRENT_METRICS_TEXT
+local JSON_REPO JSON_PROJECT_TYPE JSON_PRODUCT JSON_COMPANY JSON_AUTHOR
+local JSON_GENERATED JSON_UNITY JSON_FIRST_COMMIT JSON_LAST_COMMIT
+local SOURCE_FOLDER_DESCRIPTION PROJECT_README_METADATA
 echo "[9/12] Writing summaries and structured data..."
 
 # Build the Git-history summary fragment.
-if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
+if ((GIT_HISTORY[total_commits] > 0)); then
     # Include metrics for the selected history scope.
-    CONTRIBUTION_TEXT="Total commits: $TOTAL_COMMITS
-Active commit days: $ACTIVE_DAYS
-First commit date: ${FIRST_DATE:-N/A}
-Last commit date: ${LAST_DATE:-N/A}
-Historical C# paths changed: $HISTORICAL_CS_FILES
-Historical Unity-related paths changed: $HISTORICAL_UNITY_FILES
-Historical scenes changed: $HISTORICAL_SCENES
-Historical prefabs changed: $HISTORICAL_PREFABS"
+    CONTRIBUTION_TEXT="Total commits: ${GIT_HISTORY[total_commits]}
+Active commit days: ${GIT_HISTORY[active_days]}
+First commit date: ${GIT_HISTORY[first_date]:-N/A}
+Last commit date: ${GIT_HISTORY[last_date]:-N/A}"
+    if [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]]; then
+        CONTRIBUTION_TEXT="$CONTRIBUTION_TEXT
+Historical C# paths changed: ${GIT_HISTORY[historical_cs_files]}"
+    fi
+    if [[ "$PROJECT_TYPE" == Unity ]]; then
+        CONTRIBUTION_TEXT="$CONTRIBUTION_TEXT
+Historical Unity-related paths changed: ${GIT_HISTORY[historical_unity_files]}
+Historical scenes changed: ${GIT_HISTORY[historical_scenes]}
+Historical prefabs changed: ${GIT_HISTORY[historical_prefabs]}"
+    fi
 else
     # Explain the missing history match.
     CONTRIBUTION_TEXT="No commits matched the selected history scope: $HISTORY_SCOPE"
+fi
+
+# Build profile-specific text without leaking Unity concepts into generic reports.
+PROJECT_IDENTITY_TEXT="Repository: $DISPLAY_REPO_NAME
+Project type: $PROJECT_TYPE
+Code root: $CODE_ROOT
+Generated at: $GENERATED_AT"
+CURRENT_METRICS_TEXT='See report/data/generic-analysis.json for stack-neutral metrics.'
+if [[ "$PROJECT_TYPE" == Unity ]]; then
+    PROJECT_IDENTITY_TEXT="$PROJECT_IDENTITY_TEXT
+Product name: $DISPLAY_PRODUCT_NAME
+Company name: $DISPLAY_COMPANY_NAME
+Unity version: ${UNITY_VERSION:-Unknown}"
+    CURRENT_METRICS_TEXT="C# files: ${CURRENT_METRICS[csharp_files]}
+C# source lines: ${CURRENT_METRICS[csharp_lines]}
+Unity scenes: ${CURRENT_METRICS[scenes]}
+Unity prefabs: ${CURRENT_METRICS[prefabs]}
+Animation clips: ${CURRENT_METRICS[animations]}
+Animator controllers: ${CURRENT_METRICS[controllers]}
+Shader files: ${CURRENT_METRICS[shaders]}
+Assembly definitions: ${CURRENT_METRICS[asmdefs]}
+UXML files: ${CURRENT_METRICS[uxml]}
+USS files: ${CURRENT_METRICS[uss]}"
+elif [[ "$PROJECT_TYPE" == .NET ]]; then
+    CURRENT_METRICS_TEXT="C# files: ${CURRENT_METRICS[csharp_files]}
+C# source lines: ${CURRENT_METRICS[csharp_lines]}"
 fi
 
 # Write the executive summary.
@@ -24,26 +60,11 @@ Project and Career Analysis
 
 Project
 -------
-Repository: $DISPLAY_REPO_NAME
-Project type: $PROJECT_TYPE
-Product name: $DISPLAY_PRODUCT_NAME
-Company name: $DISPLAY_COMPANY_NAME
-Unity version: ${UNITY_VERSION:-Unknown}
-Code root: $CODE_ROOT
-Generated at: $GENERATED_AT
+$PROJECT_IDENTITY_TEXT
 
 Current Project Metrics
 -----------------------
-C# files: $CURRENT_CS_FILES
-C# source lines: $CURRENT_CS_LINES
-Unity scenes: $CURRENT_SCENES
-Unity prefabs: $CURRENT_PREFABS
-Animation clips: $CURRENT_ANIMATIONS
-Animator controllers: $CURRENT_CONTROLLERS
-Shader files: $CURRENT_SHADERS
-Assembly definitions: $CURRENT_ASMDEFS
-UXML files: $CURRENT_UXML
-USS files: $CURRENT_USS
+$CURRENT_METRICS_TEXT
 
 $HISTORY_HEADING
 ----------------------------
@@ -93,25 +114,25 @@ cat > "$DATA_DIR/project_summary.json" <<EOF
   "unity_version": "$JSON_UNITY",
   "code_root": "$(json_escape "$CODE_ROOT")",
   "current_project_metrics": {
-    "csharp_files": $CURRENT_CS_FILES,
-    "csharp_source_lines": $CURRENT_CS_LINES,
-    "unity_scenes": $CURRENT_SCENES,
-    "unity_prefabs": $CURRENT_PREFABS,
-    "animation_clips": $CURRENT_ANIMATIONS,
-    "animator_controllers": $CURRENT_CONTROLLERS,
-    "shader_files": $CURRENT_SHADERS,
-    "assembly_definitions": $CURRENT_ASMDEFS,
-    "uxml_files": $CURRENT_UXML,
-    "uss_files": $CURRENT_USS
+    "csharp_files": ${CURRENT_METRICS[csharp_files]},
+    "csharp_source_lines": ${CURRENT_METRICS[csharp_lines]},
+    "unity_scenes": ${CURRENT_METRICS[scenes]},
+    "unity_prefabs": ${CURRENT_METRICS[prefabs]},
+    "animation_clips": ${CURRENT_METRICS[animations]},
+    "animator_controllers": ${CURRENT_METRICS[controllers]},
+    "shader_files": ${CURRENT_METRICS[shaders]},
+    "assembly_definitions": ${CURRENT_METRICS[asmdefs]},
+    "uxml_files": ${CURRENT_METRICS[uxml]},
+    "uss_files": ${CURRENT_METRICS[uss]}
   }
 }
 EOF
 
 # Write contribution JSON when commits matched.
-if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
+if ((GIT_HISTORY[total_commits] > 0)); then
     # Escape commit text.
-    JSON_FIRST_COMMIT="$(json_escape "$FIRST_COMMIT")"
-    JSON_LAST_COMMIT="$(json_escape "$LAST_COMMIT")"
+    JSON_FIRST_COMMIT="$(json_escape "${GIT_HISTORY[first_commit]}")"
+    JSON_LAST_COMMIT="$(json_escape "${GIT_HISTORY[last_commit]}")"
 
     # Write contribution metrics.
     cat > "$DATA_DIR/contribution_summary.json" <<EOF
@@ -123,21 +144,21 @@ if [[ "$TOTAL_COMMITS" -gt 0 ]]; then
   "first_commit": "$JSON_FIRST_COMMIT",
   "last_commit": "$JSON_LAST_COMMIT",
   "metrics": {
-    "total_commits": $TOTAL_COMMITS,
-    "non_merge_commits": $NON_MERGE_COMMITS,
-    "merge_commits": $MERGE_COMMITS,
-    "active_days": $ACTIVE_DAYS,
-    "lines_added": $LINES_ADDED,
-    "lines_removed": $LINES_REMOVED,
-    "net_lines": $NET_LINES,
-    "unique_historical_paths_changed": $UNIQUE_FILES,
-    "historical_csharp_paths_changed": $HISTORICAL_CS_FILES,
-    "historical_unity_paths_changed": $HISTORICAL_UNITY_FILES,
-    "historical_scenes_changed": $HISTORICAL_SCENES,
-    "historical_prefabs_changed": $HISTORICAL_PREFABS,
-    "historical_animation_files_changed": $HISTORICAL_ANIMATIONS,
-    "historical_shader_files_changed": $HISTORICAL_SHADERS,
-    "historical_editor_csharp_files_changed": $HISTORICAL_EDITOR_CS
+    "total_commits": ${GIT_HISTORY[total_commits]},
+    "non_merge_commits": ${GIT_HISTORY[non_merge_commits]},
+    "merge_commits": ${GIT_HISTORY[merge_commits]},
+    "active_days": ${GIT_HISTORY[active_days]},
+    "lines_added": ${GIT_HISTORY[lines_added]},
+    "lines_removed": ${GIT_HISTORY[lines_removed]},
+    "net_lines": ${GIT_HISTORY[net_lines]},
+    "unique_historical_paths_changed": ${GIT_HISTORY[unique_files]},
+    "historical_csharp_paths_changed": ${GIT_HISTORY[historical_cs_files]},
+    "historical_unity_paths_changed": ${GIT_HISTORY[historical_unity_files]},
+    "historical_scenes_changed": ${GIT_HISTORY[historical_scenes]},
+    "historical_prefabs_changed": ${GIT_HISTORY[historical_prefabs]},
+    "historical_animation_files_changed": ${GIT_HISTORY[historical_animations]},
+    "historical_shader_files_changed": ${GIT_HISTORY[historical_shaders]},
+    "historical_editor_csharp_files_changed": ${GIT_HISTORY[historical_editor_cs]}
   }
 }
 EOF

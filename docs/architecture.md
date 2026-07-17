@@ -11,6 +11,7 @@ dna-analysis.sh          Public entrypoint and explicit orchestration
 src/core/                Reusable runtime, filesystem, Git, privacy and domain services
 src/detectors/           Project type detection and preferred roots
 src/analyzers/           Stack-specific analysis that runs only for matching profiles
+src/git/                 Git metric, specialized-history and export services
 src/pipeline/            Use-case stages; sourcing declares one public function
 src/reports/             Structured-data and chart producers
 collectors/              Python collectors that output JSON only
@@ -54,6 +55,11 @@ Bash has no native object model, so the current MVP uses documented uppercase
 context variables such as `REPO_ROOT`, `PROJECT_TYPE`, `OUTPUT_DIR` and
 `PRIVACY_MODE`. Module-local values should use `local`. Shared registries use
 explicit global declarations (`declare -g`) and are initialized once per run.
+
+Related outputs should be grouped instead of exposed as many globals. Git
+history, for example, publishes the `GIT_HISTORY` associative registry from
+small modules under `src/git/`; consumers read named keys from that contract.
+Current C#/Unity metrics follow the same rule through `CURRENT_METRICS`.
 
 Longer term, high-growth collection logic should move to Python and exchange
 versioned JSON rather than add more shared Bash globals.

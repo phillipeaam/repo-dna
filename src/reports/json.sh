@@ -96,16 +96,16 @@ write_structured_report_json() {
   },
   "generic_analysis": $generic_analysis_json,
   "current_metrics": {
-    "csharp_files": ${CURRENT_CS_FILES:-0},
-    "csharp_lines": ${CURRENT_CS_LINES:-0},
-    "scenes": ${CURRENT_SCENES:-0},
-    "prefabs": ${CURRENT_PREFABS:-0},
-    "animations": ${CURRENT_ANIMATIONS:-0},
-    "animator_controllers": ${CURRENT_CONTROLLERS:-0},
-    "shaders": ${CURRENT_SHADERS:-0},
-    "assembly_definitions": ${CURRENT_ASMDEFS:-0},
-    "uxml_files": ${CURRENT_UXML:-0},
-    "uss_files": ${CURRENT_USS:-0}
+    "csharp_files": ${CURRENT_METRICS[csharp_files]:-0},
+    "csharp_lines": ${CURRENT_METRICS[csharp_lines]:-0},
+    "scenes": ${CURRENT_METRICS[scenes]:-0},
+    "prefabs": ${CURRENT_METRICS[prefabs]:-0},
+    "animations": ${CURRENT_METRICS[animations]:-0},
+    "animator_controllers": ${CURRENT_METRICS[controllers]:-0},
+    "shaders": ${CURRENT_METRICS[shaders]:-0},
+    "assembly_definitions": ${CURRENT_METRICS[asmdefs]:-0},
+    "uxml_files": ${CURRENT_METRICS[uxml]:-0},
+    "uss_files": ${CURRENT_METRICS[uss]:-0}
   },
   "architecture": {
     "scriptable_objects": $(report_line_count "$PROJECT_DIR/13_scriptable_objects.txt"),
@@ -119,9 +119,9 @@ write_structured_report_json() {
   },
   "technologies": {
     "dependency_count": ${dependency_count:-0},
-    "shader_files": ${CURRENT_SHADERS:-0},
-    "ui_toolkit_files": $((${CURRENT_UXML:-0} + ${CURRENT_USS:-0})),
-    "assembly_definitions": ${CURRENT_ASMDEFS:-0}
+    "shader_files": ${CURRENT_METRICS[shaders]:-0},
+    "ui_toolkit_files": $((${CURRENT_METRICS[uxml]:-0} + ${CURRENT_METRICS[uss]:-0})),
+    "assembly_definitions": ${CURRENT_METRICS[asmdefs]:-0}
   },
   "systems": {
     "likely_system_files": $(report_line_count "$PROJECT_DIR/17_likely_system_files.txt"),
@@ -130,15 +130,15 @@ write_structured_report_json() {
   },
   "history": {
     "scope": "$(json_escape "$HISTORY_SCOPE")",
-    "total_commits": ${TOTAL_COMMITS:-0},
-    "merge_commits": ${MERGE_COMMITS:-0},
-    "non_merge_commits": ${NON_MERGE_COMMITS:-0},
-    "active_days": ${ACTIVE_DAYS:-0},
-    "first_date": "$(json_escape "${FIRST_DATE:-}")",
-    "last_date": "$(json_escape "${LAST_DATE:-}")",
-    "lines_added": ${LINES_ADDED:-0},
-    "lines_removed": ${LINES_REMOVED:-0},
-    "unique_paths_changed": ${UNIQUE_FILES:-0}
+    "total_commits": ${GIT_HISTORY[total_commits]:-0},
+    "merge_commits": ${GIT_HISTORY[merge_commits]:-0},
+    "non_merge_commits": ${GIT_HISTORY[non_merge_commits]:-0},
+    "active_days": ${GIT_HISTORY[active_days]:-0},
+    "first_date": "$(json_escape "${GIT_HISTORY[first_date]:-}")",
+    "last_date": "$(json_escape "${GIT_HISTORY[last_date]:-}")",
+    "lines_added": ${GIT_HISTORY[lines_added]:-0},
+    "lines_removed": ${GIT_HISTORY[lines_removed]:-0},
+    "unique_paths_changed": ${GIT_HISTORY[unique_files]:-0}
   },
   "collaboration": {
     "contributors": ${contributor_count:-0}

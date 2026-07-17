@@ -29,6 +29,12 @@ source "$SCRIPT_DIR/src/core/archive.sh"
 source "$SCRIPT_DIR/src/core/git.sh"
 # shellcheck source=src/analyzers/unity.sh
 source "$SCRIPT_DIR/src/analyzers/unity.sh"
+# shellcheck source=src/git/history-export.sh
+source "$SCRIPT_DIR/src/git/history-export.sh"
+# shellcheck source=src/git/history-metrics.sh
+source "$SCRIPT_DIR/src/git/history-metrics.sh"
+# shellcheck source=src/git/history-specialized.sh
+source "$SCRIPT_DIR/src/git/history-specialized.sh"
 
 parse_arguments "$@"
 

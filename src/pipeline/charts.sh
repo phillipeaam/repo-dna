@@ -2,7 +2,7 @@ create_optional_charts() {
 echo "[10/12] Creating optional charts..."
 
 # Create charts only when detailed, non-strict commit data exists.
-if [[ "$TOTAL_COMMITS" -gt 0 && "$PRIVACY_MODE" != strict ]]; then
+if ((GIT_HISTORY[total_commits] > 0)) && [[ "$PRIVACY_MODE" != strict ]]; then
     # Run the chart generator when dependencies exist.
     if [[ -n "$STRUCTURED_PYTHON" ]] &&
        "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1; then

@@ -250,7 +250,7 @@ is the fallback for unknown stacks.
 Argument parsing, runtime discovery, filesystem helpers, Git execution, privacy,
 and archive/finalization live under `src/core/`. Unity inventory collection is
 isolated in `src/analyzers/unity.sh`, chart generation in
-`src/reports/charts.py`, stack-neutral collection in `collectors/`, and
+`src/reports/charts.py`, Git history services in `src/git/`, stack-neutral collection in `collectors/`, and
 HTML/Notion presentation in `renderers/`. Specialized analyzers execute only for
 matching project profiles, so generic repositories do not receive empty Unity
 inventories.

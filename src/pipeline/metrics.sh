@@ -1,37 +1,44 @@
+declare -gA CURRENT_METRICS=()
+
 collect_metrics() {
 echo "[4/12] Calculating current project metrics..."
+
+CURRENT_METRICS=(
+    [csharp_files]=0 [csharp_lines]=0 [scenes]=0 [prefabs]=0
+    [animations]=0 [controllers]=0 [shaders]=0 [asmdefs]=0 [uxml]=0 [uss]=0
+)
 
 # Calculate specialized C# metrics only for C# project profiles.
 if [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]]; then
 # Count current C# files.
-CURRENT_CS_FILES="$(count_current_files '*.cs')"
+CURRENT_METRICS[csharp_files]="$(count_current_files '*.cs')"
 
 # Count current scenes.
-CURRENT_SCENES="$(count_current_files '*.unity')"
+CURRENT_METRICS[scenes]="$(count_current_files '*.unity')"
 
 # Count current prefabs.
-CURRENT_PREFABS="$(count_current_files '*.prefab')"
+CURRENT_METRICS[prefabs]="$(count_current_files '*.prefab')"
 
 # Count current animation clips.
-CURRENT_ANIMATIONS="$(count_current_files '*.anim')"
+CURRENT_METRICS[animations]="$(count_current_files '*.anim')"
 
 # Count current animator controllers.
-CURRENT_CONTROLLERS="$(count_current_files '*.controller')"
+CURRENT_METRICS[controllers]="$(count_current_files '*.controller')"
 
 # Count current shader files.
-CURRENT_SHADERS="$(count_current_files '*.shader')"
+CURRENT_METRICS[shaders]="$(count_current_files '*.shader')"
 
 # Count current assembly definitions.
-CURRENT_ASMDEFS="$(count_current_files '*.asmdef')"
+CURRENT_METRICS[asmdefs]="$(count_current_files '*.asmdef')"
 
 # Count current UXML files.
-CURRENT_UXML="$(count_current_files '*.uxml')"
+CURRENT_METRICS[uxml]="$(count_current_files '*.uxml')"
 
 # Count current USS files.
-CURRENT_USS="$(count_current_files '*.uss')"
+CURRENT_METRICS[uss]="$(count_current_files '*.uss')"
 
 # Count current C# source lines.
-CURRENT_CS_LINES="$(
+CURRENT_METRICS[csharp_lines]="$(
     analysis_find -type f -iname '*.cs' -print0 2>/dev/null |
         xargs -0 cat 2>/dev/null |
         wc -l |
@@ -68,31 +75,21 @@ Current Project Metrics
 =======================
 
 Code root: $CODE_ROOT
-C# files: $CURRENT_CS_FILES
-C# source lines: $CURRENT_CS_LINES
-Unity scenes: $CURRENT_SCENES
-Unity prefabs: $CURRENT_PREFABS
-Animation clips: $CURRENT_ANIMATIONS
-Animator controllers: $CURRENT_CONTROLLERS
-Shader files: $CURRENT_SHADERS
-Assembly definitions: $CURRENT_ASMDEFS
-UXML files: $CURRENT_UXML
-USS files: $CURRENT_USS
+C# files: ${CURRENT_METRICS[csharp_files]}
+C# source lines: ${CURRENT_METRICS[csharp_lines]}
+Unity scenes: ${CURRENT_METRICS[scenes]}
+Unity prefabs: ${CURRENT_METRICS[prefabs]}
+Animation clips: ${CURRENT_METRICS[animations]}
+Animator controllers: ${CURRENT_METRICS[controllers]}
+Shader files: ${CURRENT_METRICS[shaders]}
+Assembly definitions: ${CURRENT_METRICS[asmdefs]}
+UXML files: ${CURRENT_METRICS[uxml]}
+USS files: ${CURRENT_METRICS[uss]}
 
 These values describe the current repository state.
 They may include third-party code, imported assets, examples, and generated files.
 EOF
 else
-    CURRENT_CS_FILES=0
-    CURRENT_SCENES=0
-    CURRENT_PREFABS=0
-    CURRENT_ANIMATIONS=0
-    CURRENT_CONTROLLERS=0
-    CURRENT_SHADERS=0
-    CURRENT_ASMDEFS=0
-    CURRENT_UXML=0
-    CURRENT_USS=0
-    CURRENT_CS_LINES=0
     cat > "$PROJECT_DIR/25_current_project_metrics.txt" <<EOF
 Current Project Metrics
 =======================

@@ -9,6 +9,7 @@ tests=(
     project_detection_test.sh
     exclusions_test.sh
     ownership_test.sh
+    git_history_test.sh
     security_scan_test.sh
     generic_collector_test.sh
     reporting_test.sh
