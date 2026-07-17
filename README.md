@@ -77,9 +77,10 @@ Repository
 ## AST analysis status
 
 RepoDNA now has a language-analyzer contract under `collectors/languages/`.
-Python source is parsed with the standard-library AST and produces structured
-classes, functions, qualified methods, inheritance, decorators, parameters,
-imports, calls, per-function complexity, and pattern evidence.
+Python source is parsed with the standard-library AST. JavaScript, TypeScript,
+and C# use optional Tree-sitter grammar adapters. These analyzers produce
+structured classes, functions, qualified methods, parameters, imports, calls,
+per-function complexity, and pattern evidence.
 
 Every report exposes parser coverage per language:
 
@@ -87,10 +88,16 @@ Every report exposes parser coverage per language:
 - `heuristic-fallback`: the language still uses symbol and naming heuristics;
 - `parse_errors`: AST parsing failed and the safe fallback was used.
 
-JavaScript, TypeScript, C#, Java, Kotlin, Dart, Go, and Rust are registered as
-the next Tree-sitter priorities. They remain explicitly marked as fallback until
-their grammar adapters are implemented and tested; the report does not describe
-heuristic results as AST findings.
+Install the optional grammar bundle with:
+
+```bash
+python -m pip install -r requirements-ast.txt
+```
+
+Without it, JavaScript, TypeScript, and C# safely use `heuristic-fallback` and
+the report identifies the unavailable parser. Java, Kotlin, Dart, Go, and Rust
+remain the next Tree-sitter priorities; heuristic results are never described
+as AST findings.
 
 ---
 ## 📖 Documentation
@@ -161,6 +168,8 @@ RepoDNA requires:
 - Bash (Git Bash on Windows);
 - Python 3.11 or newer for generic collection and HTML/Notion report rendering;
 - `matplotlib` for commit-history charts.
+- the packages in `requirements-ast.txt` for JavaScript, TypeScript, and C#
+  syntax-tree analysis (optional; heuristics remain available without them).
 
 Check the installation with:
 
@@ -175,6 +184,7 @@ Install the chart dependency with:
 
 ```bash
 python -m pip install matplotlib
+python -m pip install -r requirements-ast.txt
 ```
 
 If Python is installed under a non-standard command, select it explicitly:
@@ -410,7 +420,8 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 - [x] Stack-neutral language, dependency and repository inventory
 - [x] Git contribution, churn, hotspot and collaboration analysis
 - [x] Structured JSON and HTML report generation
-- [ ] Language-aware architecture analysis beyond C#
+- [x] AST analysis for Python, JavaScript, TypeScript, and C#
+- [ ] Tree-sitter architecture analysis for Java, Kotlin, Dart, Go, and Rust
 
 ### Project detection
 

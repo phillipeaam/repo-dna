@@ -37,9 +37,24 @@ assert find["estimated_cyclomatic_complexity"] >= 3
 
 invalid = analyze_source("Python", "def broken(:\n")
 assert invalid and invalid["parse_errors"]
-assert analyze_source("TypeScript", "export class Sample {}") is None
 assert parser_status("Python")["mode"] == "ast"
-assert parser_status("TypeScript")["mode"] == "heuristic-fallback"
+
+tree_sitter_samples = {
+    "JavaScript": ('import api from "./api"; class UserRepository { find(id) { if (id) return api.get(id); } }', "./api", "UserRepository.find", "api.get"),
+    "TypeScript": ('import { Client } from "./client"; interface Store { get(id: string): string; } class StoreService { load(id: string) { if (id) return Client.fetch(id); return null; } }', "./client", "StoreService.load", "Client.fetch"),
+    "C#": ('using System.Net.Http; class UserRepository { int Get(int id) { if (id > 0) return Create(id); return 0; } }', "System.Net.Http", "UserRepository.Get", "Create"),
+}
+for language, (sample, imported, function, target) in tree_sitter_samples.items():
+    parsed = analyze_source(language, sample)
+    if parser_status(language)["mode"] == "heuristic-fallback":
+        assert parsed is None
+        continue
+    assert parsed and parsed["parser"].startswith("tree-sitter-")
+    assert not parsed["parse_errors"]
+    assert imported in parsed["imports"]
+    assert any(item["name"] == function for item in parsed["functions"])
+    assert any(item["target"] == target for item in parsed["calls"])
+    assert any(item["estimated_cyclomatic_complexity"] >= 2 for item in parsed["functions"])
 PY
 
 printf '%s\n' 'AST analysis tests passed'
