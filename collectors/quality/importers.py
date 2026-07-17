@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import unquote
 
 
 MAX_REPORT_BYTES = 25_000_000
@@ -144,6 +145,23 @@ def _severity(value: str | int | None) -> str:
     return {"fatal": "critical", "err": "error", "warn": "warning", "moderate": "medium"}.get(lowered, lowered)
 
 
+def _normalized_package(value: str) -> str:
+    normalized = unquote(value.strip()).casefold().replace("_", "-")
+    if not normalized.startswith("pkg:"):
+        return normalized
+    purl = normalized[4:].split("?", 1)[0].split("#", 1)[0]
+    ecosystem, _, identity = purl.partition("/")
+    identity = identity.rsplit("@", 1)[0]
+    if ecosystem == "maven" and "/" in identity:
+        group, artifact = identity.rsplit("/", 1)
+        return f"{group}:{artifact}"
+    return identity
+
+
+def _finding(package: str, version: str | None, identifier: Any, severity: Any, source: str) -> dict[str, Any]:
+    return {"package": package, "version": version, "id": str(identifier or "unknown"), "severity": _severity(severity), "source": source}
+
+
 def _linters(root: Path) -> dict[str, Any]:
     reports: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
@@ -196,49 +214,209 @@ def _linters(root: Path) -> dict[str, Any]:
 def _scanners(root: Path, manifest_count: int) -> dict[str, Any]:
     reports: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
-    candidates = _find(root, {"npm-audit.json", "pip-audit.json", "osv-results.json", "dependency-check-report.json", "trivy-results.json", "security-results.sarif"}, ("**/npm-audit.json", "**/pip-audit.json", "**/osv-results.json", "**/dependency-check-report.json", "**/trivy-results.json", "**/security-results.sarif"))
+    candidates = _find(
+        root,
+        {"npm-audit.json", "pip-audit.json", "osv-results.json", "dependency-check-report.json", "trivy-results.json", "security-results.sarif", "bom.json", "sbom.json"},
+        ("**/npm-audit.json", "**/pip-audit.json", "**/osv-results.json", "**/dependency-check-report.json", "**/trivy-results.json", "**/security-results.sarif", "**/bom.json", "**/sbom.json"),
+    )
     for path in candidates:
         try:
             data = _read_json(path)
             severities: Counter[str] = Counter()
+            dependency_findings: list[dict[str, Any]] = []
             name = path.name.casefold()
             tool = "Unknown"
             if name == "npm-audit.json":
                 tool = "npm audit"
-                severities.update({_severity(key): int(value) for key, value in data.get("metadata", {}).get("vulnerabilities", {}).items() if key != "total"})
+                for package, vulnerability in data.get("vulnerabilities", {}).items():
+                    via = [item for item in vulnerability.get("via", []) if isinstance(item, dict)]
+                    if via:
+                        for item in via:
+                            dependency_findings.append(_finding(package, None, item.get("source", item.get("name")), item.get("severity", vulnerability.get("severity")), tool))
+                    else:
+                        dependency_findings.append(_finding(package, None, None, vulnerability.get("severity"), tool))
             elif name == "pip-audit.json":
                 tool = "pip-audit"
                 for dependency in data.get("dependencies", data if isinstance(data, list) else []):
-                    severities["unknown"] += len(dependency.get("vulns", []))
+                    for vulnerability in dependency.get("vulns", []):
+                        dependency_findings.append(_finding(dependency.get("name", "unknown"), dependency.get("version"), vulnerability.get("id"), vulnerability.get("severity"), tool))
             elif name == "osv-results.json":
                 tool = "OSV-Scanner"
                 for result in data.get("results", []):
                     for package in result.get("packages", []):
-                        severities["unknown"] += len(package.get("vulnerabilities", []))
+                        package_info = package.get("package", {})
+                        for vulnerability in package.get("vulnerabilities", []):
+                            severity = vulnerability.get("database_specific", {}).get(
+                                "severity",
+                                vulnerability.get("ecosystem_specific", {}).get("severity", "unknown"),
+                            )
+                            dependency_findings.append(_finding(package_info.get("name", "unknown"), package.get("version"), vulnerability.get("id"), severity, tool))
             elif name == "dependency-check-report.json":
                 tool = "OWASP Dependency-Check"
                 for dependency in data.get("dependencies", []):
                     for vulnerability in dependency.get("vulnerabilities", []):
-                        severities[_severity(vulnerability.get("severity"))] += 1
+                        package = dependency.get("packages", [{}])[0].get("id") if dependency.get("packages") else dependency.get("fileName", "unknown")
+                        dependency_findings.append(_finding(package, None, vulnerability.get("name"), vulnerability.get("severity"), tool))
             elif name == "trivy-results.json":
                 tool = "Trivy"
                 for result in data.get("Results", []):
-                    for finding in [*result.get("Vulnerabilities", []), *result.get("Misconfigurations", []), *result.get("Secrets", [])]:
+                    for vulnerability in result.get("Vulnerabilities", []):
+                        dependency_findings.append(_finding(vulnerability.get("PkgName", "unknown"), vulnerability.get("InstalledVersion"), vulnerability.get("VulnerabilityID"), vulnerability.get("Severity"), tool))
+                    for finding in [*result.get("Misconfigurations", []), *result.get("Secrets", [])]:
                         severities[_severity(finding.get("Severity"))] += 1
+            elif name in {"bom.json", "sbom.json"} and data.get("bomFormat") == "CycloneDX":
+                tool = "CycloneDX"
+                if not data.get("vulnerabilities"):
+                    continue
+                components = {item.get("bom-ref"): item for item in data.get("components", [])}
+                for vulnerability in data.get("vulnerabilities", []):
+                    ratings = vulnerability.get("ratings", [])
+                    severity = ratings[0].get("severity") if ratings else "unknown"
+                    for affect in vulnerability.get("affects", []):
+                        component = components.get(affect.get("ref"), {})
+                        dependency_findings.append(_finding(component.get("name", affect.get("ref", "unknown")), component.get("version"), vulnerability.get("id"), severity, tool))
             else:
                 tool = "SARIF"
                 for run in data.get("runs", []):
                     tool = run.get("tool", {}).get("driver", {}).get("name", tool)
                     for finding in run.get("results", []):
-                        severities[_severity(finding.get("level"))] += 1
-            reports.append({"path": _relative(root, path), "tool": tool, "findings": sum(severities.values()), "severities": dict(severities)})
+                        package = finding.get("properties", {}).get("packageName")
+                        if package:
+                            dependency_findings.append(_finding(package, finding.get("properties", {}).get("packageVersion"), finding.get("ruleId"), finding.get("level"), tool))
+                        else:
+                            severities[_severity(finding.get("level"))] += 1
+            severities.update(item["severity"] for item in dependency_findings)
+            reports.append({"path": _relative(root, path), "tool": tool, "findings": sum(severities.values()), "severities": dict(severities), "dependency_findings": dependency_findings})
         except (OSError, ValueError, TypeError) as error:
             errors.append({"path": _relative(root, path), "error": str(error)})
     combined = Counter()
     for report in reports:
         combined.update(report["severities"])
-    return {"status": "imported" if reports else "invalid" if errors else "not_scanned", "findings": sum(combined.values()) if reports else None, "severities": dict(combined), "scanner_reports": [item["path"] for item in reports], "reports": reports, "parse_errors": errors, "manifests_available": manifest_count, "note": "Security findings are imported and counted without exporting vulnerable values, messages, or source snippets."}
+    dependency_findings = [finding for report in reports for finding in report.get("dependency_findings", [])]
+    return {"status": "imported" if reports else "invalid" if errors else "not_scanned", "findings": sum(combined.values()) if reports else None, "severities": dict(combined), "dependency_findings": dependency_findings, "scanner_reports": [item["path"] for item in reports], "reports": reports, "parse_errors": errors, "manifests_available": manifest_count, "note": "Security findings are imported and counted without exporting vulnerable values, messages, or source snippets."}
 
 
-def import_quality_results(root: Path, manifest_count: int) -> dict[str, Any]:
-    return {"coverage": _coverage(root), "tests": _tests(root), "linters": _linters(root), "vulnerabilities": _scanners(root, manifest_count)}
+def _license_value(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return sorted({str(item).strip() for item in value if str(item).strip()})
+    if isinstance(value, dict):
+        value = value.get("id", value.get("name", value.get("expression", "")))
+    return [str(value).strip()] if value and str(value).strip() else []
+
+
+def _licenses(root: Path) -> dict[str, Any]:
+    reports: list[dict[str, Any]] = []
+    errors: list[dict[str, str]] = []
+    candidates = _find(root, {"license-checker.json", "pip-licenses.json", "dotnet-licenses.json", "bom.json", "sbom.json", "spdx.json"}, ("**/license-checker.json", "**/pip-licenses.json", "**/dotnet-licenses.json", "**/bom.json", "**/sbom.json", "**/spdx.json"))
+    for path in candidates:
+        try:
+            data = _read_json(path)
+            packages: list[dict[str, Any]] = []
+            tool = "Unknown"
+            name = path.name.casefold()
+            if name == "license-checker.json":
+                tool = "license-checker"
+                for package_version, metadata in data.items():
+                    package = package_version.rsplit("@", 1)[0] if "@" in package_version[1:] else package_version
+                    version = package_version.rsplit("@", 1)[1] if "@" in package_version[1:] else None
+                    license_value = metadata.get("licenses") if isinstance(metadata, dict) else metadata
+                    packages.append({"name": package, "version": version, "licenses": _license_value(license_value)})
+            elif name == "pip-licenses.json":
+                tool = "pip-licenses"
+                for item in data:
+                    packages.append({"name": item.get("Name", item.get("name", "unknown")), "version": item.get("Version", item.get("version")), "licenses": _license_value(item.get("License", item.get("license")))})
+            elif name == "dotnet-licenses.json":
+                tool = "dotnet-project-licenses"
+                items = data if isinstance(data, list) else data.get("packages", data.get("Packages", []))
+                for item in items:
+                    packages.append({"name": item.get("PackageName", item.get("name", "unknown")), "version": item.get("PackageVersion", item.get("version")), "licenses": _license_value(item.get("PackageLicense", item.get("license")))})
+            elif data.get("bomFormat") == "CycloneDX":
+                tool = "CycloneDX"
+                for item in data.get("components", []):
+                    licenses = []
+                    for license_item in item.get("licenses", []):
+                        licenses.extend(_license_value(license_item.get("license", license_item.get("expression"))))
+                    packages.append({"name": item.get("name", "unknown"), "version": item.get("version"), "licenses": sorted(set(licenses))})
+            elif "spdxVersion" in data:
+                tool = "SPDX"
+                for item in data.get("packages", []):
+                    values = [item.get("licenseConcluded"), item.get("licenseDeclared")]
+                    licenses = sorted({value for value in values if value and value not in {"NOASSERTION", "NONE"}})
+                    packages.append({"name": item.get("name", "unknown"), "version": item.get("versionInfo"), "licenses": licenses})
+            else:
+                continue
+            reports.append({"path": _relative(root, path), "tool": tool, "packages": packages})
+        except (OSError, ValueError, TypeError) as error:
+            errors.append({"path": _relative(root, path), "error": str(error)})
+    packages = [item | {"source": report["tool"], "report": report["path"]} for report in reports for item in report["packages"]]
+    return {"status": "imported" if reports else "invalid" if errors else "not_found", "packages": packages, "reports": reports, "parse_errors": errors, "note": "Licenses are imported metadata and are not legal advice or a compatibility determination."}
+
+
+def _license_category(licenses: list[str]) -> str:
+    text = " OR ".join(licenses).upper()
+    if not licenses:
+        return "unresolved"
+    if re.search(r"\b(?:AGPL|GPL|LGPL|SSPL|EUPL|MPL|EPL)", text):
+        return "review_required"
+    if re.search(r"\b(?:MIT|APACHE|BSD|ISC|ZLIB|UNLICENSE)", text):
+        return "permissive"
+    if re.search(r"PROPRIETARY|COMMERCIAL", text):
+        return "proprietary"
+    return "review_required"
+
+
+def _resolve_dependencies(dependencies: dict[str, Any], scanners: dict[str, Any], licenses: dict[str, Any]) -> dict[str, Any]:
+    records: dict[str, dict[str, Any]] = {}
+    for manifest in dependencies.get("manifests", []):
+        for name in manifest.get("dependencies", []):
+            key = _normalized_package(name)
+            record = records.setdefault(key, {"name": name, "direct": True, "manifests": set(), "versions": set(), "vulnerabilities": [], "licenses": set(), "sources": set()})
+            record["direct"] = True
+            record["manifests"].add(manifest.get("path", ""))
+    for finding in scanners.get("dependency_findings", []):
+        key = _normalized_package(finding["package"])
+        record = records.setdefault(key, {"name": finding["package"], "direct": False, "manifests": set(), "versions": set(), "vulnerabilities": [], "licenses": set(), "sources": set()})
+        record["vulnerabilities"].append({key: finding[key] for key in ("id", "severity", "source")})
+        if finding.get("version"):
+            record["versions"].add(finding["version"])
+        record["sources"].add(finding["source"])
+    for package in licenses.get("packages", []):
+        key = _normalized_package(package["name"])
+        record = records.setdefault(key, {"name": package["name"], "direct": False, "manifests": set(), "versions": set(), "vulnerabilities": [], "licenses": set(), "sources": set()})
+        record["licenses"].update(package.get("licenses", []))
+        if package.get("version"):
+            record["versions"].add(package["version"])
+        record["sources"].add(package["source"])
+    resolved = []
+    for record in records.values():
+        license_values = sorted(record["licenses"])
+        vulnerabilities = record["vulnerabilities"]
+        resolved.append({
+            "name": record["name"], "direct": record["direct"], "manifests": sorted(record["manifests"]), "versions": sorted(record["versions"]),
+            "vulnerability_status": "affected" if vulnerabilities else "not_resolved",
+            "vulnerability_count": len(vulnerabilities), "vulnerabilities": vulnerabilities,
+            "license_status": "resolved" if license_values else "unresolved", "license_category": _license_category(license_values),
+            "licenses": license_values, "sources": sorted(record["sources"]),
+        })
+    resolved.sort(key=lambda item: (-item["vulnerability_count"], item["name"].casefold()))
+    return {
+        "summary": {
+            "dependencies": len(resolved), "direct_dependencies": sum(item["direct"] for item in resolved),
+            "affected_dependencies": sum(item["vulnerability_status"] == "affected" for item in resolved),
+            "license_resolved": sum(item["license_status"] == "resolved" for item in resolved),
+            "license_review_required": sum(item["license_category"] in {"review_required", "proprietary"} for item in resolved),
+            "license_unresolved": sum(item["license_status"] == "unresolved" for item in resolved),
+        },
+        "dependencies": resolved,
+        "method": "Normalized package identity correlated across manifests, scanner findings, SBOMs, and license reports",
+        "limitations": [
+            "not_resolved means that no per-dependency scanner result was correlated; it does not mean vulnerability-free",
+            "License categories are triage signals, not legal advice or compatibility analysis",
+        ],
+    }
+
+
+def import_quality_results(root: Path, dependencies: dict[str, Any]) -> dict[str, Any]:
+    scanners = _scanners(root, len(dependencies.get("manifests", [])))
+    licenses = _licenses(root)
+    return {"coverage": _coverage(root), "tests": _tests(root), "linters": _linters(root), "vulnerabilities": scanners, "dependency_licenses": licenses, "dependency_resolution": _resolve_dependencies(dependencies, scanners, licenses)}

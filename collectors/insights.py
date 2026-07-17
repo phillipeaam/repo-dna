@@ -338,7 +338,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
-    imported_quality = import_quality_results(root, len(generic["dependencies"].get("manifests", [])))
+    imported_quality = import_quality_results(root, generic["dependencies"])
     quality = {
         "code": code,
         **imported_quality,

@@ -144,6 +144,8 @@ does not claim that runtime configuration is valid or that a feature is complete
 - 👥 Collaboration insights
 - 🧠 Design pattern detection
 - ⚙ Engineering signal detection
+- Per-dependency vulnerability and license correlation from imported scanner,
+  SBOM, SPDX, and license reports
 - 📄 HTML, JSON, and CSV report generation
 - 📚 Portfolio and documentation support
 

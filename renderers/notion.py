@@ -52,6 +52,18 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             f"Imported coverage reports indicate {imported_coverage['line_coverage_percent']}% line coverage.",
             "report/data/report.json#/generic_analysis/analysis/quality/coverage",
         ))
+    dependency_resolution = quality_findings.get("dependency_resolution", {})
+    dependency_summary = dependency_resolution.get("summary", {})
+    if dependency_summary.get("dependencies", 0):
+        project_facts.append(fact(
+            f"RepoDNA correlated {dependency_summary['dependencies']} dependency identities; {dependency_summary.get('affected_dependencies', 0)} have imported vulnerability findings.",
+            "report/data/report.json#/generic_analysis/analysis/quality/dependency_resolution",
+        ))
+        project_facts.append(fact(
+            f"Imported metadata resolved licenses for {dependency_summary.get('license_resolved', 0)} dependencies; {dependency_summary.get('license_unresolved', 0)} remain unresolved and {dependency_summary.get('license_review_required', 0)} require license review.",
+            "report/data/report.json#/generic_analysis/analysis/quality/dependency_resolution/summary",
+            "medium",
+        ))
 
     technology_facts = [
         fact(f"Project detector selected {project['type']}.", "report/data/report.json#/project/type")

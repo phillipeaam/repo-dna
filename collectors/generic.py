@@ -361,6 +361,13 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
     analysis["quality"]["vulnerabilities"]["reports"] = []
     analysis["quality"]["vulnerabilities"]["parse_errors"] = []
+    analysis["quality"]["vulnerabilities"]["dependency_findings"] = []
+    dependency_licenses = analysis["quality"].get("dependency_licenses", {})
+    dependency_licenses["packages"] = []
+    dependency_licenses["reports"] = []
+    dependency_licenses["parse_errors"] = []
+    dependency_resolution = analysis["quality"].get("dependency_resolution", {})
+    dependency_resolution["dependencies"] = []
     analysis["quality"]["licenses"]["license_files"] = []
 
 

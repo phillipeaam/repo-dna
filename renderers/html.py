@@ -328,6 +328,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     test_result = quality.get("tests", {})
     linter_result = quality.get("linters", {})
     scanner_result = quality.get("vulnerabilities", {})
+    dependency_resolution = quality.get("dependency_resolution", {})
+    dependency_summary = dependency_resolution.get("summary", {})
     high_complexity_rows = [
         [item["path"], item["language"], item["estimated_cyclomatic_complexity"], item["decision_points"], item["lines"]]
         for item in complexity.get("high_complexity_files", [])
@@ -352,6 +354,11 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Linter issues", linter_result.get("issues", 0)),
         ("Vulnerability status", scanner_result.get("status", "Not assessed")),
         ("Imported security findings", scanner_result.get("findings") if scanner_result.get("findings") is not None else "Not available"),
+        ("Dependencies correlated", dependency_summary.get("dependencies", 0)),
+        ("Affected dependencies", dependency_summary.get("affected_dependencies", 0)),
+        ("Dependency licenses resolved", dependency_summary.get("license_resolved", 0)),
+        ("Dependency licenses requiring review", dependency_summary.get("license_review_required", 0)),
+        ("Dependency licenses unresolved", dependency_summary.get("license_unresolved", 0)),
         ("Repository license", quality.get("licenses", {}).get("repository_license", "Unknown")),
         ("Dependency license status", quality.get("licenses", {}).get("dependency_license_status", "Not assessed")),
     ])
@@ -360,10 +367,27 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     test_rows = [[item["tool"], item["path"], item["total"], item["passed"], item["failed"], item["errors"], item["skipped"], item.get("duration_seconds")] for item in test_result.get("reports", [])]
     linter_rows = [[item["tool"], item["path"], item["issues"], item["affected_files"], ", ".join(f"{key}: {value}" for key, value in item.get("severities", {}).items())] for item in linter_result.get("reports", [])]
     scanner_rows = [[item["tool"], item["path"], item["findings"], ", ".join(f"{key}: {value}" for key, value in item.get("severities", {}).items())] for item in scanner_result.get("reports", [])]
+    dependency_rows = []
+    for item in dependency_resolution.get("dependencies", []):
+        findings = item.get("vulnerabilities", [])
+        dependency_rows.append([
+            item["name"], "Yes" if item.get("direct") else "No", ", ".join(item.get("versions", [])) or "Unknown",
+            item.get("vulnerability_status", "not_resolved"), item.get("vulnerability_count", 0),
+            ", ".join(sorted({finding.get("severity", "unknown") for finding in findings})) or "None resolved",
+            ", ".join(finding.get("id", "unknown") for finding in findings) or "None resolved",
+            item.get("license_status", "unresolved"), item.get("license_category", "unresolved"),
+            ", ".join(item.get("licenses", [])) or "Unknown", ", ".join(item.get("sources", [])) or "Manifest only",
+        ])
     quality_body += "<h3>Imported coverage reports</h3>" + (data_table(["Tool", "Report", "Lines %", "Branches %", "Functions %"], coverage_rows, {2, 3, 4}) if coverage_rows else '<p class="empty">No parseable coverage report was imported.</p>')
     quality_body += "<h3>Imported test results</h3>" + (data_table(["Tool", "Report", "Total", "Passed", "Failed", "Errors", "Skipped", "Duration seconds"], test_rows, {2, 3, 4, 5, 6, 7}) if test_rows else '<p class="empty">No parseable test-result report was imported.</p>')
     quality_body += "<h3>Imported linter results</h3>" + (data_table(["Tool", "Report", "Issues", "Affected files", "Severities"], linter_rows, {2, 3}) if linter_rows else '<p class="empty">No parseable linter report was imported.</p>')
     quality_body += "<h3>Imported scanner results</h3>" + (data_table(["Tool", "Report", "Findings", "Severities"], scanner_rows, {2}) if scanner_rows else '<p class="empty">No parseable security scanner report was imported.</p>')
+    quality_body += "<h3>Vulnerabilities and licenses by dependency</h3>" + (data_table(
+        ["Dependency", "Direct", "Versions", "Vulnerability status", "Findings", "Severities", "Finding IDs", "License status", "License category", "Licenses", "Evidence sources"],
+        dependency_rows,
+        {4},
+    ) if dependency_rows else '<p class="empty">No dependency identities were available for correlation.</p>')
+    quality_body += '<p class="note"><strong>not_resolved</strong> means no per-dependency scanner result was correlated; it does not mean the dependency is vulnerability-free. License categories are conservative triage signals, not legal advice or a compatibility determination.</p>'
     quality_body += "<h3>High-complexity candidates</h3>" + complexity_table
     quality_body += "<h3>High-complexity functions (AST)</h3>" + function_complexity_table
 

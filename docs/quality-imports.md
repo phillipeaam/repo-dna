@@ -10,16 +10,33 @@ as a passing result.
 - Tests: JUnit XML, Jest JSON, and pytest-json-report.
 - Linters: ESLint JSON, Ruff JSON, Checkstyle XML, and SARIF.
 - Security: npm audit, pip-audit, OSV-Scanner, OWASP Dependency-Check, Trivy,
-  and SARIF.
+  SARIF, and CycloneDX vulnerability records.
+- Dependency licenses: license-checker JSON, pip-licenses JSON,
+  dotnet-project-licenses JSON, CycloneDX, and SPDX JSON.
 
 Reports are discovered through conventional filenames and limited report
 patterns. Files larger than 25 MB are rejected to bound memory consumption.
 Malformed reports receive `invalid`; absent reports receive `not_found` or
 `not_scanned`; successfully parsed reports receive `imported`.
 
-Normalized output contains only aggregate counts, severities, tool names, report
-paths, and coverage metrics. Diagnostic messages, source snippets, vulnerable
-values, test names, and secret contents are not exported.
+Normalized output correlates manifest package names with imported vulnerability
+and license metadata. It exports finding identifiers, severities, package
+versions, license identifiers, tool names, and report paths. Diagnostic messages,
+source snippets, vulnerable values, test names, and secret contents are not
+exported.
 
-Strict privacy mode retains normalized totals while removing report paths and
-per-report rows.
+The dependency status is deliberately conservative:
+
+- `affected` means an imported scanner explicitly reported a finding for that
+  dependency;
+- `not_resolved` means no per-dependency result could be correlated and does
+  **not** mean vulnerability-free;
+- `resolved` for a license means explicit license metadata was imported;
+- `unresolved` means no explicit license metadata was found.
+
+License categories (`permissive`, `review_required`, `proprietary`, and
+`unresolved`) only prioritize review. They are not legal advice and do not
+determine license compatibility.
+
+Strict privacy mode retains normalized totals while removing report paths,
+per-report rows, package identities, finding identifiers, and license details.
