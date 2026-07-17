@@ -23,6 +23,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Load project-type and source-root detection.
 # shellcheck source=lib/project-detection.sh
 source "$SCRIPT_DIR/lib/project-detection.sh"
+# shellcheck source=src/core/runtime.sh
+source "$SCRIPT_DIR/src/core/runtime.sh"
+# shellcheck source=src/core/git.sh
+source "$SCRIPT_DIR/src/core/git.sh"
 
 # Print an error and stop execution.
 die() {
@@ -97,51 +101,6 @@ if [[ "$PRIVACY_MODE" == strict ]]; then
     INCLUDE_SOURCE=false
 fi
 
-# Return success when a command exists.
-command_exists() {
-    # Ask the shell to resolve the command.
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Resolve one executable Python runtime for every Python-backed feature.
-resolve_python_runtime() {
-    local candidate
-
-    if [[ -n "${REPO_DNA_PYTHON:-}" ]]; then
-        if "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1; then
-            printf '%s' "$REPO_DNA_PYTHON"
-            return 0
-        fi
-
-        return 1
-    fi
-
-    for candidate in python3 python; do
-        if command_exists "$candidate" &&
-           "$candidate" -c 'import sys' >/dev/null 2>&1; then
-            command -v "$candidate"
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-# Format elapsed seconds as a readable duration.
-format_duration() {
-    local total_seconds="$1"
-    local hours=$((total_seconds / 3600))
-    local minutes=$(((total_seconds % 3600) / 60))
-    local seconds=$((total_seconds % 60))
-
-    if ((hours > 0)); then
-        printf '%dh %02dm %02ds' "$hours" "$minutes" "$seconds"
-    elif ((minutes > 0)); then
-        printf '%dm %02ds' "$minutes" "$seconds"
-    else
-        printf '%ds' "$seconds"
-    fi
-}
 
 # Remove whitespace from a numeric result.
 trim_count() {
@@ -172,18 +131,6 @@ html_escape() {
             -e 's/</\&lt;/g' \
             -e 's/>/\&gt;/g' \
             -e 's/"/\&quot;/g'
-}
-
-# Execute git log using the configured optional filters.
-analysis_git_log() {
-    local filters=(--all)
-
-    if [[ -n "$AUTHOR" ]]; then
-        filters+=(--author="$AUTHOR")
-    fi
-
-    filters+=("${DATE_FILTER[@]}")
-    git log "${filters[@]}" "$@"
 }
 
 # Copy one file while preserving its relative project path.
@@ -559,13 +506,16 @@ Repository root: $DISPLAY_REPO_ROOT
 Current branch: ${CURRENT_BRANCH:-Detached HEAD or unavailable}
 HEAD commit: ${HEAD_HASH:-Unavailable}
 Origin remote: ${REMOTE_URL:-Unavailable}
-Unity version: ${UNITY_VERSION:-Unknown}
 Detected code root: $CODE_ROOT
 Generated at: $GENERATED_AT
 EOF
 
+if [[ "$PROJECT_TYPE" == Unity ]]; then
+    printf 'Unity version: %s\n' "${UNITY_VERSION:-Unknown}" >> "$PROJECT_DIR/00_repository_information.txt"
+fi
+
 # Copy the Unity version file.
-if [[ "$PRIVACY_MODE" != strict ]]; then
+if [[ "$PROJECT_TYPE" == Unity && "$PRIVACY_MODE" != strict ]]; then
     cp ProjectSettings/ProjectVersion.txt "$PROJECT_DIR/" 2>/dev/null || true
     cp Packages/manifest.json "$PROJECT_DIR/packages/" 2>/dev/null || true
     cp Packages/packages-lock.json "$PROJECT_DIR/packages/" 2>/dev/null || true
@@ -585,6 +535,8 @@ analysis_find -mindepth 1 -maxdepth 2 -type d -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/02_main_directories.txt"
 
+# Export Unity-only asset inventories only for detected Unity repositories.
+if [[ "$PROJECT_TYPE" == Unity ]]; then
 # Export scenes.
 analysis_find -type f -iname '*.unity' -print 2>/dev/null |
     sort \
@@ -648,6 +600,7 @@ analysis_find -type f \( \
     \) -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/11_addressables_assets.txt"
+fi
 
 # Export likely third-party files.
 while IFS= read -r source_file; do
@@ -665,6 +618,8 @@ write_ownership_report "$PROJECT_DIR/12_ownership_classification.txt"
 # Print the third progress step.
 echo "[3/12] Detecting architecture, systems, and technologies..."
 
+# Run C#-specific architecture analysis only for C# project profiles.
+if [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]]; then
 # Detect ScriptableObjects.
 analysis_grep \
     --include='*.cs' \
@@ -736,10 +691,13 @@ analysis_grep \
     -InE \
     'TODO|FIXME|HACK|XXX' \
     > "$PROJECT_DIR/22_technical_debt_markers.txt"
+fi
 
 # Print the fourth progress step.
 echo "[4/12] Calculating current project metrics..."
 
+# Calculate specialized C# metrics only for C# project profiles.
+if [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]]; then
 # Count current C# files.
 CURRENT_CS_FILES="$(count_current_files '*.cs')"
 
@@ -819,6 +777,28 @@ USS files: $CURRENT_USS
 These values describe the current repository state.
 They may include third-party code, imported assets, examples, and generated files.
 EOF
+else
+    CURRENT_CS_FILES=0
+    CURRENT_SCENES=0
+    CURRENT_PREFABS=0
+    CURRENT_ANIMATIONS=0
+    CURRENT_CONTROLLERS=0
+    CURRENT_SHADERS=0
+    CURRENT_ASMDEFS=0
+    CURRENT_UXML=0
+    CURRENT_USS=0
+    CURRENT_CS_LINES=0
+    cat > "$PROJECT_DIR/25_current_project_metrics.txt" <<EOF
+Current Project Metrics
+=======================
+
+Project type: $PROJECT_TYPE
+Code root: $CODE_ROOT
+
+Stack-neutral metrics are available in report/data/generic-analysis.json and
+the standardized HTML reports. No Unity or C# specialized collector was run.
+EOF
+fi
 
 # Print the fifth progress step.
 echo "[5/12] Applying source export and privacy policy..."
@@ -1638,7 +1618,8 @@ write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
 GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
-        "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" --report-name "$REPORT_NAME" ||
+        "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" --report-name "$REPORT_NAME" \
+        --privacy-mode "$PRIVACY_MODE" ||
         die "Could not collect the generic repository analysis."
 else
     printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \
@@ -1717,7 +1698,6 @@ echo "================================================================"
 echo "Analysis export completed"
 echo "================================================================"
 echo "Duration   : $(format_duration "$((SECONDS - EXECUTION_STARTED_AT))")"
-echo "Python     : ${STRUCTURED_PYTHON:-not available}"
 echo "================================================================"
 
 # Print the report folder path.

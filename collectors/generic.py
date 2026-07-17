@@ -11,6 +11,7 @@ import re
 import subprocess
 import tomllib
 from collections import Counter, defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,47 @@ def git(root: Path, *args: str) -> str:
         ["git", "-C", str(root), *args], capture_output=True, text=True, errors="replace"
     )
     return result.stdout if result.returncode == 0 else ""
+
+
+def load_author_aliases(root: Path) -> tuple[dict[str, str], dict[str, str]]:
+    """Parse the intentionally small YAML-like .repodna-authors format."""
+    name_aliases: dict[str, str] = {}
+    email_aliases: dict[str, str] = {}
+    path = root / ".repodna-authors"
+    if not path.is_file():
+        return name_aliases, email_aliases
+    canonical = ""
+    section = ""
+    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if raw and not raw[0].isspace() and raw.rstrip().endswith(":"):
+            canonical = raw.rstrip()[:-1].strip()
+            name_aliases[canonical.casefold()] = canonical
+            section = ""
+        elif canonical and raw.strip() in {"names:", "emails:"}:
+            section = raw.strip()[:-1]
+        elif canonical and raw.strip().startswith("-"):
+            value = raw.strip()[1:].strip().strip('"\'')
+            if section == "names":
+                name_aliases[value.casefold()] = canonical
+            elif section == "emails":
+                email_aliases[value.casefold()] = canonical
+    return name_aliases, email_aliases
+
+
+def canonical_author(name: str, email: str, names: dict[str, str], emails: dict[str, str]) -> str:
+    return emails.get(email.casefold(), names.get(name.casefold(), name or email or "Unknown"))
+
+
+def system_for_path(path: str) -> str:
+    lowered = path.casefold()
+    groups = {
+        "Combat": ("combat", "attack", "weapon", "damage", "health", "ability"),
+        "UI": ("/ui/", "menu", "hud", "view", "screen", "widget"),
+        "Networking": ("network", "multiplayer", "photon", "socket", "lobby", "api"),
+        "Data/Persistence": ("data", "save", "persist", "database", "storage", "repository"),
+        "Tests": ("test", "spec"),
+    }
+    return next((group for group, terms in groups.items() if any(term in lowered for term in terms)), "Other")
 
 
 def is_text(path: Path) -> bool:
@@ -110,8 +152,12 @@ def dependency_names(path: Path) -> list[str]:
     return []
 
 
-def collect_git(root: Path) -> dict[str, Any]:
-    contributors = [line.strip() for line in git(root, "shortlog", "-sn", "--all").splitlines() if line.strip()]
+def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
+    name_aliases, email_aliases = load_author_aliases(root)
+    identity_rows = [row.split("\t", 1) for row in git(root, "log", "--all", "--format=%aN%x09%aE").splitlines() if "\t" in row]
+    contributor_commits: Counter[str] = Counter(
+        canonical_author(name, email, name_aliases, email_aliases) for name, email in identity_rows
+    )
     branches = [line.strip() for line in git(root, "branch", "-a", "--format=%(refname:short)").splitlines() if line.strip()]
     tags = [line.strip() for line in git(root, "tag", "--sort=-creatordate").splitlines() if line.strip()]
     months = Counter(git(root, "log", "--date=format:%Y-%m", "--pretty=format:%ad").splitlines())
@@ -122,8 +168,23 @@ def collect_git(root: Path) -> dict[str, Any]:
     added_total = 0
     removed_total = 0
     current_commit_files: set[str] = set()
-    for line in git(root, "log", "--numstat", "--pretty=tformat:__REPODNA_COMMIT__").splitlines():
-        if line == "__REPODNA_COMMIT__":
+    file_authors: dict[str, set[str]] = defaultdict(set)
+    last_changed: dict[str, str] = {}
+    coauthors: Counter[tuple[str, str]] = Counter()
+    system_months: dict[str, Counter[str]] = defaultdict(Counter)
+    current_author = "Unknown"
+    current_date = ""
+    log_rows = git(root, "log", "--all", "--find-renames", "--find-copies", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
+    for line in log_rows.replace("\x00", "\n").splitlines():
+        if line.startswith("__REPODNA_COMMIT__\t"):
+            fields = line.split("\t", 4)
+            if len(fields) >= 4:
+                current_author = canonical_author(fields[1], fields[2], name_aliases, email_aliases)
+                current_date = fields[3]
+                if len(fields) == 5:
+                    for match in re.finditer(r"Co-authored-by:\s*([^<\n]+)\s*<([^>]+)>", fields[4], re.I):
+                        other = canonical_author(match.group(1).strip(), match.group(2).strip(), name_aliases, email_aliases)
+                        coauthors[tuple(sorted((current_author, other)))] += 1
             change_commits.update(current_commit_files)
             current_commit_files.clear()
             continue
@@ -131,20 +192,59 @@ def collect_git(root: Path) -> dict[str, Any]:
         if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
             added, removed, file_path = int(parts[0]), int(parts[1]), parts[2]
             current_commit_files.add(file_path)
+            file_authors[file_path].add(current_author)
+            last_changed.setdefault(file_path, current_date)
+            if current_date:
+                system_months[system_for_path(file_path)][current_date[:7]] += 1
             churn[file_path] += added + removed
             added_total += added
             removed_total += removed
     change_commits.update(current_commit_files)
 
-    hotspots = [
-        {"path": path, "commits": commits, "churn": churn[path], "score": commits * max(churn[path], 1)}
-        for path, commits in change_commits.items()
-    ]
+    now = datetime.now(timezone.utc)
+    hotspots = []
+    for path, commits in change_commits.items():
+        file_path = root / path
+        size_lines = line_count(file_path) if file_path.is_file() else 0
+        try:
+            changed_at = datetime.fromisoformat(last_changed[path])
+            days_since = max((now - changed_at).days, 0)
+        except (KeyError, ValueError):
+            days_since = 0
+        author_count = len(file_authors[path])
+        score = round(commits * 2 + churn[path] / 50 + size_lines / 100 + author_count * 3 + 30 / (days_since + 30), 2)
+        hotspots.append({"path": path, "commits": commits, "churn": churn[path], "current_lines": size_lines, "authors": author_count, "days_since_last_change": days_since, "score": score})
     hotspots.sort(key=lambda item: (item["score"], item["churn"]), reverse=True)
 
+    for record in git(root, "log", "--all", "--format=%aN%x09%aE%x1f%B%x1e").split("\x1e"):
+        if "\x1f" not in record:
+            continue
+        identity, body = record.split("\x1f", 1)
+        if "\t" not in identity:
+            continue
+        name, email = identity.strip().split("\t", 1)
+        author = canonical_author(name, email, name_aliases, email_aliases)
+        for match in re.finditer(r"Co-authored-by:\s*([^<\n]+)\s*<([^>]+)>", body, re.I):
+            other = canonical_author(match.group(1).strip(), match.group(2).strip(), name_aliases, email_aliases)
+            coauthors[tuple(sorted((author, other)))] += 1
+
     return {
-        "contributors_count": len(contributors),
-        "contributors": [f"Contributor-{index + 1}" for index in range(len(contributors))],
+        "contributors_count": len(contributor_commits),
+        "contributors": [
+            {"name": (f"Contributor-{index + 1}" if privacy_mode == "strict" else name), "commits": commits}
+            for index, (name, commits) in enumerate(contributor_commits.most_common())
+        ],
+        "author_aliases_configured": len(name_aliases) + len(email_aliases),
+        "coauthorship": [
+            {"authors": ([f"Contributor" for _ in pair] if privacy_mode == "strict" else list(pair)), "commits": count}
+            for pair, count in coauthors.most_common(50)
+        ],
+        "shared_files": [
+            {"path": path, "authors": len(authors)} for path, authors in sorted(file_authors.items(), key=lambda item: len(item[1]), reverse=True) if len(authors) > 1
+        ][:50],
+        "system_evolution": {
+            system: dict(sorted(periods.items())) for system, periods in sorted(system_months.items())
+        },
         "branches_count": len(branches),
         "branches": branches[:100],
         "tags_count": len(tags),
@@ -160,7 +260,7 @@ def collect_git(root: Path) -> dict[str, Any]:
     }
 
 
-def collect(root: Path, report_name: str) -> dict[str, Any]:
+def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
     files: list[dict[str, Any]] = []
     language_files: Counter[str] = Counter()
     language_lines: Counter[str] = Counter()
@@ -249,7 +349,7 @@ def collect(root: Path, report_name: str) -> dict[str, Any]:
         "docker_files": sorted(docker)[:100],
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
         "possible_modules": modules[:50],
-        "git": collect_git(root),
+        "git": collect_git(root, privacy_mode),
     }
 
 
@@ -258,8 +358,9 @@ def main() -> int:
     parser.add_argument("root", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--report-name", default="")
+    parser.add_argument("--privacy-mode", choices=("standard", "strict"), default="standard")
     args = parser.parse_args()
-    data = collect(args.root.resolve(), args.report_name)
+    data = collect(args.root.resolve(), args.report_name, args.privacy_mode)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return 0

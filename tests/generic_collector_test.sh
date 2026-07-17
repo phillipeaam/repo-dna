@@ -14,6 +14,12 @@ printf '%s\n' '# Sample project' > "$TEST_ROOT/README.md"
 printf '%s\n' 'requests==2.32.0' > "$TEST_ROOT/requirements.txt"
 printf '%s\n' 'FROM python:3.13-slim' > "$TEST_ROOT/Dockerfile"
 printf '%s\n' 'name: CI' 'on: [push]' > "$TEST_ROOT/.github/workflows/ci.yml"
+printf '%s\n' \
+    'Canonical Developer:' \
+    '  names:' \
+    '    - Generic Tester' \
+    '  emails:' \
+    '    - generic@example.test' > "$TEST_ROOT/.repodna-authors"
 
 git -C "$TEST_ROOT" init -q
 git -C "$TEST_ROOT" config user.name 'Generic Tester'
@@ -41,9 +47,12 @@ assert ".github/workflows/ci.yml" in data["ci_cd_files"]
 assert "Dockerfile" in data["docker_files"]
 assert data["dependencies"]["total"] == 1
 assert data["git"]["contributors_count"] == 1
+assert data["git"]["contributors"][0] == {"name": "Canonical Developer", "commits": 2}
+assert data["git"]["author_aliases_configured"] >= 3
 assert data["git"]["branches_count"] >= 1
 assert data["git"]["churn"]["total"] > 0
 assert data["git"]["hotspots"][0]["path"] == "src/main.py"
+assert {"current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
 assert any(item["path"] == "src" for item in data["possible_modules"])
 PY
 

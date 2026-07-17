@@ -209,6 +209,15 @@ release tags, temporal history, churn, frequently changed files, hotspots, and
 possible modules. This dataset is embedded into the canonical `report.json` and
 is the fallback for unknown stacks.
 
+## Internal architecture
+
+`dna-analysis.sh` remains the backwards-compatible entrypoint. Reusable runtime
+and Git behavior now live under `src/core/`; project detection remains isolated
+in `lib/project-detection.sh`, stack-neutral collection in `collectors/`, and
+HTML/Notion presentation in `renderers/`. Specialized analyzers are executed
+only for matching project profiles, so generic repositories do not receive
+empty Unity inventories.
+
 Python 3 is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable
 runtime. `matplotlib` is required for the optional PNG charts; the HTML reports
@@ -277,3 +286,23 @@ If you have suggestions for new analyzers, technologies, or report formats, feel
 # 📜 License
 
 Distributed under the **MIT License**.
+## Author aliases
+
+Git identities can be normalized with an optional `.repodna-authors` file in
+the analyzed repository root. Copy `.repodna-authors.example` and list every
+known name and e-mail under one canonical identity:
+
+```yaml
+Phillipe Augusto:
+  names:
+    - Phillipe Augusto
+    - phillipe
+  emails:
+    - developer@example.com
+```
+
+Standard reports show the canonical contributor name and commit count. Strict
+privacy mode replaces names and does not export e-mail addresses. The Git
+analysis also reports co-authorship trailers, shared files, branches, tags,
+rename/copy-aware history, system evolution, and composite hotspots combining
+change frequency, churn, current size, author count, and recency.

@@ -15,14 +15,15 @@ trap cleanup EXIT
 create_fixture() {
     local fixture="$1"
 
-    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/collectors" "$fixture/src"
+    mkdir -p "$fixture/lib" "$fixture/utils" "$fixture/renderers" "$fixture/collectors" "$fixture/src/core" "$fixture/src/code"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/lib/"*.sh "$fixture/lib/"
     cp "$SOURCE_ROOT/utils/"*.sh "$fixture/utils/"
     cp "$SOURCE_ROOT/renderers/"*.py "$fixture/renderers/"
     cp "$SOURCE_ROOT/collectors/"*.py "$fixture/collectors/"
+    cp "$SOURCE_ROOT/src/core/"*.sh "$fixture/src/core/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
-    printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/Example.cs"
+    printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/code/Example.cs"
 
     git -C "$fixture" init -q
     git -C "$fixture" config user.name 'Private Developer'

@@ -140,16 +140,44 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         (item["path"], item["file_count"]) for item in generic.get("possible_modules", [])[:20]
     ]) if generic.get("possible_modules") else empty
     hotspot_table = table([
-        (item["path"], f"{item['commits']} commits / {item['churn']} churn")
+        (item["path"], f"score {item.get('score', 'n/a')} · {item['commits']} commits · {item['churn']} churn · {item.get('current_lines', 0)} lines · {item.get('authors', 0)} authors · changed {item.get('days_since_last_change', 0)} days ago")
         for item in generic.get("git", {}).get("hotspots", [])[:20]
     ]) if generic.get("git", {}).get("hotspots") else empty
+    git_data = generic.get("git", {})
+    contributor_table = table([
+        (item["name"], item["commits"]) for item in git_data.get("contributors", [])
+    ]) if git_data.get("contributors") else empty
+    largest_table = table([
+        (item["path"], f"{item['bytes']} bytes · {item.get('lines', 0)} lines")
+        for item in generic.get("largest_files", [])[:20]
+    ]) if generic.get("largest_files") else empty
+    directory_table = table([
+        (item["path"], item["files"]) for item in generic.get("top_directories", [])[:20]
+    ]) if generic.get("top_directories") else empty
+    shared_table = table([
+        (item["path"], item["authors"]) for item in git_data.get("shared_files", [])[:20]
+    ]) if git_data.get("shared_files") else empty
+    coauthor_table = table([
+        (" + ".join(item["authors"]), item["commits"]) for item in git_data.get("coauthorship", [])[:20]
+    ]) if git_data.get("coauthorship") else empty
+    evolution_table = table([
+        (f"{system} · {month}", count)
+        for system, periods in git_data.get("system_evolution", {}).items()
+        for month, count in periods.items()
+    ]) if git_data.get("system_evolution") else empty
+    reference_table = table([
+        ("Branches", git_data.get("branches_count", 0)),
+        ("Tags", git_data.get("tags_count", 0)),
+        ("Author aliases configured", git_data.get("author_aliases_configured", 0)),
+        ("Dependency declarations", generic.get("dependencies", {}).get("total", 0)),
+    ])
     sections = [
-        ("project-overview.html", "Project overview", table(overview) + "<h3>Generic inventory</h3>" + inventory),
+        ("project-overview.html", "Project overview", table(overview) + "<h3>Repository inventory</h3>" + inventory + "<h3>Largest files</h3>" + largest_table + "<h3>Main directories</h3>" + directory_table),
         ("architecture.html", "Architecture", table(labeled(architecture, architecture_keys)) if architecture_keys else module_table),
-        ("technologies.html", "Technologies", table(labeled(technologies, technology_keys)) + "<h3>Languages</h3>" + language_table),
+        ("technologies.html", "Technologies", table(labeled(technologies, technology_keys)) + "<h3>Languages and lines</h3>" + language_table + "<h3>Repository references</h3>" + reference_table),
         ("systems.html", "Systems", table(labeled(systems, system_keys)) if system_keys else module_table),
-        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Hotspots</h3>" + hotspot_table),
-        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration)))),
+        ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
+        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),
             ("Ownership review required", risks["ownership_review_required"]),

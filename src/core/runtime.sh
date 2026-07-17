@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Return success when a command exists.
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Resolve one executable Python runtime for every Python-backed feature.
+resolve_python_runtime() {
+    local candidate
+    if [[ -n "${REPO_DNA_PYTHON:-}" ]]; then
+        "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1 || return 1
+        printf '%s' "$REPO_DNA_PYTHON"
+        return 0
+    fi
+    for candidate in python3 python; do
+        if command_exists "$candidate" && "$candidate" -c 'import sys' >/dev/null 2>&1; then
+            command -v "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+format_duration() {
+    local total_seconds="$1"
+    local hours=$((total_seconds / 3600))
+    local minutes=$(((total_seconds % 3600) / 60))
+    local seconds=$((total_seconds % 60))
+    if ((hours > 0)); then
+        printf '%dh %02dm %02ds' "$hours" "$minutes" "$seconds"
+    elif ((minutes > 0)); then
+        printf '%dm %02ds' "$minutes" "$seconds"
+    else
+        printf '%ds' "$seconds"
+    fi
+}
