@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 # Return success when a command exists.
+die() {
+    echo ""
+    echo "Error: $1" >&2
+    exit 1
+}
+
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }

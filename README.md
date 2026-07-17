@@ -211,12 +211,14 @@ is the fallback for unknown stacks.
 
 ## Internal architecture
 
-`dna-analysis.sh` remains the backwards-compatible entrypoint. Reusable runtime
-and Git behavior now live under `src/core/`; project detection remains isolated
-in `lib/project-detection.sh`, stack-neutral collection in `collectors/`, and
-HTML/Notion presentation in `renderers/`. Specialized analyzers are executed
-only for matching project profiles, so generic repositories do not receive
-empty Unity inventories.
+`dna-analysis.sh` remains the backwards-compatible entrypoint and orchestrator.
+Argument parsing, runtime discovery, filesystem helpers, Git execution, privacy,
+and archive/finalization live under `src/core/`. Unity inventory collection is
+isolated in `src/analyzers/unity.sh`, chart generation in
+`src/reports/charts.py`, stack-neutral collection in `collectors/`, and
+HTML/Notion presentation in `renderers/`. Specialized analyzers execute only for
+matching project profiles, so generic repositories do not receive empty Unity
+inventories.
 
 Python 3 is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable

@@ -9,14 +9,6 @@ set -o pipefail
 # Record the Bash process start time for the final execution summary.
 EXECUTION_STARTED_AT=$SECONDS
 
-# Initialize optional Git-history filters.
-AUTHOR=""
-SINCE=""
-UNTIL=""
-OWNED_ROOTS=()
-INCLUDE_SOURCE=false
-PRIVACY_MODE='standard'
-
 # Resolve this script's directory so it can be run from any repository folder.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -25,227 +17,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/project-detection.sh"
 # shellcheck source=src/core/runtime.sh
 source "$SCRIPT_DIR/src/core/runtime.sh"
+# shellcheck source=src/core/arguments.sh
+source "$SCRIPT_DIR/src/core/arguments.sh"
+# shellcheck source=src/core/filesystem.sh
+source "$SCRIPT_DIR/src/core/filesystem.sh"
+# shellcheck source=src/core/privacy.sh
+source "$SCRIPT_DIR/src/core/privacy.sh"
+# shellcheck source=src/core/archive.sh
+source "$SCRIPT_DIR/src/core/archive.sh"
 # shellcheck source=src/core/git.sh
 source "$SCRIPT_DIR/src/core/git.sh"
+# shellcheck source=src/analyzers/unity.sh
+source "$SCRIPT_DIR/src/analyzers/unity.sh"
 
-# Print an error and stop execution.
-die() {
-    # Print a blank line.
-    echo ""
-
-    # Print the error message to stderr.
-    echo "Error: $1" >&2
-
-    # Exit with a failure code.
-    exit 1
-}
-
-# Print command-line usage.
-show_usage() {
-    echo "Usage:"
-    echo "  bash dna-analysis.sh [options]"
-    echo ""
-    echo "Options:"
-    echo "  --author <name-or-email>  Analyze one contributor instead of all history."
-    echo "  --since <date>            Include commits on or after this date."
-    echo "  --until <date>            Include commits on or before this date."
-    echo "  --owned-root <path>       Mark a path as project-owned (repeatable)."
-    echo "  --include-source          Copy classified C# source into the report."
-    echo "  --privacy-mode <mode>     Privacy level: standard or strict."
-    echo "  -h, --help                Show this help."
-    echo ""
-    echo "Examples:"
-    echo "  bash dna-analysis.sh"
-    echo "  bash dna-analysis.sh --author \"Phillipe Augusto\""
-    echo "  bash dna-analysis.sh --since 2020-01-01 --until 2025-12-31"
-    echo "  bash dna-analysis.sh --owned-root Assets/_Project"
-    echo "  bash dna-analysis.sh --include-source"
-    echo "  bash dna-analysis.sh --privacy-mode strict"
-}
-
-# Read named command-line options.
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --author|--since|--until|--owned-root|-owned-root|--privacy-mode)
-            [[ -n "${2:-}" ]] || die "Option $1 requires a value."
-
-            case "$1" in
-                --author) AUTHOR="$2" ;;
-                --since)  SINCE="$2" ;;
-                --until)  UNTIL="$2" ;;
-                --owned-root|-owned-root) OWNED_ROOTS+=("${2#./}") ;;
-                --privacy-mode) PRIVACY_MODE="$2" ;;
-            esac
-
-            shift 2
-            ;;
-        --include-source)
-            INCLUDE_SOURCE=true
-            shift
-            ;;
-        -h|--help)
-            show_usage
-            exit 0
-            ;;
-        *)
-            show_usage >&2
-            die "Unknown option: $1"
-            ;;
-    esac
-done
-
-[[ "$PRIVACY_MODE" == standard || "$PRIVACY_MODE" == strict ]] ||
-    die "Invalid privacy mode: $PRIVACY_MODE (expected standard or strict)."
-
-if [[ "$PRIVACY_MODE" == strict ]]; then
-    INCLUDE_SOURCE=false
-fi
-
-
-# Remove whitespace from a numeric result.
-trim_count() {
-    # Delete all whitespace characters.
-    tr -d '[:space:]'
-}
-
-# Escape a value before writing it to JSON.
-json_escape() {
-    # Print the value without an extra newline.
-    printf '%s' "$1" |
-
-        # Escape backslashes, quotes, and line breaks.
-        sed \
-            -e 's/\\/\\\\/g' \
-            -e 's/"/\\"/g' \
-            -e ':a;N;$!ba;s/\n/\\n/g'
-}
-
-# Escape a value before writing it to HTML.
-html_escape() {
-    # Print the value without an extra newline.
-    printf '%s' "$1" |
-
-        # Replace HTML-sensitive characters.
-        sed \
-            -e 's/&/\&amp;/g' \
-            -e 's/</\&lt;/g' \
-            -e 's/>/\&gt;/g' \
-            -e 's/"/\&quot;/g'
-}
-
-# Copy one file while preserving its relative project path.
-copy_preserving_path() {
-    # Read the source file path.
-    local source_file="$1"
-
-    # Read the destination root.
-    local destination_root="$2"
-
-    # Create the destination directory tree.
-    mkdir -p "$destination_root/$(dirname "$source_file")"
-
-    # Copy the file into the matching relative path.
-    cp "$source_file" "$destination_root/$source_file"
-}
-
-# Scan the completed report without copying matched secret values into the result.
-run_privacy_scan() {
-    local findings_file
-    local secret_regex
-    findings_file="$(mktemp)" || die "Could not create the privacy scan workspace."
-    secret_regex='-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|(api[_-]?key|client[_-]?secret|access[_-]?token|password)[[:space:]]*[:=][[:space:]]*[^[:space:]]{8,}'
-
-    grep -RIlE -- "$secret_regex" "$OUTPUT_DIR" 2>/dev/null > "$findings_file" || true
-
-    if [[ "$PRIVACY_MODE" == strict ]]; then
-        grep -RIlE -- \
-            '([[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alpha:]]{2,}|https?://|ssh://|git@[^[:space:]]+:)' \
-            "$OUTPUT_DIR" 2>/dev/null >> "$findings_file" || true
-        grep -RIlF -- "$REPO_ROOT" "$OUTPUT_DIR" 2>/dev/null >> "$findings_file" || true
-    fi
-
-    sort -u "$findings_file" -o "$findings_file"
-
-    {
-        printf '%s\n' 'Privacy scan'
-        printf '%s\n' '------------'
-        printf 'Mode: %s\n' "$PRIVACY_MODE"
-
-        if [[ -s "$findings_file" ]]; then
-            PRIVACY_SCAN_FAILED=true
-            printf '%s\n' 'Result: blocked'
-            printf '%s\n' 'Potential sensitive content was found in:'
-            sed "s|^$OUTPUT_DIR/||" "$findings_file"
-        else
-            PRIVACY_SCAN_FAILED=false
-            printf '%s\n' 'Result: passed'
-            printf '%s\n' 'No configured sensitive-content pattern was detected.'
-        fi
-    } > "$SUMMARY_DIR/03_privacy_scan.txt"
-
-    rm -f "$findings_file"
-}
-
-# Remove matched source-line bodies from detector reports in strict mode.
-sanitize_strict_reports() {
-    local report_file
-
-    [[ "$PRIVACY_MODE" == strict ]] || return 0
-
-    for report_file in \
-        "$PROJECT_DIR"/13_*.txt \
-        "$PROJECT_DIR"/14_*.txt \
-        "$PROJECT_DIR"/15_*.txt \
-        "$PROJECT_DIR"/16_*.txt \
-        "$PROJECT_DIR"/17_*.txt \
-        "$PROJECT_DIR"/18_*.txt \
-        "$PROJECT_DIR"/19_*.txt \
-        "$PROJECT_DIR"/20_*.txt \
-        "$PROJECT_DIR"/21_*.txt \
-        "$PROJECT_DIR"/22_*.txt \
-        "$PROJECT_DIR"/23_*.txt; do
-        [[ -f "$report_file" ]] || continue
-        sed -Ei 's/^([^:]+:[0-9]+):.*/\1:[content omitted]/' "$report_file"
-    done
-}
-
-# Count current files matching a case-insensitive name pattern.
-count_current_files() {
-    # Read the file-name pattern.
-    local pattern="$1"
-
-    # Find matching files using the exclusion system.
-    count_files_matching "$pattern"
-}
-
-# Count unique historical files matching a lower-case regular expression.
-count_historical_files() {
-    # Read the regular expression.
-    local pattern="$1"
-    local awk_pattern="${pattern//\\/\\\\}"
-
-    # List every path changed in the selected history scope.
-    analysis_git_log --name-only --pretty=format: 2>/dev/null |
-
-        # Match paths using a lower-case comparison.
-        awk -v regex="$awk_pattern" '
-            {
-                line = tolower($0)
-                if (line ~ regex) {
-                    print $0
-                }
-            }
-        ' |
-
-        # Keep unique paths.
-        sort -u |
-
-        # Count the unique paths.
-        wc -l |
-
-        # Remove whitespace from the count.
-        trim_count
-}
+parse_arguments "$@"
 
 # Require Git.
 command_exists git || die "Git is not installed or is not available in PATH."
@@ -535,72 +320,7 @@ analysis_find -mindepth 1 -maxdepth 2 -type d -print 2>/dev/null |
     sort \
     > "$PROJECT_DIR/02_main_directories.txt"
 
-# Export Unity-only asset inventories only for detected Unity repositories.
-if [[ "$PROJECT_TYPE" == Unity ]]; then
-# Export scenes.
-analysis_find -type f -iname '*.unity' -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/03_scenes.txt"
-
-# Export prefabs.
-analysis_find -type f -iname '*.prefab' -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/04_prefabs.txt"
-
-# Export animation assets.
-analysis_find -type f \( \
-        -iname '*.anim' -o \
-        -iname '*.controller' -o \
-        -iname '*.overrideController' \
-    \) -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/05_animation_assets.txt"
-
-# Export shader assets.
-analysis_find -type f \( \
-        -iname '*.shader' -o \
-        -iname '*.hlsl' -o \
-        -iname '*.cginc' -o \
-        -iname '*.compute' -o \
-        -iname '*.shadergraph' \
-    \) -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/06_shader_assets.txt"
-
-# Export assembly definitions.
-analysis_find -type f \( \
-        -iname '*.asmdef' -o \
-        -iname '*.asmref' \
-    \) -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/07_assembly_definitions.txt"
-
-# Export UI Toolkit assets.
-analysis_find -type f \( \
-        -iname '*.uxml' -o \
-        -iname '*.uss' \
-    \) -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/08_ui_toolkit_assets.txt"
-
-# Export Timeline assets.
-analysis_find -type f -iname '*.playable' -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/09_timeline_assets.txt"
-
-# Export Resources assets.
-analysis_find -type f -path '*/Resources/*' -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/10_resources_assets.txt"
-
-# Export Addressables-related assets.
-analysis_find -type f \( \
-        -path '*Addressable*' -o \
-        -iname '*Addressable*' \
-    \) -print 2>/dev/null |
-    sort \
-    > "$PROJECT_DIR/11_addressables_assets.txt"
-fi
+collect_unity_assets
 
 # Export likely third-party files.
 while IFS= read -r source_file; do
@@ -1499,102 +1219,13 @@ echo "[10/12] Creating optional charts..."
 
 # Create charts only when detailed, non-strict commit data exists.
 if [[ "$TOTAL_COMMITS" -gt 0 && "$PRIVACY_MODE" != strict ]]; then
-    # Write the Python chart generator.
-    cat > "$OUTPUT_DIR/generate_graphs.py" <<'PYTHON'
-from __future__ import annotations
-
-import csv
-import sys
-from collections import Counter
-from pathlib import Path
-
-
-def load_commits(csv_path: Path) -> tuple[Counter[str], Counter[str]]:
-    months: Counter[str] = Counter()
-    years: Counter[str] = Counter()
-
-    with csv_path.open("r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-
-        for row in reader:
-            date = (row.get("Date") or "").strip()
-
-            if len(date) < 7:
-                continue
-
-            months[date[:7]] += 1
-            years[date[:4]] += 1
-
-    return months, years
-
-
-def save_chart(
-    labels: list[str],
-    values: list[int],
-    title: str,
-    output_path: Path,
-) -> None:
-    import matplotlib.pyplot as plt
-
-    if not labels:
-        return
-
-    width = max(9.0, min(22.0, len(labels) * 0.55))
-
-    plt.figure(figsize=(width, 5.5))
-    plt.bar(labels, values)
-    plt.title(title)
-    plt.xlabel("Period")
-    plt.ylabel("Commits")
-    plt.xticks(rotation=60, ha="right")
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=160)
-    plt.close()
-
-
-def main() -> int:
-    try:
-        import matplotlib  # noqa: F401
-    except ImportError:
-        print("matplotlib is unavailable; charts were skipped.")
-        return 0
-
-    base = Path(__file__).resolve().parent
-    graphs = base / "graphs"
-    graphs.mkdir(parents=True, exist_ok=True)
-
-    months, years = load_commits(base / "data" / "history_commits.csv")
-
-    month_labels = sorted(months)
-    year_labels = sorted(years)
-
-    save_chart(
-        month_labels,
-        [months[label] for label in month_labels],
-        "Commits by Month",
-        graphs / "commits_by_month.png",
-    )
-
-    save_chart(
-        year_labels,
-        [years[label] for label in year_labels],
-        "Commits by Year",
-        graphs / "commits_by_year.png",
-    )
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-PYTHON
-
     # Run the chart generator when dependencies exist.
     if [[ -n "$STRUCTURED_PYTHON" ]] &&
        "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1; then
         # Generate charts without failing the complete report.
         MPLBACKEND=Agg MPLCONFIGDIR="$OUTPUT_DIR/.matplotlib" \
-            "$STRUCTURED_PYTHON" "$OUTPUT_DIR/generate_graphs.py" || true
+            "$STRUCTURED_PYTHON" "$SCRIPT_DIR/src/reports/charts.py" \
+            "$DATA_DIR/history_commits.csv" "$GRAPHS_DIR" || true
         rm -rf "$OUTPUT_DIR/.matplotlib"
     else
         # Explain why charts were skipped.
@@ -1637,110 +1268,5 @@ write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not render the Notion evidence JSON."
 
 run_privacy_scan
-
-if [[ "$PRIVACY_SCAN_FAILED" == true ]]; then
-    echo "Warning: archive creation blocked by the privacy scan."
-    echo "Review summary/03_privacy_scan.txt before compressing the report."
-else
-
-# Remove an older archive with the same name.
-rm -f "$ZIP_PATH"
-
-# Use zip when available.
-if command_exists zip; then
-    # Create a ZIP with a clean top-level folder.
-    (
-        cd "$REPO_ROOT" &&
-        zip -qr "$ZIP_PATH" "$REPORT_NAME"
-    ) || echo "Warning: zip could not create the archive."
-
-# Use PowerShell from Git Bash on Windows.
-elif command_exists powershell.exe && command_exists cygpath; then
-    # Convert the report path to Windows format.
-    WINDOWS_OUTPUT="$(cygpath -aw "$OUTPUT_DIR")"
-
-    # Convert the ZIP path to Windows format.
-    WINDOWS_ZIP="$(cygpath -aw "$ZIP_PATH")"
-
-    # Create the archive with PowerShell.
-    powershell.exe -NoProfile -Command \
-        "Compress-Archive -LiteralPath '$WINDOWS_OUTPUT' -DestinationPath '$WINDOWS_ZIP' -Force" \
-        >/dev/null 2>&1 ||
-        echo "Warning: PowerShell could not create the archive."
-
-# Use tar.gz as a final portable fallback.
-elif command_exists tar; then
-    # Define the tar.gz path.
-    TAR_PATH="$REPO_ROOT/${REPORT_NAME}.tar.gz"
-
-    # Create the tar.gz archive.
-    (
-        cd "$REPO_ROOT" &&
-        tar -czf "$TAR_PATH" "$REPORT_NAME"
-    ) || echo "Warning: tar could not create the archive."
-
-# Keep the report folder when no archive tool exists.
-else
-    # Explain that manual compression is still possible.
-    echo "No supported archive command was found."
-    echo "The report folder was generated and can be compressed manually."
-fi
-fi
-
-echo "Potential secret findings: $POTENTIAL_SECRET_COUNT"
-
-# Print the twelfth progress step.
-echo "[12/12] Finalizing..."
-
-# Print a completion banner.
-echo ""
-echo "================================================================"
-echo "Analysis export completed"
-echo "================================================================"
-echo "Duration   : $(format_duration "$((SECONDS - EXECUTION_STARTED_AT))")"
-echo "================================================================"
-
-# Print the report folder path.
-echo "Report folder:"
-echo "  $DISPLAY_OUTPUT_PATH"
-echo ""
-
-# Print the ZIP path when present.
-if [[ -f "$ZIP_PATH" ]]; then
-    echo "ZIP archive:"
-    echo "  $DISPLAY_ZIP_PATH"
-    echo ""
-fi
-
-# Print the tar.gz path when present.
-if [[ -n "${TAR_PATH:-}" && -f "${TAR_PATH:-}" ]]; then
-    DISPLAY_TAR_PATH="$TAR_PATH"
-    [[ "$PRIVACY_MODE" == strict ]] && DISPLAY_TAR_PATH="${TAR_PATH##*/}"
-    echo "TAR.GZ archive:"
-    echo "  $DISPLAY_TAR_PATH"
-    echo ""
-fi
-
-# Print the main starting point.
-echo "Start here:"
-if [[ "$PRIVACY_MODE" == strict ]]; then
-    echo "  $REPORT_NAME/report/index.html"
-else
-    echo "  $REPORT_DIR/index.html"
-fi
-echo ""
-
-# Print the Notion guide path.
-echo "Notion guide:"
-echo "  $DISPLAY_SUMMARY_PATH/01_notion_evidence_guide.md"
-echo ""
-
-# Print the reusable analysis prompt path.
-echo "Analysis prompt:"
-echo "  $DISPLAY_SUMMARY_PATH/02_analysis_prompt.md"
-echo ""
-
-# Print the privacy reminder.
-echo "Review confidential code, e-mails, URLs, credentials, and client names"
-echo "before sharing the generated package."
-echo "================================================================"
+create_report_archive
+print_completion_summary
