@@ -22,6 +22,8 @@ PRIVACY_MODE=standard
 PROJECT_TYPE=.NET
 source "$SOURCE_ROOT/src/core/git.sh"
 source "$SOURCE_ROOT/src/core/filesystem.sh"
+source "$SOURCE_ROOT/src/core/patterns.sh"
+source "$SOURCE_ROOT/src/git/history-export.sh"
 source "$SOURCE_ROOT/src/git/history-metrics.sh"
 source "$SOURCE_ROOT/src/git/history-specialized.sh"
 
@@ -38,6 +40,15 @@ collect_specialized_git_metrics
 [[ "${GIT_HISTORY[lines_added]}" -ge 2 ]]
 [[ "${GIT_HISTORY[first_commit]}" == *'Initial source'* ]]
 [[ "${GIT_HISTORY[last_commit]}" == *'Rename source'* ]]
+
+# Git detail export must not depend on a C#/Unity architecture pass defining globals.
+CONTRIBUTION_DIR="$TEST_ROOT/contribution"
+DATA_DIR="$TEST_ROOT/data"
+HISTORY_SCOPE='Entire repository'
+DISPLAY_AUTHOR='All contributors'
+mkdir -p "$CONTRIBUTION_DIR" "$DATA_DIR"
+export_git_history_details
+[[ -f "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" ]]
 
 PRIVACY_MODE=strict
 git_history_reset

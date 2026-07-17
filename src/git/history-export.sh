@@ -60,6 +60,9 @@ EOF
 }
 
 export_git_history_details() {
+    local system_keywords
+    system_keywords="$(system_keywords_pattern)"
+
     if [[ "$PRIVACY_MODE" != strict ]]; then
         analysis_git_log --date=iso-strict --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null > "$CONTRIBUTION_DIR/01_commits.txt"
         {
@@ -74,6 +77,6 @@ export_git_history_details() {
     analysis_git_log --name-only --pretty=format: 2>/dev/null | awk 'NF { count = split($0, parts, "/"); if (count >= 3) print parts[1] "/" parts[2] "/" parts[3]; else if (count >= 2) print parts[1] "/" parts[2]; else print parts[1] }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/05_top_changed_directories.txt"
     analysis_git_log --name-only --pretty=format: 2>/dev/null | awk 'NF { count = split($0, parts, "."); if (count > 1) print "." tolower(parts[count]); else print "[no_extension]" }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/06_changed_file_extensions.txt"
     if [[ "$PRIVACY_MODE" != strict ]]; then
-        analysis_git_log --pretty=format:'%s' 2>/dev/null | grep -Ei "$SYSTEM_KEYWORDS" | sort > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
+        analysis_git_log --pretty=format:'%s' 2>/dev/null | grep -Ei "$system_keywords" | sort > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
     fi
 }

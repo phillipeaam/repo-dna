@@ -21,6 +21,8 @@ source "$SCRIPT_DIR/src/core/runtime.sh"
 source "$SCRIPT_DIR/src/core/arguments.sh"
 # shellcheck source=src/core/filesystem.sh
 source "$SCRIPT_DIR/src/core/filesystem.sh"
+# shellcheck source=src/core/patterns.sh
+source "$SCRIPT_DIR/src/core/patterns.sh"
 # shellcheck source=src/core/privacy.sh
 source "$SCRIPT_DIR/src/core/privacy.sh"
 # shellcheck source=src/core/archive.sh

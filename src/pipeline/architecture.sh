@@ -1,6 +1,9 @@
 collect_architecture() {
 echo "[3/12] Detecting architecture, systems, and technologies..."
 
+local system_keywords
+system_keywords="$(system_keywords_pattern)"
+
 # Run C#-specific architecture analysis only for C# project profiles.
 if [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]]; then
 # Detect ScriptableObjects.
@@ -31,12 +34,9 @@ analysis_grep \
     'UnityEditor|CustomEditor|PropertyDrawer|EditorWindow|MenuItem' \
     > "$PROJECT_DIR/16_editor_tooling.txt"
 
-# Define system-related keywords.
-SYSTEM_KEYWORDS='Player|Character|Movement|Motor|Controller|Camera|Combat|Attack|Weapon|Damage|Health|Ability|Skill|Buff|Debuff|Inventory|Item|Equipment|Quest|Mission|Dialogue|AI|Enemy|NPC|Behavior|State|Pool|Save|Persistence|Database|Network|Multiplayer|Photon|Mirror|Fusion|Netcode|Lobby|Matchmaking|Audio|Music|Localization|Analytics|Telemetry|Achievement|Progress|Tutorial|Onboarding|UI|HUD|Menu|Input|Animation|Timeline|Addressable|Loading|Scene|Spawn|Procedural|Editor|Tool'
-
 # Detect likely gameplay and product-system files by file name.
 analysis_find -type f -iname '*.cs' -print 2>/dev/null |
-    grep -Ei "$SYSTEM_KEYWORDS" |
+    grep -Ei "$system_keywords" |
     sort \
     > "$PROJECT_DIR/17_likely_system_files.txt" || true
 
