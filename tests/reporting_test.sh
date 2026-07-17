@@ -38,7 +38,7 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
       {"name": "C#", "files": 12, "lines": 340},
       {"name": "Shell", "files": 2, "lines": 80}
     ],
-    "largest_files": [],
+    "largest_files": [{"path": "src/Core.cs", "bytes": 2048, "lines": 1234}],
     "top_directories": [],
     "configuration_files": ["sample.csproj"],
     "documentation_files": ["README.md"],
@@ -49,6 +49,7 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
     "possible_modules": [{"path": "src", "file_count": 12, "languages": {"C#": 12}}],
     "git": {
       "hotspots": [{"path": "src/Core.cs", "commits": 5, "churn": 200}],
+      "system_evolution": {"Data/Persistence": {"2026-01": 4}},
       "churn": {"lines_added": 1000, "lines_removed": 400, "total": 1400}
     }
   },
@@ -141,6 +142,17 @@ grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
 grep -q 'C# files</span><strong>12' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Commits</span><strong>42' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Files</span><strong>25' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Repository at a glance' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'Primary language</th><td>C#' "$TEST_ROOT/report/executive-summary.html"
+grep -q 'File</th><th>Size</th><th>Lines' "$TEST_ROOT/report/project-overview.html"
+grep -q 'class="number">1,234' "$TEST_ROOT/report/project-overview.html"
+grep -q 'Declared dependency entries' "$TEST_ROOT/report/technologies.html"
+grep -q 'does not necessarily represent unique' "$TEST_ROOT/report/technologies.html"
+grep -q 'Data/Persistence' "$TEST_ROOT/report/systems.html"
+! grep -q 'Module candidate' "$TEST_ROOT/report/systems.html"
+grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
+grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
+grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'Potential secret findings</th><td>1' "$TEST_ROOT/report/risks.html" || {
     cat "$TEST_ROOT/report/risks.html" >&2
     exit 1
