@@ -6,6 +6,9 @@ set -u
 # Fail a pipeline when any command inside it fails.
 set -o pipefail
 
+# Record the Bash process start time for the final execution summary.
+EXECUTION_STARTED_AT=$SECONDS
+
 # Initialize optional Git-history filters.
 AUTHOR=""
 SINCE=""
@@ -98,6 +101,46 @@ fi
 command_exists() {
     # Ask the shell to resolve the command.
     command -v "$1" >/dev/null 2>&1
+}
+
+# Resolve one executable Python runtime for every Python-backed feature.
+resolve_python_runtime() {
+    local candidate
+
+    if [[ -n "${REPO_DNA_PYTHON:-}" ]]; then
+        if "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1; then
+            printf '%s' "$REPO_DNA_PYTHON"
+            return 0
+        fi
+
+        return 1
+    fi
+
+    for candidate in python3 python; do
+        if command_exists "$candidate" &&
+           "$candidate" -c 'import sys' >/dev/null 2>&1; then
+            command -v "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Format elapsed seconds as a readable duration.
+format_duration() {
+    local total_seconds="$1"
+    local hours=$((total_seconds / 3600))
+    local minutes=$(((total_seconds % 3600) / 60))
+    local seconds=$((total_seconds % 60))
+
+    if ((hours > 0)); then
+        printf '%dh %02dm %02ds' "$hours" "$minutes" "$seconds"
+    elif ((minutes > 0)); then
+        printf '%dm %02ds' "$minutes" "$seconds"
+    else
+        printf '%ds' "$seconds"
+    fi
 }
 
 # Remove whitespace from a numeric result.
@@ -232,12 +275,13 @@ count_current_files() {
 count_historical_files() {
     # Read the regular expression.
     local pattern="$1"
+    local awk_pattern="${pattern//\\/\\\\}"
 
     # List every path changed in the selected history scope.
     analysis_git_log --name-only --pretty=format: 2>/dev/null |
 
         # Match paths using a lower-case comparison.
-        awk -v regex="$pattern" '
+        awk -v regex="$awk_pattern" '
             {
                 line = tolower($0)
                 if (line ~ regex) {
@@ -258,6 +302,9 @@ count_historical_files() {
 
 # Require Git.
 command_exists git || die "Git is not installed or is not available in PATH."
+
+# Resolve Python once so collectors, renderers, and charts use the same runtime.
+STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
 
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
@@ -1562,13 +1609,17 @@ if __name__ == "__main__":
 PYTHON
 
     # Run the chart generator when dependencies exist.
-    if command_exists python3 &&
-       python3 -c 'import matplotlib' >/dev/null 2>&1; then
+    if [[ -n "$STRUCTURED_PYTHON" ]] &&
+       "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1; then
         # Generate charts without failing the complete report.
-        python3 "$OUTPUT_DIR/generate_graphs.py" || true
+        "$STRUCTURED_PYTHON" "$OUTPUT_DIR/generate_graphs.py" || true
     else
         # Explain why charts were skipped.
-        echo "Optional charts skipped because Python 3 or matplotlib is unavailable."
+        if [[ -z "$STRUCTURED_PYTHON" ]]; then
+            echo "Optional charts skipped because no executable Python runtime was found."
+        else
+            echo "Optional charts skipped because matplotlib is unavailable."
+        fi
     fi
 fi
 
@@ -1580,16 +1631,6 @@ sanitize_strict_reports
 POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
-
-STRUCTURED_PYTHON=''
-if [[ -n "${REPO_DNA_PYTHON:-}" ]] &&
-   "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1; then
-    STRUCTURED_PYTHON="$REPO_DNA_PYTHON"
-elif command_exists python3 && python3 -c 'import sys' >/dev/null 2>&1; then
-    STRUCTURED_PYTHON='python3'
-elif command_exists python && python -c 'import sys' >/dev/null 2>&1; then
-    STRUCTURED_PYTHON='python'
-fi
 
 GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
@@ -1684,6 +1725,9 @@ echo "[12/12] Finalizing..."
 echo ""
 echo "================================================================"
 echo "Analysis export completed"
+echo "================================================================"
+echo "Duration   : $(format_duration "$((SECONDS - EXECUTION_STARTED_AT))")"
+echo "Python     : ${STRUCTURED_PYTHON:-not available}"
 echo "================================================================"
 
 # Print the report folder path.
