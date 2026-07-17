@@ -9,6 +9,7 @@ show_usage() {
         '  --owned-root <path>       Mark a path as project-owned (repeatable).' \
         '  --portfolio-profile <file>  Add personally confirmed portfolio claims.' \
         '  --include-source          Copy classified C# source into the report.' \
+        '  --save-snapshot           Persist a versioned snapshot under .repodna/snapshots.' \
         '  --privacy-mode <mode>     Privacy level: standard or strict.' \
         '  -h, --help                Show this help.' '' 'Examples:' \
         '  bash dna-analysis.sh' \
@@ -25,6 +26,7 @@ parse_arguments() {
     UNTIL=""
     OWNED_ROOTS=()
     INCLUDE_SOURCE=false
+    SAVE_SNAPSHOT=false
     PRIVACY_MODE='standard'
     PORTFOLIO_PROFILE=''
     while [[ $# -gt 0 ]]; do
@@ -41,6 +43,7 @@ parse_arguments() {
                 esac
                 shift 2 ;;
             --include-source) INCLUDE_SOURCE=true; shift ;;
+            --save-snapshot) SAVE_SNAPSHOT=true; shift ;;
             -h|--help) show_usage; exit 0 ;;
             *) show_usage >&2; die "Unknown option: $1" ;;
         esac

@@ -37,7 +37,7 @@ find_report() {
 
 default_fixture="$TEST_ROOT/default-project"
 create_fixture "$default_fixture"
-(cd "$default_fixture" && bash ./dna-analysis.sh >/dev/null)
+(cd "$default_fixture" && bash ./dna-analysis.sh --save-snapshot >/dev/null)
 default_report="$(find_report "$default_fixture")"
 [[ -n "$default_report" ]]
 [[ -f "$default_report/security/potential_secrets.txt" ]]
@@ -48,6 +48,12 @@ grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
 grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/executive-summary.html" ]]
 [[ -f "$default_report/notion/evidence.json" ]]
+snapshot_file="$(find "$default_report/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)"
+[[ -n "$snapshot_file" && -s "$snapshot_file" ]]
+[[ -f "$default_report/snapshots/analysis-snapshot-1.0.0.schema.json" ]]
+persistent_snapshot="$(find "$default_fixture/.repodna/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)"
+[[ -n "$persistent_snapshot" && -s "$persistent_snapshot" ]]
+grep -q '"artifact_type": "repodna_analysis_snapshot"' "$persistent_snapshot"
 [[ -f "$default_report/llm/evidence.json" ]]
 [[ -f "$default_report/llm/schema.json" ]]
 grep -q '"artifact_type": "repodna_llm_evidence"' "$default_report/llm/evidence.json"
@@ -78,6 +84,11 @@ strict_report="$(find_report "$strict_fixture")"
 [[ ! -d "$strict_report/source" ]]
 [[ ! -f "$strict_report/data/history_commits.csv" ]]
 [[ -f "$strict_report/llm/evidence.json" ]]
+[[ -n "$(find "$strict_report/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)" ]]
+strict_snapshot="$(find "$strict_report/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)"
+grep -q '"commit": ""' "$strict_snapshot"
+grep -q '"branch": "\[redacted\]"' "$strict_snapshot"
+[[ "$(basename "$strict_snapshot")" == *_sanitized.json ]]
 [[ -f "$strict_report/llm/schema.json" ]]
 grep -q '"mode": "strict"' "$strict_report/llm/evidence.json"
 grep -q 'Origin remote: \[redacted\]' "$strict_report/project/00_repository_information.txt"

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/analysis-snapshot-1.0.0.schema.json",
+  "title": "RepoDNA Analysis Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "snapshot_id", "generated_at", "repository", "scope", "inventory", "architecture", "systems", "quality", "health", "git", "risks", "provenance"],
+  "properties": {
+    "$schema": {"const": "./analysis-snapshot-1.0.0.schema.json"},
+    "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_analysis_snapshot"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string"},
+    "repository": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "type", "commit", "branch"],
+      "properties": {
+        "name": {"type": ["string", "null"]}, "type": {"type": ["string", "null"]},
+        "commit": {"type": "string", "pattern": "^([0-9a-f]{40,64})?$"}, "branch": {"type": "string"}
+      }
+    },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["privacy_mode", "author_filter", "git_scope", "source_included"],
+      "properties": {
+        "privacy_mode": {"enum": ["standard", "strict"]}, "author_filter": {"type": "string"},
+        "git_scope": {"type": "string"}, "source_included": {"type": "boolean"}
+      }
+    },
+    "inventory": {"$ref": "#/$defs/object"},
+    "architecture": {"$ref": "#/$defs/object"},
+    "systems": {"type": "array", "items": {"$ref": "#/$defs/object"}},
+    "quality": {"$ref": "#/$defs/object"},
+    "health": {"$ref": "#/$defs/object"},
+    "git": {"$ref": "#/$defs/object"},
+    "risks": {"$ref": "#/$defs/object"},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["canonical_source", "collector_schema_version", "canonical_schema_version"],
+      "properties": {
+        "canonical_source": {"const": "report/data/report.json"},
+        "collector_schema_version": {"type": ["string", "null"]},
+        "canonical_schema_version": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "object": {"type": "object"}
+  }
+}

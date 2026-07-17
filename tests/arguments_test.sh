@@ -9,6 +9,7 @@ source "$SOURCE_ROOT/src/core/arguments.sh"
 parse_arguments
 [[ -z "$AUTHOR" && -z "$SINCE" && -z "$UNTIL" ]]
 [[ "$INCLUDE_SOURCE" == false && "$PRIVACY_MODE" == standard ]]
+[[ "$SAVE_SNAPSHOT" == false ]]
 [[ ${#OWNED_ROOTS[@]} -eq 0 ]]
 
 parse_arguments --author Developer --since 2024-01-01 --until 2025-01-01 \
@@ -23,6 +24,9 @@ parse_arguments --include-source --privacy-mode strict
 
 parse_arguments --portfolio-profile confirmations.json
 [[ "$PORTFOLIO_PROFILE" == confirmations.json ]]
+
+parse_arguments --save-snapshot
+[[ "$SAVE_SNAPSHOT" == true ]]
 
 if (parse_arguments --privacy-mode unsafe) >/dev/null 2>&1; then
     echo 'Invalid privacy mode was accepted.' >&2

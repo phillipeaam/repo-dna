@@ -206,6 +206,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`report/index.html\`: navigation entry point for the HTML report set
 - \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
 - \`llm/evidence.json\`: compact, provenance-rich evidence prepared for LLM use
+- \`snapshots/\`: validated point-in-time analysis snapshot and versioned schema
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 

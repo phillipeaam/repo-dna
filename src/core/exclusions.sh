@@ -27,6 +27,7 @@ declare -gar IGNORED_DIRS=(
     vendor
     Packages
     .git
+    .repodna
 )
 
 # Load directory entries from .repodna-ignore.

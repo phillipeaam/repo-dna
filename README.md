@@ -27,6 +27,7 @@ One command creates a timestamped analysis package containing:
 - author-to-system activity ownership with percentages, ranking, and confidence;
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
+- validated point-in-time analysis snapshots with optional Git persistence;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation, Notion, and provenance-aware LLM evidence;
 - charts for commits, churn, hotspots, systems, authors, and architectural
@@ -136,6 +137,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
 - [Charts and visual evidence](docs/charts.md)
+- [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
@@ -242,6 +244,12 @@ bash /path/to/repo-dna/dna-analysis.sh
 Use `bash ./dna-analysis.sh --help` from the RepoDNA checkout to list every
 option. Generated reports are written to a timestamped directory in the
 analyzed repository; start with `report/index.html`.
+
+Persist a compact snapshot for future period comparison with:
+
+```bash
+bash ./dna-analysis.sh --save-snapshot
+```
 
 To add personally confirmed portfolio context, copy
 `.repodna-portfolio.example.json`, edit the answers and approved claim IDs, then

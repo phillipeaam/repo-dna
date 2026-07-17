@@ -24,6 +24,17 @@ create_analysis_charts
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
+SNAPSHOT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+[[ "$PRIVACY_MODE" != strict ]] || SNAPSHOT_BRANCH='[redacted]'
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/snapshot.py" \
+    "$REPORT_DATA_DIR/report.json" "$SNAPSHOT_FILE" \
+    --schema "$SCRIPT_DIR/schemas/analysis-snapshot-1.0.0.schema.json" \
+    --commit "$SNAPSHOT_COMMIT" --branch "$SNAPSHOT_BRANCH" ||
+    die "Could not create the versioned analysis snapshot."
+cp "$SCRIPT_DIR/schemas/analysis-snapshot-1.0.0.schema.json" \
+    "$SNAPSHOT_DIR/analysis-snapshot-1.0.0.schema.json" ||
+    die "Could not copy the analysis snapshot schema."
+
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
     "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
     die "Could not render the standardized HTML reports."
@@ -45,6 +56,15 @@ PORTFOLIO_ARGS=()
     die "Could not render the portfolio evidence draft."
 
 run_privacy_scan
+if [[ "$SAVE_SNAPSHOT" == true ]]; then
+    mkdir -p "$PERSISTENT_SNAPSHOT_DIR" ||
+        die "Could not create the persistent snapshot directory."
+    cp "$SNAPSHOT_FILE" "$PERSISTENT_SNAPSHOT_DIR/$SNAPSHOT_NAME" ||
+        die "Could not persist the versioned analysis snapshot."
+    cp "$SCRIPT_DIR/schemas/analysis-snapshot-1.0.0.schema.json" \
+        "$PERSISTENT_SNAPSHOT_DIR/analysis-snapshot-1.0.0.schema.json" ||
+        die "Could not persist the analysis snapshot schema."
+fi
 create_report_archive
 print_completion_summary
 }

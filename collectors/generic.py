@@ -31,7 +31,7 @@ LANGUAGES = {
 }
 
 HARD_EXCLUDES = {
-    ".git", "node_modules", "vendor", "packages", "library", "logs", "temp",
+    ".git", ".repodna", "node_modules", "vendor", "packages", "library", "logs", "temp",
     "obj", "bin", "build", "builds", "dist", ".venv", "venv", "__pycache__",
     ".next", ".nuxt", "coverage",
 }

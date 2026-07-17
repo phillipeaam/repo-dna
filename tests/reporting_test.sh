@@ -201,6 +201,24 @@ fi
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
 "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
 "$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json" --schema "$SOURCE_ROOT/schemas/llm-evidence-1.0.0.schema.json"
+"$PYTHON" "$SOURCE_ROOT/renderers/snapshot.py" "$TEST_ROOT/report.json" "$TEST_ROOT/snapshots/fixture.json" --schema "$SOURCE_ROOT/schemas/analysis-snapshot-1.0.0.schema.json" --commit 0123456789abcdef0123456789abcdef01234567 --branch feature/test
+"$PYTHON" - "$TEST_ROOT/snapshots/fixture.json" "$SOURCE_ROOT/schemas/analysis-snapshot-1.0.0.schema.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+from jsonschema import Draft202012Validator
+
+snapshot = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+schema = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+assert not list(Draft202012Validator(schema).iter_errors(snapshot))
+assert snapshot["schema_version"] == "1.0.0"
+assert snapshot["repository"]["commit"] == "0123456789abcdef0123456789abcdef01234567"
+assert snapshot["repository"]["branch"] == "feature/test"
+assert snapshot["inventory"]["files"] == 25
+assert snapshot["health"]["score"] == 72.5
+assert snapshot["git"]["technical_impact_summary"] == {}
+assert "contributions" not in snapshot["git"]
+PY
 "$PYTHON" - "$TEST_ROOT/llm/evidence.json" <<'PY'
 import json
 import sys
@@ -351,6 +369,7 @@ grep -q '"claims_requiring_confirmation"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"kind": "fact"' "$TEST_ROOT/notion/evidence.json"
 grep -q '"artifact_type": "repodna_llm_evidence"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"schema_version": "1.0.0"' "$TEST_ROOT/llm/evidence.json"
+grep -q '"artifact_type": "repodna_analysis_snapshot"' "$TEST_ROOT/snapshots/fixture.json"
 grep -q '"llm_contract"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"kind": "inference"' "$TEST_ROOT/llm/evidence.json"
 grep -q '"kind": "candidate"' "$TEST_ROOT/llm/evidence.json"

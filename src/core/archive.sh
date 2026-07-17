@@ -51,6 +51,10 @@ print_completion_summary() {
     fi
     printf '\nNotion guide:\n  %s/01_notion_evidence_guide.md\n' "$DISPLAY_SUMMARY_PATH"
     printf '\nPortfolio draft:\n  %s/portfolio/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    printf '\nAnalysis snapshot:\n  %s/snapshots/%s\n' "$DISPLAY_OUTPUT_PATH" "$SNAPSHOT_NAME"
+    if [[ "$SAVE_SNAPSHOT" == true ]]; then
+        printf '\nPersisted snapshot:\n  %s/.repodna/snapshots/%s\n' "$REPO_ROOT" "$SNAPSHOT_NAME"
+    fi
     printf '\nAnalysis prompt:\n  %s/02_analysis_prompt.md\n\n' "$DISPLAY_SUMMARY_PATH"
     echo "Review confidential code, e-mails, URLs, credentials, and client names"
     echo "before sharing the generated package."

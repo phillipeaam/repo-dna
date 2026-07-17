@@ -88,6 +88,18 @@ NOTION_DIR="$OUTPUT_DIR/notion"
 # Define the compact evidence package prepared for downstream LLMs.
 LLM_DIR="$OUTPUT_DIR/llm"
 
+# Define packaged and optionally persisted analysis snapshots.
+SNAPSHOT_DIR="$OUTPUT_DIR/snapshots"
+PERSISTENT_SNAPSHOT_DIR="$REPO_ROOT/.repodna/snapshots"
+SNAPSHOT_COMMIT="$(git rev-parse HEAD 2>/dev/null || true)"
+SNAPSHOT_SHORT_COMMIT="${SNAPSHOT_COMMIT:0:12}"
+if [[ "$PRIVACY_MODE" == strict ]]; then
+    SNAPSHOT_COMMIT=''
+    SNAPSHOT_SHORT_COMMIT='sanitized'
+fi
+SNAPSHOT_NAME="${TIMESTAMP}_${SNAPSHOT_SHORT_COMMIT:-uncommitted}.json"
+SNAPSHOT_FILE="$SNAPSHOT_DIR/$SNAPSHOT_NAME"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -156,6 +168,7 @@ mkdir -p \
     "$REPORT_DATA_DIR" \
     "$NOTION_DIR" \
     "$LLM_DIR" \
+    "$SNAPSHOT_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
