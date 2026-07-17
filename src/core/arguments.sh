@@ -7,6 +7,7 @@ show_usage() {
         '  --since <date>            Include commits on or after this date.' \
         '  --until <date>            Include commits on or before this date.' \
         '  --owned-root <path>       Mark a path as project-owned (repeatable).' \
+        '  --portfolio-profile <file>  Add personally confirmed portfolio claims.' \
         '  --include-source          Copy classified C# source into the report.' \
         '  --privacy-mode <mode>     Privacy level: standard or strict.' \
         '  -h, --help                Show this help.' '' 'Examples:' \
@@ -25,9 +26,10 @@ parse_arguments() {
     OWNED_ROOTS=()
     INCLUDE_SOURCE=false
     PRIVACY_MODE='standard'
+    PORTFOLIO_PROFILE=''
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --author|--since|--until|--owned-root|-owned-root|--privacy-mode)
+            --author|--since|--until|--owned-root|-owned-root|--privacy-mode|--portfolio-profile)
                 [[ -n "${2:-}" ]] || die "Option $1 requires a value."
                 case "$1" in
                     --author) AUTHOR="$2" ;;
@@ -35,6 +37,7 @@ parse_arguments() {
                     --until) UNTIL="$2" ;;
                     --owned-root|-owned-root) OWNED_ROOTS+=("${2#./}") ;;
                     --privacy-mode) PRIVACY_MODE="$2" ;;
+                    --portfolio-profile) PORTFOLIO_PROFILE="$2" ;;
                 esac
                 shift 2 ;;
             --include-source) INCLUDE_SOURCE=true; shift ;;
@@ -44,5 +47,7 @@ parse_arguments() {
     done
     [[ "$PRIVACY_MODE" == standard || "$PRIVACY_MODE" == strict ]] ||
         die "Invalid privacy mode: $PRIVACY_MODE (expected standard or strict)."
+    [[ "$PRIVACY_MODE" != strict || -z "$PORTFOLIO_PROFILE" ]] ||
+        die "--portfolio-profile cannot be used with strict privacy mode."
     [[ "$PRIVACY_MODE" != strict ]] || INCLUDE_SOURCE=false
 }

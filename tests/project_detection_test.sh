@@ -22,8 +22,9 @@ assert_detection() {
     }
 }
 
-mkdir -p "$TEST_ROOT/generic" "$TEST_ROOT/unity/ProjectSettings" "$TEST_ROOT/node/src" \
-    "$TEST_ROOT/android/app/src/main" "$TEST_ROOT/dotnet" "$TEST_ROOT/python/src" "$TEST_ROOT/priority/ProjectSettings"
+mkdir -p "$TEST_ROOT/generic" "$TEST_ROOT/unity/ProjectSettings" "$TEST_ROOT/unity/Assets" "$TEST_ROOT/node/src" \
+    "$TEST_ROOT/android/app/src/main" "$TEST_ROOT/dotnet" "$TEST_ROOT/python/src" "$TEST_ROOT/priority/ProjectSettings" "$TEST_ROOT/priority/Assets" \
+    "$TEST_ROOT/node-no-src" "$TEST_ROOT/dart" "$TEST_ROOT/flutter/lib"
 touch "$TEST_ROOT/unity/ProjectSettings/ProjectVersion.txt"
 printf '{}' > "$TEST_ROOT/node/package.json"
 printf '<manifest />' > "$TEST_ROOT/android/app/src/main/AndroidManifest.xml"
@@ -31,6 +32,9 @@ printf '<Project />' > "$TEST_ROOT/dotnet/sample.csproj"
 printf '[project]\nname="sample"\n' > "$TEST_ROOT/python/pyproject.toml"
 touch "$TEST_ROOT/priority/ProjectSettings/ProjectVersion.txt"
 printf '{}' > "$TEST_ROOT/priority/package.json"
+printf '{}' > "$TEST_ROOT/node-no-src/package.json"
+printf 'name: dart_package\n' > "$TEST_ROOT/dart/pubspec.yaml"
+printf 'name: flutter_app\ndependencies:\n  flutter:\n    sdk: flutter\n' > "$TEST_ROOT/flutter/pubspec.yaml"
 
 assert_detection "$TEST_ROOT/generic" 'Generic Git repository' '.'
 assert_detection "$TEST_ROOT/unity" Unity Assets
@@ -39,4 +43,7 @@ assert_detection "$TEST_ROOT/android" Android app/src/main
 assert_detection "$TEST_ROOT/dotnet" .NET .
 assert_detection "$TEST_ROOT/python" Python src
 assert_detection "$TEST_ROOT/priority" Unity Assets
+assert_detection "$TEST_ROOT/node-no-src" Node .
+assert_detection "$TEST_ROOT/dart" 'Generic Git repository' .
+assert_detection "$TEST_ROOT/flutter" Flutter lib
 printf '%s\n' 'project detection tests passed'

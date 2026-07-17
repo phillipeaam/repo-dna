@@ -43,7 +43,8 @@ is_unity_project() {
 }
 
 is_flutter_project() {
-    [[ -f pubspec.yaml ]]
+    [[ -f pubspec.yaml ]] || return 1
+    grep -Eq '(^[[:space:]]*flutter:|sdk:[[:space:]]*flutter)' pubspec.yaml
 }
 
 is_unreal_project() {
@@ -122,5 +123,9 @@ detect_code_root() {
     local project_type="${1:-}"
     local preferred_root="${PROJECT_ROOTS["$project_type"]:-.}"
 
-    printf '%s' "$preferred_root"
+    if [[ -d "$preferred_root" ]]; then
+        printf '%s' "$preferred_root"
+    else
+        printf '.'
+    fi
 }

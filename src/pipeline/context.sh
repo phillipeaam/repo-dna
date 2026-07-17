@@ -2,10 +2,15 @@ initialize_analysis_context() {
 # Require Git.
 command_exists git || die "Git is not installed or is not available in PATH."
 
+if [[ -n "$PORTFOLIO_PROFILE" ]]; then
+    [[ -f "$PORTFOLIO_PROFILE" ]] || die "Portfolio profile not found: $PORTFOLIO_PROFILE"
+    PORTFOLIO_PROFILE="$(cd "$(dirname "$PORTFOLIO_PROFILE")" && pwd)/$(basename "$PORTFOLIO_PROFILE")"
+fi
+
 # Resolve Python once so collectors, renderers, and charts use the same runtime.
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
 [[ -n "$STRUCTURED_PYTHON" ]] ||
-    die "Python 3 is required to generate the standardized HTML reports. Install Python or set REPO_DNA_PYTHON."
+    die "Python 3.11 or newer is required to generate the standardized reports. Install a compatible runtime or set REPO_DNA_PYTHON."
 
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
@@ -80,6 +85,9 @@ REPORT_DATA_DIR="$REPORT_DIR/data"
 # Define Notion-ready structured evidence.
 NOTION_DIR="$OUTPUT_DIR/notion"
 
+# Define approval-gated portfolio and CV evidence outputs.
+PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
+
 # Define the optional graph folder.
 GRAPHS_DIR="$OUTPUT_DIR/graphs"
 
@@ -144,6 +152,7 @@ mkdir -p \
     "$SECURITY_DIR" \
     "$REPORT_DATA_DIR" \
     "$NOTION_DIR" \
+    "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
 

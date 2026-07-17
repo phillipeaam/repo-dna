@@ -36,6 +36,16 @@ Core modules must not source pipeline modules. Collectors do not write reports,
 and renderers do not inspect the repository. Both communicate through
 `report/data/report.json` and `report/data/generic-analysis.json`.
 
+`collectors/insights.py` enriches the generic collector output with
+language-aware symbols, imports, architecture and pattern signals, system
+candidates, quality evidence, narrative facts, and the versioned repository
+health model. It does not write presentation files.
+
+`renderers/portfolio.py` creates an approval-gated portfolio draft. Repository
+facts remain unapproved unless their claim IDs are explicitly listed in a
+portfolio confirmation profile. Personal profiles are not accepted in strict
+privacy mode.
+
 ## Pipeline contract
 
 Each file in `src/pipeline/`:

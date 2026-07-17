@@ -110,6 +110,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     project = data["project"]
     profile = data.get("analysis_profile", {"unity": False, "csharp": True})
     generic = data.get("generic_analysis", {})
+    analysis = generic.get("analysis", {})
     metrics = data["current_metrics"]
     architecture = data["architecture"]
     technologies = data["technologies"]
@@ -178,12 +179,13 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         [item["path"], item["file_count"], ", ".join(item.get("languages", {})) or "Unknown"]
         for item in generic.get("possible_modules", [])[:20]
     ], {1}) if generic.get("possible_modules") else empty
+    structured_systems = analysis.get("systems", [])
     system_rows = [
-        [system, sum(periods.values()), len(periods)]
-        for system, periods in generic.get("git", {}).get("system_evolution", {}).items()
+        [item["name"], item["confidence"], item["file_count"], item.get("symbol_count", 0), item.get("import_references", 0), ", ".join(item.get("languages", {}))]
+        for item in structured_systems
     ]
     system_table = data_table(
-        ["Inferred system", "Changed files", "Active months"], system_rows, {1, 2}
+        ["System candidate", "Confidence", "Files", "Symbols", "Import references", "Languages"], system_rows, {2, 3, 4}
     ) if system_rows else empty
     manifest_rows = [
         [item["path"], item["dependency_count"]]
@@ -232,13 +234,60 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     technology_body += "<h3>Languages and lines</h3>" + language_table
     technology_body += "<h3>Repository references</h3>" + reference_table
 
+    pattern_rows = [
+        [item["name"], item["matches"], item["confidence"], item["basis"]]
+        for item in analysis.get("architecture", {}).get("design_patterns", [])
+    ]
+    pattern_table = data_table(["Pattern signal", "Matches", "Confidence", "Basis"], pattern_rows, {1}) if pattern_rows else empty
     architecture_body = table(labeled(architecture, architecture_keys)) if architecture_keys else (
-        '<p class="note">For generic repositories, architecture candidates are inferred from top-level modules and their language composition.</p>' + module_table
+        '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
     )
-    systems_body = table(labeled(systems, system_keys)) if system_keys else (
-        '<p class="note">System names are inferred from historical file paths and keywords. They are candidates for review, not confirmed product architecture.</p>' + system_table
-    )
+    architecture_body += "<h3>Multi-language design-pattern signals</h3>" + pattern_table
+    systems_body = table(labeled(systems, system_keys)) if system_keys else ""
+    systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
+    systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
     hotspot_explanation = '<p class="note">Composite hotspots rank files that may deserve attention by combining change frequency, code churn, current size, number of authors, and recency. A higher score suggests relevance or maintenance risk; it does not prove poor code quality.</p>'
+
+    quality = analysis.get("quality", {})
+    complexity = analysis.get("code", {}).get("complexity", {})
+    high_complexity_rows = [
+        [item["path"], item["language"], item["estimated_cyclomatic_complexity"], item["decision_points"], item["lines"]]
+        for item in complexity.get("high_complexity_files", [])
+    ]
+    complexity_table = data_table(["File", "Language", "Estimated complexity", "Decision points", "Lines"], high_complexity_rows, {2, 3, 4}) if high_complexity_rows else '<p class="empty">No files crossed the current high-complexity threshold.</p>'
+    quality_body = table([
+        ("Complexity method", complexity.get("method", "Not assessed")),
+        ("Files analyzed", complexity.get("files_analyzed", 0)),
+        ("Average estimated complexity", complexity.get("average") if complexity.get("average") is not None else "Not assessed"),
+        ("Maximum estimated complexity", complexity.get("maximum") if complexity.get("maximum") is not None else "Not assessed"),
+        ("Coverage status", quality.get("coverage", {}).get("status", "Not assessed")),
+        ("Line coverage", quality.get("coverage", {}).get("line_coverage_percent") if quality.get("coverage", {}).get("line_coverage_percent") is not None else "Not available"),
+        ("Vulnerability status", quality.get("vulnerabilities", {}).get("status", "Not assessed")),
+        ("Repository license", quality.get("licenses", {}).get("repository_license", "Unknown")),
+        ("Dependency license status", quality.get("licenses", {}).get("dependency_license_status", "Not assessed")),
+    ])
+    quality_body += '<p class="note">A vulnerability status of not_scanned is not equivalent to zero vulnerabilities. RepoDNA only reports verified scanner evidence.</p>'
+    quality_body += "<h3>High-complexity candidates</h3>" + complexity_table
+
+    health = analysis.get("health", {})
+    health_rows = [
+        [item["name"], item["score"], item["maximum"], item["status"], item["evidence"]]
+        for item in health.get("dimensions", [])
+    ]
+    health_body = table([
+        ("Health score", health.get("score", "Not assessed")),
+        ("Grade", health.get("grade", "Not assessed")),
+        ("Assessment coverage", f"{health.get('assessment_coverage_percent', 0)}%"),
+        ("Model version", health.get("version", "Unknown")),
+    ]) + data_table(["Dimension", "Score", "Maximum", "Status", "Evidence"], health_rows, {1, 2})
+    health_body += "<h3>Method limitations</h3>" + item_list(health.get("limitations", []))
+
+    narrative_facts = analysis.get("narrative_facts", [])
+    narrative_body = '<p class="note">Every sentence below is generated from a structured fact and retains an evidence pointer. No business impact or personal ownership is invented.</p>'
+    narrative_body += "".join(
+        f'<section><p>{esc(item["statement"])}</p><small>Confidence: {esc(item["confidence"])} · Evidence: {esc(item["evidence"])}</small></section>'
+        for item in narrative_facts
+    ) or empty
 
     notion = build_notion_evidence(data)
     notion_facts = [item["statement"] for item in notion["about_project"]["facts"]]
@@ -264,16 +313,14 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         f"{systems.get('likely_system_files', 0)} likely system files"
         if profile["csharp"] else f"{len(system_rows)} systems inferred from Git paths"
     )
-    design_status = "Available" if profile["csharp"] else "Not available for this profile"
-    design_evidence = (
-        f"{architecture.get('architecture_signals', 0)} C# design-pattern matches"
-        if profile["csharp"] else "Only stack-neutral module inference was performed"
-    )
+    design_patterns = analysis.get("architecture", {}).get("design_patterns", [])
+    design_status = "Available" if analysis.get("architecture", {}).get("languages_analyzed") else "Not available for this profile"
+    design_evidence = f"{len(design_patterns)} pattern categories with {sum(item['matches'] for item in design_patterns)} heuristic matches"
     capability_rows = [
         ["Automatic project detection", "Completed", f"Detected profile: {project['type']}"],
         ["Architecture discovery", "Completed", architecture_evidence],
         ["Technology inventory", "Completed", f"Languages: {language_names}; {dependency_total} dependency declarations"],
-        ["Gameplay and application systems", "Completed", system_evidence],
+        ["Gameplay and application systems", "Completed", f"{len(structured_systems)} symbol/dependency-based system candidates"],
         ["Project metrics", "Completed", f"{generic.get('file_count', 0)} files across {len(generic.get('languages', []))} languages"],
         ["Git contribution analysis", "Completed", f"{history.get('total_commits', 0)} commits; {generic.get('git', {}).get('churn', {}).get('total', 0)} lines of churn"],
         ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals"],
@@ -291,6 +338,10 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("systems.html", "Systems", systems_body),
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_table + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
+        ("quality.html", "Quality and compliance", quality_body),
+        ("health.html", "Repository health", health_body),
+        ("narrative.html", "Evidence-based narrative", narrative_body),
+        ("portfolio.html", "Portfolio and CV", '<p>The approval-gated portfolio draft is available at <a href="../portfolio/index.html">portfolio/index.html</a>. Repository facts remain unapproved until explicitly confirmed.</p>'),
         ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),
             ("Ownership review required", risks["ownership_review_required"]),

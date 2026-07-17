@@ -28,6 +28,13 @@ write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
     die "Could not render the Notion evidence JSON."
 
+PORTFOLIO_ARGS=()
+[[ -z "$PORTFOLIO_PROFILE" ]] || PORTFOLIO_ARGS+=(--confirmations "$PORTFOLIO_PROFILE")
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/portfolio.py" \
+    "$REPORT_DATA_DIR/report.json" "$PORTFOLIO_DIR/draft.json" "$PORTFOLIO_DIR/index.html" \
+    "${PORTFOLIO_ARGS[@]}" ||
+    die "Could not render the portfolio evidence draft."
+
 run_privacy_scan
 create_report_archive
 print_completion_summary

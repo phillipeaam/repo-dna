@@ -1,0 +1,19 @@
+{
+  "candidate_name": "Your name",
+  "target_role": "Target role",
+  "approved_claims": [
+    "repository-fact-1",
+    "achievement-1"
+  ],
+  "achievements": [
+    {
+      "id": "achievement-1",
+      "action": "Implemented the repository analysis pipeline",
+      "result": "reduced the time required to prepare engineering evidence",
+      "metric": "confirm a measurable result before approval",
+      "evidence": [
+        "report/data/report.json"
+      ]
+    }
+  ]
+}

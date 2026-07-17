@@ -19,6 +19,10 @@ parse_arguments --author Developer --since 2024-01-01 --until 2025-01-01 \
 
 parse_arguments --include-source --privacy-mode strict
 [[ "$PRIVACY_MODE" == strict && "$INCLUDE_SOURCE" == false ]]
+[[ -z "$PORTFOLIO_PROFILE" ]]
+
+parse_arguments --portfolio-profile confirmations.json
+[[ "$PORTFOLIO_PROFILE" == confirmations.json ]]
 
 if (parse_arguments --privacy-mode unsafe) >/dev/null 2>&1; then
     echo 'Invalid privacy mode was accepted.' >&2

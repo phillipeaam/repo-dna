@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from insights import analyze_repository
+
 
 LANGUAGES = {
     ".cs": "C#", ".py": "Python", ".js": "JavaScript", ".jsx": "JavaScript",
@@ -168,6 +170,7 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
     added_total = 0
     removed_total = 0
     current_commit_files: set[str] = set()
+    current_commit_systems: set[str] = set()
     file_authors: dict[str, set[str]] = defaultdict(set)
     last_changed: dict[str, str] = {}
     coauthors: Counter[tuple[str, str]] = Counter()
@@ -177,16 +180,16 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
     log_rows = git(root, "log", "--all", "--find-renames", "--find-copies", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
     for line in log_rows.replace("\x00", "\n").splitlines():
         if line.startswith("__REPODNA_COMMIT__\t"):
+            change_commits.update(current_commit_files)
+            if current_date:
+                for system in current_commit_systems:
+                    system_months[system][current_date[:7]] += 1
+            current_commit_files.clear()
+            current_commit_systems.clear()
             fields = line.split("\t", 4)
             if len(fields) >= 4:
                 current_author = canonical_author(fields[1], fields[2], name_aliases, email_aliases)
                 current_date = fields[3]
-                if len(fields) == 5:
-                    for match in re.finditer(r"Co-authored-by:\s*([^<\n]+)\s*<([^>]+)>", fields[4], re.I):
-                        other = canonical_author(match.group(1).strip(), match.group(2).strip(), name_aliases, email_aliases)
-                        coauthors[tuple(sorted((current_author, other)))] += 1
-            change_commits.update(current_commit_files)
-            current_commit_files.clear()
             continue
         parts = line.split("\t", 2)
         if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
@@ -194,12 +197,14 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
             current_commit_files.add(file_path)
             file_authors[file_path].add(current_author)
             last_changed.setdefault(file_path, current_date)
-            if current_date:
-                system_months[system_for_path(file_path)][current_date[:7]] += 1
+            current_commit_systems.add(system_for_path(file_path))
             churn[file_path] += added + removed
             added_total += added
             removed_total += removed
     change_commits.update(current_commit_files)
+    if current_date:
+        for system in current_commit_systems:
+            system_months[system][current_date[:7]] += 1
 
     now = datetime.now(timezone.utc)
     hotspots = []
@@ -258,6 +263,51 @@ def collect_git(root: Path, privacy_mode: str) -> dict[str, Any]:
         ],
         "hotspots": hotspots[:50],
     }
+
+
+def sanitize_strict_result(result: dict[str, Any]) -> None:
+    """Remove repository-specific names while preserving aggregate evidence."""
+
+    def anonymize_paths(items: list[dict[str, Any]], prefix: str = "File") -> None:
+        for index, item in enumerate(items, 1):
+            if "path" in item:
+                item["path"] = f"{prefix}-{index}"
+
+    result["configuration_files"] = []
+    result["documentation_files"] = []
+    result["test_files"] = []
+    result["ci_cd_files"] = []
+    result["docker_files"] = []
+    anonymize_paths(result["largest_files"])
+    anonymize_paths(result["top_directories"], "Directory")
+    anonymize_paths(result["possible_modules"], "Module")
+    for index, manifest in enumerate(result["dependencies"]["manifests"], 1):
+        manifest["path"] = f"Manifest-{index}"
+        manifest["dependencies"] = []
+
+    git_data = result["git"]
+    git_data["branches"] = []
+    git_data["tags"] = []
+    git_data["releases"] = []
+    anonymize_paths(git_data["shared_files"])
+    anonymize_paths(git_data["most_changed_files"])
+    anonymize_paths(git_data["hotspots"])
+
+    analysis = result["analysis"]
+    for index, symbol in enumerate(analysis["code"]["symbols"], 1):
+        symbol["name"] = f"Symbol-{index}"
+        symbol["path"] = f"File-{index}"
+    for index, item in enumerate(analysis["code"]["imports"], 1):
+        item["path"] = f"File-{index}"
+        item["imports"] = []
+    anonymize_paths(analysis["code"]["complexity"]["high_complexity_files"])
+    for index, system in enumerate(analysis["systems"], 1):
+        system["name"] = f"Module-{index}"
+        system["path"] = f"Module-{index}"
+        system["dependency_manifests"] = []
+    analysis["quality"]["coverage"]["evidence_files"] = []
+    analysis["quality"]["vulnerabilities"]["scanner_reports"] = []
+    analysis["quality"]["licenses"]["license_files"] = []
 
 
 def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
@@ -325,8 +375,8 @@ def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
     ]
     modules.sort(key=lambda item: item["file_count"], reverse=True)
 
-    return {
-        "schema_version": "1.0",
+    result = {
+        "schema_version": "1.1",
         "collector": "generic",
         "file_count": len(files),
         "language_count": len(language_files),
@@ -350,7 +400,13 @@ def collect(root: Path, report_name: str, privacy_mode: str) -> dict[str, Any]:
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
         "possible_modules": modules[:50],
         "git": collect_git(root, privacy_mode),
+        "_files": files,
     }
+    result["analysis"] = analyze_repository(root, result)
+    result.pop("_files")
+    if privacy_mode == "strict":
+        sanitize_strict_result(result)
+    return result
 
 
 def main() -> int:

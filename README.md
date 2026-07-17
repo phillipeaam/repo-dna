@@ -69,6 +69,10 @@ Repository
 | Collaboration | Contributors, co-authored commits, and files shared across authors. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
+| Quality and compliance | Estimated complexity, coverage evidence, vulnerability-scan status, and license evidence. |
+| Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
+| Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
+| Portfolio and CV | Approval-gated claims and X-Y-Z achievement drafts. |
 
 ---
 ## 📖 Documentation
@@ -76,6 +80,7 @@ Repository
 - [Bash Cheat Sheet](docs/bash-cheatsheet.md)
 - [Architecture](docs/architecture.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
+- [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)
 - [Contributing](CONTRIBUTING.md)
 ---
@@ -171,6 +176,18 @@ bash /path/to/repo-dna/dna-analysis.sh
 Use `bash ./dna-analysis.sh --help` from the RepoDNA checkout to list every
 option. Generated reports are written to a timestamped directory in the
 analyzed repository; start with `report/index.html`.
+
+To add personally confirmed portfolio context, copy
+`.repodna-portfolio.example.json`, edit the answers and approved claim IDs, then
+run:
+
+```bash
+bash ./dna-analysis.sh --portfolio-profile path/to/confirmations.json
+```
+
+Portfolio profiles are rejected in strict privacy mode because they may contain
+personal information. Without a profile, RepoDNA still creates a draft, but all
+personal attribution remains marked as requiring confirmation.
 
 ## Customizing Directory Exclusions
 
@@ -274,6 +291,10 @@ report/
 ├── systems.html
 ├── contribution.html
 ├── collaboration.html
+├── quality.html
+├── health.html
+├── narrative.html
+├── portfolio.html
 ├── risks.html
 ├── notion-evidence.html
 └── data/

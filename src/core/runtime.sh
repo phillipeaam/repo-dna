@@ -15,12 +15,12 @@ command_exists() {
 resolve_python_runtime() {
     local candidate
     if [[ -n "${REPO_DNA_PYTHON:-}" ]]; then
-        "$REPO_DNA_PYTHON" -c 'import sys' >/dev/null 2>&1 || return 1
+        "$REPO_DNA_PYTHON" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))' >/dev/null 2>&1 || return 1
         printf '%s' "$REPO_DNA_PYTHON"
         return 0
     fi
     for candidate in python3 python; do
-        if command_exists "$candidate" && "$candidate" -c 'import sys' >/dev/null 2>&1; then
+        if command_exists "$candidate" && "$candidate" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))' >/dev/null 2>&1; then
             command -v "$candidate"
             return 0
         fi

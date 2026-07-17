@@ -205,6 +205,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`report/\`: standardized HTML reports rendered from canonical JSON
 - \`report/index.html\`: navigation entry point for the HTML report set
 - \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
+- \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 
 ## Start here

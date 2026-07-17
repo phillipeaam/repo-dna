@@ -50,6 +50,7 @@ print_completion_summary() {
         echo "  $REPORT_DIR/index.html"
     fi
     printf '\nNotion guide:\n  %s/01_notion_evidence_guide.md\n' "$DISPLAY_SUMMARY_PATH"
+    printf '\nPortfolio draft:\n  %s/portfolio/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nAnalysis prompt:\n  %s/02_analysis_prompt.md\n\n' "$DISPLAY_SUMMARY_PATH"
     echo "Review confidential code, e-mails, URLs, credentials, and client names"
     echo "before sharing the generated package."

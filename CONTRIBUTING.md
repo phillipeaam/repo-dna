@@ -34,6 +34,12 @@ Every bug fix should include a regression test. New project detectors need
 priority and preferred-root cases. Privacy changes must cover standard and
 strict modes. Report changes must be driven from structured JSON fixtures.
 
+Heuristic analysis must publish its basis, confidence, and limitations. Unknown
+or unavailable evidence must use an explicit state such as `not_scanned` or
+`not_assessed`; it must never be represented as a zero-risk result. Changes to
+the health score require a model-version update and corresponding changes to
+`docs/health-score.md`.
+
 ## Pull requests
 
 Keep changes focused, explain observable behavior changes, and call out privacy

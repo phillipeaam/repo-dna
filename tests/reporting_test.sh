@@ -51,6 +51,33 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
       "hotspots": [{"path": "src/Core.cs", "commits": 5, "churn": 200}],
       "system_evolution": {"Data/Persistence": {"2026-01": 4}},
       "churn": {"lines_added": 1000, "lines_removed": 400, "total": 1400}
+    },
+    "analysis": {
+      "architecture": {
+        "languages_analyzed": ["C#"],
+        "signals": [],
+        "design_patterns": [{"name": "Repository", "matches": 3, "confidence": "medium", "basis": "symbol and naming heuristic"}]
+      },
+      "code": {
+        "symbol_count": 10,
+        "importing_file_count": 4,
+        "complexity": {"method": "estimated", "files_analyzed": 12, "average": 4.5, "maximum": 21, "high_complexity_files": []}
+      },
+      "systems": [{"name": "Data/Persistence", "confidence": "high", "file_count": 6, "symbol_count": 8, "import_references": 12, "languages": {"C#": 6}}],
+      "quality": {
+        "coverage": {"status": "not_detected", "line_coverage_percent": null},
+        "vulnerabilities": {"status": "not_scanned"},
+        "licenses": {"repository_license": "MIT", "dependency_license_status": "not_scanned"}
+      },
+      "health": {
+        "score": 72.5,
+        "grade": "B",
+        "assessment_coverage_percent": 95,
+        "version": "1.0",
+        "dimensions": [{"name": "Testing evidence", "score": 10, "maximum": 20, "status": "assessed", "evidence": "3 test files"}],
+        "limitations": ["Repository evidence is not product quality."]
+      },
+      "narrative_facts": [{"statement": "The repository contains 25 analyzed files.", "evidence": "#/file_count", "confidence": "high"}]
     }
   },
   "current_metrics": {
@@ -123,6 +150,15 @@ fi
 }
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
 "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
+"$PYTHON" "$SOURCE_ROOT/renderers/portfolio.py" "$TEST_ROOT/report.json" "$TEST_ROOT/portfolio/draft.json" "$TEST_ROOT/portfolio/index.html"
+cat > "$TEST_ROOT/confirmations.json" <<'JSON'
+{
+  "candidate_name": "Confirmed Developer",
+  "target_role": "Software Engineer",
+  "approved_claims": ["repository-fact-1"]
+}
+JSON
+"$PYTHON" "$SOURCE_ROOT/renderers/portfolio.py" "$TEST_ROOT/report.json" "$TEST_ROOT/portfolio/approved.json" "$TEST_ROOT/portfolio/approved.html" --confirmations "$TEST_ROOT/confirmations.json"
 
 for report_name in \
     index.html \
@@ -133,6 +169,10 @@ for report_name in \
     systems.html \
     contribution.html \
     collaboration.html \
+    quality.html \
+    health.html \
+    narrative.html \
+    portfolio.html \
     risks.html \
     notion-evidence.html; do
     [[ -s "$TEST_ROOT/report/$report_name" ]]
@@ -148,7 +188,7 @@ grep -q 'Analysis coverage and evidence' "$TEST_ROOT/report/executive-summary.ht
 grep -q 'Automatic project detection' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Detected profile: .NET' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Design pattern detection' "$TEST_ROOT/report/executive-summary.html"
-grep -q '3 C# design-pattern matches' "$TEST_ROOT/report/executive-summary.html"
+grep -q '1 pattern categories with 3 heuristic matches' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Portfolio and documentation support' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'File</th><th>Size</th><th>Lines' "$TEST_ROOT/report/project-overview.html"
 grep -q 'class="number">1,234' "$TEST_ROOT/report/project-overview.html"
@@ -161,6 +201,14 @@ grep -q 'change frequency, code churn' "$TEST_ROOT/report/contribution.html"
 grep -q 'Score</th><th>Commits</th><th>Churn</th><th>Lines</th><th>Authors</th><th>Days since change' "$TEST_ROOT/report/contribution.html"
 grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
+grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"
+grep -q 'Repository health' "$TEST_ROOT/report/health.html"
+grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"
+grep -q 'portfolio/index.html' "$TEST_ROOT/report/portfolio.html"
+grep -q 'confirmation_required' "$TEST_ROOT/portfolio/draft.json"
+grep -q 'Portfolio and CV evidence draft' "$TEST_ROOT/portfolio/index.html"
+grep -q '"approved_claim_count": 1' "$TEST_ROOT/portfolio/approved.json"
+grep -q 'Confirmed Developer' "$TEST_ROOT/portfolio/approved.json"
 grep -q 'Potential secret findings</th><td class="number">1' "$TEST_ROOT/report/risks.html" || {
     cat "$TEST_ROOT/report/risks.html" >&2
     exit 1
