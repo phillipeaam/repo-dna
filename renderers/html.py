@@ -246,6 +246,18 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         {1, 3, 4, 5, 6, 7, 9},
     ) if ownership_rows else '<p class="empty">Insufficient Git evidence to infer author-to-system activity.</p>'
     ownership_note = '<p class="note">This is approximate historical activity ownership, not proof of responsibility or authorship. Share of system activity compares author-file commit touches inside a system. Author focus shows how much of that author\'s system activity occurred there. Confidence reflects evidence volume; it is not confidence in personal or business ownership.</p>'
+    bus_factor = analysis.get("bus_factor_by_system", {})
+    bus_factor_rows = [
+        [item["system"], item["bus_factor"], item["risk"], item["authors_with_activity"], item["total_commit_touches"],
+         f"{item['covered_activity_percent']:.2f}%", ", ".join(author["author"] for author in item["critical_authors"]),
+         item["confidence"], item["system_confidence"]]
+        for item in bus_factor.get("systems", [])
+    ]
+    bus_factor_table = data_table(
+        ["System", "Bus factor", "Concentration", "Active authors", "Commit touches", "Covered activity", "Critical authors", "Evidence confidence", "System confidence"],
+        bus_factor_rows, {1, 3, 4, 5},
+    ) if bus_factor_rows else '<p class="empty">Bus factor requires repository-wide Git activity across detected systems. It is unavailable with an author filter.</p>'
+    bus_factor_note = '<p class="note">Estimated bus factor is the minimum number of authors whose cumulative file-touch activity reaches 75% for a detected system. It measures historical concentration, not exclusive knowledge, replaceability, formal ownership, or team performance.</p>'
     technical_impact = git_data.get("technical_impact", {})
     impact_rows = [
         [item["date"][:10], item["commit"], item["author"], item["subject"], ", ".join(item.get("systems", [])),
@@ -504,7 +516,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ["Gameplay and application systems", "Completed", f"{len(structured_systems)} symbol/dependency-based system candidates"],
         ["Project metrics", "Completed", f"{generic.get('file_count', 0)} files across {len(generic.get('languages', []))} languages"],
         ["Git contribution analysis", "Completed", f"{history.get('total_commits', 0)} commits; {generic.get('git', {}).get('churn', {}).get('total', 0)} lines of churn"],
-        ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals"],
+        ["Collaboration insights", "Completed", f"{collaboration.get('contributors', 0)} contributors; {len(git_data.get('shared_files', []))} shared-file signals; {bus_factor.get('summary', {}).get('systems_assessed', 0)} systems with bus-factor estimates"],
         ["Design pattern detection", design_status, design_evidence],
         ["Module and dependency graphs", "Completed", f"{graph_summary.get('internal_edges', 0)} internal edges; {graph_summary.get('dependency_nodes', 0)} dependency nodes; {graph_summary.get('cycles', 0)} module cycles"],
         ["Architectural boundaries", "Completed", f"{len(entrypoint_rows)} entrypoints; {len(violation_rows)} inferred boundary violations; {len(architectural_cycle_rows)} assessed cycles"],
@@ -521,7 +533,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("systems.html", "Systems", systems_body),
         ("graphs.html", "Module and dependency graphs", graphs_body),
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Personal achievement candidates</h3>" + achievement_table + achievement_note + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
-        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
+        ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Bus factor by system</h3>" + bus_factor_table + bus_factor_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),
         ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),

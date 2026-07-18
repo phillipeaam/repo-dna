@@ -28,3 +28,6 @@ still calculated within the selected author's detected-system activity.
 Renames and copies use Git's `--find-renames` and `--find-copies` processing, but
 historical ambiguity, squashed commits, shared accounts, generated code, and
 missing history can still affect the result.
+
+The repository-wide relationships also feed the separate
+[bus factor by system](bus-factor.md) estimate.

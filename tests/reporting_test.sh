@@ -85,6 +85,12 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
           {"author": "Developer Two", "system": "Data/Persistence", "rank_in_system": 2, "commits": 6, "churn": 300, "files_touched": 3, "system_activity_share_percent": 20.0, "author_focus_percent": 35.0, "confidence": "medium", "confidence_score": 63, "system_confidence": "high"}
         ]
       },
+      "bus_factor_by_system": {
+        "status": "assessed", "threshold_percent": 75.0,
+        "summary": {"systems_assessed": 1, "critical_systems": 1, "minimum_bus_factor": 1},
+        "systems": [{"system": "Data/Persistence", "bus_factor": 1, "risk": "high_concentration", "authors_with_activity": 2, "total_commit_touches": 30, "covered_activity_percent": 80.0, "critical_authors": [{"author": "Developer One", "activity_share_percent": 80.0, "commits": 24, "files_touched": 8}], "confidence": "high", "system_confidence": "high"}],
+        "method": "75% activity threshold", "limitations": []
+      },
       "personal_achievement_candidates": {
         "status": "candidates_generated", "author": "Developer One", "summary": {"candidates": 1, "high_confidence": 1, "medium_confidence": 0, "low_confidence": 0},
         "candidates": [{"id": "system-data-persistence", "category": "system_contribution", "title": "Contribution to Data/Persistence", "draft_statement": "Contributed historical changes to Data/Persistence across 24 commit touches and 8 files.", "factual_basis": ["60% author focus"], "metrics": {"commit_touches": 24, "files_touched": 8, "churn": 1800, "author_focus_percent": 60.0}, "evidence": ["#/analysis/author_system_ownership"], "confidence": "high", "confirmation_required": true, "required_confirmations": ["Confirm actual responsibility.", "Describe the outcome."], "xyz_inputs": {"accomplished_x": "requires confirmation", "measured_by_y": {"commit_touches": 24}, "by_doing_z": "requires confirmation"}}]
@@ -325,6 +331,9 @@ grep -q 'Repository facts' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'What was your formal mission?' "$TEST_ROOT/report/notion-evidence.html"
 grep -q 'paginated contributor directory' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Author and system activity ownership' "$TEST_ROOT/report/collaboration.html"
+grep -q 'Bus factor by system' "$TEST_ROOT/report/collaboration.html"
+grep -q 'high_concentration' "$TEST_ROOT/report/collaboration.html"
+grep -q 'Developer One' "$TEST_ROOT/report/collaboration.html"
 grep -q '80.00%' "$TEST_ROOT/report/collaboration.html"
 grep -q 'historical activity ownership' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"

@@ -15,6 +15,7 @@ from graphs import build_graphs
 from architecture import analyze_architecture
 from quality import import_quality_results
 from author_system_ownership import analyze_author_system_ownership
+from bus_factor import analyze_bus_factor
 from achievement_candidates import generate_achievement_candidates
 
 
@@ -341,6 +342,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
     systems = identify_systems(generic["_files"], code, generic["dependencies"])
     author_system_ownership = analyze_author_system_ownership(systems, generic["git"])
+    bus_factor_by_system = analyze_bus_factor(author_system_ownership)
     achievement_candidates = generate_achievement_candidates(
         generic["git"].get("author_filter", ""),
         generic["git"].get("technical_impact", {}),
@@ -375,6 +377,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         },
         "systems": systems,
         "author_system_ownership": author_system_ownership,
+        "bus_factor_by_system": bus_factor_by_system,
         "personal_achievement_candidates": achievement_candidates,
         "frameworks": frameworks,
         "graphs": graphs,

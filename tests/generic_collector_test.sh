@@ -97,6 +97,9 @@ assert activity_ownership["status"] == "assessed"
 assert activity_ownership["summary"]["authors"] == 2
 assert any(item["author"] == "Canonical Developer" and item["system"] == "src" for item in activity_ownership["relationships"])
 assert all(item["system_activity_share_percent"] is not None for item in activity_ownership["relationships"])
+bus_factor = analysis["bus_factor_by_system"]
+assert bus_factor["status"] == "assessed"
+assert bus_factor["summary"]["systems_assessed"] >= 1
 assert analysis["quality"]["coverage"]["status"] == "not_found"
 assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
 assert analysis["health"]["version"] == "1.1"
@@ -122,10 +125,11 @@ assert data["git"]["most_changed_files"] == [{"path": "src/module/feature.py", "
 ownership = data["analysis"]["author_system_ownership"]
 assert {item["author"] for item in ownership["relationships"]} == {"Focused Developer"}
 assert all(item["system_activity_share_percent"] is None for item in ownership["relationships"])
+assert data["analysis"]["bus_factor_by_system"]["status"] == "unavailable_in_author_scope"
 achievements = data["analysis"]["personal_achievement_candidates"]
 assert achievements["status"] == "candidates_generated"
 assert achievements["author"] == "Focused Developer"
-assert any(item["category"] == "system_contribution" for item in achievements["candidates"])
+assert any(item["category"] == "system_contribution" for item in achievements["candidates"]), achievements
 assert all(item["confirmation_required"] for item in achievements["candidates"])
 PY
 
@@ -148,6 +152,8 @@ assert all(item["commit"].startswith("Contribution-") for item in data["git"]["t
 ownership = data["analysis"]["author_system_ownership"]
 assert all(item["author"].startswith("Contributor-") for item in ownership["relationships"])
 assert all(item["system"].startswith("Module-") for item in ownership["relationships"])
+assert all(item["system"].startswith("Module-") for item in data["analysis"]["bus_factor_by_system"]["systems"])
+assert all(author["author"].startswith("Contributor-") for item in data["analysis"]["bus_factor_by_system"]["systems"] for author in item["critical_authors"])
 assert "Canonical Developer" not in text
 PY
 

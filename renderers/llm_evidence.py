@@ -184,6 +184,14 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             {key: relationship.get(key) for key in ("commits", "churn", "files_touched", "system_activity_share_percent", "author_focus_percent")},
             ["Activity ownership does not prove responsibility or authorship."], True,
         ))
+    for index, system in enumerate(analysis.get("bus_factor_by_system", {}).get("systems", []), 1):
+        items.append(evidence(
+            f"bus-factor-{index}", "collaboration", "inference",
+            f"{system['system']} has an estimated activity bus factor of {system['bus_factor']} at the 75% cumulative activity threshold.",
+            system.get("confidence", "low"), ["#/generic_analysis/analysis/bus_factor_by_system"],
+            {key: system.get(key) for key in ("bus_factor", "risk", "authors_with_activity", "total_commit_touches", "covered_activity_percent", "system_confidence")},
+            ["This is historical activity concentration, not proof of exclusive knowledge, replaceability, or formal ownership."], True,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

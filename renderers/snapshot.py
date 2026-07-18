@@ -86,6 +86,7 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
             "hotspots": git_data.get("hotspots", [])[:50],
             "technical_impact_summary": git_data.get("technical_impact", {}).get("summary", {}),
             "author_system_ownership_summary": analysis.get("author_system_ownership", {}).get("summary", {}),
+            "bus_factor_summary": analysis.get("bus_factor_by_system", {}).get("summary", {}),
         },
         "risks": data.get("risks", {}),
         "provenance": {

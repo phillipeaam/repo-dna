@@ -25,6 +25,7 @@ One command creates a timestamped analysis package containing:
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - ownership classification with confidence and evidence;
 - author-to-system activity ownership with percentages, ranking, and confidence;
+- estimated bus factor and activity concentration for each detected system;
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - validated point-in-time analysis snapshots with optional Git persistence;
@@ -73,7 +74,7 @@ Repository
 | Technologies | Languages, line counts, dependency declarations, manifests, branches, and tags. |
 | Systems | Confirmed specialized signals or systems inferred from historical paths for review. |
 | Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
-| Collaboration | Contributors, co-authored commits, and files shared across authors. |
+| Collaboration | Contributors, co-authored commits, shared files, author-system activity, and bus factor by system. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
@@ -136,6 +137,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Module and dependency graphs](docs/dependency-graphs.md)
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)
+- [Bus factor by system](docs/bus-factor.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)

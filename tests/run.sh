@@ -10,6 +10,7 @@ tests=(
     exclusions_test.sh
     ownership_test.sh
     author_system_ownership_test.sh
+    bus_factor_test.sh
     technical_impact_test.sh
     achievement_candidates_test.sh
     git_history_test.sh
