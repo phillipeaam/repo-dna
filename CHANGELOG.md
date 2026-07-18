@@ -7,6 +7,10 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Expanded generic technology detection across runtimes, package managers,
+  dependency-manifest families, build tools, CI/CD, tests, linting,
+  configuration, documentation, and containerization.
+
 - Made `report/data/report.json` the sole public analysis source, added shared
   `canonical_metrics`, and removed the exported generic collector staging file.
 

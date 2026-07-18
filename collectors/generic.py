@@ -58,7 +58,26 @@ CONFIG_NAMES = {
     "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts",
     "dockerfile", "docker-compose.yml", "docker-compose.yaml", "makefile", "cmakelists.txt",
     ".editorconfig", ".npmrc", ".yarnrc", "nuget.config", "global.json",
+    ".shellcheckrc", "shellcheckrc", "tox.ini", "pytest.ini", "ruff.toml",
 }
+
+DEPENDENCY_MANIFEST_NAMES = {
+    "package.json", "pyproject.toml", "setup.py", "cargo.toml", "go.mod",
+    "composer.json", "pubspec.yaml", "pom.xml", "manifest.json",
+    "build.gradle", "build.gradle.kts", "package.swift",
+}
+
+
+def is_requirements_file(name: str) -> bool:
+    return bool(re.fullmatch(r"requirements(?:-[a-z0-9_.-]+)?\.txt", name, re.I))
+
+
+def is_dependency_manifest(name: str, extension: str) -> bool:
+    return name in DEPENDENCY_MANIFEST_NAMES or is_requirements_file(name) or extension == ".csproj"
+
+
+def is_configuration_file(name: str, extension: str) -> bool:
+    return name in CONFIG_NAMES or is_requirements_file(name) or extension in {".csproj", ".sln", ".props", ".targets"}
 
 
 def git(root: Path, *args: str) -> str:
@@ -192,7 +211,7 @@ def dependency_names(path: Path) -> list[str]:
                 if isinstance(value, dict):
                     names.update(value)
             return sorted(names)[:200]
-        if name == "requirements.txt":
+        if is_requirements_file(name):
             rows = []
             for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
                 line = line.strip()
@@ -205,7 +224,13 @@ def dependency_names(path: Path) -> list[str]:
             if name == "pyproject.toml":
                 for value in data.get("project", {}).get("dependencies", []):
                     names.add(re.split(r"[<>=!~\[ ;]", value, maxsplit=1)[0])
+                for group in data.get("project", {}).get("optional-dependencies", {}).values():
+                    for value in group:
+                        names.add(re.split(r"[<>=!~\[ ;]", value, maxsplit=1)[0])
                 names.update(data.get("tool", {}).get("poetry", {}).get("dependencies", {}))
+                names.update(data.get("tool", {}).get("poetry", {}).get("dev-dependencies", {}))
+                for group in data.get("tool", {}).get("poetry", {}).get("group", {}).values():
+                    names.update(group.get("dependencies", {}))
             else:
                 names.update(data.get("dependencies", {}))
                 names.update(data.get("dev-dependencies", {}))
@@ -221,9 +246,100 @@ def dependency_names(path: Path) -> list[str]:
             return sorted(set(re.findall(r"^\s{2}([a-zA-Z0-9_-]+):", path.read_text(encoding="utf-8", errors="replace"), re.M)))[:200]
         if name in {"build.gradle", "build.gradle.kts"}:
             return sorted(set(re.findall(r"(?:implementation|api|compileOnly|runtimeOnly|testImplementation)\s*\(?[\"\047]([^:\"\047]+:[^:\"\047]+)", path.read_text(encoding="utf-8", errors="replace"))))[:200]
+        if name == "setup.py":
+            text = path.read_text(encoding="utf-8", errors="replace")
+            blocks = re.findall(r"(?:install_requires|tests_require)\s*=\s*\[([^]]*)]", text, re.S)
+            return sorted(set(re.findall(r"[\"']([A-Za-z0-9_.-]+)(?:\[[^]]+])?(?:[<>=!~].*)?[\"']", "\n".join(blocks))))[:200]
+        if name == "package.swift":
+            text = path.read_text(encoding="utf-8", errors="replace")
+            explicit = re.findall(r"\.package\s*\([^)]*name:\s*[\"']([^\"']+)", text)
+            urls = [value.removesuffix(".git") for value in re.findall(r"\.package\s*\([^)]*url:\s*[\"'][^\"']*/([^/\"']+)[\"']", text)]
+            return sorted(set(explicit + urls))[:200]
     except (OSError, ValueError, TypeError):
         return []
     return []
+
+
+def technology_inventory(
+    root: Path, languages: list[dict[str, Any]], manifests: list[dict[str, Any]], files: list[dict[str, Any]],
+    configs: list[str], docs: list[str], tests: list[str], ci_cd: list[str], docker: list[str], frameworks: list[dict[str, Any]],
+) -> dict[str, Any]:
+    paths = {item["path"].lower() for item in files}
+    names = {Path(path).name.lower() for path in paths}
+    dependencies = {name.casefold() for manifest in manifests for name in manifest.get("dependencies", [])}
+    language_names = {item["name"] for item in languages}
+    signal_text = "\n".join(
+        (root / path).read_text(encoding="utf-8", errors="replace")
+        for path in sorted(set(configs + ci_cd))
+        if (root / path).is_file() and (root / path).stat().st_size <= 1_000_000
+    ).casefold()
+
+    runtimes = set()
+    if "Python" in language_names or any(is_requirements_file(name) or name in {"pyproject.toml", "setup.py"} for name in names): runtimes.add("Python")
+    if language_names & {"JavaScript", "TypeScript"} or "package.json" in names: runtimes.add("Node.js")
+    if language_names & {"Java", "Kotlin"}: runtimes.add("JVM")
+    if "C#" in language_names: runtimes.add(".NET")
+    if "Dart" in language_names or "pubspec.yaml" in names: runtimes.add("Dart")
+    if "Swift" in language_names or "package.swift" in names: runtimes.add("Swift")
+    if "Shell" in language_names: runtimes.add("Bash/Shell")
+
+    package_managers = set()
+    marker_to_manager = {
+        "package.json": "npm-compatible", "pyproject.toml": "Python packaging", "setup.py": "Python packaging",
+        "cargo.toml": "Cargo", "go.mod": "Go modules", "composer.json": "Composer", "pubspec.yaml": "pub",
+        "pom.xml": "Maven", "build.gradle": "Gradle", "build.gradle.kts": "Gradle", "package.swift": "SwiftPM",
+    }
+    for name, manager in marker_to_manager.items():
+        if name in names: package_managers.add(manager)
+    if any(is_requirements_file(name) for name in names): package_managers.add("pip")
+    if any(path.endswith(".csproj") for path in paths): package_managers.add("NuGet")
+    if "yarn.lock" in names: package_managers.add("Yarn")
+    if "pnpm-lock.yaml" in names: package_managers.add("pnpm")
+    if "package-lock.json" in names: package_managers.add("npm")
+    if "bun.lockb" in names or "bun.lock" in names: package_managers.add("Bun")
+
+    build_tools = set()
+    build_markers = {"makefile":"Make", "cmakelists.txt":"CMake", "pom.xml":"Maven", "build.gradle":"Gradle", "build.gradle.kts":"Gradle", "package.swift":"SwiftPM", "cargo.toml":"Cargo"}
+    for name, tool in build_markers.items():
+        if name in names: build_tools.add(tool)
+    if any(path.endswith((".sln", ".csproj")) for path in paths): build_tools.add("MSBuild/.NET SDK")
+    if "package.json" in names: build_tools.add("package.json scripts")
+    if names & {"pyproject.toml", "setup.py"}: build_tools.add("Python build backend")
+
+    test_tools = set()
+    lint_tools = set()
+    for dependency, tool in {"pytest":"pytest", "unittest":"unittest", "jest":"Jest", "vitest":"Vitest", "mocha":"Mocha", "xunit":"xUnit", "nunit":"NUnit", "junit":"JUnit"}.items():
+        if dependency in dependencies: test_tools.add(tool)
+    for pattern, tool in {r"\bpytest\b":"pytest", r"\bbats\b":"Bats", r"\bjest\b":"Jest", r"\bvitest\b":"Vitest", r"\bdotnet test\b":"dotnet test"}.items():
+        if re.search(pattern, signal_text): test_tools.add(tool)
+    if any(name.endswith(".bats") for name in names): test_tools.add("Bats")
+    if tests and not test_tools: test_tools.add("Repository test files")
+    for dependency, tool in {"ruff":"Ruff", "flake8":"Flake8", "pylint":"Pylint", "eslint":"ESLint", "prettier":"Prettier", "mypy":"mypy", "shellcheck":"ShellCheck"}.items():
+        if dependency in dependencies: lint_tools.add(tool)
+    if names & {".shellcheckrc", "shellcheckrc"}: lint_tools.add("ShellCheck")
+    if names & {"ruff.toml"} or "ruff" in dependencies: lint_tools.add("Ruff")
+    for pattern, tool in {r"\bshellcheck\b":"ShellCheck", r"\bshfmt\b":"shfmt", r"\bruff\b":"Ruff", r"\beslint\b":"ESLint", r"\bprettier\b":"Prettier"}.items():
+        if re.search(pattern, signal_text): lint_tools.add(tool)
+
+    ci_tools = set()
+    if any(path.startswith(".github/workflows/") for path in paths): ci_tools.add("GitHub Actions")
+    if any(path in {".gitlab-ci.yml", ".gitlab-ci.yaml"} or path.startswith(".gitlab/") for path in paths): ci_tools.add("GitLab CI")
+    if "jenkinsfile" in names: ci_tools.add("Jenkins")
+    if any(name.startswith("azure-pipelines.") for name in names): ci_tools.add("Azure Pipelines")
+
+    containers = set()
+    if any(name.startswith("dockerfile") for name in names): containers.add("Docker")
+    if any(name in {"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"} for name in names): containers.add("Docker Compose")
+
+    categories = {
+        "languages": sorted(language_names), "runtimes": sorted(runtimes), "package_managers": sorted(package_managers),
+        "declared_dependencies": sorted(dependencies),
+        "frameworks": sorted(item["name"] for item in frameworks), "build_tools": sorted(build_tools),
+        "ci_cd": sorted(ci_tools), "test_tools": sorted(test_tools), "lint_tools": sorted(lint_tools),
+        "configuration_files": sorted(configs), "documentation_files": sorted(docs), "containerization": sorted(containers),
+    }
+    technologies = sorted({value for key, values in categories.items() if key not in {"configuration_files", "documentation_files"} for value in values})
+    return {**categories, "technologies": technologies, "technology_count": len(technologies)}
 
 
 def author_scope_args(author_filter: str, name_aliases: dict[str, str], email_aliases: dict[str, str]) -> list[str]:
@@ -383,6 +499,13 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     result["test_files"] = []
     result["ci_cd_files"] = []
     result["docker_files"] = []
+    inventory = result.get("technology_inventory", {})
+    inventory["configuration_files"] = []
+    inventory["documentation_files"] = []
+    private_dependencies = set(inventory.get("declared_dependencies", []))
+    inventory["declared_dependencies"] = []
+    inventory["technologies"] = [item for item in inventory.get("technologies", []) if item not in private_dependencies]
+    inventory["technology_count"] = len(inventory["technologies"])
     anonymize_paths(result["largest_files"])
     anonymize_paths(result["top_directories"], "Directory")
     anonymize_paths(result["possible_modules"], "Module")
@@ -637,7 +760,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
 
             lower_path = relative.lower()
             lower_name = file_name.lower()
-            if lower_name in CONFIG_NAMES or extension in {".csproj", ".sln", ".props", ".targets"}:
+            if is_configuration_file(lower_name, extension):
                 configs.append(relative)
             if lower_name.startswith(("readme", "changelog", "contributing", "architecture")) or extension in {".md", ".rst", ".adoc"}:
                 docs.append(relative)
@@ -647,7 +770,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
                 ci_cd.append(relative)
             if lower_name.startswith("dockerfile") or lower_name in {"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}:
                 docker.append(relative)
-            if lower_name in {"package.json", "pyproject.toml", "requirements.txt", "cargo.toml", "go.mod", "composer.json", "pubspec.yaml", "pom.xml", "manifest.json", "build.gradle", "build.gradle.kts"} or extension == ".csproj":
+            if is_dependency_manifest(lower_name, extension):
                 names = dependency_names(path)
                 manifests.append({"path": relative, "dependency_count": len(names), "dependencies": names})
 
@@ -682,11 +805,16 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
         "ci_cd_files": sorted(ci_cd)[:100],
         "docker_files": sorted(docker)[:100],
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
+        "technology_inventory": {},
         "possible_modules": modules[:50],
         "git": collect_git(root, privacy_mode, author_filter),
         "_files": files,
     }
     result["analysis"] = analyze_repository(root, result, forge_data)
+    result["technology_inventory"] = technology_inventory(
+        root, result["languages"], manifests, files, configs, docs, tests, ci_cd, docker,
+        result["analysis"].get("frameworks", {}).get("detected", []),
+    )
     result.pop("_files")
     result["git"].pop("_file_author_activity", None)
     if privacy_mode == "strict":

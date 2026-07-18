@@ -22,10 +22,9 @@ METRIC_KEYS = (
 def canonical_metrics(report: dict[str, Any]) -> dict[str, int]:
     generic = report.get("generic_analysis", {})
     analysis = generic.get("analysis", {})
-    frameworks = analysis.get("frameworks", {}).get("detected", [])
-    languages = generic.get("languages", [])
+    inventory = generic.get("technology_inventory", {})
     return {
-        "technology_count": len(languages) + len(frameworks),
+        "technology_count": int(inventory.get("technology_count", 0) or 0),
         "dependency_count": int(generic.get("dependencies", {}).get("total", 0) or 0),
         "system_count": len(analysis.get("systems", [])),
         "configuration_file_count": int(generic.get("configuration_file_count", 0) or 0),

@@ -515,6 +515,13 @@ is the fallback for unknown stacks. The sibling `canonical_metrics` object is
 the official source for technology, dependency, system, configuration-file, and
 test-file counts used by every derived output.
 
+Generic technology detection also classifies runtimes, package managers,
+declared dependencies, frameworks, build tools, CI/CD providers, test and lint
+tools, configuration and documentation files, and containerization. Python
+requirement families such as `requirements-reporting.txt` and
+`requirements-ast.txt` are treated as dependency manifests, not only the exact
+name `requirements.txt`.
+
 ## Internal architecture
 
 `dna-analysis.sh` remains the backwards-compatible entrypoint and orchestrator.

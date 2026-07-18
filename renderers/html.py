@@ -311,6 +311,21 @@ def render(data: dict[str, Any], output_path: Path) -> None:
             ["Manifest", "Declarations"], manifest_rows, {1}
         )
     technology_body += "<h3>Languages and lines</h3>" + language_table
+    tool_inventory = generic.get("technology_inventory", {})
+    technology_body += "<h3>Runtime and tooling</h3>" + data_table(
+        ["Category", "Detected"],
+        [
+            ["Runtimes", ", ".join(tool_inventory.get("runtimes", [])) or "None detected"],
+            ["Package managers", ", ".join(tool_inventory.get("package_managers", [])) or "None detected"],
+            ["Declared dependencies", ", ".join(tool_inventory.get("declared_dependencies", [])) or "None detected"],
+            ["Frameworks", ", ".join(tool_inventory.get("frameworks", [])) or "None detected"],
+            ["Build tools", ", ".join(tool_inventory.get("build_tools", [])) or "None detected"],
+            ["CI/CD", ", ".join(tool_inventory.get("ci_cd", [])) or "None detected"],
+            ["Test tools", ", ".join(tool_inventory.get("test_tools", [])) or "None detected"],
+            ["Lint tools", ", ".join(tool_inventory.get("lint_tools", [])) or "None detected"],
+            ["Containerization", ", ".join(tool_inventory.get("containerization", [])) or "None detected"],
+        ],
+    )
     technology_body += "<h3>Repository references</h3>" + reference_table
 
     pattern_rows = [

@@ -8,6 +8,7 @@ trap 'rm -rf "$TEST_ROOT" 2>/dev/null || true' EXIT
 
 mkdir -p "$TEST_ROOT/src/module" "$TEST_ROOT/src/data" "$TEST_ROOT/tests" "$TEST_ROOT/docs" "$TEST_ROOT/.github/workflows"
 printf '%s\n' 'print("hello")' > "$TEST_ROOT/src/main.py"
+printf '%s\n' '#!/usr/bin/env bash' 'echo hello' > "$TEST_ROOT/src/analyze.sh"
 printf '%s\n' \
     'from collections import defaultdict' \
     'class FeatureRepository:' \
@@ -21,6 +22,9 @@ printf '%s\n' 'class DataRepository:' '    pass' > "$TEST_ROOT/src/data/reposito
 printf '%s\n' '# Sample project' > "$TEST_ROOT/README.md"
 printf '%s\n' '# Repository health score' > "$TEST_ROOT/docs/health-score.md"
 printf '%s\n' 'requests==2.32.0' > "$TEST_ROOT/requirements.txt"
+printf '%s\n' 'matplotlib==3.10.0' 'jsonschema==4.25.0' > "$TEST_ROOT/requirements-reporting.txt"
+printf '%s\n' 'tree-sitter==0.25.0' > "$TEST_ROOT/requirements-ast.txt"
+printf '%s\n' 'shell=bash' > "$TEST_ROOT/.shellcheckrc"
 printf '%s\n' 'FROM python:3.13-slim' > "$TEST_ROOT/Dockerfile"
 printf '%s\n' 'name: CI' 'on: [push]' > "$TEST_ROOT/.github/workflows/ci.yml"
 printf '%s\n' \
@@ -61,11 +65,26 @@ data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 assert data["file_count"] >= 7
 assert any(item["name"] == "Python" and item["lines"] >= 5 for item in data["languages"])
 assert "requirements.txt" in data["configuration_files"], data["configuration_files"]
+assert "requirements-reporting.txt" in data["configuration_files"]
+assert "requirements-ast.txt" in data["configuration_files"]
 assert "README.md" in data["documentation_files"]
 assert "tests/test_feature.py" in data["test_files"]
 assert ".github/workflows/ci.yml" in data["ci_cd_files"]
 assert "Dockerfile" in data["docker_files"]
-assert data["dependencies"]["total"] == 1
+assert data["dependencies"]["total"] == 4
+manifests = {item["path"]: item for item in data["dependencies"]["manifests"]}
+assert manifests["requirements-reporting.txt"]["dependency_count"] == 2
+assert manifests["requirements-ast.txt"]["dependencies"] == ["tree-sitter"]
+inventory = data["technology_inventory"]
+assert {"Python", "Shell"} <= set(inventory["languages"])
+assert "Python" in inventory["runtimes"]
+assert "Bash/Shell" in inventory["runtimes"]
+assert {"pip", "Python packaging"} & set(inventory["package_managers"])
+assert "GitHub Actions" in inventory["ci_cd"]
+assert "ShellCheck" in inventory["lint_tools"]
+assert "Docker" in inventory["containerization"]
+assert {"matplotlib", "jsonschema", "tree-sitter", "requests"} <= set(inventory["declared_dependencies"])
+assert inventory["technology_count"] == len(inventory["technologies"])
 assert data["git"]["contributors_count"] == 2
 assert data["git"]["contributors"][0] == {"name": "Canonical Developer", "commits": 2}
 assert data["git"]["author_aliases_configured"] >= 3
