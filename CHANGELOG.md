@@ -1,5 +1,8 @@
 # Changelog
 
+- Defined required, recommended, and optional dependency tiers; added a
+  dependency-free partial-report path and actionable optional-feature warnings.
+
 - Added the user-local `install.sh` installer, repeatable update flow, installed
   command contract, and single-source `repodna --version` behavior.
 

@@ -287,16 +287,21 @@ RepoDNA can be used for:
 
 ## Requirements
 
-RepoDNA requires:
+RepoDNA works in dependency layers:
 
-- Git;
-- Bash 4.3 or newer (a current Git Bash on Windows);
-- Python 3.11 or newer for generic collection and HTML/Notion report rendering;
-- the packages in `requirements-reporting.txt` for required JSON Schema
-  validation and optional commit-history charts;
-- the packages in `requirements-ast.txt` for JavaScript, TypeScript, C#, Java,
+- **Required:** Git, Bash 4.3+ (a current Git Bash on Windows), and the basic
+  Unix tools `awk`, `find`, `grep`, `sed`, and `sort`;
+- **Recommended:** Python 3.11+ and `requirements-reporting.txt` for the
+  canonical model, HTML dashboards, JSON Schema validation, and Matplotlib
+  charts;
+- **Optional:** the packages in `requirements-ast.txt` for JavaScript, TypeScript, C#, Java,
   Kotlin, Dart, Go, and Rust
-  syntax-tree analysis (optional; heuristics remain available without them).
+  syntax-tree analysis; Graphviz; external coverage and scanner tools; and
+  ecosystem-specific analyzers.
+
+Without Python, RepoDNA produces a basic inventory, Git and privacy reports,
+partial HTML/JSON, and an archive, then returns exit code `5`. Missing optional
+tools only skips their corresponding feature.
 
 Check the installation with:
 

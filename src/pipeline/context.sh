@@ -13,8 +13,17 @@ fi
 
 # Resolve Python once so collectors, renderers, and charts use the same runtime.
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
-[[ -n "$STRUCTURED_PYTHON" ]] ||
-    die "Python 3.11 or newer is required to generate the standardized reports. Install a compatible runtime or set REPO_DNA_PYTHON." 3
+PARTIAL_ANALYSIS=false
+if [[ -n "$STRUCTURED_PYTHON" ]] && ! "$STRUCTURED_PYTHON" -c 'import jsonschema' >/dev/null 2>&1; then
+    printf '%s\n' 'Warning: the recommended JSON Schema module was not found.' >&2
+    printf '%s\n' "  Install with: $STRUCTURED_PYTHON -m pip install -r $SCRIPT_DIR/requirements-reporting.txt" >&2
+    STRUCTURED_PYTHON=''
+fi
+if [[ -z "$STRUCTURED_PYTHON" ]]; then
+    PARTIAL_ANALYSIS=true
+    printf '%s\n' 'Warning: the recommended Python reporting runtime is unavailable. Structured analysis will be skipped.' >&2
+    printf '%s\n' '  Install Python 3.11+ and requirements-reporting.txt, or set REPO_DNA_PYTHON.' >&2
+fi
 
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||

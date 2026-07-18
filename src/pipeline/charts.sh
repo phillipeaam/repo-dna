@@ -14,9 +14,11 @@ if ((GIT_HISTORY[total_commits] > 0)) && [[ "$PRIVACY_MODE" != strict ]]; then
     else
         # Explain why charts were skipped.
         if [[ -z "$STRUCTURED_PYTHON" ]]; then
-            echo "Optional charts skipped because no executable Python runtime was found."
+            echo "Warning: Python 3.11+ was not found. Graph generation was skipped."
+            echo "  Install Python and run: python -m pip install matplotlib"
         else
-            echo "Optional charts skipped because matplotlib is unavailable."
+            echo "Warning: Matplotlib was not found. Graph generation was skipped."
+            echo "  Install with: $STRUCTURED_PYTHON -m pip install matplotlib"
         fi
     fi
 fi

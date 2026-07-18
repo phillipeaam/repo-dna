@@ -49,6 +49,11 @@ print_completion_summary() {
     else
         echo "  $REPORT_DIR/index.html"
     fi
+    if [[ "${PARTIAL_ANALYSIS:-false}" == true ]]; then
+        printf '\nStatus: partial analysis (recommended Python reporting runtime unavailable).\n'
+        echo "================================================================"
+        return 0
+    fi
     printf '\nNotion guide:\n  %s/01_notion_evidence_guide.md\n' "$DISPLAY_SUMMARY_PATH"
     printf '\nPortfolio draft:\n  %s/portfolio/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nAnalysis snapshot:\n  %s/snapshots/%s\n' "$DISPLAY_OUTPUT_PATH" "$SNAPSHOT_NAME"

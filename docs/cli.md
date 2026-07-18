@@ -27,6 +27,9 @@ Exit codes are stable:
 | 4 | Privacy/security block; report remains available but archive is blocked |
 | 5 | Partial analysis |
 
-`doctor` checks Git, Bash, Python, optional Python modules, ShellCheck,
+`doctor` checks required Git/Bash/Unix tools, recommended Python/reporting
+modules, optional Tree-sitter, ShellCheck,
 Graphviz, archive backends, temporary-directory writes, current-directory
 permissions, locale, UTF-8 signals, and Bash compatibility before a long run.
+Missing recommended dependencies produce a partial result (exit `5`); missing
+optional dependencies only skip the feature that uses them.

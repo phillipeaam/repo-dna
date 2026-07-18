@@ -39,6 +39,8 @@ source "$SCRIPT_DIR/src/core/privacy.sh"
 source "$SCRIPT_DIR/src/core/archive.sh"
 # shellcheck source=src/core/git.sh
 source "$SCRIPT_DIR/src/core/git.sh"
+# shellcheck source=src/reports/basic.sh
+source "$SCRIPT_DIR/src/reports/basic.sh"
 # shellcheck source=src/analyzers/unity.sh
 source "$SCRIPT_DIR/src/analyzers/unity.sh"
 # shellcheck source=src/git/history-export.sh
@@ -100,3 +102,4 @@ write_structured_reports
 [[ "$NO_GRAPHS" == true ]] || create_optional_charts
 run_security_and_archive
 [[ "${PRIVACY_SCAN_FAILED:-false}" != true ]] || exit 4
+[[ "${PARTIAL_ANALYSIS:-false}" != true ]] || exit 5

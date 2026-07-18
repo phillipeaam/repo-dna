@@ -7,6 +7,14 @@ POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
 
+if [[ -z "$STRUCTURED_PYTHON" ]]; then
+    write_basic_partial_report || die "Could not create the dependency-free partial report."
+    run_privacy_scan
+    create_report_archive
+    print_completion_summary
+    return 0
+fi
+
 GENERIC_ANALYSIS_FILE="$OUTPUT_DIR/.generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
