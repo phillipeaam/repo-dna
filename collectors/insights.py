@@ -432,6 +432,16 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
         **imported_quality,
         "licenses": license_evidence(root, generic["_files"]),
     }
+    test_results = quality.get("tests", {})
+    quality["test_execution"] = {
+        "status": test_results.get("execution_status", "not_observed"),
+        "total": test_results.get("total") if test_results.get("status") == "imported" else None,
+        "passed": test_results.get("passed") if test_results.get("status") == "imported" else None,
+        "failed": test_results.get("failed") if test_results.get("status") == "imported" else None,
+        "skipped": test_results.get("skipped") if test_results.get("status") == "imported" else None,
+        "duration_seconds": test_results.get("duration_seconds"),
+        "message": test_results.get("message") or "Imported test execution evidence.",
+    }
     health = health_score(generic, quality, generic["git"], architecture_model)
     return {
         "architecture": {

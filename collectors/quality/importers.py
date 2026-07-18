@@ -105,7 +105,7 @@ def _coverage(root: Path) -> dict[str, Any]:
 def _tests(root: Path) -> dict[str, Any]:
     reports: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
-    candidates = _find(root, {"junit.xml", "test-results.xml", "jest-results.json", "pytest-report.json"}, ("**/TEST-*.xml", "**/junit*.xml", "**/jest-results.json", "**/pytest-report.json"))
+    candidates = _find(root, {"junit.xml", "test-results.xml", "jest-results.json", "pytest-report.json", "repodna-test-results.json"}, ("**/TEST-*.xml", "**/junit*.xml", "**/jest-results.json", "**/pytest-report.json", "**/repodna-test-results.json"))
     for path in candidates:
         try:
             if path.suffix.casefold() == ".xml":
@@ -119,7 +119,12 @@ def _tests(root: Path) -> dict[str, Any]:
                 tool = "JUnit XML"
             else:
                 data = _read_json(path)
-                if "numTotalTests" in data:
+                if data.get("artifact_type") == "repodna_test_execution":
+                    execution = data.get("test_execution", {})
+                    tool, total = "RepoDNA test runner", int(execution.get("total", 0))
+                    failed, skipped = int(execution.get("failed", 0)), int(execution.get("skipped", 0))
+                    errors_count, duration = 0, execution.get("duration_seconds")
+                elif "numTotalTests" in data:
                     tool, total, failed, skipped = "Jest", int(data.get("numTotalTests", 0)), int(data.get("numFailedTests", 0)), int(data.get("numPendingTests", 0))
                     errors_count, duration = 0, None
                 else:
@@ -136,7 +141,8 @@ def _tests(root: Path) -> dict[str, Any]:
     for report in reports:
         for key in ("total", "passed", "failed", "errors", "skipped"):
             totals[key] += report[key]
-    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "Test-result artifacts were invalid." if errors else "No test-result artifact was provided or discovered.", **dict(totals), "reports": reports, "parse_errors": errors, "note": "Test outcomes are imported artifacts, not a test execution performed by RepoDNA."}
+    execution_status = "failed" if totals.get("failed", 0) or totals.get("errors", 0) else "passed" if reports else "not_observed"
+    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "Test-result artifacts were invalid." if errors else "No test-result artifact was provided or discovered.", "execution_status": execution_status, **dict(totals), "duration_seconds": round(sum(item.get("duration_seconds") or 0 for item in reports), 3) if reports else None, "reports": reports, "parse_errors": errors, "note": "Test outcomes are imported artifacts, not a test execution performed by RepoDNA."}
 
 
 def _severity(value: str | int | None) -> str:

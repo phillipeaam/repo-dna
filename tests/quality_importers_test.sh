@@ -7,6 +7,7 @@ TEST_ROOT="$(mktemp -d -p "$SOURCE_ROOT" .quality-import-test.XXXXXX)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
 printf '%s\n' '{"total":{"lines":{"total":100,"covered":82,"pct":82},"statements":{"total":110,"covered":88,"pct":80},"functions":{"total":20,"covered":15,"pct":75},"branches":{"total":30,"covered":18,"pct":60}}}' > "$TEST_ROOT/coverage-summary.json"
+printf '%s\n' '{"$schema":"./test-execution-1.0.0.schema.json","schema_version":"1.0","artifact_type":"repodna_test_execution","started_at":"2026-07-18T00:00:00Z","test_execution":{"status":"passed","total":41,"passed":41,"failed":0,"skipped":0,"duration_seconds":18.4},"tests":[]}' > "$TEST_ROOT/repodna-test-results.json"
 printf '%s\n' '<testsuites><testsuite name="unit" tests="10" failures="1" errors="1" skipped="2" time="3.5"/></testsuites>' > "$TEST_ROOT/junit.xml"
 printf '%s\n' '[{"filePath":"src/app.ts","messages":[{"severity":2},{"severity":1}]}]' > "$TEST_ROOT/eslint-report.json"
 printf '%s\n' '{"vulnerabilities":{"lodash":{"severity":"high","via":[{"source":12345,"severity":"high"}]}}}' > "$TEST_ROOT/npm-audit.json"
@@ -29,10 +30,13 @@ coverage = quality["coverage"]
 assert coverage["status"] == "imported"
 assert coverage["line_coverage_percent"] == 82
 assert coverage["reports"][0]["tool"] == "Istanbul"
-
 tests = quality["tests"]
 assert tests["status"] == "imported"
-assert (tests["total"], tests["passed"], tests["failed"], tests["errors"], tests["skipped"]) == (10, 6, 1, 1, 2)
+assert tests["execution_status"] == "failed"
+assert (tests["total"], tests["passed"], tests["failed"], tests["errors"], tests["skipped"]) == (51, 47, 1, 1, 2)
+assert tests["duration_seconds"] == 21.9
+runner = next(item for item in tests["reports"] if item["tool"] == "RepoDNA test runner")
+assert runner["total"] == 41 and runner["passed"] == 41
 
 linters = quality["linters"]
 assert linters["status"] == "imported" and linters["issues"] == 2

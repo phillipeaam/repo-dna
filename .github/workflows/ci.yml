@@ -57,11 +57,28 @@ jobs:
       - name: Compile Python modules
         run: python -m compileall -q collectors renderers src/reports
 
+      - name: Python formatting contract
+        run: python scripts/check-python-format.py
+
+      - name: Verify documentation links
+        run: python scripts/check-links.py README.md docs
+
       - name: Run complete test suite
-        run: bash ./tests/run.sh
+        run: bash ./tests/run.sh --json test-results/repodna-test-results.json
+
+      - name: Validate consolidated test evidence
+        if: always()
+        run: python renderers/validate_json.py test-results/repodna-test-results.json schemas/test-execution-1.0.0.schema.json
+
+      - name: Upload consolidated test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repodna-test-execution
+          path: test-results/repodna-test-results.json
 
   fixtures:
-    name: Fixtures (${{ matrix.os }})
+    name: Smoke and fixtures (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:

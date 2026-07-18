@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/test-execution-1.0.0.schema.json",
+  "title": "RepoDNA test execution evidence",
+  "type": "object",
+  "required": ["$schema", "schema_version", "artifact_type", "started_at", "test_execution", "tests"],
+  "properties": {
+    "$schema": {"const": "./test-execution-1.0.0.schema.json"},
+    "schema_version": {"const": "1.0"},
+    "artifact_type": {"const": "repodna_test_execution"},
+    "started_at": {"type": "string"},
+    "test_execution": {
+      "type": "object",
+      "required": ["status", "total", "passed", "failed", "skipped", "duration_seconds"],
+      "properties": {
+        "status": {"enum": ["passed", "failed"]},
+        "total": {"type": "integer", "minimum": 0},
+        "passed": {"type": "integer", "minimum": 0},
+        "failed": {"type": "integer", "minimum": 0},
+        "skipped": {"type": "integer", "minimum": 0},
+        "duration_seconds": {"type": "number", "minimum": 0}
+      }
+    },
+    "tests": {"type": "array", "items": {"type": "object", "required": ["name", "status", "duration_seconds"]}}
+  }
+}

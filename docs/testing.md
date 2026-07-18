@@ -7,6 +7,21 @@ tests locally with:
 bash ./tests/run.sh
 ```
 
+To execute every test even after failures and produce machine-readable evidence:
+
+```bash
+bash ./tests/run.sh --json test-results/repodna-test-results.json
+python renderers/validate_json.py \
+  test-results/repodna-test-results.json \
+  schemas/test-execution-1.0.0.schema.json
+```
+
+The JSON answers `Does the test suite pass?` through
+`test_execution.status`, and includes totals, passed, failed, skipped, duration,
+and one result per test script. RepoDNA can import this file as real test
+execution evidence; the presence of test source files alone is not treated as
+proof that the suite passed.
+
 ## Fixtures
 
 `tests/fixtures/` contains minimal repository structures for Unity, Android,
@@ -31,6 +46,11 @@ allows them, missing Python configuration, and missing archive tools.
 GitHub Actions runs the test suite on Ubuntu, macOS, and Windows. Windows commands
 use Git Bash. WSL is not represented by a GitHub-hosted runner and remains a
 manual or future self-hosted validation target.
+
+The Linux validation runs the complete Bash/Python-backed suite, ShellCheck,
+Bats, the Python formatting contract, JSON Schema validation, documentation and
+generated-HTML link checks, fixture report generation, and archive validation.
+Portable fixture and smoke tests run on Linux, macOS, and Windows/Git Bash.
 
 The lint job runs ShellCheck at error severity across Bash source and tests.
 `shfmt` enforces the entrypoint and selected maintained shell modules, expanding

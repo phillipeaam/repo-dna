@@ -1,5 +1,6 @@
 # Changelog
 
+- Added versioned test-execution evidence, complete-suite pass/fail aggregation, CI artifact publication, Python formatting validation, local-link verification, and portable Linux/macOS/Windows smoke gates.
 - Reworked heuristic secret detection with placeholder suppression, safe previews, four severity levels, `.repodna-ignore`, value-free allowlists, dedicated fake-secret fixtures, and explicit security-scanner limitations.
 - Reworked repository health model 2.0 to separate Health Score, Evidence Coverage, and confidence, with six normalized dimensions and explicit explanations for proven losses, unsupported analysis, unavailable information, and external tools not executed.
 - Consolidated facts, heuristic inferences, and unobserved external evidence in the canonical analysis model; missing coverage, tests, lint, and scanner artifacts no longer become zero-valued measurements or reduce the health score.

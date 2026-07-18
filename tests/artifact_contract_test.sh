@@ -88,6 +88,8 @@ assert (root / "portfolio/portfolio-draft-1.0.0.schema.json").is_file()
 print(f"validated {len(documents)} generated JSON documents")
 PY
 
+python "$SOURCE_ROOT/scripts/check-links.py" "$REPORT_ROOT/report"
+
 if [[ -s "$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip" ]]; then
     ARCHIVE_PATH="$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip"
     unzip -Z1 "$ARCHIVE_PATH" > "$TEST_ROOT/archive-contents.txt"

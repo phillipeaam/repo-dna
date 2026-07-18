@@ -576,7 +576,7 @@ module exists, and checks its Bash syntax.
 Run the complete local suite with:
 
 ```bash
-bash ./tests/run.sh
+bash ./tests/run.sh --json test-results/repodna-test-results.json
 ```
 
 The same suite runs on Linux, macOS, and Windows Git Bash for every push and pull
