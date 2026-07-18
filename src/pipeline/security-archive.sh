@@ -64,6 +64,14 @@ cp "$SCRIPT_DIR/schemas/health-trends-1.0.0.schema.json" \
     "$HEALTH_TRENDS_DIR/health-trends-1.0.0.schema.json" ||
     die "Could not copy the health-trends schema."
 
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/system_documentation.py" \
+    "$REPORT_DATA_DIR/report.json" "$SYSTEM_DOCUMENTATION_DIR" \
+    --schema "$SCRIPT_DIR/schemas/system-documentation-1.0.0.schema.json" ||
+    die "Could not render structured system documentation."
+cp "$SCRIPT_DIR/schemas/system-documentation-1.0.0.schema.json" \
+    "$SYSTEM_DOCUMENTATION_DIR/system-documentation-1.0.0.schema.json" ||
+    die "Could not copy the system-documentation schema."
+
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
     "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
     die "Could not render the standardized HTML reports."

@@ -209,6 +209,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`snapshots/\`: validated point-in-time analysis snapshot and versioned schema
 - \`comparison/\`: structured and navigable comparison with a previous snapshot
 - \`health-trends/\`: compatible health-score history, exclusions, and optional chart
+- \`system-docs/\`: evidence-based HTML and JSON documentation per detected system
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 
@@ -218,8 +219,9 @@ $SOURCE_FOLDER_DESCRIPTION
 2. \`notion/evidence.json\`
 3. \`comparison/index.html\`
 4. \`health-trends/index.html\`
-5. \`llm/evidence.json\`
-6. \`report/data/report.json\`
+5. \`system-docs/index.html\`
+6. \`llm/evidence.json\`
+7. \`report/data/report.json\`
 
 ## Limitations
 

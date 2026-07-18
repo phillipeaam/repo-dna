@@ -110,6 +110,9 @@ COMPARISON_DIR="$OUTPUT_DIR/comparison"
 # Define versioned health-score trend outputs.
 HEALTH_TRENDS_DIR="$OUTPUT_DIR/health-trends"
 
+# Define per-system evidence documentation outputs.
+SYSTEM_DOCUMENTATION_DIR="$OUTPUT_DIR/system-docs"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -181,6 +184,7 @@ mkdir -p \
     "$SNAPSHOT_DIR" \
     "$COMPARISON_DIR" \
     "$HEALTH_TRENDS_DIR" \
+    "$SYSTEM_DOCUMENTATION_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

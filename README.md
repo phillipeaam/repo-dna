@@ -26,6 +26,7 @@ One command creates a timestamped analysis package containing:
 - ownership classification with confidence and evidence;
 - author-to-system activity ownership with percentages, ranking, and confidence;
 - estimated bus factor and activity concentration for each detected system;
+- structured HTML and JSON documentation for every detected system;
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - validated point-in-time analysis snapshots with optional Git persistence;
@@ -73,6 +74,7 @@ Repository
 | Architecture | Specialized architecture signals or generic module candidates and language composition. |
 | Technologies | Languages, line counts, dependency declarations, manifests, branches, and tags. |
 | Systems | Confirmed specialized signals or systems inferred from historical paths for review. |
+| System documentation | Per-system facts, metrics, architecture, dependencies, evolution, ownership, bus factor, and explicit unknowns. |
 | Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
 | Collaboration | Contributors, co-authored commits, shared files, author-system activity, and bus factor by system. |
 | Risks | Potential secrets and ownership classifications requiring review. |
@@ -138,6 +140,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)
 - [Bus factor by system](docs/bus-factor.md)
+- [Structured documentation by system](docs/system-documentation.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
