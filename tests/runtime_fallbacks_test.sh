@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SOURCE_ROOT/src/core/bash-version.sh"
 source "$SOURCE_ROOT/src/core/runtime.sh"
+
+bash_version_supported 4 3
+bash_version_supported 5 0
+if bash_version_supported 4 2; then
+    echo 'Bash 4.2 was incorrectly accepted.' >&2; exit 1
+fi
+version_error="$(require_supported_bash 3 2 '3.2.57(1)-release' 2>&1 || true)"
+[[ "$version_error" == *'requires Bash 4.3 or newer'* ]]
+[[ "$version_error" == *'detected Bash 3.2.57(1)-release'* ]]
 
 # An explicitly configured non-executable Python runtime must be rejected.
 REPO_DNA_PYTHON="$SOURCE_ROOT/tests/fixtures/no-git/missing-python"

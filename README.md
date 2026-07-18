@@ -177,6 +177,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Composite hotspot model](docs/hotspot-model.md)
 - [Author alias configuration](docs/author-aliases.md)
 - [Git tags and releases](docs/git-tags-and-releases.md)
+- [Runtime requirements](docs/runtime-requirements.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)
@@ -249,7 +250,7 @@ RepoDNA can be used for:
 RepoDNA requires:
 
 - Git;
-- Bash (Git Bash on Windows);
+- Bash 4.3 or newer (a current Git Bash on Windows);
 - Python 3.11 or newer for generic collection and HTML/Notion report rendering;
 - the packages in `requirements-reporting.txt` for required JSON Schema
   validation and optional commit-history charts;
@@ -266,6 +267,11 @@ python --version
 python -c "import jsonschema; print(jsonschema.__version__)"
 python -c "import matplotlib; print(matplotlib.__version__)"
 ```
+
+RepoDNA verifies `BASH_VERSINFO` before loading modules that use associative
+arrays and namerefs. Unsupported shells stop with an installation-oriented
+message. Running `sh ./dna-analysis.sh` is not supported; use
+`bash ./dna-analysis.sh`.
 
 Install reporting dependencies and optional AST adapters with:
 

@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+if [ -z "${BASH_VERSION:-}" ]; then
+    printf '%s\n' 'RepoDNA must be executed with Bash 4.3 or newer.' >&2
+    printf '%s\n' 'Run: bash ./dna-analysis.sh' >&2
+    exit 2
+fi
+
+# Resolve the entrypoint location before loading the minimum-version guard.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=src/core/bash-version.sh
+source "$SCRIPT_DIR/src/core/bash-version.sh"
+require_supported_bash "${BASH_VERSINFO[0]}" "${BASH_VERSINFO[1]}" "$BASH_VERSION" || exit 2
+
 # Fail when an undefined variable is used.
 set -u
 
@@ -8,9 +21,6 @@ set -o pipefail
 
 # Record the Bash process start time for the final execution summary.
 EXECUTION_STARTED_AT=$SECONDS
-
-# Resolve this script's directory so it can be run from any repository folder.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Load project-type and source-root detection.
 # shellcheck source=src/detectors/project-type.sh
