@@ -218,6 +218,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Period comparison](docs/period-comparison.md)
 - [Health score trends](docs/health-trends.md)
 - [Quality result imports](docs/quality-imports.md)
+- [Facts, inferences, and unobserved evidence](docs/evidence-classification.md)
 - [SBOM and lockfile resolution](docs/sbom.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)

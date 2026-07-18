@@ -133,9 +133,17 @@ assert all(item["system_activity_share_percent"] is not None for item in activit
 bus_factor = analysis["bus_factor_by_system"]
 assert bus_factor["status"] == "assessed"
 assert bus_factor["summary"]["systems_assessed"] >= 1
-assert analysis["quality"]["coverage"]["status"] == "not_found"
-assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
-assert analysis["health"]["version"] == "1.1"
+assert analysis["quality"]["coverage"]["status"] == "not_observed"
+assert analysis["quality"]["coverage"]["line_coverage_percent"] is None
+assert analysis["quality"]["coverage"]["message"] == "No coverage artifact was provided or discovered."
+assert analysis["quality"]["vulnerabilities"]["status"] == "not_observed"
+assert analysis["quality"]["vulnerabilities"]["findings"] is None
+assert analysis["health"]["version"] == "1.2"
+testing = next(item for item in analysis["health"]["dimensions"] if item["name"] == "Testing evidence")
+assert testing["maximum"] == 5, testing
+assert analysis["conclusions"]["facts"] and analysis["conclusions"]["inferences"]
+assert all(item["classification"] == "fact" and item["evidence"] for item in analysis["conclusions"]["facts"])
+assert all(item["classification"] == "inference" and item["evidence"] for item in analysis["conclusions"]["inferences"])
 assert analysis["health"]["score"] is not None
 assert analysis["narrative_facts"]
 assert analysis["onboarding"]["status"] == "collected"

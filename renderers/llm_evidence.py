@@ -127,10 +127,10 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     linters = quality.get("linters", {})
     vulnerabilities = quality.get("vulnerabilities", {})
     items.extend([
-        evidence("coverage", "quality", "fact", f"Coverage status is {coverage.get('status', 'not_found')}.", "high", ["#/generic_analysis/analysis/quality/coverage"], {"line_coverage_percent": coverage.get("line_coverage_percent")}, [coverage.get("note", "Missing coverage is not a passing result.")]),
-        evidence("tests", "quality", "fact", f"Test-result status is {tests.get('status', 'not_found')}.", "high", ["#/generic_analysis/analysis/quality/tests"], {key: tests.get(key, 0) for key in ("total", "passed", "failed", "errors", "skipped")}, [tests.get("note", "RepoDNA imports test reports and does not execute tests.")]),
-        evidence("linters", "quality", "fact", f"Linter-result status is {linters.get('status', 'not_found')}.", "high", ["#/generic_analysis/analysis/quality/linters"], {"issues": linters.get("issues"), "severities": linters.get("severities", {})}),
-        evidence("vulnerabilities", "security", "fact", f"Security scanner status is {vulnerabilities.get('status', 'not_scanned')}.", "high", ["#/generic_analysis/analysis/quality/vulnerabilities"], {"findings": vulnerabilities.get("findings"), "severities": vulnerabilities.get("severities", {})}, ["not_scanned and not_resolved do not mean vulnerability-free."]),
+        evidence("coverage", "quality", "fact", coverage.get("message") or f"Coverage status is {coverage.get('status', 'not_observed')}.", "high", ["#/generic_analysis/analysis/quality/coverage"], {"line_coverage_percent": coverage.get("line_coverage_percent")}, [coverage.get("note", "Missing coverage is not a passing result.")]),
+        evidence("tests", "quality", "fact", tests.get("message") or f"Test-result status is {tests.get('status', 'not_observed')}.", "high", ["#/generic_analysis/analysis/quality/tests"], {key: tests.get(key) for key in ("total", "passed", "failed", "errors", "skipped")}, [tests.get("note", "RepoDNA imports test reports and does not execute tests.")]),
+        evidence("linters", "quality", "fact", linters.get("message") or f"Linter-result status is {linters.get('status', 'not_observed')}.", "high", ["#/generic_analysis/analysis/quality/linters"], {"issues": linters.get("issues"), "severities": linters.get("severities", {})}),
+        evidence("vulnerabilities", "security", "fact", vulnerabilities.get("message") or f"Security scanner status is {vulnerabilities.get('status', 'not_observed')}.", "high", ["#/generic_analysis/analysis/quality/vulnerabilities"], {"findings": vulnerabilities.get("findings"), "severities": vulnerabilities.get("severities", {})}, ["not_observed and not_resolved do not mean vulnerability-free."]),
     ])
     dependency_resolution = quality.get("dependency_resolution", {})
     dependency_inventory = analysis.get("dependency_inventory", {})

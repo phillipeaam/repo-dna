@@ -7,7 +7,7 @@ correctness of the software.
 ## Model contract
 
 - Model: `RepoDNA repository health heuristic`
-- Version: `1.1`
+- Version: `1.2`
 - Scale: 0-100 across assessed dimensions
 - Grades: A (85+), B (70+), C (55+), D (40+), E (below 40)
 - Output: `generic_analysis.analysis.health`
@@ -21,7 +21,7 @@ and lowers assessment coverage. It is never treated as a passing result.
 | Dimension | Maximum | Current evidence |
 |---|---:|---|
 | Documentation | 15 | Detected documentation files |
-| Testing evidence | 20 | Test files, imported pass ratio, and imported line coverage |
+| Testing evidence | 5-20 | Test files are locally observable (5 points). Imported test results add 8 assessable points and imported line coverage adds 7. Missing external artifacts reduce assessment coverage, not the score. |
 | Automation | 15 | CI/CD and Docker files |
 | Maintainability | 20 | Estimated decision-point complexity and imported linter status |
 | Knowledge distribution | 15 | Contributors visible in Git history |
@@ -37,8 +37,8 @@ coverage so fallback estimates are not presented as equivalent to AST results.
 
 RepoDNA does not infer vulnerabilities or dependency licenses from package names.
 Without an ecosystem-aware scanner report, dependency security remains
-`not_scanned`. Without resolved package metadata, dependency licenses remain
-`not_scanned`.
+`not_observed`. Without imported dependency-license metadata, dependency license
+evidence remains `not_observed`.
 
 The score must always be read together with its dimension evidence, model
 version, assessment coverage, and limitations.

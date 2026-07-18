@@ -94,7 +94,8 @@ def _coverage(root: Path) -> dict[str, Any]:
     line_percentages = [item["metrics"].get("lines", {}).get("percent") for item in reports]
     line_percentages = [value for value in line_percentages if value is not None]
     return {
-        "status": "imported" if reports else "invalid" if errors else "not_found",
+        "status": "imported" if reports else "invalid" if errors else "not_observed",
+        "message": None if reports else "Coverage artifacts were invalid." if errors else "No coverage artifact was provided or discovered.",
         "line_coverage_percent": round(sum(line_percentages) / len(line_percentages), 2) if line_percentages else None,
         "reports": reports, "evidence_files": [item["path"] for item in reports], "parse_errors": errors,
         "note": "Coverage metrics are imported from existing reports; RepoDNA does not execute the test suite.",
@@ -135,7 +136,7 @@ def _tests(root: Path) -> dict[str, Any]:
     for report in reports:
         for key in ("total", "passed", "failed", "errors", "skipped"):
             totals[key] += report[key]
-    return {"status": "imported" if reports else "invalid" if errors else "not_found", **dict(totals), "reports": reports, "parse_errors": errors, "note": "Test outcomes are imported artifacts, not a test execution performed by RepoDNA."}
+    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "Test-result artifacts were invalid." if errors else "No test-result artifact was provided or discovered.", **dict(totals), "reports": reports, "parse_errors": errors, "note": "Test outcomes are imported artifacts, not a test execution performed by RepoDNA."}
 
 
 def _severity(value: str | int | None) -> str:
@@ -208,7 +209,7 @@ def _linters(root: Path) -> dict[str, Any]:
     combined = Counter()
     for report in reports:
         combined.update(report["severities"])
-    return {"status": "imported" if reports else "invalid" if errors else "not_found", "issues": sum(combined.values()), "severities": dict(combined), "reports": reports, "parse_errors": errors, "note": "Linter findings are imported without source snippets or diagnostic message content."}
+    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "Linter artifacts were invalid." if errors else "No linter artifact was provided or discovered.", "issues": sum(combined.values()) if reports else None, "severities": dict(combined), "reports": reports, "parse_errors": errors, "note": "Linter findings are imported without source snippets or diagnostic message content."}
 
 
 def _scanners(root: Path, manifest_count: int) -> dict[str, Any]:
@@ -293,7 +294,7 @@ def _scanners(root: Path, manifest_count: int) -> dict[str, Any]:
     for report in reports:
         combined.update(report["severities"])
     dependency_findings = [finding for report in reports for finding in report.get("dependency_findings", [])]
-    return {"status": "imported" if reports else "invalid" if errors else "not_scanned", "findings": sum(combined.values()) if reports else None, "severities": dict(combined), "dependency_findings": dependency_findings, "scanner_reports": [item["path"] for item in reports], "reports": reports, "parse_errors": errors, "manifests_available": manifest_count, "note": "Security findings are imported and counted without exporting vulnerable values, messages, or source snippets."}
+    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "Security scanner artifacts were invalid." if errors else "No security scanner artifact was provided or discovered.", "findings": sum(combined.values()) if reports else None, "severities": dict(combined), "dependency_findings": dependency_findings, "scanner_reports": [item["path"] for item in reports], "reports": reports, "parse_errors": errors, "manifests_available": manifest_count, "note": "Security findings are imported and counted without exporting vulnerable values, messages, or source snippets."}
 
 
 def _license_value(value: Any) -> list[str]:
@@ -349,7 +350,7 @@ def _licenses(root: Path) -> dict[str, Any]:
         except (OSError, ValueError, TypeError) as error:
             errors.append({"path": _relative(root, path), "error": str(error)})
     packages = [item | {"source": report["tool"], "report": report["path"]} for report in reports for item in report["packages"]]
-    return {"status": "imported" if reports else "invalid" if errors else "not_found", "packages": packages, "reports": reports, "parse_errors": errors, "note": "Licenses are imported metadata and are not legal advice or a compatibility determination."}
+    return {"status": "imported" if reports else "invalid" if errors else "not_observed", "message": None if reports else "License artifacts were invalid." if errors else "No dependency-license artifact was provided or discovered.", "packages": packages, "reports": reports, "parse_errors": errors, "note": "Licenses are imported metadata and are not legal advice or a compatibility determination."}
 
 
 def _license_category(licenses: list[str]) -> str:

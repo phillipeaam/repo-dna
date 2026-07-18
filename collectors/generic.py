@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from insights import analyze_repository
+from insights import analyze_repository, build_conclusions
 from technical_impact import collect_technical_impact
 
 
@@ -686,6 +686,14 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis["quality"]["vulnerabilities"]["reports"] = []
     analysis["quality"]["vulnerabilities"]["parse_errors"] = []
     analysis["quality"]["vulnerabilities"]["dependency_findings"] = []
+    for conclusion in analysis.get("conclusions", {}).get("facts", []):
+        conclusion["evidence"] = [item for item in conclusion.get("evidence", []) if item.startswith("#/")]
+        conclusion["evidence"] = conclusion["evidence"] or ["#/technology_inventory/technologies"]
+    for conclusion in analysis.get("conclusions", {}).get("inferences", []):
+        conclusion["value"] = "Architectural system candidate"
+        conclusion["evidence"] = ["#/analysis/systems"]
+    for observation in analysis.get("conclusions", {}).get("observations", []):
+        observation["evidence"] = []
     dependency_licenses = analysis["quality"].get("dependency_licenses", {})
     dependency_licenses["packages"] = []
     dependency_licenses["reports"] = []
@@ -833,6 +841,9 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     result["technology_inventory"] = technology_inventory(
         root, result["languages"], manifests, files, configs, docs, tests, ci_cd, docker,
         result["analysis"].get("frameworks", {}).get("detected", []),
+    )
+    result["analysis"]["conclusions"] = build_conclusions(
+        result, result["analysis"].get("systems", []), result["analysis"].get("quality", {})
     )
     result.pop("_files")
     result["git"].pop("_file_author_activity", None)

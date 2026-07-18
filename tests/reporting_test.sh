@@ -132,6 +132,7 @@ cat > "$TEST_ROOT/report.json" <<'JSON'
         "dimensions": [{"name": "Testing evidence", "score": 10, "maximum": 20, "status": "assessed", "evidence": "3 test files"}],
         "limitations": ["Repository evidence is not product quality."]
       },
+      "conclusions": {"facts": [{"value": "C#", "classification": "fact", "confidence": 1.0, "evidence": ["src/Program.cs"]}], "inferences": [{"value": "Data/Persistence", "classification": "inference", "confidence": 0.8, "evidence": ["src/Data"]}], "observations": [{"subject": "coverage", "status": "imported", "message": "A coverage artifact was discovered and imported.", "evidence": ["coverage-summary.json"]}]},
       "narrative_facts": [{"statement": "The repository contains 25 analyzed files.", "evidence": "#/file_count", "confidence": "high"}]
     }
   },
@@ -383,7 +384,7 @@ grep -q '80.00%' "$TEST_ROOT/report/collaboration.html"
 grep -q 'historical activity ownership' "$TEST_ROOT/report/collaboration.html"
 grep -q 'Developer One' "$TEST_ROOT/report/contributors-1.html"
 grep -q 'Page 1 of 1' "$TEST_ROOT/report/contributors-1.html"
-grep -q 'not_scanned is not equivalent to zero vulnerabilities' "$TEST_ROOT/report/quality.html"
+grep -q 'not_observed.*not equivalent to 0% coverage' "$TEST_ROOT/report/quality.html"
 grep -q 'Imported coverage reports' "$TEST_ROOT/report/quality.html"
 grep -q 'Istanbul' "$TEST_ROOT/report/quality.html"
 grep -q 'Imported test results' "$TEST_ROOT/report/quality.html"

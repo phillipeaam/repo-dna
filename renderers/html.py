@@ -408,10 +408,10 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Coverage status", coverage_result.get("status", "Not assessed")),
         ("Line coverage", coverage_result.get("line_coverage_percent") if coverage_result.get("line_coverage_percent") is not None else "Not available"),
         ("Test results status", test_result.get("status", "Not assessed")),
-        ("Tests passed", test_result.get("passed", 0)),
-        ("Tests failed", test_result.get("failed", 0)),
+        ("Tests passed", test_result.get("passed") if test_result.get("status") == "imported" else "Not observed"),
+        ("Tests failed", test_result.get("failed") if test_result.get("status") == "imported" else "Not observed"),
         ("Linter status", linter_result.get("status", "Not assessed")),
-        ("Linter issues", linter_result.get("issues", 0)),
+        ("Linter issues", linter_result.get("issues") if linter_result.get("status") == "imported" else "Not observed"),
         ("Vulnerability status", scanner_result.get("status", "Not assessed")),
         ("Imported security findings", scanner_result.get("findings") if scanner_result.get("findings") is not None else "Not available"),
         ("Dependencies correlated", dependency_summary.get("dependencies", 0)),
@@ -425,7 +425,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Repository license", quality.get("licenses", {}).get("repository_license", "Unknown")),
         ("Dependency license status", quality.get("licenses", {}).get("dependency_license_status", "Not assessed")),
     ])
-    quality_body += '<p class="note">A vulnerability status of not_scanned is not equivalent to zero vulnerabilities. RepoDNA only reports verified scanner evidence.</p>'
+    quality_body += '<p class="note"><strong>not_observed</strong> means that no compatible external artifact was discovered. It is not equivalent to 0% coverage, zero failed tests, zero linter issues, or zero vulnerabilities.</p>'
     coverage_rows = [[item["tool"], item["path"], item.get("metrics", {}).get("lines", {}).get("percent"), item.get("metrics", {}).get("branches", {}).get("percent"), item.get("metrics", {}).get("functions", {}).get("percent")] for item in coverage_result.get("reports", [])]
     test_rows = [[item["tool"], item["path"], item["total"], item["passed"], item["failed"], item["errors"], item["skipped"], item.get("duration_seconds")] for item in test_result.get("reports", [])]
     linter_rows = [[item["tool"], item["path"], item["issues"], item["affected_files"], ", ".join(f"{key}: {value}" for key, value in item.get("severities", {}).items())] for item in linter_result.get("reports", [])]

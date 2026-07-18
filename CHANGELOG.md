@@ -1,5 +1,7 @@
 # Changelog
 
+- Consolidated facts, heuristic inferences, and unobserved external evidence in the canonical analysis model; missing coverage, tests, lint, and scanner artifacts no longer become zero-valued measurements or reduce the health score.
+
 All notable changes to RepoDNA will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

@@ -247,11 +247,21 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
     test_results = quality["tests"]
     coverage_result = quality["coverage"]
     testing_score = min(5, tests) if tests else 0
+    testing_maximum = 5
+    testing_evidence = [f"{tests} test files"]
     if test_results["status"] == "imported" and test_results.get("total", 0):
         testing_score += 8 * test_results.get("passed", 0) / test_results["total"]
+        testing_maximum += 8
+        testing_evidence.append(f"{test_results['passed']}/{test_results['total']} imported tests passed")
+    else:
+        testing_evidence.append(test_results.get("message", "Test results were not observed"))
     if coverage_result["status"] == "imported" and coverage_result.get("line_coverage_percent") is not None:
         testing_score += 7 * coverage_result["line_coverage_percent"] / 100
-    add("Testing evidence", min(20, testing_score), 20, f"{tests} test files; test results {test_results['status']}; coverage {coverage_result.get('line_coverage_percent')}%")
+        testing_maximum += 7
+        testing_evidence.append(f"Imported line coverage {coverage_result['line_coverage_percent']}%")
+    else:
+        testing_evidence.append(coverage_result.get("message", "Coverage was not observed"))
+    add("Testing evidence", min(testing_maximum, testing_score), testing_maximum, "; ".join(testing_evidence))
     add("Automation", min(15, ci * 8 + generic.get("docker_file_count", 0) * 3), 15, f"{ci} CI/CD files")
     if complexity["average"] is None:
         add("Maintainability", 0, 20, "No supported source files", "not_assessed")
@@ -277,11 +287,11 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
     achieved = sum(item["score"] for item in assessed)
     maximum = sum(item["maximum"] for item in assessed)
     score = round(achieved / maximum * 100, 1) if maximum else None
-    coverage = round(maximum / sum(item["maximum"] for item in dimensions) * 100, 1)
+    coverage = round(maximum / 100 * 100, 1)
     grade = None if score is None else "A" if score >= 85 else "B" if score >= 70 else "C" if score >= 55 else "D" if score >= 40 else "E"
     return {
         "model": "RepoDNA repository health heuristic",
-        "version": "1.1",
+        "version": "1.2",
         "score": score,
         "grade": grade,
         "assessment_coverage_percent": coverage,
@@ -292,6 +302,48 @@ def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dic
             "AST coverage varies by language; heuristic fallback complexity is not equivalent to language-native static analysis.",
         ],
     }
+
+
+def build_conclusions(generic: dict[str, Any], systems: list[dict[str, Any]], quality: dict[str, Any]) -> dict[str, Any]:
+    """Publish material conclusions using one fact/inference/absence contract."""
+    manifests = generic.get("dependencies", {}).get("manifests", [])
+    files = {item["path"] for item in generic.get("_files", [])}
+    facts: list[dict[str, Any]] = []
+    for technology in generic.get("technology_inventory", {}).get("technologies", []):
+        evidence = [
+            item["path"] for item in manifests
+            if technology.casefold() in {str(value).casefold() for value in item.get("dependencies", [])}
+        ]
+        if not evidence:
+            evidence = [path for path in files if technology.casefold().replace(".js", "") in path.casefold()][:5]
+        facts.append({
+            "value": technology, "classification": "fact", "confidence": 1.0,
+            "evidence": sorted(evidence)[:10] or ["#/technology_inventory/technologies"],
+        })
+
+    inferences = [
+        {
+            "value": system["name"], "classification": "inference",
+            "confidence": system.get("confidence", 0.5),
+            "evidence": system.get("files", [])[:10],
+        }
+        for system in systems
+    ]
+    observations = []
+    labels = {
+        "coverage": "coverage artifact", "tests": "test-result artifact",
+        "linters": "linter artifact", "vulnerabilities": "security scanner artifact",
+        "dependency_licenses": "dependency-license artifact",
+    }
+    for key, label in labels.items():
+        result = quality.get(key, {})
+        observations.append({
+            "subject": key,
+            "status": result.get("status", "not_observed"),
+            "message": result.get("message") or f"A {label} was discovered and imported.",
+            "evidence": result.get("evidence_files", result.get("scanner_reports", [])),
+        })
+    return {"facts": facts, "inferences": inferences, "observations": observations}
 
 
 def build_narrative_facts(generic: dict[str, Any], code: dict[str, Any], systems: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -376,5 +428,6 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
         "graphs": graphs,
         "quality": quality | {"code": {"complexity": code["complexity"]}},
         "health": health,
+        "conclusions": build_conclusions(generic, systems, quality),
         "narrative_facts": build_narrative_facts(generic, code, systems),
     }

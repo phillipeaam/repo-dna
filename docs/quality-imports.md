@@ -16,8 +16,9 @@ as a passing result.
 
 Reports are discovered through conventional filenames and limited report
 patterns. Files larger than 25 MB are rejected to bound memory consumption.
-Malformed reports receive `invalid`; absent reports receive `not_found` or
-`not_scanned`; successfully parsed reports receive `imported`.
+Malformed reports receive `invalid`; absent reports receive `not_observed`;
+successfully parsed reports receive `imported`. A missing artifact never implies
+a zero measurement or a clean result.
 
 Normalized output correlates manifest package names and lockfile-resolved
 versions with imported vulnerability and license metadata. It exports finding identifiers, severities, package
