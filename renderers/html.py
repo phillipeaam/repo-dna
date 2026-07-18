@@ -473,6 +473,45 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ]) + data_table(["Dimension", "Score", "Maximum", "Status", "Evidence"], health_rows, {1, 2})
     health_body += "<h3>Method limitations</h3>" + item_list(health.get("limitations", []))
 
+    delivery = analysis.get("delivery", {})
+    release_analysis = delivery.get("releases", {})
+    release_summary = release_analysis.get("summary", {})
+    release_rows = [[
+        item.get("tag"), item.get("date"), item.get("tag_type"), "Yes" if item.get("semantic_version") else "No",
+        item.get("commits_since_previous", 0), item.get("files_changed", 0), item.get("lines_added", 0),
+        item.get("lines_removed", 0), item.get("churn", 0), item.get("subject", ""),
+    ] for item in release_analysis.get("releases", [])]
+    ci_analysis = delivery.get("ci", {})
+    ci_summary = ci_analysis.get("summary", {})
+    ci_rows = [[
+        item.get("provider"), item.get("name"), item.get("path"), ", ".join(item.get("triggers", [])),
+        item.get("job_count", 0), item.get("step_count", 0), item.get("test_job_count", 0),
+        item.get("deployment_job_count", 0), len(item.get("signals", {}).get("floating_action_references", [])),
+    ] for item in ci_analysis.get("workflows", [])]
+    delivery_body = table([
+        ("Releases detected", release_summary.get("release_count", 0)),
+        ("Semantic releases", release_summary.get("semantic_release_count", 0)),
+        ("Latest release", release_summary.get("latest_release") or "Not available"),
+        ("Average days between releases", release_summary.get("average_days_between_releases") if release_summary.get("average_days_between_releases") is not None else "Not available"),
+        ("Unreleased commits", release_analysis.get("unreleased", {}).get("commits", 0)),
+        ("Changelog present", "Yes" if release_summary.get("changelog_present") else "No"),
+        ("CI workflows", ci_summary.get("workflow_count", 0)),
+        ("CI jobs", ci_summary.get("job_count", 0)),
+        ("Test/quality jobs", ci_summary.get("test_job_count", 0)),
+        ("Deployment/release jobs", ci_summary.get("deployment_job_count", 0)),
+        ("Floating action references", ci_summary.get("floating_action_reference_count", 0)),
+    ])
+    delivery_body += "<h3>Local release history</h3>" + (data_table(
+        ["Tag", "Date", "Type", "SemVer", "Commits", "Files", "Added", "Removed", "Churn", "Subject"],
+        release_rows, {4, 5, 6, 7, 8},
+    ) if release_rows else '<p class="empty">No local release tags were found.</p>')
+    delivery_body += "<h3>Unreleased changes</h3>" + table(labeled(release_analysis.get("unreleased", {}), list(release_analysis.get("unreleased", {}))))
+    delivery_body += "<h3>Versioned CI workflows</h3>" + (data_table(
+        ["Provider", "Workflow", "Path", "Triggers/stages", "Jobs", "Steps", "Test jobs", "Deploy jobs", "Floating actions"],
+        ci_rows, {4, 5, 6, 7, 8},
+    ) if ci_rows else '<p class="empty">No supported local CI configuration was found.</p>')
+    delivery_body += '<p class="note">Release evidence comes from local tags and Git ranges. CI evidence describes configuration only; it does not prove successful runs, deployments, approvals, or published remote releases.</p>'
+
     narrative_facts = analysis.get("narrative_facts", [])
     narrative_body = '<p class="note">Every sentence below is generated from a structured fact and retains an evidence pointer. No business impact or personal ownership is invented.</p>'
     narrative_body += "".join(
@@ -525,6 +564,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ["Module and dependency graphs", "Completed", f"{graph_summary.get('internal_edges', 0)} internal edges; {graph_summary.get('dependency_nodes', 0)} dependency nodes; {graph_summary.get('cycles', 0)} module cycles"],
         ["Architectural boundaries", "Completed", f"{len(entrypoint_rows)} entrypoints; {len(violation_rows)} inferred boundary violations; {len(architectural_cycle_rows)} assessed cycles"],
         ["Engineering signals", "Completed", f"{generic.get('test_file_count', 0)} tests; {generic.get('ci_cd_file_count', 0)} CI/CD; {generic.get('docker_file_count', 0)} Docker; {generic.get('documentation_file_count', 0)} documentation files"],
+        ["Local release and CI analysis", "Completed", f"{release_summary.get('release_count', 0)} local releases; {ci_summary.get('workflow_count', 0)} workflows; {ci_summary.get('job_count', 0)} jobs"],
         ["Report generation", "Completed", "HTML report suite, canonical JSON, Git CSV data, and optional charts"],
         ["Portfolio and documentation support", "Completed", f"{len(notion_facts)} repository facts and {len(notion['personal_confirmation_required'])} personal confirmation prompts"],
     ]
@@ -570,6 +610,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Personal achievement candidates</h3>" + achievement_table + achievement_note + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Bus factor by system</h3>" + bus_factor_table + bus_factor_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
+        ("delivery.html", "Releases and CI", delivery_body),
         ("sbom.html", "SBOM and lockfiles", '<p>Open the lockfile-derived dependency inventory at <a href="../sbom/index.html">sbom/index.html</a>. The CycloneDX 1.6 artifact is available at <a href="../sbom/bom.json">sbom/bom.json</a>.</p>'),
         ("health.html", "Repository health", health_body),
         ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),

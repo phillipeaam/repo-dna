@@ -75,6 +75,20 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "medium",
         ))
 
+    delivery = generic.get("analysis", {}).get("delivery", {})
+    release_summary = delivery.get("releases", {}).get("summary", {})
+    if release_summary:
+        project_facts.append(fact(
+            f"Local Git tags describe {release_summary.get('release_count', 0)} releases; latest tag: {release_summary.get('latest_release') or 'none'}.",
+            "report/data/report.json#/generic_analysis/analysis/delivery/releases/summary",
+        ))
+    ci_summary = delivery.get("ci", {}).get("summary", {})
+    if ci_summary.get("workflow_count", 0):
+        project_facts.append(fact(
+            f"The repository versions {ci_summary['workflow_count']} CI workflows containing {ci_summary.get('job_count', 0)} detected jobs.",
+            "report/data/report.json#/generic_analysis/analysis/delivery/ci/summary",
+        ))
+
     technology_facts = [
         fact(f"Project detector selected {project['type']}.", "report/data/report.json#/project/type")
     ]

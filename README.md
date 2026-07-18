@@ -25,6 +25,7 @@ One command creates a timestamped analysis package containing:
 - Android components, screens, data/network layers, permissions, Gradle variants, and tests;
 - verified Flutter dependencies, widgets, routes, state management, bridges, tests, and flavors;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
+- local release cadence, per-tag change ranges, unreleased changes, changelog coverage, and static CI workflow evidence;
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - lockfile-resolved dependency versions and a CycloneDX 1.6 software bill of materials;
 - ownership classification with confidence and evidence;
@@ -53,6 +54,7 @@ sensitive content from the shareable package.
 | Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. Python receives native AST analysis; other languages currently use an explicit heuristic fallback. |
 | Dependencies and SBOM | Resolves direct and transitive versions from supported lockfiles, emits Package URLs and dependency edges, generates CycloneDX 1.6 JSON, and feeds version evidence into vulnerability/license correlation. |
 | Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
+| Releases and CI | Reconstructs release ranges from local tags, measures cadence and unreleased changes, checks changelog coverage, and statically inventories CI providers, triggers, jobs, steps, permissions, actions, cache, and artifacts. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
 | Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
@@ -83,6 +85,7 @@ Repository
 | System documentation | Per-system facts, metrics, architecture, dependencies, evolution, ownership, bus factor, and explicit unknowns. |
 | Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
 | Collaboration | Contributors, co-authored commits, shared files, author-system activity, and bus factor by system. |
+| Releases and CI | Local tags, cadence, per-release commits/churn, unreleased work, changelog coverage, workflows, triggers, jobs, and delivery/security signals. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
@@ -154,6 +157,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Developer onboarding dataset](docs/onboarding-dataset.md)
 - [Automated testing and fixtures](docs/testing.md)
 - [CI/CD and releases](docs/ci-cd.md)
+- [Local release and CI analysis](docs/local-delivery-analysis.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
@@ -183,6 +187,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - Per-dependency vulnerability and license correlation from imported scanner,
   SBOM, SPDX, and license reports
 - Lockfile resolution and CycloneDX 1.6 SBOM generation
+- Local release cadence, changelog coverage, and static CI workflow analysis
 - 📄 HTML, JSON, and CSV report generation
 - 📚 Portfolio and documentation support
 

@@ -40,6 +40,7 @@ REPORT_ROOT="$(find "$PROJECT_ROOT" -maxdepth 1 -type d -name '*_project_analysi
 [[ -n "$REPORT_ROOT" ]]
 [[ -s "$REPORT_ROOT/report/data/report.json" ]]
 [[ -s "$REPORT_ROOT/report/index.html" ]]
+[[ -s "$REPORT_ROOT/report/delivery.html" ]]
 [[ -s "$REPORT_ROOT/sbom/bom.json" ]]
 [[ -s "$REPORT_ROOT/sbom/index.html" ]]
 
@@ -60,6 +61,8 @@ assert canonical["schema_version"] == "1.1"
 assert canonical["project"]["type"] == ".NET"
 assert "generic_analysis" in canonical
 assert canonical["generic_analysis"]["analysis"]["dependency_inventory"]["sbom"]["bomFormat"] == "CycloneDX"
+assert canonical["generic_analysis"]["analysis"]["delivery"]["releases"]["status"] == "assessed"
+assert "ci" in canonical["generic_analysis"]["analysis"]["delivery"]
 print(f"validated {len(documents)} generated JSON documents")
 PY
 

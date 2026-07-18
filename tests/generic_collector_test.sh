@@ -108,6 +108,10 @@ assert analysis["narrative_facts"]
 assert analysis["onboarding"]["status"] == "collected"
 assert analysis["personal_achievement_candidates"]["status"] == "requires_author_filter"
 assert analysis["personal_achievement_candidates"]["candidates"] == []
+assert analysis["delivery"]["releases"]["summary"]["release_count"] == 0
+assert analysis["delivery"]["ci"]["summary"]["workflow_count"] == 1
+assert analysis["delivery"]["ci"]["workflows"][0]["provider"] == "GitHub Actions"
+assert analysis["delivery"]["ci"]["workflows"][0]["triggers"] == ["push"]
 PY
 
 python - "$TEST_ROOT/generic-analysis-focused.json" <<'PY'
@@ -157,6 +161,9 @@ assert all(item["system"].startswith("Module-") for item in data["analysis"]["bu
 assert all(author["author"].startswith("Contributor-") for item in data["analysis"]["bus_factor_by_system"]["systems"] for author in item["critical_authors"])
 assert data["analysis"]["onboarding"]["status"] == "redacted_by_privacy_mode"
 assert data["analysis"]["onboarding"]["commands"] == []
+assert data["analysis"]["delivery"]["releases"]["status"] == "redacted_by_privacy_mode"
+assert data["analysis"]["delivery"]["releases"]["releases"] == []
+assert data["analysis"]["delivery"]["ci"]["workflows"] == []
 assert "Canonical Developer" not in text
 PY
 

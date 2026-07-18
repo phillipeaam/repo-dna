@@ -22,6 +22,7 @@ from unity_analysis import analyze_unity
 from android_analysis import analyze_android
 from flutter_analysis import analyze_flutter
 from dependency_inventory import collect_dependency_inventory
+from delivery_analysis import analyze_delivery
 
 
 SOURCE_LANGUAGES = {
@@ -358,6 +359,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         author_system_ownership,
     )
     dependency_inventory = collect_dependency_inventory(root, generic["dependencies"])
+    delivery = analyze_delivery(root, generic.get("ci_cd_files", []))
     imported_quality = import_quality_results(root, generic["dependencies"], dependency_inventory)
     quality = {
         "code": code,
@@ -393,6 +395,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         "android": android,
         "flutter": flutter,
         "dependency_inventory": dependency_inventory,
+        "delivery": delivery,
         "personal_achievement_candidates": achievement_candidates,
         "frameworks": frameworks,
         "graphs": graphs,

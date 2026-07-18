@@ -160,6 +160,24 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
                 ["License categories are triage signals, not legal advice."],
             ))
 
+    delivery = analysis.get("delivery", {})
+    releases = delivery.get("releases", {})
+    ci_analysis = delivery.get("ci", {})
+    if releases:
+        items.append(evidence(
+            "local-release-history", "project", "fact",
+            f"Local Git history contains {releases.get('summary', {}).get('release_count', 0)} release tags and {releases.get('unreleased', {}).get('commits', 0)} commits after the latest tag.",
+            "high", ["#/generic_analysis/analysis/delivery/releases"],
+            {"summary": releases.get("summary", {}), "unreleased": releases.get("unreleased", {})}, releases.get("limitations", []),
+        ))
+    if ci_analysis:
+        items.append(evidence(
+            "local-ci-configuration", "quality", "fact",
+            f"Static analysis found {ci_analysis.get('summary', {}).get('workflow_count', 0)} CI workflows with {ci_analysis.get('summary', {}).get('job_count', 0)} jobs.",
+            "high", ["#/generic_analysis/analysis/delivery/ci"],
+            ci_analysis.get("summary", {}), ci_analysis.get("limitations", []),
+        ))
+
     health = analysis.get("health", {})
     if health:
         items.append(evidence(

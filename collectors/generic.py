@@ -470,6 +470,18 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
         dependency_inventory["sbom"]["components"] = []
         dependency_inventory["sbom"]["dependencies"] = []
     dependency_inventory["status"] = "redacted_by_privacy_mode"
+    delivery = analysis.get("delivery", {})
+    releases = delivery.get("releases", {})
+    releases["releases"] = []
+    releases["changelog"] = {"path": None, "versions": []}
+    releases.get("summary", {})["latest_release"] = None
+    releases.get("summary", {})["latest_release_date"] = None
+    releases.get("unreleased", {})["base_tag"] = None
+    releases["status"] = "redacted_by_privacy_mode"
+    ci_analysis = delivery.get("ci", {})
+    ci_analysis["workflows"] = []
+    ci_analysis["parse_errors"] = []
+    ci_analysis["status"] = "redacted_by_privacy_mode"
     analysis["quality"]["licenses"]["license_files"] = []
 
 
@@ -525,7 +537,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
                 docs.append(relative)
             if re.search(r"(^|/)(test|tests|spec|specs|__tests__)(/|$)", lower_path) or re.search(r"(test|tests|spec)\.[^.]+$", lower_name):
                 tests.append(relative)
-            if lower_path.startswith((".github/workflows/", ".gitlab-ci")) or lower_name in {"jenkinsfile", "azure-pipelines.yml", "bitbucket-pipelines.yml", "circle.yml"}:
+            if lower_path.startswith((".github/workflows/", ".gitlab-ci", ".gitlab/", ".circleci/")) or lower_name in {"jenkinsfile", "azure-pipelines.yml", "azure-pipelines.yaml", "bitbucket-pipelines.yml", "bitbucket-pipelines.yaml", "circle.yml"}:
                 ci_cd.append(relative)
             if lower_name.startswith("dockerfile") or lower_name in {"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}:
                 docker.append(relative)
