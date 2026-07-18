@@ -203,7 +203,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "repository-health", "health", "inference",
             f"Repository health score is {health.get('score')} with grade {health.get('grade')} and {health.get('assessment_coverage_percent', 0)}% assessment coverage.",
             "medium", ["#/generic_analysis/analysis/health"],
-            {"score": health.get("score"), "grade": health.get("grade"), "assessment_coverage_percent": health.get("assessment_coverage_percent"), "model_version": health.get("version")},
+            {"score": health.get("score"), "grade": health.get("grade"), "assessment_coverage_percent": health.get("assessment_coverage_percent"), "confidence": health.get("confidence"), "dimensions": health.get("dimensions", []), "model_version": health.get("version")},
             health.get("limitations", []),
         ))
 

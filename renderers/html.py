@@ -456,15 +456,20 @@ def render(data: dict[str, Any], output_path: Path) -> None:
 
     health = analysis.get("health", {})
     health_rows = [
-        [item["name"], item["score"], item["maximum"], item["status"], item["evidence"]]
+        [item["name"], item["score"] if item["score"] is not None else "Not assessed", item.get("evidence_coverage_percent", 0), item["status"], item["evidence"]]
         for item in health.get("dimensions", [])
     ]
     health_body = table([
         ("Health score", health.get("score", "Not assessed")),
         ("Grade", health.get("grade", "Not assessed")),
-        ("Assessment coverage", f"{health.get('assessment_coverage_percent', 0)}%"),
+        ("Evidence coverage", f"{health.get('assessment_coverage_percent', 0)}%"),
+        ("Confidence", health.get("confidence", "Unknown")),
         ("Model version", health.get("version", "Unknown")),
-    ]) + data_table(["Dimension", "Score", "Maximum", "Status", "Evidence"], health_rows, {1, 2})
+    ]) + data_table(["Dimension", "Score / 100", "Evidence coverage %", "Status", "Evidence"], health_rows, {1, 2})
+    for item in health.get("dimensions", []):
+        health_body += f"<h3>{esc(item['name'])}: score explanation</h3>"
+        health_body += "<h4>Proven point losses</h4>" + item_list(item.get("point_losses", []))
+        health_body += "<h4>Unavailable or unsupported evidence</h4>" + item_list(item.get("unavailable", []))
     health_body += "<h3>Method limitations</h3>" + item_list(health.get("limitations", []))
 
     delivery = analysis.get("delivery", {})

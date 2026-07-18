@@ -7,26 +7,35 @@ correctness of the software.
 ## Model contract
 
 - Model: `RepoDNA repository health heuristic`
-- Version: `1.2`
+- Version: `2.0`
 - Scale: 0-100 across assessed dimensions
 - Grades: A (85+), B (70+), C (55+), D (40+), E (below 40)
 - Output: `generic_analysis.analysis.health`
 
-The report includes a separate assessment coverage percentage. A dimension that
-cannot be verified is marked `not_assessed`, excluded from the score denominator,
-and lowers assessment coverage. It is never treated as a passing result.
+The report exposes two independent results. **Health Score** summarizes only
+observed evidence. **Evidence Coverage** reports how much of the weighted model
+could actually be evaluated. Confidence is `High` at 80% coverage, `Medium` at
+50%, and `Low` below 50%.
+
+Every check is classified as a proven good practice (`positive`), proven point
+loss (`problem`), unavailable information (`not_observed`), unsupported analysis
+(`unsupported`), or an external tool that was not executed/provided
+(`external_not_executed`). Only `positive` and `problem` affect the health score.
 
 ## Dimensions
 
-| Dimension | Maximum | Current evidence |
+| Dimension | Weight | Current evidence |
 |---|---:|---|
 | Documentation | 15 | Detected documentation files |
-| Testing evidence | 5-20 | Test files are locally observable (5 points). Imported test results add 8 assessable points and imported line coverage adds 7. Missing external artifacts reduce assessment coverage, not the score. |
-| Automation | 15 | CI/CD and Docker files |
-| Maintainability | 20 | Estimated decision-point complexity and imported linter status |
-| Knowledge distribution | 15 | Contributors visible in Git history |
-| Governance | 10 | Repository license evidence |
-| Dependency security | 5 | Imported scanner finding counts and severity |
+| Testing | 20 | Test files, imported test outcomes, and imported line coverage |
+| Architecture | 15 | AST/parser support for discovered source files |
+| Security | 15 | Imported scanner findings and severity |
+| Maintainability | 20 | Estimated complexity and imported linter results |
+| Repository Hygiene | 15 | CI/CD, repository license, and configuration evidence |
+
+Each dimension is displayed on a 0-100 scale, independently of its model weight.
+The report lists every proven point loss and every unavailable check beneath the
+dimension, so a low score can be distinguished from low evidence coverage.
 
 ## Important limitations
 

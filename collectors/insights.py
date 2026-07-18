@@ -175,6 +175,7 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
     complexity_rows.sort(key=lambda row: row["estimated_cyclomatic_complexity"], reverse=True)
     function_complexity.sort(key=lambda row: row["estimated_cyclomatic_complexity"], reverse=True)
     complexities = [row["estimated_cyclomatic_complexity"] for row in complexity_rows]
+    function_complexities = sorted(row["estimated_cyclomatic_complexity"] for row in function_complexity)
     analyzed_languages = sorted({item.get("language") for item in files if item.get("language") in SOURCE_LANGUAGES})
     return {
         "languages_analyzed": analyzed_languages,
@@ -204,6 +205,10 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
             "files_analyzed": len(complexity_rows),
             "average": round(sum(complexities) / len(complexities), 2) if complexities else None,
             "maximum": max(complexities) if complexities else None,
+            "function_count": len(function_complexities),
+            "function_average": round(sum(function_complexities) / len(function_complexities), 2) if function_complexities else None,
+            "function_median": function_complexities[len(function_complexities) // 2] if function_complexities else None,
+            "functions_over_threshold": sum(value >= 10 for value in function_complexities),
             "high_complexity_files": [row for row in complexity_rows if row["estimated_cyclomatic_complexity"] >= 20][:50],
             "high_complexity_functions": [row for row in function_complexity if row["estimated_cyclomatic_complexity"] >= 10][:100],
         },
@@ -233,72 +238,110 @@ def license_evidence(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dict[str, Any]) -> dict[str, Any]:
+def health_score(generic: dict[str, Any], quality: dict[str, Any], git_data: dict[str, Any], architecture: dict[str, Any]) -> dict[str, Any]:
     dimensions: list[dict[str, Any]] = []
 
-    def add(name: str, score: float, maximum: float, evidence: str, status: str = "assessed") -> None:
-        dimensions.append({"name": name, "score": round(score, 1), "maximum": maximum, "status": status, "evidence": evidence})
+    def dimension(name: str, weight: int, checks: list[dict[str, Any]]) -> None:
+        assessed = [item for item in checks if item["state"] in {"positive", "problem"}]
+        assessed_weight = sum(item["weight"] for item in assessed)
+        achieved = sum(item["points"] for item in assessed)
+        score = round(achieved / assessed_weight * 100, 1) if assessed_weight else None
+        dimensions.append({
+            "name": name, "weight": weight, "score": score, "maximum": 100,
+            "status": "assessed" if assessed_weight == weight else "partial" if assessed_weight else "not_assessed",
+            "evidence_coverage_percent": round(assessed_weight / weight * 100, 1),
+            "evidence": "; ".join(item["message"] for item in assessed) or "No supported evidence was available.",
+            "checks": checks,
+            "point_losses": [item["message"] for item in assessed if item["points"] < item["weight"]],
+            "unavailable": [item["message"] for item in checks if item["state"] not in {"positive", "problem"}],
+        })
 
     docs = generic.get("documentation_file_count", 0)
-    tests = generic.get("test_file_count", 0)
-    ci = generic.get("ci_cd_file_count", 0)
-    complexity = quality["code"]["complexity"]
-    add("Documentation", min(15, 5 + docs * 2) if docs else 0, 15, f"{docs} documentation files")
-    test_results = quality["tests"]
-    coverage_result = quality["coverage"]
-    testing_score = min(5, tests) if tests else 0
-    testing_maximum = 5
-    testing_evidence = [f"{tests} test files"]
+    dimension("Documentation", 15, [{"name":"repository_documentation","weight":15,"points":min(15, docs * 3),"state":"positive" if docs >= 5 else "problem","message":f"{docs} documentation files observed; full credit requires 5."}])
+
+    tests = generic.get("test_file_count", 0); test_results = quality["tests"]; coverage_result = quality["coverage"]
+    testing_checks = [{"name":"test_files","weight":8,"points":8 if tests >= 5 else min(8, tests * 1.6),"state":"positive" if tests >= 5 else "problem","message":f"{tests} test files observed; full credit requires 5."}]
     if test_results["status"] == "imported" and test_results.get("total", 0):
-        testing_score += 8 * test_results.get("passed", 0) / test_results["total"]
-        testing_maximum += 8
-        testing_evidence.append(f"{test_results['passed']}/{test_results['total']} imported tests passed")
-    else:
-        testing_evidence.append(test_results.get("message", "Test results were not observed"))
+        ratio = test_results.get("passed", 0) / test_results["total"]
+        testing_checks.append({"name":"test_results","weight":6,"points":6*ratio,"state":"positive" if ratio >= .9 else "problem","message":f"{test_results.get('passed',0)}/{test_results['total']} imported tests passed."})
+    else: testing_checks.append({"name":"test_results","weight":6,"points":0,"state":"external_not_executed","message":test_results.get("message", "No test-result artifact was provided or discovered.")})
     if coverage_result["status"] == "imported" and coverage_result.get("line_coverage_percent") is not None:
-        testing_score += 7 * coverage_result["line_coverage_percent"] / 100
-        testing_maximum += 7
-        testing_evidence.append(f"Imported line coverage {coverage_result['line_coverage_percent']}%")
+        value = coverage_result["line_coverage_percent"]
+        testing_checks.append({"name":"line_coverage","weight":6,"points":6*value/100,"state":"positive" if value >= 70 else "problem","message":f"Imported line coverage is {value}%."})
+    else: testing_checks.append({"name":"line_coverage","weight":6,"points":0,"state":"external_not_executed","message":coverage_result.get("message", "No coverage artifact was provided or discovered.")})
+    dimension("Testing", 20, testing_checks)
+
+    code = quality["code"]; parser_rows = code.get("parser_coverage", []); parsed = sum(item.get("ast_files",0) for item in parser_rows); fallback = sum(item.get("heuristic_files",0) for item in parser_rows)
+    if parsed + fallback:
+        ratio = parsed / (parsed + fallback)
+        architecture_checks = [{"name":"parser_support","weight":6,"points":3+3*ratio,"state":"positive" if ratio >= .5 else "problem","message":f"{parsed} AST-parsed and {fallback} heuristic-fallback source files."}]
+    else: architecture_checks = [{"name":"parser_support","weight":6,"points":0,"state":"unsupported","message":"No supported source files were available for architecture analysis."}]
+    assessed_modules=architecture.get("coupling",{}).get("summary",{}).get("assessed_modules",0)
+    if assessed_modules:
+        cycles=architecture.get("summary",{}).get("cycles",0); violations=architecture.get("summary",{}).get("boundary_violations",0)
+        architecture_checks.extend([
+            {"name":"dependency_cycles","weight":5,"points":max(0,5-cycles),"state":"positive" if cycles==0 else "problem","message":f"{cycles} approximate module dependency cycles across {assessed_modules} assessed modules."},
+            {"name":"boundary_violations","weight":4,"points":max(0,4-violations),"state":"positive" if violations==0 else "problem","message":f"{violations} inferred architectural boundary violations."},
+        ])
     else:
-        testing_evidence.append(coverage_result.get("message", "Coverage was not observed"))
-    add("Testing evidence", min(testing_maximum, testing_score), testing_maximum, "; ".join(testing_evidence))
-    add("Automation", min(15, ci * 8 + generic.get("docker_file_count", 0) * 3), 15, f"{ci} CI/CD files")
-    if complexity["average"] is None:
-        add("Maintainability", 0, 20, "No supported source files", "not_assessed")
-    else:
-        avg = complexity["average"]
-        base = max(0, 18 - max(avg - 5, 0))
-        lint = quality["linters"]
-        lint_bonus = 2 if lint["status"] == "imported" and lint.get("issues", 0) == 0 else 1 if lint["status"] == "imported" else 0
-        add("Maintainability", min(20, base + lint_bonus), 20, f"Estimated average file complexity {avg}; linter results {lint['status']} with {lint.get('issues', 0)} issues")
-    contributors = git_data.get("contributors_count", 0)
-    add("Knowledge distribution", min(15, 5 + contributors * 2) if contributors else 0, 15, f"{contributors} contributors in Git history")
-    license_name = quality["licenses"]["repository_license"]
-    add("Governance", 10 if license_name not in {"Unknown", "Unclassified"} else 2 if license_name == "Unclassified" else 0, 10, f"Repository license: {license_name}")
+        architecture_checks.extend([
+            {"name":"dependency_cycles","weight":5,"points":0,"state":"unsupported","message":"No module graph was available for cycle analysis."},
+            {"name":"boundary_violations","weight":4,"points":0,"state":"unsupported","message":"No module boundaries were available for direction analysis."},
+        ])
+    dimension("Architecture", 15, architecture_checks)
+
     security = quality["vulnerabilities"]
     if security["status"] == "imported":
-        severities = security.get("severities", {})
-        penalty = severities.get("critical", 0) * 2 + severities.get("high", 0) + (security.get("findings", 0) - severities.get("critical", 0) - severities.get("high", 0)) * 0.25
-        add("Dependency security", max(0, 5 - penalty), 5, f"Imported {security.get('findings', 0)} findings: {severities}")
-    else:
-        add("Dependency security", 0, 5, security["note"], "not_assessed")
+        severities=security.get("severities",{}); findings=security.get("findings",0) or 0
+        penalty=min(15, severities.get("critical",0)*6+severities.get("high",0)*3+max(0,findings-severities.get("critical",0)-severities.get("high",0))*.5)
+        security_checks=[{"name":"scanner_results","weight":15,"points":15-penalty,"state":"positive" if findings==0 else "problem","message":f"Imported scanner evidence contains {findings} findings: {severities}."}]
+    else: security_checks=[{"name":"scanner_results","weight":15,"points":0,"state":"external_not_executed","message":security.get("message","No security scanner artifact was provided or discovered.")}]
+    dimension("Security", 15, security_checks)
 
-    assessed = [item for item in dimensions if item["status"] == "assessed"]
-    achieved = sum(item["score"] for item in assessed)
-    maximum = sum(item["maximum"] for item in assessed)
-    score = round(achieved / maximum * 100, 1) if maximum else None
-    coverage = round(maximum / 100 * 100, 1)
+    complexity=code["complexity"]; maintainability=[]
+    if complexity["average"] is None: maintainability.append({"name":"complexity","weight":15,"points":0,"state":"unsupported","message":"No supported source files were available for complexity analysis."})
+    elif complexity.get("function_count"):
+        function_count=complexity["function_count"]; high=complexity.get("functions_over_threshold",0); median=complexity.get("function_median",1); ratio=high/function_count
+        points=max(0,15-min(10,ratio*30)-min(5,max(median-5,0)*.5))
+        maintainability.append({"name":"complexity","weight":15,"points":points,"state":"positive" if high==0 and median<=5 else "problem","message":f"AST measured {function_count} functions: median complexity {median}; {high} functions at or above 10."})
+    else:
+        files=complexity.get("files_analyzed",0); high=len(complexity.get("high_complexity_files",[])); ratio=high/files if files else 1
+        points=max(0,15*(1-ratio*.6))
+        maintainability.append({"name":"complexity","weight":15,"points":points,"state":"positive" if high==0 else "problem","message":f"Fallback analysis flagged {high} of {files} files at or above complexity 20; file size can influence this heuristic."})
+    lint=quality["linters"]
+    if lint["status"]=="imported":
+        issues=lint.get("issues",0) or 0; maintainability.append({"name":"linter_results","weight":5,"points":max(0,5-min(5,issues*.25)),"state":"positive" if issues==0 else "problem","message":f"Imported linter evidence contains {issues} issues."})
+    else: maintainability.append({"name":"linter_results","weight":5,"points":0,"state":"external_not_executed","message":lint.get("message","No linter artifact was provided or discovered.")})
+    dimension("Maintainability",20,maintainability)
+
+    ci=generic.get("ci_cd_file_count",0); license_name=quality["licenses"]["repository_license"]; configs=generic.get("configuration_file_count",0)
+    dimension("Repository Hygiene",15,[
+        {"name":"automation","weight":6,"points":6 if ci else 0,"state":"positive" if ci else "problem","message":f"{ci} CI/CD files observed."},
+        {"name":"license","weight":4,"points":4 if license_name not in {"Unknown","Unclassified"} else 0,"state":"positive" if license_name not in {"Unknown","Unclassified"} else "problem","message":f"Repository license: {license_name}."},
+        {"name":"configuration","weight":5,"points":min(5,configs),"state":"positive" if configs>=5 else "problem","message":f"{configs} configuration files observed; full credit requires 5."},
+    ])
+
+    assessed_dimensions=[item for item in dimensions if item["score"] is not None]
+    assessed_weight=sum(item["weight"]*item["evidence_coverage_percent"]/100 for item in dimensions)
+    score=round(sum(item["score"]*item["weight"]*item["evidence_coverage_percent"]/100 for item in assessed_dimensions)/assessed_weight,1) if assessed_weight else None
+    coverage=round(assessed_weight,1)
     grade = None if score is None else "A" if score >= 85 else "B" if score >= 70 else "C" if score >= 55 else "D" if score >= 40 else "E"
     return {
         "model": "RepoDNA repository health heuristic",
-        "version": "1.2",
+        "version": "2.0",
         "score": score,
         "grade": grade,
         "assessment_coverage_percent": coverage,
+        "confidence": "High" if coverage >= 80 else "Medium" if coverage >= 50 else "Low",
         "dimensions": dimensions,
+        "evidence_state_definitions": {
+            "positive":"A good practice was supported by repository evidence.", "problem":"A point loss was supported by repository evidence.",
+            "not_observed":"Information was unavailable.", "unsupported":"The current analyzer could not assess this signal.",
+            "external_not_executed":"A compatible external-tool artifact was not provided or discovered."
+        },
         "limitations": [
             "The score measures repository evidence, not product quality or team performance.",
-            "Unassessed dimensions are excluded from the score and reduce assessment coverage.",
+            "Unavailable, unsupported, and externally unexecuted checks are excluded from the score and reduce evidence coverage.",
             "AST coverage varies by language; heuristic fallback complexity is not equivalent to language-native static analysis.",
         ],
     }
@@ -389,7 +432,7 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
         **imported_quality,
         "licenses": license_evidence(root, generic["_files"]),
     }
-    health = health_score(generic, quality, generic["git"])
+    health = health_score(generic, quality, generic["git"], architecture_model)
     return {
         "architecture": {
             "languages_analyzed": code["languages_analyzed"],

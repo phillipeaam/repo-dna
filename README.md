@@ -69,7 +69,7 @@ One command creates a timestamped analysis package containing:
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - validated point-in-time analysis snapshots with optional Git persistence;
-- compatible health-score trends with assessment coverage and model-version safeguards;
+- compatible health-score trends with evidence coverage, confidence, and model-version safeguards;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation, Notion, and provenance-aware LLM evidence;
 - charts for commits, churn, hotspots, systems, authors, and architectural
@@ -136,7 +136,7 @@ Repository
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
 | Quality and compliance | Complexity plus imported coverage, test, linter, security-scanner, and license evidence. |
 | SBOM and lockfiles | Parsed lockfiles, exact versions, direct/transitive classification, PURLs, dependency evidence, and CycloneDX JSON. |
-| Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
+| Repository health | Separate Health Score and Evidence Coverage, confidence, six normalized dimensions, proven point losses, unavailable evidence, and model limitations. |
 | Health score trends | Historical scores, period delta, compatibility exclusions, and an optional PNG chart. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
 | Portfolio and CV | Approval-gated claims and X-Y-Z achievement drafts. |

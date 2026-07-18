@@ -138,9 +138,11 @@ assert analysis["quality"]["coverage"]["line_coverage_percent"] is None
 assert analysis["quality"]["coverage"]["message"] == "No coverage artifact was provided or discovered."
 assert analysis["quality"]["vulnerabilities"]["status"] == "not_observed"
 assert analysis["quality"]["vulnerabilities"]["findings"] is None
-assert analysis["health"]["version"] == "1.2"
-testing = next(item for item in analysis["health"]["dimensions"] if item["name"] == "Testing evidence")
-assert testing["maximum"] == 5, testing
+assert analysis["health"]["version"] == "2.0"
+assert analysis["health"]["confidence"] in {"Low", "Medium", "High"}
+testing = next(item for item in analysis["health"]["dimensions"] if item["name"] == "Testing")
+assert testing["maximum"] == 100 and testing["evidence_coverage_percent"] == 40, testing
+assert {item["state"] for item in testing["checks"]} == {"problem", "external_not_executed"}
 assert analysis["conclusions"]["facts"] and analysis["conclusions"]["inferences"]
 assert all(item["classification"] == "fact" and item["evidence"] for item in analysis["conclusions"]["facts"])
 assert all(item["classification"] == "inference" and item["evidence"] for item in analysis["conclusions"]["inferences"])

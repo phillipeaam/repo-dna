@@ -110,6 +110,7 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
             "score": analysis.get("health", {}).get("score"),
             "grade": analysis.get("health", {}).get("grade"),
             "assessment_coverage_percent": analysis.get("health", {}).get("assessment_coverage_percent", 0),
+            "confidence": analysis.get("health", {}).get("confidence"),
             "model_version": analysis.get("health", {}).get("version"),
             "dimensions": analysis.get("health", {}).get("dimensions", []),
         },
