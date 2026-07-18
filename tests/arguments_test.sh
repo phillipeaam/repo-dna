@@ -10,6 +10,7 @@ parse_arguments
 [[ -z "$AUTHOR" && -z "$SINCE" && -z "$UNTIL" ]]
 [[ "$INCLUDE_SOURCE" == false && "$PRIVACY_MODE" == standard ]]
 [[ "$SAVE_SNAPSHOT" == false ]]
+[[ -z "$COMPARE_WITH" ]]
 [[ ${#OWNED_ROOTS[@]} -eq 0 ]]
 
 parse_arguments --author Developer --since 2024-01-01 --until 2025-01-01 \
@@ -27,6 +28,9 @@ parse_arguments --portfolio-profile confirmations.json
 
 parse_arguments --save-snapshot
 [[ "$SAVE_SNAPSHOT" == true ]]
+
+parse_arguments --compare-with previous.json
+[[ "$COMPARE_WITH" == previous.json ]]
 
 if (parse_arguments --privacy-mode unsafe) >/dev/null 2>&1; then
     echo 'Invalid privacy mode was accepted.' >&2

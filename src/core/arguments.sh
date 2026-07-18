@@ -10,6 +10,7 @@ show_usage() {
         '  --portfolio-profile <file>  Add personally confirmed portfolio claims.' \
         '  --include-source          Copy classified C# source into the report.' \
         '  --save-snapshot           Persist a versioned snapshot under .repodna/snapshots.' \
+        '  --compare-with <file>     Compare this run with a previous analysis snapshot.' \
         '  --privacy-mode <mode>     Privacy level: standard or strict.' \
         '  -h, --help                Show this help.' '' 'Examples:' \
         '  bash dna-analysis.sh' \
@@ -27,11 +28,12 @@ parse_arguments() {
     OWNED_ROOTS=()
     INCLUDE_SOURCE=false
     SAVE_SNAPSHOT=false
+    COMPARE_WITH=''
     PRIVACY_MODE='standard'
     PORTFOLIO_PROFILE=''
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --author|--since|--until|--owned-root|-owned-root|--privacy-mode|--portfolio-profile)
+            --author|--since|--until|--owned-root|-owned-root|--privacy-mode|--portfolio-profile|--compare-with)
                 [[ -n "${2:-}" ]] || die "Option $1 requires a value."
                 case "$1" in
                     --author) AUTHOR="$2" ;;
@@ -40,6 +42,7 @@ parse_arguments() {
                     --owned-root|-owned-root) OWNED_ROOTS+=("${2#./}") ;;
                     --privacy-mode) PRIVACY_MODE="$2" ;;
                     --portfolio-profile) PORTFOLIO_PROFILE="$2" ;;
+                    --compare-with) COMPARE_WITH="$2" ;;
                 esac
                 shift 2 ;;
             --include-source) INCLUDE_SOURCE=true; shift ;;

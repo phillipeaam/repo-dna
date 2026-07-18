@@ -138,6 +138,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [LLM evidence package](docs/llm-evidence.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
+- [Period comparison](docs/period-comparison.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
@@ -249,6 +250,13 @@ Persist a compact snapshot for future period comparison with:
 
 ```bash
 bash ./dna-analysis.sh --save-snapshot
+```
+
+On later runs, RepoDNA automatically compares against the latest persisted
+snapshot. Select a specific baseline with:
+
+```bash
+bash ./dna-analysis.sh --compare-with .repodna/snapshots/<snapshot>.json
 ```
 
 To add personally confirmed portfolio context, copy

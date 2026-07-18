@@ -6,6 +6,10 @@ if [[ -n "$PORTFOLIO_PROFILE" ]]; then
     [[ -f "$PORTFOLIO_PROFILE" ]] || die "Portfolio profile not found: $PORTFOLIO_PROFILE"
     PORTFOLIO_PROFILE="$(cd "$(dirname "$PORTFOLIO_PROFILE")" && pwd)/$(basename "$PORTFOLIO_PROFILE")"
 fi
+if [[ -n "$COMPARE_WITH" ]]; then
+    [[ -f "$COMPARE_WITH" ]] || die "Comparison snapshot not found: $COMPARE_WITH"
+    COMPARE_WITH="$(cd "$(dirname "$COMPARE_WITH")" && pwd)/$(basename "$COMPARE_WITH")"
+fi
 
 # Resolve Python once so collectors, renderers, and charts use the same runtime.
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
@@ -100,6 +104,9 @@ fi
 SNAPSHOT_NAME="${TIMESTAMP}_${SNAPSHOT_SHORT_COMMIT:-uncommitted}.json"
 SNAPSHOT_FILE="$SNAPSHOT_DIR/$SNAPSHOT_NAME"
 
+# Define period-comparison outputs.
+COMPARISON_DIR="$OUTPUT_DIR/comparison"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -169,6 +176,7 @@ mkdir -p \
     "$NOTION_DIR" \
     "$LLM_DIR" \
     "$SNAPSHOT_DIR" \
+    "$COMPARISON_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

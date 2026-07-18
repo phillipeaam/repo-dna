@@ -207,6 +207,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`notion/evidence.json\`: facts, evidence, inferences, and confirmation prompts
 - \`llm/evidence.json\`: compact, provenance-rich evidence prepared for LLM use
 - \`snapshots/\`: validated point-in-time analysis snapshot and versioned schema
+- \`comparison/\`: structured and navigable comparison with a previous snapshot
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 
@@ -214,8 +215,9 @@ $SOURCE_FOLDER_DESCRIPTION
 
 1. \`report/index.html\`
 2. \`notion/evidence.json\`
-3. \`llm/evidence.json\`
-4. \`report/data/report.json\`
+3. \`comparison/index.html\`
+4. \`llm/evidence.json\`
+5. \`report/data/report.json\`
 
 ## Limitations
 

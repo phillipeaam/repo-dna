@@ -35,6 +35,21 @@ cp "$SCRIPT_DIR/schemas/analysis-snapshot-1.0.0.schema.json" \
     "$SNAPSHOT_DIR/analysis-snapshot-1.0.0.schema.json" ||
     die "Could not copy the analysis snapshot schema."
 
+COMPARISON_BASELINE="$COMPARE_WITH"
+if [[ -z "$COMPARISON_BASELINE" && -d "$PERSISTENT_SNAPSHOT_DIR" ]]; then
+    COMPARISON_BASELINE="$(find "$PERSISTENT_SNAPSHOT_DIR" -maxdepth 1 -type f -name '*.json' \
+        ! -name 'analysis-snapshot-*.schema.json' -print 2>/dev/null | sort | tail -n 1)"
+fi
+COMPARISON_ARGS=()
+[[ -z "$COMPARISON_BASELINE" ]] || COMPARISON_ARGS+=(--baseline "$COMPARISON_BASELINE")
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/snapshot_compare.py" \
+    "$SNAPSHOT_FILE" "$COMPARISON_DIR/comparison.json" "$COMPARISON_DIR/index.html" \
+    --schema "$SCRIPT_DIR/schemas/analysis-comparison-1.0.0.schema.json" \
+    "${COMPARISON_ARGS[@]}" || die "Could not compare analysis periods."
+cp "$SCRIPT_DIR/schemas/analysis-comparison-1.0.0.schema.json" \
+    "$COMPARISON_DIR/analysis-comparison-1.0.0.schema.json" ||
+    die "Could not copy the period-comparison schema."
+
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
     "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
     die "Could not render the standardized HTML reports."

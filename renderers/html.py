@@ -526,6 +526,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("health.html", "Repository health", health_body),
         ("narrative.html", "Evidence-based narrative", narrative_body),
         ("portfolio.html", "Portfolio and CV", '<p>The approval-gated portfolio draft is available at <a href="../portfolio/index.html">portfolio/index.html</a>. Repository facts remain unapproved until explicitly confirmed.</p>'),
+        ("comparison.html", "Period comparison", '<p>Compare this run with the previous persisted snapshot at <a href="../comparison/index.html">comparison/index.html</a>. The structured deltas are available in <a href="../comparison/comparison.json">comparison.json</a>.</p>'),
         ("charts.html", "Charts", charts_body),
         ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),

@@ -46,6 +46,6 @@ history, diagnostic text, secret values, and full dependency findings. Detailed
 evidence remains in the canonical report for that run.
 
 Snapshots generated with different privacy scopes, author filters, health-model
-versions, or major snapshot schemas should not be compared without explicitly
-accounting for those differences. Period comparison and health trends will consume
-this contract in subsequent RepoDNA features.
+versions, or major snapshot schemas receive explicit compatibility warnings.
+See [Period comparison](period-comparison.md) for automatic and explicit baseline
+selection.

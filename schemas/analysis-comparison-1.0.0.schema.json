@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/analysis-comparison-1.0.0.schema.json",
+  "title": "RepoDNA Period Comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "status", "baseline", "current", "compatibility", "period", "inventory", "languages", "architecture", "systems", "quality", "health", "git", "risks", "changes", "limitations"],
+  "properties": {
+    "$schema": {"const": "./analysis-comparison-1.0.0.schema.json"},
+    "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_analysis_comparison"},
+    "status": {"enum": ["no_baseline", "compared", "scope_mismatch", "incompatible_schema"]},
+    "baseline": {"type": ["object", "null"]}, "current": {"type": "object"},
+    "compatibility": {"type": "object", "required": ["comparable", "schema_compatible", "warnings"], "properties": {"comparable": {"type": "boolean"}, "schema_compatible": {"type": "boolean"}, "warnings": {"type": "array", "items": {"type": "string"}}}},
+    "period": {"type": "object"}, "inventory": {"type": "object"}, "languages": {"type": "array"},
+    "architecture": {"type": "object"}, "systems": {"type": "array"}, "quality": {"type": "object"},
+    "health": {"type": "object"}, "git": {"type": "object"}, "risks": {"type": "object"},
+    "changes": {"type": "array", "items": {"type": "object"}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}
