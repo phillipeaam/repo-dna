@@ -60,8 +60,10 @@ for path in documents:
         json.load(stream)
 
 canonical = json.loads((root / "report/data/report.json").read_text(encoding="utf-8"))
-assert canonical["schema_version"] == "1.2"
-assert canonical["$schema"] == "./report-1.2.0.schema.json"
+assert canonical["schema_version"] == "1.3"
+assert canonical["$schema"] == "./report-1.3.0.schema.json"
+assert not ({"current_metrics", "architecture", "technologies", "systems"} & canonical.keys())
+assert set(canonical["project"]) == {"name", "type", "code_root"}
 assert canonical["project"]["type"] == ".NET"
 assert "generic_analysis" in canonical
 assert set(canonical["canonical_metrics"]) == {"technology_count", "dependency_count", "system_count", "configuration_file_count", "test_file_count"}
@@ -69,9 +71,17 @@ assert canonical["generic_analysis"]["analysis"]["dependency_inventory"]["sbom"]
 assert canonical["generic_analysis"]["analysis"]["delivery"]["releases"]["status"] == "assessed"
 assert "ci" in canonical["generic_analysis"]["analysis"]["delivery"]
 assert canonical["generic_analysis"]["analysis"]["forge_activity"]["status"] == "imported"
-assert canonical["generic_analysis"]["$schema"] == "./generic-analysis-1.1.0.schema.json"
-assert (root / "report/data/report-1.2.0.schema.json").is_file()
-assert (root / "report/data/generic-analysis-1.1.0.schema.json").is_file()
+assert canonical["generic_analysis"]["$schema"] == "./generic-analysis-core-1.0.0.schema.json"
+assert canonical["specialized_analysis"] == {}
+generic = canonical["generic_analysis"]
+assert {"possible_modules", "configuration_files", "test_files", "script_files", "documentation_files"} <= generic.keys()
+assert {"architecture", "graphs", "systems"} <= generic["analysis"].keys()
+assert {"entrypoints", "boundaries"} <= generic["analysis"]["architecture"].keys()
+assert {"module_graph", "dependency_graph"} <= generic["analysis"]["graphs"].keys()
+assert "hotspots" in generic["git"]
+assert (root / "report/data/report-1.3.0.schema.json").is_file()
+assert (root / "report/data/generic-analysis-1.2.0.schema.json").is_file()
+assert (root / "report/data/generic-analysis-core-1.0.0.schema.json").is_file()
 assert not (root / "report/data/generic-analysis.json").exists()
 assert (root / "notion/notion-evidence-1.0.0.schema.json").is_file()
 assert (root / "portfolio/portfolio-draft-1.0.0.schema.json").is_file()

@@ -71,6 +71,8 @@ assert "README.md" in data["documentation_files"]
 assert "tests/test_feature.py" in data["test_files"]
 assert ".github/workflows/ci.yml" in data["ci_cd_files"]
 assert "Dockerfile" in data["docker_files"]
+assert "src/analyze.sh" in data["script_files"]
+assert data["script_file_count"] == 1
 assert data["dependencies"]["total"] == 4
 manifests = {item["path"]: item for item in data["dependencies"]["manifests"]}
 assert manifests["requirements-reporting.txt"]["dependency_count"] == 2

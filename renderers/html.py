@@ -108,14 +108,11 @@ def page_document(
 def render(data: dict[str, Any], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     project = data["project"]
-    profile = data.get("analysis_profile", {"unity": False, "csharp": True})
+    profile = data.get("analysis_profile", {"unity": False})
     generic = data.get("generic_analysis", {})
     canonical = data.get("canonical_metrics", {})
     analysis = generic.get("analysis", {})
-    metrics = data["current_metrics"]
-    architecture = data["architecture"]
-    technologies = data["technologies"]
-    systems = data["systems"]
+    specialized = data.get("specialized_analysis", {})
     history = data["history"]
     collaboration = data["collaboration"]
     risks = data["risks"]
@@ -133,8 +130,6 @@ def render(data: dict[str, Any], output_path: Path) -> None:
             ("Files", generic.get("file_count", 0)),
             ("Technologies", canonical.get("technology_count", 0)),
         ]
-    if profile["csharp"]:
-        headline[0:0] = [("C# files", metrics["csharp_files"]), ("C# lines", metrics["csharp_lines"])]
 
     overview = [
         ("Repository", project["name"]),
@@ -143,27 +138,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Privacy mode", privacy["mode"]),
         ("Source included", str(privacy["source_included"]).lower()),
     ]
-    if profile["unity"]:
-        overview.extend([
-            ("Product", project["product"]),
-            ("Company", project["company"]),
-            ("Unity version", project["unity_version"]),
-        ])
-
-    if profile["unity"]:
-        architecture_keys = list(architecture)
-        system_keys = list(systems)
-    elif profile["csharp"]:
-        architecture_keys = [
-            "interfaces", "architecture_signals", "networking_signals",
-            "services_and_data_signals", "performance_signals", "technical_debt_markers",
-        ]
-        system_keys = ["likely_system_files"]
-    else:
-        architecture_keys = []
-        system_keys = []
-
-    empty = '<p class="empty">No specialized collector is available for this project type yet.</p>'
+    empty = '<p class="empty">No repository evidence was detected for this section.</p>'
     inventory = table([
         ("Files", generic.get("file_count", 0)),
         ("Languages", len(generic.get("languages", []))),
@@ -172,6 +147,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Test files", canonical.get("test_file_count", 0)),
         ("CI/CD files", len(generic.get("ci_cd_files", []))),
         ("Docker files", len(generic.get("docker_files", []))),
+        ("Scripts", generic.get("script_file_count", 0)),
     ])
     language_table = table([
         (f"{item['name']} ({item['files']} files)", item["lines"])
@@ -376,9 +352,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     graphs_body += "<h3>External dependency graph</h3>" + (data_table(["Dependency", "Declared", "Import references", "Source modules", "Manifests"], dependency_rows, {2, 3}) if dependency_rows else empty)
     graphs_body += "<h3>Module cycles</h3>" + (data_table(["#", "Strongly connected modules"], cycle_rows, {0}) if cycle_rows else '<p class="empty">No module cycles were detected.</p>')
     graphs_body += "<h3>Unresolved relative imports</h3>" + (data_table(["Source", "Import"], unresolved_rows) if unresolved_rows else '<p class="empty">No unresolved relative imports were detected.</p>')
-    architecture_body = table(labeled(architecture, architecture_keys)) if architecture_keys else (
-        '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
-    )
+    architecture_body = '<p class="note">Architecture candidates combine module structure, supported-language symbols, imports, and naming evidence. They remain heuristics until reviewed.</p>' + module_table
     architecture_body += "<h3>Multi-language design-pattern signals</h3>" + pattern_table
     architecture_body += "<h3>Parser coverage</h3>" + parser_table
     architecture_body += "<h3>Specialized framework adapters</h3>" + framework_table
@@ -397,8 +371,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     architecture_body += "<h3>Boundary violations</h3>" + (data_table(["Source", "Layer", "Target", "Target layer", "References", "Severity", "Rule"], violation_rows, {4}) if violation_rows else '<p class="empty">No violations were found among classified module boundaries.</p>')
     architecture_body += "<h3>Architectural cycles</h3>" + (data_table(["Modules", "Layers", "Cross-boundary", "Severity"], architectural_cycle_rows) if architectural_cycle_rows else '<p class="empty">No module cycles were detected.</p>')
     architecture_body += '<p class="note">Layers are inferred from directory tokens and require review. A reported violation is an architectural signal, not proof that the repository intended to follow Clean Architecture.</p>'
-    systems_body = table(labeled(systems, system_keys)) if system_keys else ""
-    systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
+    systems_body = '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
     systems_body += "<h3>Framework concepts</h3>" + framework_table
     hotspot_model = generic.get("git", {}).get("hotspot_model", {})
@@ -597,16 +570,9 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     notion_body += '<p><a href="../notion/evidence.json">Open the complete structured evidence JSON</a></p>'
 
     language_names = ", ".join(item["name"] for item in generic.get("languages", [])[:5]) or "None detected"
-    architecture_evidence = (
-        f"{architecture.get('architecture_signals', 0)} pattern signals and {architecture.get('interfaces', 0)} interfaces"
-        if profile["csharp"] else f"{len(generic.get('possible_modules', []))} module candidates"
-    )
+    architecture_evidence = f"{len(generic.get('possible_modules', []))} module candidates; {graph_summary.get('internal_edges', 0)} internal dependency edges"
     if framework_analysis.get("count", 0):
         architecture_evidence += f"; {framework_analysis['count']} specialized framework adapters matched"
-    system_evidence = (
-        f"{systems.get('likely_system_files', 0)} likely system files"
-        if profile["csharp"] else f"{len(system_rows)} systems inferred from Git paths"
-    )
     design_patterns = analysis.get("architecture", {}).get("design_patterns", [])
     design_status = "Available" if analysis.get("architecture", {}).get("languages_analyzed") else "Not available for this profile"
     design_evidence = f"{len(design_patterns)} pattern categories with {sum(item['matches'] for item in design_patterns)} heuristic matches"
@@ -628,7 +594,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ]
     capability_table = data_table(["Analysis capability", "Status", "Evidence produced"], capability_rows)
 
-    unity_analysis = analysis.get("unity", {})
+    unity_analysis = specialized.get("unity", analysis.get("unity", {}))
     unity_config = unity_analysis.get("configuration", {})
     unity_system_rows = [
         [item["name"], item["confidence"], item["file_count"], item["score"], ", ".join(item.get("primary_directories", [])), item.get("git", {}).get("matching_commit_touches", 0), len(item.get("git", {}).get("frequently_changed_files", []))]

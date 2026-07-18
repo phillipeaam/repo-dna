@@ -22,12 +22,11 @@ def fact(statement: str, evidence: str, confidence: str = "high") -> dict[str, A
 def build(data: dict[str, Any]) -> dict[str, Any]:
     project = data["project"]
     profile = data["analysis_profile"]
-    metrics = data["current_metrics"]
     history = data["history"]
-    technologies = data["technologies"]
-    systems = data["systems"]
+    canonical = data.get("canonical_metrics", {})
     collaboration = data["collaboration"]
     generic = data.get("generic_analysis", {})
+    specialized = data.get("specialized_analysis", {})
     framework_findings = generic.get("analysis", {}).get("frameworks", {}).get("detected", [])
     quality_findings = generic.get("analysis", {}).get("quality", {})
     activity_ownership = generic.get("analysis", {}).get("author_system_ownership", {})
@@ -38,10 +37,10 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         fact(f"Repository classified as {project['type']}.", "report/data/report.json#/project/type"),
         fact(f"Detected code root: {project['code_root']}.", "report/data/report.json#/project/code_root"),
     ]
-    if profile["csharp"]:
+    for language in generic.get("languages", []):
         project_facts.append(fact(
-            f"Current tree contains {metrics['csharp_files']} C# files and {metrics['csharp_lines']} lines.",
-            "report/data/report.json#/current_metrics",
+            f"Current tree contains {language['files']} {language['name']} files and approximately {language['lines']} lines.",
+            "report/data/report.json#/generic_analysis/languages",
         ))
     imported_tests = quality_findings.get("tests", {})
     if imported_tests.get("status") == "imported":
@@ -92,28 +91,26 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     technology_facts = [
         fact(f"Project detector selected {project['type']}.", "report/data/report.json#/project/type")
     ]
-    if profile["csharp"] and metrics["csharp_files"] > 0:
-        technology_facts.append(fact("C# is present in the analyzed source tree.", "report/data/report.json#/current_metrics/csharp_files"))
     if profile["unity"]:
         technology_facts.append(fact("Unity project markers were detected.", "report/data/report.json#/analysis_profile/unity"))
     if profile.get("godot"):
-        godot = generic.get("analysis", {}).get("godot", {})
+        godot = specialized.get("godot", generic.get("analysis", {}).get("godot", {}))
         summary = godot.get("summary", {})
         technology_facts.append(fact(
             f"Godot project markers were detected with {summary.get('scenes', 0)} scenes and {summary.get('scripts', 0)} scripts analyzed.",
             "report/data/report.json#/generic_analysis/analysis/godot",
         ))
     if profile.get("unreal"):
-        unreal = generic.get("analysis", {}).get("unreal", {})
+        unreal = specialized.get("unreal", generic.get("analysis", {}).get("unreal", {}))
         summary = unreal.get("summary", {})
         technology_facts.append(fact(
             f"Unreal project markers were detected with {summary.get('modules', 0)} modules, {summary.get('source_files', 0)} C++ source files, and {summary.get('blueprint_assets', 0)} binary Content assets inventoried.",
             "report/data/report.json#/generic_analysis/analysis/unreal",
         ))
-    if technologies["dependency_count"] > 0:
+    if canonical.get("dependency_count", 0) > 0:
         technology_facts.append(fact(
-            f"Dependency manifest contains approximately {technologies['dependency_count']} entries.",
-            "report/data/report.json#/technologies/dependency_count",
+            f"Detected dependency manifests contain {canonical['dependency_count']} declarations.",
+            "report/data/report.json#/canonical_metrics/dependency_count",
             "medium",
         ))
     for language in generic.get("languages", []):
@@ -129,17 +126,6 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         ))
 
     major_systems: list[dict[str, Any]] = []
-    if systems["likely_system_files"] > 0:
-        major_systems.append({
-            "name": "Unconfirmed system candidates",
-            "kind": "inference",
-            "confidence": "low",
-            "evidence": ["report/data/report.json#/systems/likely_system_files"],
-            "files": [],
-            "commits": [],
-            "author_involvement": "unknown",
-            "confirmation_required": True,
-        })
     for module in generic.get("possible_modules", [])[:20]:
         major_systems.append({
             "name": module["path"],

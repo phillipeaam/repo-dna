@@ -36,6 +36,12 @@ Core modules must not source pipeline modules. Collectors do not write reports,
 and renderers do not inspect the repository. Both communicate through
 `report/data/report.json`. Collector staging files are private pipeline details.
 
+The canonical model keeps stack-neutral results under `generic_analysis`.
+Modules, symbols, imports, internal dependency edges, cycles, inferred
+boundaries, entrypoints, tests, configuration, documentation, and hotspots are
+always produced by this base layer. Technology-specific results are additive;
+they never provide the fallback architecture for an unrelated repository.
+
 `collectors/insights.py` enriches the generic collector output with
 language-aware symbols, imports, architecture and pattern signals, system
 candidates, quality evidence, narrative facts, and the versioned repository

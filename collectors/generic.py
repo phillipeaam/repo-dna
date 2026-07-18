@@ -499,6 +499,7 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     result["test_files"] = []
     result["ci_cd_files"] = []
     result["docker_files"] = []
+    result["script_files"] = []
     inventory = result.get("technology_inventory", {})
     inventory["configuration_files"] = []
     inventory["documentation_files"] = []
@@ -725,6 +726,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     tests: list[str] = []
     ci_cd: list[str] = []
     docker: list[str] = []
+    scripts: list[str] = []
     manifests: list[dict[str, Any]] = []
     module_stats: dict[str, Counter[str]] = defaultdict(Counter)
 
@@ -770,6 +772,8 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
                 ci_cd.append(relative)
             if lower_name.startswith("dockerfile") or lower_name in {"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}:
                 docker.append(relative)
+            if extension in {".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd"}:
+                scripts.append(relative)
             if is_dependency_manifest(lower_name, extension):
                 names = dependency_names(path)
                 manifests.append({"path": relative, "dependency_count": len(names), "dependencies": names})
@@ -782,8 +786,8 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     modules.sort(key=lambda item: item["file_count"], reverse=True)
 
     result = {
-        "$schema": "./generic-analysis-1.1.0.schema.json",
-        "schema_version": "1.1",
+        "$schema": "./generic-analysis-1.2.0.schema.json",
+        "schema_version": "1.2",
         "collector": "generic",
         "file_count": len(files),
         "language_count": len(language_files),
@@ -792,6 +796,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
         "test_file_count": len(tests),
         "ci_cd_file_count": len(ci_cd),
         "docker_file_count": len(docker),
+        "script_file_count": len(scripts),
         "languages": [
             {"name": language, "files": count, "lines": language_lines[language]}
             for language, count in language_files.most_common()
@@ -804,6 +809,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
         "test_files": sorted(tests)[:300],
         "ci_cd_files": sorted(ci_cd)[:100],
         "docker_files": sorted(docker)[:100],
+        "script_files": sorted(scripts)[:300],
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
         "technology_inventory": {},
         "possible_modules": modules[:50],

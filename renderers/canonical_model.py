@@ -33,10 +33,18 @@ def canonical_metrics(report: dict[str, Any]) -> dict[str, int]:
 
 
 def finalize(report: dict[str, Any]) -> dict[str, Any]:
-    metrics = canonical_metrics(report)
-    report["canonical_metrics"] = metrics
-    # Compatibility views must mirror the canonical value, never recalculate it.
-    report.setdefault("technologies", {})["dependency_count"] = metrics["dependency_count"]
+    generic = report.get("generic_analysis", {})
+    analysis = generic.get("analysis", {})
+    profile = report.get("analysis_profile", {})
+    specialized = {}
+    for name in ("unity", "android", "flutter", "godot", "unreal"):
+        value = analysis.pop(name, None)
+        if profile.get(name) and value is not None:
+            specialized[name] = value
+    generic["$schema"] = "./generic-analysis-core-1.0.0.schema.json"
+    generic["schema_version"] = "1.0"
+    report["specialized_analysis"] = specialized
+    report["canonical_metrics"] = canonical_metrics(report)
     return report
 
 

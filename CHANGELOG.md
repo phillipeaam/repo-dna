@@ -7,6 +7,10 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Removed legacy Unity/C# metric, architecture, technology, and system views
+  from the canonical model; generic reports now use stack-neutral structural
+  analysis exclusively, with specialized analyzers as additive sections.
+
 - Expanded generic technology detection across runtimes, package managers,
   dependency-manifest families, build tools, CI/CD, tests, linting,
   configuration, documentation, and containerization.

@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/phillipeaam/repo-dna/schemas/report-1.3.0.schema.json","title":"RepoDNA canonical report","type":"object","additionalProperties":false,
+  "required":["$schema","schema_version","generated_at","privacy","project","analysis_profile","generic_analysis","specialized_analysis","canonical_metrics","history","collaboration","risks","visualizations","evidence"],
+  "properties":{
+    "$schema":{"const":"./report-1.3.0.schema.json"},"schema_version":{"const":"1.3"},"generated_at":{"type":"string","minLength":1},
+    "privacy":{"type":"object","required":["mode","source_included"],"properties":{"mode":{"enum":["standard","strict"]},"source_included":{"type":"boolean"}}},
+    "project":{"type":"object","additionalProperties":false,"required":["name","type","code_root"],"properties":{"name":{"type":"string"},"type":{"type":"string"},"code_root":{"type":"string"}}},
+    "analysis_profile":{"type":"object","additionalProperties":false,"required":["unity","android","flutter","godot","unreal"],"properties":{"unity":{"type":"boolean"},"android":{"type":"boolean"},"flutter":{"type":"boolean"},"godot":{"type":"boolean"},"unreal":{"type":"boolean"}}},
+    "generic_analysis":{"$ref":"./generic-analysis-core-1.0.0.schema.json"},
+    "specialized_analysis":{"type":"object","additionalProperties":false,"properties":{"unity":{"type":"object"},"android":{"type":"object"},"flutter":{"type":"object"},"godot":{"type":"object"},"unreal":{"type":"object"}}},
+    "canonical_metrics":{"type":"object","additionalProperties":false,"required":["technology_count","dependency_count","system_count","configuration_file_count","test_file_count"],"properties":{"technology_count":{"$ref":"#/$defs/count"},"dependency_count":{"$ref":"#/$defs/count"},"system_count":{"$ref":"#/$defs/count"},"configuration_file_count":{"$ref":"#/$defs/count"},"test_file_count":{"$ref":"#/$defs/count"}}},
+    "history":{"type":"object","required":["scope","total_commits","merge_commits","non_merge_commits","active_days","first_date","last_date","lines_added","lines_removed","unique_paths_changed"]},"collaboration":{"$ref":"#/$defs/object"},"risks":{"$ref":"#/$defs/object"},"visualizations":{"type":"object","required":["charts"]},"evidence":{"$ref":"#/$defs/object"}
+  },"$defs":{"object":{"type":"object"},"count":{"type":"integer","minimum":0}}
+}

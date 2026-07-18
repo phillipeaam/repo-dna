@@ -1,7 +1,6 @@
 write_structured_reports() {
 local CONTRIBUTION_TEXT PROJECT_IDENTITY_TEXT CURRENT_METRICS_TEXT
-local JSON_REPO JSON_PROJECT_TYPE JSON_PRODUCT JSON_COMPANY JSON_AUTHOR
-local JSON_GENERATED JSON_UNITY JSON_FIRST_COMMIT JSON_LAST_COMMIT
+local JSON_AUTHOR JSON_FIRST_COMMIT JSON_LAST_COMMIT
 local SOURCE_FOLDER_DESCRIPTION PROJECT_README_METADATA
 echo "[9/12] Writing summaries and structured data..."
 
@@ -75,8 +74,8 @@ Recommended Review Order
 1. summary/00_executive_summary.txt
 2. summary/01_notion_evidence_guide.md
 3. project/00_repository_information.txt
-4. project/17_likely_system_files.txt
-5. project/18_architecture_pattern_signals.txt
+4. report/data/report.json
+5. project/01_folder_tree.txt
 6. contribution/00_contribution_summary.txt
 7. contribution/04_top_changed_files.txt
 8. contribution/05_top_changed_directories.txt
@@ -93,40 +92,7 @@ things. Files touched are not the same as files authored.
 EOF
 
 # Escape JSON values.
-JSON_REPO="$(json_escape "$DISPLAY_REPO_NAME")"
-JSON_PROJECT_TYPE="$(json_escape "$PROJECT_TYPE")"
-JSON_PRODUCT="$(json_escape "$DISPLAY_PRODUCT_NAME")"
-JSON_COMPANY="$(json_escape "$DISPLAY_COMPANY_NAME")"
 JSON_AUTHOR="$(json_escape "$DISPLAY_AUTHOR")"
-JSON_GENERATED="$(json_escape "$GENERATED_AT")"
-JSON_UNITY="$(json_escape "${UNITY_VERSION:-Unknown}")"
-
-# Write project JSON.
-cat > "$DATA_DIR/project_summary.json" <<EOF
-{
-  "repository": "$JSON_REPO",
-  "project_type": "$JSON_PROJECT_TYPE",
-  "product_name": "$JSON_PRODUCT",
-  "company_name": "$JSON_COMPANY",
-  "history_scope": "$(json_escape "$HISTORY_SCOPE")",
-  "author_filter": "$JSON_AUTHOR",
-  "generated_at": "$JSON_GENERATED",
-  "unity_version": "$JSON_UNITY",
-  "code_root": "$(json_escape "$CODE_ROOT")",
-  "current_project_metrics": {
-    "csharp_files": ${CURRENT_METRICS[csharp_files]},
-    "csharp_source_lines": ${CURRENT_METRICS[csharp_lines]},
-    "unity_scenes": ${CURRENT_METRICS[scenes]},
-    "unity_prefabs": ${CURRENT_METRICS[prefabs]},
-    "animation_clips": ${CURRENT_METRICS[animations]},
-    "animator_controllers": ${CURRENT_METRICS[controllers]},
-    "shader_files": ${CURRENT_METRICS[shaders]},
-    "assembly_definitions": ${CURRENT_METRICS[asmdefs]},
-    "uxml_files": ${CURRENT_METRICS[uxml]},
-    "uss_files": ${CURRENT_METRICS[uss]}
-  }
-}
-EOF
 
 # Write contribution JSON when commits matched.
 if ((GIT_HISTORY[total_commits] > 0)); then

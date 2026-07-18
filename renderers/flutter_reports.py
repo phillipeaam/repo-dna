@@ -41,7 +41,7 @@ def validate(document: dict[str, Any], schema_path: Path) -> None:
 
 def main() -> int:
     parser=argparse.ArgumentParser(); parser.add_argument("report",type=Path); parser.add_argument("output",type=Path); parser.add_argument("--schema",type=Path,required=True); args=parser.parse_args()
-    report=json.loads(args.report.read_text(encoding="utf-8")); data=report.get("generic_analysis",{}).get("analysis",{}).get("flutter",{})
+    report=json.loads(args.report.read_text(encoding="utf-8")); data=report.get("specialized_analysis",{}).get("flutter",report.get("generic_analysis",{}).get("analysis",{}).get("flutter",{}))
     if data.get("status") not in {"assessed","redacted_by_privacy_mode"}: raise SystemExit("Canonical report does not contain a Flutter analysis.")
     document={"$schema":"./flutter-analysis-1.0.0.schema.json","schema_version":"1.0.0","artifact_type":"repodna_flutter_analysis",**data}; validate(document,args.schema)
     args.output.mkdir(parents=True,exist_ok=True); args.output.joinpath("analysis.json").write_text(json.dumps(document,indent=2,ensure_ascii=False)+"\n",encoding="utf-8"); render_text(data,args.output); args.output.joinpath("index.html").write_text(html(data),encoding="utf-8"); return 0

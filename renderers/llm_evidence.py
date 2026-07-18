@@ -48,6 +48,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     privacy = data.get("privacy", {})
     generic = data.get("generic_analysis", {})
     analysis = generic.get("analysis", {})
+    specialized = data.get("specialized_analysis", {})
     git_data = generic.get("git", {})
     architecture = analysis.get("architecture", {})
     quality = analysis.get("quality", {})
@@ -244,12 +245,12 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "medium" if suggested else "high", ["#/generic_analysis/analysis/onboarding/commands"],
             command, ["Suggested commands were not executed and require team confirmation."] if suggested else ["Declared command existence does not prove that all local prerequisites are installed."], suggested,
         ))
-    unity = analysis.get("unity", {})
+    unity = specialized.get("unity", analysis.get("unity", {}))
     for index, system in enumerate(unity.get("gameplay_systems", [])[:50], 1):
         items.append(evidence(
             f"unity-gameplay-{index}", "system", "inference",
             f"Unity gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
-            system.get("confidence", "low"), ["#/generic_analysis/analysis/unity/gameplay_systems"],
+            system.get("confidence", "low"), ["#/specialized_analysis/unity/gameplay_systems"],
             {key: system.get(key) for key in ("score", "file_count", "primary_directories", "git")},
             ["Gameplay categories are inferred from paths, symbols, imports, and Git evidence and require confirmation."], True,
         ))
@@ -257,83 +258,83 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         items.append(evidence(
             f"unity-signal-{index}", "quality", "candidate",
             f"Unity review signal {signal['type']} was detected with {signal['confidence']} confidence.",
-            signal.get("confidence", "low"), ["#/generic_analysis/analysis/unity/signals"], signal,
+            signal.get("confidence", "low"), ["#/specialized_analysis/unity/signals"], signal,
             ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
         ))
-    android = analysis.get("android", {})
+    android = specialized.get("android", analysis.get("android", {}))
     if android.get("status") in {"assessed", "redacted_by_privacy_mode"}:
         items.append(evidence(
             "android-analysis-summary", "technology", "fact",
             f"Android analysis recorded {android.get('summary', {}).get('components', 0)} component signals, {android.get('summary', {}).get('screens', 0)} screens, and {android.get('summary', {}).get('permissions', 0)} declared permissions.",
-            "high", ["#/generic_analysis/analysis/android"], android.get("summary", {}),
+            "high", ["#/specialized_analysis/android"], android.get("summary", {}),
             ["Static declarations do not prove runtime use or behavior."],
         ))
     for index, component in enumerate(android.get("components", [])[:100], 1):
         items.append(evidence(
             f"android-component-{index}", "system", "fact" if component.get("manifest") else "inference",
             f"Android {component['type']} evidence: {component['name']}.",
-            "high" if component.get("manifest") else "medium", ["#/generic_analysis/analysis/android/components"], component,
+            "high" if component.get("manifest") else "medium", ["#/specialized_analysis/android/components"], component,
             ["Naming-based source component classification requires inheritance confirmation."], not bool(component.get("manifest")),
         ))
-    flutter = analysis.get("flutter", {})
+    flutter = specialized.get("flutter", analysis.get("flutter", {}))
     if flutter.get("status") in {"assessed", "redacted_by_privacy_mode"}:
         items.append(evidence(
             "flutter-analysis-summary", "technology", "fact",
             f"Verified Flutter analysis recorded {flutter.get('summary', {}).get('widgets', 0)} widgets, {flutter.get('summary', {}).get('screens', 0)} screens, and {flutter.get('summary', {}).get('routes', 0)} route signals.",
-            "high", ["#/generic_analysis/analysis/flutter"], flutter.get("summary", {}),
+            "high", ["#/specialized_analysis/flutter"], flutter.get("summary", {}),
             ["Routes and architecture can be created dynamically and require runtime confirmation."],
         ))
     for index, manager in enumerate(flutter.get("state_management", [])[:20], 1):
         items.append(evidence(
             f"flutter-state-{index}", "architecture", "inference",
             f"Flutter state-management evidence matched {manager['name']} with {manager['confidence']} confidence.",
-            manager.get("confidence", "medium"), ["#/generic_analysis/analysis/flutter/state_management"], manager,
+            manager.get("confidence", "medium"), ["#/specialized_analysis/flutter/state_management"], manager,
             ["Package presence does not prove consistent application-wide architecture."], True,
         ))
-    godot = analysis.get("godot", {})
+    godot = specialized.get("godot", analysis.get("godot", {}))
     if godot.get("status") in {"assessed", "redacted_by_privacy_mode"}:
         summary = godot.get("summary", {})
         items.append(evidence(
             "godot-analysis-summary", "technology", "fact",
             f"Godot analysis recorded {summary.get('scenes', 0)} scenes, {summary.get('scripts', 0)} scripts, {summary.get('autoloads', 0)} autoloads, and {summary.get('export_presets', 0)} export presets.",
-            "high", ["#/generic_analysis/analysis/godot"], summary,
+            "high", ["#/specialized_analysis/godot"], summary,
             ["Static project files do not prove runtime behavior or successful exports."],
         ))
     for index, system in enumerate(godot.get("gameplay_systems", [])[:50], 1):
         items.append(evidence(
             f"godot-gameplay-{index}", "system", "inference",
             f"Godot gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
-            system.get("confidence", "medium"), ["#/generic_analysis/analysis/godot/gameplay_systems"], system,
+            system.get("confidence", "medium"), ["#/specialized_analysis/godot/gameplay_systems"], system,
             ["Gameplay categories are static evidence-based candidates and require human confirmation."], True,
         ))
     for index, signal in enumerate(godot.get("signals", [])[:100], 1):
         items.append(evidence(
             f"godot-signal-{index}", "quality", "candidate",
             f"Godot review signal {signal['type']} was detected with {signal['confidence']} confidence.",
-            signal.get("confidence", "medium"), ["#/generic_analysis/analysis/godot/signals"], signal,
+            signal.get("confidence", "medium"), ["#/specialized_analysis/godot/signals"], signal,
             ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
         ))
-    unreal = analysis.get("unreal", {})
+    unreal = specialized.get("unreal", analysis.get("unreal", {}))
     if unreal.get("status") in {"assessed", "redacted_by_privacy_mode"}:
         summary = unreal.get("summary", {})
         items.append(evidence(
             "unreal-analysis-summary", "technology", "fact",
             f"Unreal analysis recorded {summary.get('modules', 0)} modules, {summary.get('source_files', 0)} source files, {summary.get('reflected_types', 0)} reflected types, {summary.get('blueprint_assets', 0)} Content assets, and {summary.get('maps', 0)} maps.",
-            "high", ["#/generic_analysis/analysis/unreal"], summary,
+            "high", ["#/specialized_analysis/unreal"], summary,
             ["Binary Blueprint graphs and map internals were not decoded."],
         ))
     for index, system in enumerate(unreal.get("gameplay_systems", [])[:50], 1):
         items.append(evidence(
             f"unreal-gameplay-{index}", "system", "inference",
             f"Unreal gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
-            system.get("confidence", "medium"), ["#/generic_analysis/analysis/unreal/gameplay_systems"], system,
+            system.get("confidence", "medium"), ["#/specialized_analysis/unreal/gameplay_systems"], system,
             ["Gameplay categories are evidence-backed candidates requiring human confirmation."], True,
         ))
     for index, signal in enumerate(unreal.get("signals", [])[:100], 1):
         items.append(evidence(
             f"unreal-signal-{index}", "quality", "candidate",
             f"Unreal review signal {signal['type']} was detected with {signal['confidence']} confidence.",
-            signal.get("confidence", "medium"), ["#/generic_analysis/analysis/unreal/signals"], signal,
+            signal.get("confidence", "medium"), ["#/specialized_analysis/unreal/signals"], signal,
             ["This is a heuristic signal, not a confirmed bug; validate with code review and Unreal profiling tools."], True,
         ))
     technical_impact = git_data.get("technical_impact", {})

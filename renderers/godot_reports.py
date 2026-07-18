@@ -97,7 +97,7 @@ def main() -> int:
     parser.add_argument("--schema", type=Path, required=True)
     args = parser.parse_args()
     report = json.loads(args.report.read_text(encoding="utf-8"))
-    data = report.get("generic_analysis", {}).get("analysis", {}).get("godot", {})
+    data = report.get("specialized_analysis", {}).get("godot", report.get("generic_analysis", {}).get("analysis", {}).get("godot", {}))
     if data.get("status") not in {"assessed", "redacted_by_privacy_mode"}:
         raise SystemExit("Canonical report does not contain a Godot analysis.")
     document = {"$schema": "./godot-analysis-1.0.0.schema.json", "schema_version": "1.0.0", "artifact_type": "repodna_godot_analysis", **data}

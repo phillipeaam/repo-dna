@@ -22,14 +22,15 @@ def _slug_time(value: str) -> str:
 def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
     generic = data.get("generic_analysis", {})
     analysis = generic.get("analysis", {})
+    specialized = data.get("specialized_analysis", {})
     architecture = analysis.get("architecture", {})
     quality = analysis.get("quality", {})
     git_data = generic.get("git", {})
     dependency_resolution = quality.get("dependency_resolution", {})
-    unity = analysis.get("unity", {})
+    unity = specialized.get("unity", analysis.get("unity", {}))
     unity_configuration = unity.get("configuration", {})
-    android = analysis.get("android", {})
-    flutter = analysis.get("flutter", {})
+    android = specialized.get("android", analysis.get("android", {}))
+    flutter = specialized.get("flutter", analysis.get("flutter", {}))
     generated_at = data.get("generated_at", "")
     canonical = data.get("canonical_metrics", {})
     return {

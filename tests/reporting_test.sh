@@ -210,8 +210,8 @@ fi
 import json, sys
 data=json.load(open(sys.argv[1],encoding="utf-8"))
 data["analysis_profile"]["unity"]=True
-data["project"].update({"type":"Unity","unity_version":"6000.0.1f1","product":"Fixture","company":"Fixture"})
-data["generic_analysis"]["analysis"]["unity"]={
+data["project"]["type"]="Unity"
+data["specialized_analysis"]["unity"]={
  "status":"assessed",
  "configuration":{"build":{"enabled_scene_count":1,"enabled_scenes":["Assets/Scenes/Main.unity"]},"rendering":{"pipeline":"URP"},"input":{"system":"New Input System"},"packages":{"com.unity.inputsystem":"1.11.2"},"quality_levels":["High"],"assemblies":{"asmdef_count":2,"test_assemblies":["Assets/Tests.asmdef"]},"native_plugins":[]},
  "gameplay_systems":[{"name":"Combat","confidence":"high","file_count":18,"score":40,"primary_directories":["Assets/_Project/Combat"],"git":{"matching_commit_touches":42,"frequently_changed_files":[{"path":"Assets/_Project/Combat/Damage.cs","commits":11}]}}],
@@ -324,7 +324,7 @@ done
 [[ -s "$TEST_ROOT/report/contributors-1.html" ]]
 
 grep -q '<!doctype html>' "$TEST_ROOT/report/index.html"
-grep -q 'C# files</span><strong>12' "$TEST_ROOT/report/executive-summary.html"
+! grep -q 'C# files</span>' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Commits</span><strong>42' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Files</span><strong>25' "$TEST_ROOT/report/executive-summary.html"
 grep -q 'Repository at a glance' "$TEST_ROOT/report/executive-summary.html"

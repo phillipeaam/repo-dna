@@ -52,7 +52,7 @@ def validate(data: dict[str, Any], schema_path: Path) -> None:
 
 def main() -> int:
     parser=argparse.ArgumentParser(); parser.add_argument("report",type=Path); parser.add_argument("output",type=Path); parser.add_argument("--schema",type=Path,required=True); args=parser.parse_args()
-    report=json.loads(args.report.read_text(encoding="utf-8")); data=report.get("generic_analysis",{}).get("analysis",{}).get("android",{})
+    report=json.loads(args.report.read_text(encoding="utf-8")); data=report.get("specialized_analysis",{}).get("android",report.get("generic_analysis",{}).get("analysis",{}).get("android",{}))
     if data.get("status") not in {"assessed","redacted_by_privacy_mode"}: raise SystemExit("Canonical report does not contain an Android analysis.")
     document={"$schema":"./android-analysis-1.0.0.schema.json","schema_version":"1.0.0","artifact_type":"repodna_android_analysis",**data}
     validate(document,args.schema); args.output.mkdir(parents=True,exist_ok=True)

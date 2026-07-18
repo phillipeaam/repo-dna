@@ -104,7 +104,11 @@ sensitive content from the shareable package.
 ```text
 Repository
     -> project detector and analysis profile
-    -> generic and specialized collectors
+    -> generic collector (always)
+       -> modules, imports, boundaries, cycles, entrypoints, tests, scripts,
+          configuration, documentation, dependencies, and hotspots
+    -> specialized analyzers (only when detected)
+       -> Unity, Android, Flutter, Godot, Unreal, and language/framework detail
     -> canonical report/data/report.json
     -> HTML, Notion, portfolio, and LLM evidence renderers
     -> privacy scan

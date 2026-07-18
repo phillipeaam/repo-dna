@@ -12,56 +12,15 @@ report_line_count() {
     fi
 }
 
-report_dependency_manifest() {
-    case "$PROJECT_TYPE" in
-        Unity)   [[ -f Packages/manifest.json ]] && printf 'Packages/manifest.json' ;;
-        Node)    [[ -f package.json ]] && printf 'package.json' ;;
-        Python)
-            if [[ -f pyproject.toml ]]; then
-                printf 'pyproject.toml'
-            elif [[ -f requirements.txt ]]; then
-                printf 'requirements.txt'
-            fi
-            ;;
-        Android)
-            if [[ -f build.gradle.kts ]]; then
-                printf 'build.gradle.kts'
-            elif [[ -f build.gradle ]]; then
-                printf 'build.gradle'
-            else
-                find . -maxdepth 3 -type f \( -name build.gradle -o -name build.gradle.kts \) -print -quit 2>/dev/null
-            fi
-            ;;
-        .NET)    find . -maxdepth 2 -type f -name '*.csproj' -print -quit 2>/dev/null ;;
-        Flutter) [[ -f pubspec.yaml ]] && printf 'pubspec.yaml' ;;
-        *)       printf '' ;;
-    esac
-}
-
-report_dependency_count() {
-    local manifest="$1"
-
-    [[ -f "$manifest" ]] || { printf '0'; return; }
-
-    case "$manifest" in
-        *.csproj) grep -Eic '<PackageReference[[:space:]>]' "$manifest" || true ;;
-        requirements.txt) awk 'NF && $0 !~ /^[[:space:]]*#/' "$manifest" | wc -l | tr -d '[:space:]' ;;
-        *) grep -Ec '^[[:space:]]*["[:alnum:]_.@/-]+["[:space:]]*[:=]' "$manifest" || true ;;
-    esac
-}
-
 write_structured_report_json() {
     local output_file="$1"
     local ownership_review_count
     local contributor_count
-    local dependency_manifest
-    local dependency_count
     local unity_analysis=false
     local android_analysis=false
     local flutter_analysis=false
     local godot_analysis=false
     local unreal_analysis=false
-    local csharp_analysis=false
     local generic_analysis_json
     local charts_json='[]'
     local -a chart_items=()
@@ -71,9 +30,6 @@ write_structured_report_json() {
     [[ "$PROJECT_TYPE" == Flutter ]] && flutter_analysis=true
     [[ "$PROJECT_TYPE" == Godot ]] && godot_analysis=true
     [[ "$PROJECT_TYPE" == Unreal ]] && unreal_analysis=true
-    [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
-    dependency_manifest="$(report_dependency_manifest)"
-    dependency_count="$(report_dependency_count "$dependency_manifest")"
     if [[ -f "${GENERIC_ANALYSIS_FILE:-}" ]]; then
         generic_analysis_json="$(cat "$GENERIC_ANALYSIS_FILE")"
     else
@@ -106,8 +62,8 @@ write_structured_report_json() {
 
     cat > "$output_file" <<EOF
 {
-  "\$schema": "./report-1.2.0.schema.json",
-  "schema_version": "1.2",
+  "\$schema": "./report-1.3.0.schema.json",
+  "schema_version": "1.3",
   "generated_at": "$(json_escape "$GENERATED_AT")",
   "privacy": {
     "mode": "$(json_escape "$PRIVACY_MODE")",
@@ -116,55 +72,17 @@ write_structured_report_json() {
   "project": {
     "name": "$(json_escape "$DISPLAY_REPO_NAME")",
     "type": "$(json_escape "$PROJECT_TYPE")",
-    "product": "$(json_escape "$DISPLAY_PRODUCT_NAME")",
-    "company": "$(json_escape "$DISPLAY_COMPANY_NAME")",
-    "code_root": "$(json_escape "$CODE_ROOT")",
-    "unity_version": "$(json_escape "${UNITY_VERSION:-Unknown}")"
+    "code_root": "$(json_escape "$CODE_ROOT")"
   },
   "analysis_profile": {
     "unity": $unity_analysis,
     "android": $android_analysis,
     "flutter": $flutter_analysis,
     "godot": $godot_analysis,
-    "unreal": $unreal_analysis,
-    "csharp": $csharp_analysis,
-    "dependency_manifest": "$(json_escape "$dependency_manifest")"
+    "unreal": $unreal_analysis
   },
   "generic_analysis": $generic_analysis_json,
   "canonical_metrics": {},
-  "current_metrics": {
-    "csharp_files": ${CURRENT_METRICS[csharp_files]:-0},
-    "csharp_lines": ${CURRENT_METRICS[csharp_lines]:-0},
-    "scenes": ${CURRENT_METRICS[scenes]:-0},
-    "prefabs": ${CURRENT_METRICS[prefabs]:-0},
-    "animations": ${CURRENT_METRICS[animations]:-0},
-    "animator_controllers": ${CURRENT_METRICS[controllers]:-0},
-    "shaders": ${CURRENT_METRICS[shaders]:-0},
-    "assembly_definitions": ${CURRENT_METRICS[asmdefs]:-0},
-    "uxml_files": ${CURRENT_METRICS[uxml]:-0},
-    "uss_files": ${CURRENT_METRICS[uss]:-0}
-  },
-  "architecture": {
-    "scriptable_objects": $(report_line_count "$PROJECT_DIR/13_scriptable_objects.txt"),
-    "monobehaviours": $(report_line_count "$PROJECT_DIR/14_monobehaviours.txt"),
-    "interfaces": $(report_line_count "$PROJECT_DIR/15_interfaces.txt"),
-    "architecture_signals": $(report_line_count "$PROJECT_DIR/18_architecture_pattern_signals.txt"),
-    "networking_signals": $(report_line_count "$PROJECT_DIR/19_networking_signals.txt"),
-    "services_and_data_signals": $(report_line_count "$PROJECT_DIR/20_services_and_data_signals.txt"),
-    "performance_signals": $(report_line_count "$PROJECT_DIR/21_performance_signals.txt"),
-    "technical_debt_markers": $(report_line_count "$PROJECT_DIR/22_technical_debt_markers.txt")
-  },
-  "technologies": {
-    "dependency_count": ${dependency_count:-0},
-    "shader_files": ${CURRENT_METRICS[shaders]:-0},
-    "ui_toolkit_files": $((${CURRENT_METRICS[uxml]:-0} + ${CURRENT_METRICS[uss]:-0})),
-    "assembly_definitions": ${CURRENT_METRICS[asmdefs]:-0}
-  },
-  "systems": {
-    "likely_system_files": $(report_line_count "$PROJECT_DIR/17_likely_system_files.txt"),
-    "resources_assets": $(report_line_count "$PROJECT_DIR/10_resources_assets.txt"),
-    "addressables_assets": $(report_line_count "$PROJECT_DIR/11_addressables_assets.txt")
-  },
   "history": {
     "scope": "$(json_escape "$HISTORY_SCOPE")",
     "total_commits": ${GIT_HISTORY[total_commits]:-0},

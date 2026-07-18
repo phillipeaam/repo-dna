@@ -1,0 +1,9 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/phillipeaam/repo-dna/schemas/generic-analysis-core-1.0.0.schema.json","title":"RepoDNA canonical generic analysis","type":"object",
+  "required":["$schema","schema_version","collector","file_count","language_count","configuration_file_count","documentation_file_count","test_file_count","ci_cd_file_count","docker_file_count","script_file_count","languages","configuration_files","documentation_files","test_files","ci_cd_files","docker_files","script_files","dependencies","technology_inventory","possible_modules","git","analysis"],
+  "properties":{
+    "$schema":{"const":"./generic-analysis-core-1.0.0.schema.json"},"schema_version":{"const":"1.0"},"collector":{"const":"generic"},
+    "analysis":{"type":"object","required":["architecture","code","systems","author_system_ownership","bus_factor_by_system","onboarding","dependency_inventory","delivery","forge_activity","personal_achievement_candidates","frameworks","graphs","quality","health","narrative_facts"],"not":{"anyOf":[{"required":["unity"]},{"required":["android"]},{"required":["flutter"]},{"required":["godot"]},{"required":["unreal"]}]}},
+    "script_file_count":{"type":"integer","minimum":0},"script_files":{"type":"array","items":{"type":"string"}}
+  }
+}

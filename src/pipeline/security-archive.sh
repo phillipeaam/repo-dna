@@ -16,7 +16,7 @@ if [[ -n "$STRUCTURED_PYTHON" ]]; then
         "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" "${GENERIC_COLLECTOR_ARGS[@]}" ||
         die "Could not collect the generic repository analysis."
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
-        "$GENERIC_ANALYSIS_FILE" "$SCRIPT_DIR/schemas/generic-analysis-1.1.0.schema.json" ||
+        "$GENERIC_ANALYSIS_FILE" "$SCRIPT_DIR/schemas/generic-analysis-1.2.0.schema.json" ||
         die "Generic analysis JSON violates its schema."
 else
     printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \
@@ -31,12 +31,14 @@ write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     "$REPORT_DATA_DIR/report.json" || die "Could not finalize the canonical analysis model."
 rm -f "$GENERIC_ANALYSIS_FILE"
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
-    "$REPORT_DATA_DIR/report.json" "$SCRIPT_DIR/schemas/report-1.2.0.schema.json" ||
+    "$REPORT_DATA_DIR/report.json" "$SCRIPT_DIR/schemas/report-1.3.0.schema.json" ||
     die "Canonical report JSON violates its schema."
-cp "$SCRIPT_DIR/schemas/report-1.2.0.schema.json" "$REPORT_DATA_DIR/report-1.2.0.schema.json" ||
+cp "$SCRIPT_DIR/schemas/report-1.3.0.schema.json" "$REPORT_DATA_DIR/report-1.3.0.schema.json" ||
     die "Could not package the canonical report schema."
-cp "$SCRIPT_DIR/schemas/generic-analysis-1.1.0.schema.json" "$REPORT_DATA_DIR/generic-analysis-1.1.0.schema.json" ||
+cp "$SCRIPT_DIR/schemas/generic-analysis-1.2.0.schema.json" "$REPORT_DATA_DIR/generic-analysis-1.2.0.schema.json" ||
     die "Could not package the generic analysis schema."
+cp "$SCRIPT_DIR/schemas/generic-analysis-core-1.0.0.schema.json" "$REPORT_DATA_DIR/generic-analysis-core-1.0.0.schema.json" ||
+    die "Could not package the canonical generic-analysis schema."
 cp "$SCRIPT_DIR/schemas/forge-data-1.0.0.schema.json" "$REPORT_DATA_DIR/forge-data-1.0.0.schema.json" ||
     die "Could not package the provider-neutral forge-data schema."
 
