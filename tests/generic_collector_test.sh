@@ -40,6 +40,7 @@ git -C "$TEST_ROOT" config user.name 'Generic Tester'
 git -C "$TEST_ROOT" config user.email 'generic@example.test'
 git -C "$TEST_ROOT" add .
 git -C "$TEST_ROOT" commit -qm 'Initial project'
+git -C "$TEST_ROOT" tag v0.1.0
 printf '%s\n' '# changed' >> "$TEST_ROOT/src/main.py"
 git -C "$TEST_ROOT" add src/main.py
 git -C "$TEST_ROOT" commit -qm 'Change hotspot' -m 'Co-authored-by: Pair Developer <pair@example.test>'
@@ -78,6 +79,8 @@ assert any(item["path"] == "src/main.py" for item in data["git"]["hotspots"])
 assert {"model", "version", "current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
 assert data["git"]["hotspot_model"]["model"] == "repodna-composite-hotspot"
 assert data["git"]["hotspot_model"]["version"] == "1.0"
+assert data["git"]["recent_tags"] == ["v0.1.0"]
+assert "releases" not in data["git"]
 assert data["git"]["coauthorship"][0]["commits"] == 1
 assert sum(data["git"]["system_evolution"]["Data/Persistence"].values()) == 1
 assert "Combat" not in data["git"]["system_evolution"]
@@ -110,7 +113,7 @@ assert analysis["narrative_facts"]
 assert analysis["onboarding"]["status"] == "collected"
 assert analysis["personal_achievement_candidates"]["status"] == "requires_author_filter"
 assert analysis["personal_achievement_candidates"]["candidates"] == []
-assert analysis["delivery"]["releases"]["summary"]["release_count"] == 0
+assert analysis["delivery"]["releases"]["summary"]["release_count"] == 1
 assert analysis["delivery"]["ci"]["summary"]["workflow_count"] == 1
 assert analysis["delivery"]["ci"]["workflows"][0]["provider"] == "GitHub Actions"
 assert analysis["delivery"]["ci"]["workflows"][0]["triggers"] == ["push"]
@@ -152,6 +155,8 @@ assert "FeatureRepository" not in text
 assert "requirements.txt" not in text
 assert data["git"]["branches"] == []
 assert data["git"]["tags"] == []
+assert data["git"]["recent_tags"] == []
+assert "releases" not in data["git"]
 assert all(item["path"].startswith("File-") for item in data["git"]["hotspots"])
 assert all(item["name"].startswith("Module-") for item in data["analysis"]["systems"])
 assert all(item["subject"] == "[REDACTED]" for item in data["git"]["technical_impact"]["contributions"])

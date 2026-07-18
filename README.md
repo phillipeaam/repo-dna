@@ -176,6 +176,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Canonical JSON contracts](docs/canonical-json-contracts.md)
 - [Composite hotspot model](docs/hotspot-model.md)
 - [Author alias configuration](docs/author-aliases.md)
+- [Git tags and releases](docs/git-tags-and-releases.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)

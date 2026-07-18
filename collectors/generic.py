@@ -350,7 +350,7 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
         "branches": branches[:100],
         "tags_count": len(tags),
         "tags": tags[:100],
-        "releases": tags[:30],
+        "recent_tags": tags[:30],
         "history_by_month": dict(sorted(months.items())),
         "history_by_year": dict(sorted(years.items())),
         "churn": {"lines_added": added_total, "lines_removed": removed_total, "total": added_total + removed_total},
@@ -393,7 +393,7 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     git_data = result["git"]
     git_data["branches"] = []
     git_data["tags"] = []
-    git_data["releases"] = []
+    git_data["recent_tags"] = []
     for index, contribution in enumerate(git_data.get("technical_impact", {}).get("contributions", []), 1):
         contribution["commit"] = f"Contribution-{index}"
         contribution["author"] = "Selected contributor" if git_data.get("author_filter") else "Contributor"
