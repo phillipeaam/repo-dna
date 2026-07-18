@@ -524,6 +524,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("health.html", "Repository health", health_body),
+        ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),
         ("narrative.html", "Evidence-based narrative", narrative_body),
         ("portfolio.html", "Portfolio and CV", '<p>The approval-gated portfolio draft is available at <a href="../portfolio/index.html">portfolio/index.html</a>. Repository facts remain unapproved until explicitly confirmed.</p>'),
         ("comparison.html", "Period comparison", '<p>Compare this run with the previous persisted snapshot at <a href="../comparison/index.html">comparison/index.html</a>. The structured deltas are available in <a href="../comparison/comparison.json">comparison.json</a>.</p>'),

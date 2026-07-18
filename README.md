@@ -28,6 +28,7 @@ One command creates a timestamped analysis package containing:
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - validated point-in-time analysis snapshots with optional Git persistence;
+- compatible health-score trends with assessment coverage and model-version safeguards;
 - redacted potential-secret findings and a pre-archive privacy scan;
 - structured JSON for automation, Notion, and provenance-aware LLM evidence;
 - charts for commits, churn, hotspots, systems, authors, and architectural
@@ -48,6 +49,7 @@ sensitive content from the shareable package.
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
 | Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
 | Reporting | Produces navigable HTML, canonical JSON, Git CSV data, Notion evidence, an LLM-ready evidence package, security reports, and optional PNG charts. |
+| Health trends | Builds a versioned score series from compatible snapshots and records every excluded point with its reason. |
 
 ## Analysis flow
 
@@ -77,6 +79,7 @@ Repository
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
 | Quality and compliance | Complexity plus imported coverage, test, linter, security-scanner, and license evidence. |
 | Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
+| Health score trends | Historical scores, period delta, compatibility exclusions, and an optional PNG chart. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
 | Portfolio and CV | Approval-gated claims and X-Y-Z achievement drafts. |
 
@@ -139,6 +142,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)
+- [Health score trends](docs/health-trends.md)
 - [Quality result imports](docs/quality-imports.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)

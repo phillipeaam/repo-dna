@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/health-trends-1.0.0.schema.json",
+  "title": "RepoDNA Health Score Trends",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "status", "repository", "scope", "health_model_version", "summary", "points", "excluded_snapshots", "limitations"],
+  "properties": {
+    "$schema": {"const": "./health-trends-1.0.0.schema.json"},
+    "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_health_trends"},
+    "status": {"enum": ["available", "insufficient_history"]},
+    "repository": {"type": "object"}, "scope": {"type": "object"},
+    "health_model_version": {"type": ["string", "null"]},
+    "summary": {"type": "object", "required": ["point_count", "first_score", "latest_score", "delta", "direction"]},
+    "points": {"type": "array", "items": {"type": "object", "required": ["snapshot_id", "generated_at", "commit", "score", "grade", "assessment_coverage_percent", "dimensions"]}},
+    "excluded_snapshots": {"type": "array", "items": {"type": "object", "required": ["source", "snapshot_id", "reasons"]}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -50,6 +50,20 @@ cp "$SCRIPT_DIR/schemas/analysis-comparison-1.0.0.schema.json" \
     "$COMPARISON_DIR/analysis-comparison-1.0.0.schema.json" ||
     die "Could not copy the period-comparison schema."
 
+HEALTH_TREND_ARGS=(--history-dir "$PERSISTENT_SNAPSHOT_DIR")
+if [[ "$PRIVACY_MODE" != strict ]] && "$STRUCTURED_PYTHON" -c 'import matplotlib' >/dev/null 2>&1; then
+    HEALTH_TREND_ARGS+=(--chart "$HEALTH_TRENDS_DIR/health-score-trend.png")
+fi
+MPLBACKEND=Agg MPLCONFIGDIR="$OUTPUT_DIR/.matplotlib" \
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/health_trends.py" \
+    "$SNAPSHOT_FILE" "$HEALTH_TRENDS_DIR/trends.json" "$HEALTH_TRENDS_DIR/index.html" \
+    --schema "$SCRIPT_DIR/schemas/health-trends-1.0.0.schema.json" \
+    "${HEALTH_TREND_ARGS[@]}" || die "Could not build health-score trends."
+rm -rf "$OUTPUT_DIR/.matplotlib"
+cp "$SCRIPT_DIR/schemas/health-trends-1.0.0.schema.json" \
+    "$HEALTH_TRENDS_DIR/health-trends-1.0.0.schema.json" ||
+    die "Could not copy the health-trends schema."
+
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/html.py" \
     "$REPORT_DATA_DIR/report.json" "$REPORT_DIR/index.html" ||
     die "Could not render the standardized HTML reports."

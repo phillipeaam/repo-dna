@@ -107,6 +107,9 @@ SNAPSHOT_FILE="$SNAPSHOT_DIR/$SNAPSHOT_NAME"
 # Define period-comparison outputs.
 COMPARISON_DIR="$OUTPUT_DIR/comparison"
 
+# Define versioned health-score trend outputs.
+HEALTH_TRENDS_DIR="$OUTPUT_DIR/health-trends"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -177,6 +180,7 @@ mkdir -p \
     "$LLM_DIR" \
     "$SNAPSHOT_DIR" \
     "$COMPARISON_DIR" \
+    "$HEALTH_TRENDS_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

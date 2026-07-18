@@ -268,6 +268,7 @@ for report_name in \
     collaboration.html \
     quality.html \
     health.html \
+    health-trends.html \
     narrative.html \
     portfolio.html \
     charts.html \
@@ -342,6 +343,7 @@ grep -q 'CVE-TEST-1' "$TEST_ROOT/report/quality.html"
 grep -q 'not_resolved.*does not mean the dependency is vulnerability-free' "$TEST_ROOT/report/quality.html"
 grep -q 'High-complexity functions (AST)' "$TEST_ROOT/report/quality.html"
 grep -q 'Repository health' "$TEST_ROOT/report/health.html"
+grep -q 'health-trends/index.html' "$TEST_ROOT/report/health-trends.html"
 grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"
 grep -q 'portfolio/index.html' "$TEST_ROOT/report/portfolio.html"
 grep -q 'commits_by_month.png' "$TEST_ROOT/report/charts.html"
