@@ -159,12 +159,14 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ], {1}) if generic.get("possible_modules") else empty
     structured_systems = analysis.get("systems", [])
     system_rows = [
-        [item["name"], item["confidence"], item["file_count"], item.get("symbol_count", 0), item.get("import_references", 0), ", ".join(item.get("languages", {}))]
+        [item["name"], item.get("confidence_level", "unknown"), item["confidence"], item["file_count"], item.get("symbol_count", 0), item.get("import_references", 0), ", ".join(item.get("languages", {}))]
         for item in structured_systems
     ]
     system_table = data_table(
-        ["System candidate", "Confidence", "Files", "Symbols", "Import references", "Languages"], system_rows, {2, 3, 4}
+        ["System candidate", "Confidence level", "Confidence", "Files", "Symbols", "Import references", "Languages"], system_rows, {2, 3, 4, 5}
     ) if system_rows else empty
+    entity_rows = [[item.get("name"), item.get("entity_type"), item.get("path") or "—", item.get("file_count", item.get("reference_count", 0)), item.get("confidence", 0)] for item in analysis.get("structural_entities", [])[:100]]
+    entity_table = data_table(["Entity", "Type", "Path", "Files/references", "Confidence"], entity_rows, {3, 4}) if entity_rows else empty
     manifest_rows = [
         [item["path"], item["dependency_count"]]
         for item in generic.get("dependencies", {}).get("manifests", [])
@@ -373,6 +375,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     architecture_body += '<p class="note">Layers are inferred from directory tokens and require review. A reported violation is an architectural signal, not proof that the repository intended to follow Clean Architecture.</p>'
     systems_body = '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
+    systems_body += "<h3>Structural entities</h3>" + entity_table
+    systems_body += '<p class="note">Directories, modules, packages, namespaces, infrastructure, test suites, and documentation are reported separately and are not automatically promoted to architectural systems.</p>'
     systems_body += "<h3>Framework concepts</h3>" + framework_table
     hotspot_model = generic.get("git", {}).get("hotspot_model", {})
     hotspot_explanation = f'<p class="note">Composite hotspots use <strong>{esc(hotspot_model.get("model", "legacy hotspot model"))} {esc(hotspot_model.get("version", "unversioned"))}</strong> to combine change frequency, code churn, current size, number of authors, and recency. A higher score suggests relative review priority; it does not prove poor code quality. Formula: <code>{esc(hotspot_model.get("formula", "not recorded"))}</code>.</p>'

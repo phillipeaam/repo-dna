@@ -526,6 +526,13 @@ requirement families such as `requirements-reporting.txt` and
 `requirements-ast.txt` are treated as dependency manifests, not only the exact
 name `requirements.txt`.
 
+Generic system detection keeps directories, modules, packages, namespaces,
+infrastructure, test suites, and documentation as distinct structural entity
+types. Architectural systems are separate cross-file candidates inferred from
+paths, parsed symbols, imports, entrypoints, graph relationships, and Git
+activity, with numeric confidence and reviewable evidence. See
+[`docs/system-detection.md`](docs/system-detection.md).
+
 ## Internal architecture
 
 `dna-analysis.sh` remains the backwards-compatible entrypoint and orchestrator.

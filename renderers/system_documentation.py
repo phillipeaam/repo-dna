@@ -38,10 +38,11 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     used_slugs: dict[str, int] = {}
     for system in analysis.get("systems", []):
         name, root = system["name"], system.get("path", system["name"])
+        evidence_files = set(system.get("files", []))
         base = slug(name); used_slugs[base] = used_slugs.get(base, 0) + 1
         identifier = base if used_slugs[base] == 1 else f"{base}-{used_slugs[base]}"
-        system_symbols = [item for item in symbols if belongs(str(item.get("path", "")), root)][:100]
-        system_entrypoints = [item for item in entrypoints if belongs(str(item.get("path", "")), root)]
+        system_symbols = [item for item in symbols if item.get("path") in evidence_files or belongs(str(item.get("path", "")), root)][:100]
+        system_entrypoints = [item for item in entrypoints if item.get("path") in evidence_files or belongs(str(item.get("path", "")), root)]
         system_coupling = [item for item in coupling if item.get("module") == root]
         system_ownership = [item for item in ownership if item.get("system") == name]
         facts = [
@@ -51,7 +52,8 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         documents.append({
             "$schema": f"../{SCHEMA_FILE}", "schema_version": VERSION,
             "artifact_type": "repodna_system_documentation", "id": identifier,
-            "name": name, "path": root, "confidence": system.get("confidence", "medium"),
+            "name": name, "path": root, "confidence": system.get("confidence", 0.5),
+            "confidence_level": system.get("confidence_level", "medium"),
             "confirmation_required": system.get("confirmation_required", True),
             "metrics": {key: system.get(key, 0) for key in ("file_count", "lines", "symbol_count", "import_references")},
             "languages": system.get("languages", {}), "dependency_manifests": system.get("dependency_manifests", []),
@@ -108,7 +110,7 @@ def system_html(item: dict[str, Any]) -> str:
     coupling_items = [f"{value.get('module', item['path'])}: afferent {value.get('afferent', 0)}, efferent {value.get('efferent', 0)}, instability {value.get('instability', 'unknown')}" for value in item["architecture"]["coupling"]]
     evolution_items = [f"{period}: {count} commit touches" for period, count in item["git_evolution"].items()]
     inference_items = [f"{value['statement']} ({value['confidence']} confidence; confirmation required)" for value in item["inferences"]]
-    return f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{escape(item['name'])} · RepoDNA</title><style>{STYLE}</style></head><body><p><a href=../index.html>← System documentation</a></p><h1>{escape(item['name'])}</h1><p>Path: <code>{escape(item['path'])}</code> · detection confidence: <strong>{escape(item['confidence'])}</strong></p><div class=cards>{cards}</div><section><h2>Confirmed repository facts</h2>{facts}</section><section><h2>Languages and symbols</h2>{list_html([f'{name}: {count} files' for name, count in item['languages'].items()])}<h3>Representative symbols</h3>{list_html(symbol_items)}</section><section><h2>Dependencies and entrypoints</h2><h3>Dependency manifests</h3>{list_html(item['dependency_manifests'])}<h3>Entrypoints</h3>{list_html([entry.get('path', entry) for entry in item['entrypoints']])}</section><section><h2>Architecture evidence</h2><h3>Coupling</h3>{list_html(coupling_items)}<h3>Detection evidence</h3>{list_html(item['architecture']['evidence'])}</section><section><h2>Historical evolution</h2>{list_html(evolution_items)}</section><section><h2>Historical activity ownership</h2><table><tr><th>Author</th><th>Rank</th><th>Commit touches</th><th>Activity share</th><th>Confidence</th></tr>{owners}</table><h3>Bus factor</h3>{bus_html}</section><section><h2>Inferences requiring review</h2>{list_html(inference_items)}</section><section><h2>Unknowns requiring confirmation</h2>{list_html(item['unknowns'])}</section><p class=note>System boundaries, purpose, ownership, and impact require human review. <a href=../data/{item['id']}.json>Open structured JSON</a>.</p></body></html>"
+    return f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>{escape(item['name'])} · RepoDNA</title><style>{STYLE}</style></head><body><p><a href=../index.html>← System documentation</a></p><h1>{escape(item['name'])}</h1><p>Path: <code>{escape(item['path'])}</code> · detection confidence: <strong>{escape(str(item['confidence']))}</strong></p><div class=cards>{cards}</div><section><h2>Confirmed repository facts</h2>{facts}</section><section><h2>Languages and symbols</h2>{list_html([f'{name}: {count} files' for name, count in item['languages'].items()])}<h3>Representative symbols</h3>{list_html(symbol_items)}</section><section><h2>Dependencies and entrypoints</h2><h3>Dependency manifests</h3>{list_html(item['dependency_manifests'])}<h3>Entrypoints</h3>{list_html([entry.get('path', entry) for entry in item['entrypoints']])}</section><section><h2>Architecture evidence</h2><h3>Coupling</h3>{list_html(coupling_items)}<h3>Detection evidence</h3>{list_html(item['architecture']['evidence'])}</section><section><h2>Historical evolution</h2>{list_html(evolution_items)}</section><section><h2>Historical activity ownership</h2><table><tr><th>Author</th><th>Rank</th><th>Commit touches</th><th>Activity share</th><th>Confidence</th></tr>{owners}</table><h3>Bus factor</h3>{bus_html}</section><section><h2>Inferences requiring review</h2>{list_html(inference_items)}</section><section><h2>Unknowns requiring confirmation</h2>{list_html(item['unknowns'])}</section><p class=note>System boundaries, purpose, ownership, and impact require human review. <a href=../data/{item['id']}.json>Open structured JSON</a>.</p></body></html>"
 
 
 def render(document: dict[str, Any], output_dir: Path) -> None:
@@ -117,7 +119,7 @@ def render(document: dict[str, Any], output_dir: Path) -> None:
     for item in document["systems"]:
         (output_dir / "systems" / f"{item['id']}.html").write_text(system_html(item), encoding="utf-8")
         (output_dir / "data" / f"{item['id']}.json").write_text(json.dumps(item, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        links.append(f"<li><a href=systems/{item['id']}.html>{escape(item['name'])}</a> · {item['metrics']['file_count']} files · {escape(item['confidence'])} confidence</li>")
+        links.append(f"<li><a href=systems/{item['id']}.html>{escape(item['name'])}</a> · {item['metrics']['file_count']} files · {escape(str(item['confidence']))} confidence</li>")
     body = "".join(links) or "<li>No systems were detected.</li>"
     (output_dir / "index.html").write_text(f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>System documentation</title><style>{STYLE}</style></head><body><h1>Structured system documentation</h1><p>{document['system_count']} detected systems. Facts are separated from inferences and unknowns.</p><ul>{body}</ul><p><a href=systems.json>Open the complete structured catalog</a></p></body></html>", encoding="utf-8")
 

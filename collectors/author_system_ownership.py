@@ -32,9 +32,10 @@ def analyze_author_system_ownership(
     for system in systems:
         name = system["name"]
         system_path = system.get("path", name)
+        system_files = set(system.get("files", []))
         authors: dict[str, dict[str, Any]] = defaultdict(lambda: {"commits": 0, "churn": 0, "files": set()})
         for path, contributions in activity.items():
-            if not _belongs_to_system(path, system_path):
+            if path not in system_files and not _belongs_to_system(path, system_path):
                 continue
             for author, metrics in contributions.items():
                 authors[author]["commits"] += metrics.get("commits", 0)

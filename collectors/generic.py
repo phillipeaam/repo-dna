@@ -528,7 +528,20 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     anonymize_paths(git_data["hotspots"])
 
     analysis = result["analysis"]
+    for index, entity in enumerate(analysis.get("structural_entities", []), 1):
+        if entity.get("path"):
+            entity["path"] = f"{entity.get('entity_type', 'entity').title()}-{index}"
+        if "files" in entity:
+            entity["files"] = []
+        if "evidence" in entity and isinstance(entity["evidence"], list):
+            entity["evidence"] = []
     system_name_map = {system["name"]: f"Module-{index}" for index, system in enumerate(analysis["systems"], 1)}
+    for system in analysis["systems"]:
+        system["name"] = system_name_map[system["name"]]
+        system["path"] = "[redacted]"
+        system["files"] = []
+        system["evidence"] = []
+        system["dependency_manifests"] = []
     ownership = analysis.get("author_system_ownership", {})
     achievement_candidates = analysis.get("personal_achievement_candidates", {})
     if achievement_candidates.get("candidates"):

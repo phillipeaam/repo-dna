@@ -117,11 +117,18 @@ assert analysis["code"]["symbol_count"] >= 3
 assert analysis["code"]["importing_file_count"] >= 1
 assert analysis["code"]["call_count"] >= 1
 assert any(item["name"] == "FeatureRepository.feature" for item in analysis["code"]["complexity"]["high_complexity_functions"]) is False
-assert any(item["name"] == "src" for item in analysis["systems"])
+data_system = next(item for item in analysis["systems"] if item["name"] == "Data and Persistence")
+assert data_system["entity_type"] == "system"
+assert 0 <= data_system["confidence"] <= 1
+assert data_system["confidence_level"] in {"low", "medium", "high"}
+assert {"src/data/repository.py", "src/data/save.py"} <= set(data_system["files"])
+assert any(item["name"] == "src" and item["entity_type"] == "module" for item in analysis["structural_entities"])
+assert any(item["entity_type"] == "test_suite" for item in analysis["structural_entities"])
+assert any(item["entity_type"] == "documentation" for item in analysis["structural_entities"])
 activity_ownership = analysis["author_system_ownership"]
 assert activity_ownership["status"] == "assessed"
 assert activity_ownership["summary"]["authors"] == 2
-assert any(item["author"] == "Canonical Developer" and item["system"] == "src" for item in activity_ownership["relationships"])
+assert any(item["author"] == "Canonical Developer" and item["system"] == "Data and Persistence" for item in activity_ownership["relationships"])
 assert all(item["system_activity_share_percent"] is not None for item in activity_ownership["relationships"])
 bus_factor = analysis["bus_factor_by_system"]
 assert bus_factor["status"] == "assessed"

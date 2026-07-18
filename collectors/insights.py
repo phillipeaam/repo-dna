@@ -26,6 +26,7 @@ from delivery_analysis import analyze_delivery
 from forge_import import import_forge_data
 from godot_analysis import analyze_godot
 from unreal_analysis import analyze_unreal
+from system_classifier import classify_structural_entities, classify_systems
 
 
 SOURCE_LANGUAGES = {
@@ -211,46 +212,6 @@ def analyze_code(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def identify_systems(files: list[dict[str, Any]], code: dict[str, Any], dependencies: dict[str, Any]) -> list[dict[str, Any]]:
-    groups: dict[str, dict[str, Any]] = {}
-    symbols_by_path: Counter[str] = Counter(item["path"].split("/", 1)[0] for item in code["symbols"])
-    imports_by_path: Counter[str] = Counter()
-    for item in code["imports"]:
-        imports_by_path[item["path"].split("/", 1)[0]] += len(item["imports"])
-    for item in files:
-        if not item.get("language"):
-            continue
-        path = item["path"]
-        root_name = path.split("/", 1)[0] if "/" in path else "[root]"
-        group = groups.setdefault(root_name, {"file_count": 0, "languages": Counter(), "lines": 0})
-        group["file_count"] += 1
-        group["languages"][item["language"]] += 1
-        group["lines"] += item.get("lines", 0)
-    manifest_paths = [item["path"] for item in dependencies.get("manifests", [])]
-    systems = []
-    for name, group in groups.items():
-        evidence = [f"{group['file_count']} source files", f"{group['lines']} source lines"]
-        if symbols_by_path[name]:
-            evidence.append(f"{symbols_by_path[name]} symbols")
-        if imports_by_path[name]:
-            evidence.append(f"{imports_by_path[name]} import references")
-        related_manifests = [path for path in manifest_paths if path == name or path.startswith(f"{name}/")]
-        systems.append({
-            "name": name,
-            "path": name,
-            "confidence": "high" if group["file_count"] >= 5 and (symbols_by_path[name] or imports_by_path[name]) else "medium",
-            "file_count": group["file_count"],
-            "lines": group["lines"],
-            "symbol_count": symbols_by_path[name],
-            "import_references": imports_by_path[name],
-            "languages": dict(group["languages"].most_common()),
-            "dependency_manifests": related_manifests,
-            "evidence": evidence,
-            "confirmation_required": True,
-        })
-    return sorted(systems, key=lambda item: (item["symbol_count"] + item["import_references"], item["file_count"]), reverse=True)[:50]
-
-
 def license_evidence(root: Path, files: list[dict[str, Any]]) -> dict[str, Any]:
     license_paths = [item["path"] for item in files if Path(item["path"]).name.casefold().startswith(("license", "copying", "notice"))]
     detected = "Unknown"
@@ -337,7 +298,7 @@ def build_narrative_facts(generic: dict[str, Any], code: dict[str, Any], systems
     facts = [
         {"statement": f"The repository contains {generic['file_count']} analyzed files across {generic['language_count']} detected languages.", "evidence": "#/file_count", "confidence": "high"},
         {"statement": f"The collector identified {code['symbol_count']} source symbols in supported languages.", "evidence": "#/analysis/code/symbol_count", "confidence": "medium"},
-        {"statement": f"The analysis produced {len(systems)} module-based system candidates requiring human confirmation.", "evidence": "#/analysis/systems", "confidence": "medium"},
+        {"statement": f"The analysis produced {len(systems)} evidence-based architectural system candidates requiring human confirmation.", "evidence": "#/analysis/systems", "confidence": "medium"},
     ]
     if generic.get("test_file_count", 0):
         facts.append({"statement": f"The repository contains {generic['test_file_count']} files classified as tests.", "evidence": "#/test_files", "confidence": "high"})
@@ -349,7 +310,8 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
     frameworks = analyze_frameworks(generic["_files"], code, generic["dependencies"])
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
     architecture_model = analyze_architecture(root, generic["_files"], graphs)
-    systems = identify_systems(generic["_files"], code, generic["dependencies"])
+    systems = classify_systems(generic["_files"], code, architecture_model, generic["git"], generic["dependencies"])
+    structural_entities = classify_structural_entities(generic, code, graphs)
     author_system_ownership = analyze_author_system_ownership(systems, generic["git"])
     bus_factor_by_system = analyze_bus_factor(author_system_ownership)
     onboarding = collect_onboarding(root, generic["_files"], generic["dependencies"])
@@ -397,6 +359,7 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
             "complexity": code["complexity"],
         },
         "systems": systems,
+        "structural_entities": structural_entities,
         "author_system_ownership": author_system_ownership,
         "bus_factor_by_system": bus_factor_by_system,
         "onboarding": onboarding,

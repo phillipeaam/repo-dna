@@ -101,8 +101,8 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         items.append(evidence(
             f"system-{index}", "system", "inference",
             f"{system['name']} is a detected system candidate supported by repository structure and code evidence.",
-            system.get("confidence", "medium"), ["#/generic_analysis/analysis/systems"],
-            {key: system.get(key) for key in ("file_count", "lines", "symbol_count", "import_references", "languages")},
+            system.get("confidence_level", "medium"), ["#/generic_analysis/analysis/systems"],
+            {**{key: system.get(key) for key in ("file_count", "lines", "symbol_count", "import_references", "languages")}, "confidence_score": system.get("confidence")},
             ["System boundaries require architectural review."], True,
         ))
 

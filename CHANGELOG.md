@@ -7,6 +7,10 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Replaced directory-as-system grouping with evidence-based architectural
+  system classification, numeric confidence, and separately typed structural
+  entities for modules, packages, namespaces, infrastructure, tests, and docs.
+
 - Removed legacy Unity/C# metric, architecture, technology, and system views
   from the canonical model; generic reports now use stack-neutral structural
   analysis exclusively, with specialized analyzers as additive sections.
