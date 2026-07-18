@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from notion import build as build_notion_evidence
 
@@ -66,6 +68,22 @@ def item_list(items: list[str]) -> str:
     return "<ul>" + "".join(f"<li>{esc(item)}</li>" for item in items) + "</ul>"
 
 
+def read_json(path: Path) -> dict[str, Any]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def slug(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-") or "system"
+
+
+def repository_file_link(path: str) -> str:
+    normalized = path.replace("\\", "/")
+    return f'<a href="../../{quote(normalized, safe="/")}" title="Open repository evidence: {esc(normalized)}">{esc(normalized)}</a>'
+
+
 def format_bytes(value: int) -> str:
     size = float(value)
     for unit in ("B", "KB", "MB", "GB"):
@@ -80,28 +98,57 @@ def labeled(values: dict[str, Any], keys: list[str]) -> list[tuple[str, Any]]:
 
 
 STYLES = """
-:root{--ink:#182230;--muted:#617083;--paper:#f5f7fa;--panel:#fff;--line:#dce3ea;--brand:#155eef;--risk:#b42318}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-header{background:linear-gradient(135deg,#101828,#233b63);color:#fff;padding:3rem max(5vw,1.5rem)}header p{color:#cbd5e1}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:2rem;max-width:1280px;margin:auto;padding:2rem}
-nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.75rem}nav a{display:block;color:var(--ink);padding:.55rem .7rem;text-decoration:none;border-radius:8px}nav a:hover,nav a.active{background:#edf3ff;color:var(--brand)}main{min-width:0}.metrics,.report-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1rem;margin-bottom:2rem}.metric,section,.report-links a{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(16,24,40,.04)}.metric{padding:1rem}.metric span{display:block;color:var(--muted);font-size:.82rem}.metric strong{display:block;text-align:right;font-size:1.65rem;font-variant-numeric:tabular-nums}.report-links a{padding:1rem;text-decoration:none;font-weight:600}section{padding:1.4rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2{margin-top:0}h2{font-size:1.2rem}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;width:55%}.data-table th{width:auto}td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.chart{display:block;width:100%;height:auto;margin:1rem 0;border:1px solid var(--line);border-radius:10px}.note{background:#f8fafc;border-left:4px solid var(--brand);padding:.8rem 1rem;color:var(--muted)}a{color:var(--brand)}.empty{color:var(--muted)}
-@media(max-width:760px){.layout{display:block;padding:1rem}nav{position:static;margin-bottom:1rem;display:flex;overflow:auto}nav a{white-space:nowrap}header{padding:2rem 1rem}}
-@media print{nav{display:none}.layout{display:block;padding:0}section,.metric{box-shadow:none;break-inside:avoid}body{background:#fff}}
+:root{color-scheme:light;--ink:#132238;--muted:#617087;--paper:#f3f6fb;--panel:#fff;--panel-2:#f8faff;--line:#dce4ef;--brand:#4b55e7;--brand-2:#06a6a6;--brand-soft:#eef0ff;--risk:#c43232;--warn:#a85b00;--success:#087a55;--shadow:0 18px 50px rgba(24,39,75,.08)}
+[data-theme=dark]{color-scheme:dark;--ink:#edf4ff;--muted:#9caec5;--paper:#09111f;--panel:#111c2d;--panel-2:#172438;--line:#293950;--brand:#9298ff;--brand-2:#4dd7d0;--brand-soft:#20294e;--risk:#ff8585;--warn:#ffbd66;--success:#5dd5a8;--shadow:0 18px 50px rgba(0,0,0,.25)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--brand)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#101b38 0%,#263276 55%,#087f86 130%);color:#fff;padding:2.6rem max(4vw,1.25rem) 3rem}.hero:after{content:"";position:absolute;right:-8rem;top:-12rem;width:32rem;height:32rem;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 70px rgba(255,255,255,.035),0 0 0 140px rgba(255,255,255,.025)}.hero-inner{position:relative;z-index:1;max-width:1440px;margin:auto}.eyebrow{margin:0 0 .55rem;color:#a9f4ee;text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800}.hero h1{max-width:850px;margin:0;font-size:clamp(2rem,4vw,3.65rem);line-height:1.05;letter-spacing:-.045em}.hero-meta{color:#d7e1f3;margin:.8rem 0 1.35rem}.toolbar{display:flex;align-items:center;gap:.65rem;max-width:760px}.search{position:relative;flex:1}.search input{width:100%;border:1px solid rgba(255,255,255,.25);background:rgba(5,13,31,.38);color:#fff;border-radius:12px;padding:.8rem 1rem .8rem 2.7rem;outline:none}.search input::placeholder{color:#c5d0e3}.search:before{content:"⌕";position:absolute;left:1rem;top:.46rem;font-size:1.25rem;color:#a9f4ee}.icon-button,.schema-badge{border:1px solid rgba(255,255,255,.25);background:rgba(5,13,31,.32);color:#fff;border-radius:12px;padding:.72rem .9rem;white-space:nowrap}.icon-button{cursor:pointer;font-size:1rem}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:2rem;max-width:1440px;margin:auto;padding:2rem}.primary-nav{position:sticky;top:1rem;align-self:start;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:.75rem;box-shadow:var(--shadow)}.primary-nav .nav-label{display:block;padding:.55rem .75rem;color:var(--muted);font-size:.7rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.primary-nav a{display:flex;align-items:center;gap:.65rem;color:var(--ink);padding:.58rem .72rem;text-decoration:none;border-radius:10px}.primary-nav a:hover,.primary-nav a.active{background:var(--brand-soft);color:var(--brand)}.primary-nav a.active{font-weight:750}.primary-nav a:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--line)}.primary-nav a.active:before{background:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 18%,transparent)}main{min-width:0}
+.metrics,.report-links,.answer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.25rem}.metric,section,.report-links a,.answer-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.metric{padding:1.1rem}.metric span{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.07em}.metric strong{display:block;text-align:right;font-size:1.8rem;font-variant-numeric:tabular-nums;letter-spacing:-.035em}.report-links a{padding:1rem;text-decoration:none;font-weight:700}.answer-card{position:relative;padding:1.2rem;min-height:170px;text-decoration:none;color:var(--ink);transition:transform .18s ease,border-color .18s ease}.answer-card:hover{transform:translateY(-3px);border-color:var(--brand)}.answer-card .number{display:block;color:var(--brand-2);font-weight:850;font-size:.72rem;letter-spacing:.12em}.answer-card h3{margin:.4rem 0;font-size:1.06rem}.answer-card p{color:var(--muted);margin:.35rem 0}.answer-card strong{color:var(--ink)}
+section{padding:1.45rem;margin-bottom:1rem;scroll-margin-top:1rem}h1,h2,h3{letter-spacing:-.02em}h1,h2{margin-top:0}h2{font-size:1.28rem}.section-kicker{color:var(--brand);text-transform:uppercase;font-size:.72rem;font-weight:800;letter-spacing:.12em}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse}th,td{padding:.72rem;border-bottom:1px solid var(--line);text-align:left}tr:last-child th,tr:last-child td{border-bottom:0}tbody tr:hover{background:var(--panel-2)}th{color:var(--muted);font-weight:650;width:55%}.data-table th{width:auto;background:var(--panel-2);font-size:.76rem;text-transform:uppercase;letter-spacing:.045em}td.number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.chart{display:block;width:100%;height:auto;margin:1rem 0;border:1px solid var(--line);border-radius:12px}.note{background:var(--panel-2);border-left:4px solid var(--brand);padding:.85rem 1rem;color:var(--muted);border-radius:0 10px 10px 0}.empty{color:var(--muted)}.confidence-legend{display:flex;gap:.55rem;flex-wrap:wrap;margin:.8rem 0 1.2rem}.confidence{padding:.28rem .55rem;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);font-size:.76rem;cursor:help}.confidence.high{color:var(--success)}.confidence.medium{color:var(--warn)}.confidence.low{color:var(--risk)}code{background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.12rem .3rem}.search-empty{display:none;padding:1rem;color:var(--muted)}
+@media(max-width:850px){.layout{display:block;padding:1rem}.primary-nav{position:static;margin-bottom:1rem;display:flex;overflow:auto}.primary-nav .nav-label{display:none}.primary-nav a{white-space:nowrap}.hero{padding:2rem 1rem}.toolbar{align-items:stretch;flex-wrap:wrap}.schema-badge{order:3}.answer-grid{grid-template-columns:1fr}}
+@media print{.hero{background:#fff!important;color:#111;padding:1rem 0}.hero-meta,.eyebrow{color:#333}.toolbar,.primary-nav{display:none}.layout{display:block;padding:0}.answer-card,section,.metric{box-shadow:none;break-inside:avoid;border-color:#bbb}body{background:#fff;color:#111}a{color:#111;text-decoration:none}.answer-grid{grid-template-columns:repeat(2,1fr)}}
 """
+
+PRIMARY_NAV = [
+    ("index.html", "Overview"), ("technologies.html", "Technologies"),
+    ("architecture.html", "Architecture"), ("systems.html", "Systems"),
+    ("contribution.html", "Contribution"), ("health.html", "Quality & Health"),
+    ("risks.html", "Risks & Security"), ("onboarding.html", "Onboarding"),
+    ("portfolio.html", "Portfolio"), ("raw-evidence.html", "Raw Evidence"),
+]
+
+PAGE_CATEGORY = {
+    "executive-summary.html": "index.html", "project-overview.html": "index.html",
+    "collaboration.html": "contribution.html", "quality.html": "health.html",
+    "health-trends.html": "health.html", "charts.html": "health.html",
+    "system-documentation.html": "systems.html", "graphs.html": "architecture.html",
+    "delivery.html": "risks.html", "forge-activity.html": "contribution.html",
+    "sbom.html": "technologies.html", "notion-evidence.html": "portfolio.html",
+    "comparison.html": "raw-evidence.html", "narrative.html": "portfolio.html",
+}
 
 
 def page_document(
     data: dict[str, Any], title: str, body: str, pages: list[tuple[str, str]], active: str
 ) -> str:
     project = data["project"]
+    active_category = PAGE_CATEGORY.get(active, active)
     nav = "".join(
-        f'<a class="{"active" if filename == active else ""}" href="{esc(filename)}">{esc(label)}</a>'
-        for filename, label in pages
+        f'<a class="{"active" if filename == active_category else ""}" href="{esc(filename)}">{esc(label)}</a>'
+        for filename, label in PRIMARY_NAV
     )
+    scripts = """<script>
+const root=document.documentElement,theme=document.querySelector('[data-theme-toggle]');
+theme?.addEventListener('click',()=>{const dark=root.dataset.theme==='dark'||(!root.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);root.dataset.theme=dark?'light':'dark';theme.setAttribute('aria-label',dark?'Use dark theme':'Use light theme')});
+const search=document.querySelector('[data-report-search]');
+search?.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();let visible=0;document.querySelectorAll('tbody tr,.answer-card,.report-links a').forEach(el=>{const show=!q||el.textContent.toLowerCase().includes(q);el.hidden=!show;if(show&&q)visible++});document.querySelector('.search-empty')?.style.setProperty('display',q&&!visible?'block':'none')});
+</script>"""
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} · {esc(project['name'])} · RepoDNA</title><style>{STYLES}</style></head>
-<body><header><p>RepoDNA structured report · schema {esc(data['schema_version'])}</p><h1>{esc(title)}</h1><p>{esc(project['name'])} · {esc(project['type'])} · generated {esc(data['generated_at'])}</p></header>
-<div class="layout"><nav>{nav}</nav><main>{body}</main></div>
+<body><header class="hero"><div class="hero-inner"><p class="eyebrow">Repository intelligence</p><h1>{esc(title)}</h1><p class="hero-meta">{esc(project['name'])} · {esc(project['type'])} · generated {esc(data['generated_at'])}</p>
+<div class="toolbar"><label class="search"><span hidden>Search report</span><input type="search" data-report-search placeholder="Search tables, systems, technologies…"></label><span class="schema-badge" title="Canonical analysis contract version">Schema {esc(data['schema_version'])}</span><button class="icon-button" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle light or dark theme">◐</button></div></div></header>
+<div class="layout"><nav class="primary-nav" aria-label="Primary report navigation"><span class="nav-label">Explore</span>{nav}</nav><main><p class="search-empty">No visible report item matches this search.</p>{body}</main></div>{scripts}
 </body></html>"""
 
 
@@ -158,13 +205,16 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         for item in generic.get("possible_modules", [])[:20]
     ], {1}) if generic.get("possible_modules") else empty
     structured_systems = analysis.get("systems", [])
-    system_rows = [
-        [item["name"], item.get("confidence_level", "unknown"), item["confidence"], item["file_count"], item.get("symbol_count", 0), item.get("import_references", 0), ", ".join(item.get("languages", {}))]
-        for item in structured_systems
-    ]
-    system_table = data_table(
-        ["System candidate", "Confidence level", "Confidence", "Files", "Symbols", "Import references", "Languages"], system_rows, {2, 3, 4, 5}
-    ) if system_rows else empty
+    system_rows = []
+    for item in structured_systems:
+        evidence_links = ", ".join(repository_file_link(path) for path in item.get("files", [])[:3]) or "No representative files listed"
+        system_rows.append(
+            f'<tr><td><a href="../system-docs/systems/{slug(item["name"])}.html"><strong>{esc(item["name"])}</strong></a></td>'
+            f'<td><span class="confidence {esc(item.get("confidence_level", "unknown"))}" title="Confidence is based on independent repository signals">{esc(item.get("confidence_level", "unknown"))} · {esc(item["confidence"])}</span></td>'
+            f'<td class="number">{item["file_count"]:,}</td><td class="number">{item.get("symbol_count", 0):,}</td>'
+            f'<td class="number">{item.get("import_references", 0):,}</td><td>{esc(", ".join(item.get("languages", {})))}</td><td>{evidence_links}</td></tr>'
+        )
+    system_table = ('<div class="table-wrap"><table class="data-table"><thead><tr><th>System candidate</th><th>Confidence</th><th>Files</th><th>Symbols</th><th>Import references</th><th>Languages</th><th>Representative evidence</th></tr></thead><tbody>' + "".join(system_rows) + '</tbody></table></div>') if system_rows else empty
     entity_rows = [[item.get("name"), item.get("entity_type"), item.get("path") or "—", item.get("file_count", item.get("reference_count", 0)), item.get("confidence", 0)] for item in analysis.get("structural_entities", [])[:100]]
     entity_table = data_table(["Entity", "Type", "Path", "Files/references", "Confidence"], entity_rows, {3, 4}) if entity_rows else empty
     manifest_rows = [
@@ -373,7 +423,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     architecture_body += "<h3>Boundary violations</h3>" + (data_table(["Source", "Layer", "Target", "Target layer", "References", "Severity", "Rule"], violation_rows, {4}) if violation_rows else '<p class="empty">No violations were found among classified module boundaries.</p>')
     architecture_body += "<h3>Architectural cycles</h3>" + (data_table(["Modules", "Layers", "Cross-boundary", "Severity"], architectural_cycle_rows) if architectural_cycle_rows else '<p class="empty">No module cycles were detected.</p>')
     architecture_body += '<p class="note">Layers are inferred from directory tokens and require review. A reported violation is an architectural signal, not proof that the repository intended to follow Clean Architecture.</p>'
-    systems_body = '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
+    confidence_legend = '<div class="confidence-legend" aria-label="Confidence legend"><span class="confidence high" title="Strong evidence from multiple independent signals">High confidence</span><span class="confidence medium" title="Useful evidence that should be reviewed">Medium confidence</span><span class="confidence low" title="Limited or ambiguous evidence; confirmation required">Low confidence</span></div>'
+    systems_body = confidence_legend + '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
     systems_body += "<h3>Structural entities</h3>" + entity_table
     systems_body += '<p class="note">Directories, modules, packages, namespaces, infrastructure, test suites, and documentation are reported separately and are not automatically promoted to architectural systems.</p>'
@@ -649,16 +700,16 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("forge-activity.html", "Issues, PRs, and releases", forge_body),
         ("sbom.html", "SBOM and lockfiles", '<p>Open the lockfile-derived dependency inventory at <a href="../sbom/index.html">sbom/index.html</a>. The CycloneDX 1.6 artifact is available at <a href="../sbom/bom.json">sbom/bom.json</a>.</p>'),
         ("health.html", "Repository health", health_body),
-        ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),
         ("narrative.html", "Evidence-based narrative", narrative_body),
         ("portfolio.html", "Portfolio and CV", '<p>The approval-gated portfolio draft is available at <a href="../portfolio/index.html">portfolio/index.html</a>. Repository facts remain unapproved until explicitly confirmed.</p>'),
-        ("comparison.html", "Period comparison", '<p>Compare this run with the previous persisted snapshot at <a href="../comparison/index.html">comparison/index.html</a>. The structured deltas are available in <a href="../comparison/comparison.json">comparison.json</a>.</p>'),
         ("charts.html", "Charts", charts_body),
         ("risks.html", "Risks", table([
             ("Potential secret findings", risks["potential_secret_findings"]),
             ("Ownership review required", risks["ownership_review_required"]),
         ]) + '<p><a href="../security/potential_secrets.txt">Open redacted security evidence</a></p>'),
         ("notion-evidence.html", "Notion evidence", notion_body),
+        ("raw-evidence.html", "Raw evidence", f'''<p class="note">Machine-readable evidence is provided for auditing, automation, and downstream tools. Human-facing pages remain derived from the same canonical model.</p>
+        <div class="report-links"><a href="data/report.json">Canonical report.json<br><small>Schema {esc(data['schema_version'])}</small></a><a href="data/generic-analysis-1.2.0.schema.json">Generic analysis schema</a><a href="../notion/evidence.json">Notion evidence JSON</a><a href="../llm/evidence.json">LLM evidence dataset</a><a href="../onboarding/dataset.json">Onboarding dataset</a><a href="../system-docs/systems.json">System catalog</a><a href="../security/potential_secrets.txt">Redacted security findings</a><a href="../sbom/bom.json">CycloneDX SBOM</a></div>'''),
     ]
     if profile["unity"]:
         sections.insert(4, ("unity-analysis.html", "Unity analysis", unity_body))
@@ -670,8 +721,33 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         sections.insert(4, ("godot-analysis.html", "Godot analysis", '<p>Open the specialized Godot reports at <a href="../godot/index.html">godot/index.html</a>. Structured evidence is available in <a href="../godot/analysis.json">analysis.json</a>.</p>'))
     if profile.get("unreal") or project.get("type") == "Unreal":
         sections.insert(4, ("unreal-analysis.html", "Unreal analysis", '<p>Open the specialized Unreal reports at <a href="../unreal/index.html">unreal/index.html</a>. Structured evidence is available in <a href="../unreal/analysis.json">analysis.json</a>.</p>'))
+    comparison_data = read_json(output_path.parent.parent / "comparison" / "comparison.json")
+    if comparison_data.get("status") == "compared":
+        sections.append(("comparison.html", "Period comparison", '<p>Open the evidence-backed period comparison at <a href="../comparison/index.html">comparison/index.html</a> or inspect <a href="../comparison/comparison.json">its structured deltas</a>.</p>'))
+    trend_data = read_json(output_path.parent.parent / "health-trends" / "trends.json")
+    if trend_data.get("status") == "available" and trend_data.get("summary", {}).get("point_count", 0) >= 2:
+        sections.append(("health-trends.html", "Health score trends", '<p>Open the multi-point health series at <a href="../health-trends/index.html">health-trends/index.html</a> or inspect <a href="../health-trends/trends.json">its structured data</a>.</p>'))
     top_language = generic.get("languages", [{}])[0].get("name", "Not detected") if generic.get("languages") else "Not detected"
-    executive_body = '<section><h2>Repository at a glance</h2><p>This summary highlights the main measurable signals collected from the current repository and its Git history.</p><div class="metrics">' + metric_cards(headline) + "</div>"
+    top_technologies = [item["name"] for item in generic.get("languages", [])[:3]] + tool_inventory.get("frameworks", [])[:2]
+    top_systems = [item.get("name", "Unnamed system") for item in structured_systems[:4]]
+    top_contributors = [f"{item['name']} ({item['commits']:,})" for item in contributors[:3]]
+    top_hotspots = [f"{item['path']} ({item.get('score', 0)})" for item in git_data.get("hotspots", [])[:3]]
+    quick_answers = [
+        ("01", "What is this project?", "project-overview.html", f"<strong>{esc(project['type'])}</strong><br>{generic.get('file_count', 0):,} files in <code>{esc(project['code_root'])}</code>"),
+        ("02", "Which technologies?", "technologies.html", esc(", ".join(top_technologies) or "No stack evidence detected")),
+        ("03", "Which systems exist?", "systems.html", esc(", ".join(top_systems) or "No system candidate reached the threshold")),
+        ("04", "How is it organized?", "architecture.html", f"{len(generic.get('possible_modules', [])):,} modules · {graph_summary.get('internal_edges', 0):,} internal edges · {len(entrypoint_rows):,} entrypoints"),
+        ("05", "Who contributed?", "collaboration.html", esc(", ".join(top_contributors) or "No contributor history in scope")),
+        ("06", "Where are the hotspots?", "contribution.html", esc(", ".join(top_hotspots) or "No hotspot evidence in scope")),
+        ("07", "What needs attention?", "risks.html", f"<strong>{risks['potential_secret_findings']:,}</strong> security findings · <strong>{risks['ownership_review_required']:,}</strong> ownership reviews"),
+        ("08", "Where should I start?", "onboarding.html", f"{len(entrypoint_rows):,} entrypoints · {len(generic.get('documentation_files', [])):,} documentation files"),
+    ]
+    answer_grid = '<div class="answer-grid">' + "".join(
+        f'<a class="answer-card" href="{href}"><span class="number">{number}</span><h3>{esc(question)}</h3><p>{answer}</p></a>'
+        for number, question, href, answer in quick_answers
+    ) + '</div>'
+    executive_body = '<section><span class="section-kicker">Decision-ready overview</span><h2>Understand the repository in eight answers</h2><p>Start with the evidence that matters, then open a focused area for detail.</p>' + answer_grid + '</section>'
+    executive_body += '<section><h2>Repository at a glance</h2><div class="metrics">' + metric_cards(headline) + "</div>"
     executive_body += table([
         ("Primary language", top_language),
         ("Detected tests", generic.get("test_file_count", 0)),
@@ -683,10 +759,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     all_pages = [("index.html", "Home"), ("executive-summary.html", "Executive summary")] + [
         (filename, title) for filename, title, _ in sections
     ]
-    links = '<div class="report-links">' + "".join(
-        f'<a href="{esc(filename)}">{esc(title)}</a>' for filename, title in all_pages[1:]
-    ) + "</div>"
-    output_path.write_text(page_document(data, project["name"], executive_body + links, all_pages, "index.html"), encoding="utf-8")
+    output_path.write_text(page_document(data, project["name"], executive_body, all_pages, "index.html"), encoding="utf-8")
     (output_path.parent / "executive-summary.html").write_text(
         page_document(data, "Executive summary", executive_body, all_pages, "executive-summary.html"), encoding="utf-8"
     )

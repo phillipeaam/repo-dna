@@ -505,6 +505,14 @@ honored, and reviewed false positives can be listed in
 RepoDNA writes canonical collected data to `report/data/report.json`. The HTML
 renderer reads only that JSON and creates a linked, self-contained report set:
 
+The main dashboard answers eight repository-orientation questions immediately
+and uses a focused ten-area navigation: Overview, Technologies, Architecture,
+Systems, Contribution, Quality & Health, Risks & Security, Onboarding,
+Portfolio, and Raw Evidence. It includes offline search, light/dark themes,
+confidence explanations, evidence links, responsive layout, print styling, and
+the canonical Schema version. Comparison and health-trend entries are exposed
+only when enough compatible data exists.
+
 ```text
 report/
 ├── index.html

@@ -314,12 +314,12 @@ for report_name in \
     collaboration.html \
     quality.html \
     health.html \
-    health-trends.html \
     narrative.html \
     portfolio.html \
     charts.html \
     risks.html \
-    notion-evidence.html; do
+    notion-evidence.html \
+    raw-evidence.html; do
     [[ -s "$TEST_ROOT/report/$report_name" ]]
 done
 [[ -s "$TEST_ROOT/report/contributors-1.html" ]]
@@ -398,7 +398,7 @@ grep -q 'CVE-TEST-1' "$TEST_ROOT/report/quality.html"
 grep -q 'not_resolved.*does not mean the dependency is vulnerability-free' "$TEST_ROOT/report/quality.html"
 grep -q 'High-complexity functions (AST)' "$TEST_ROOT/report/quality.html"
 grep -q 'Repository health' "$TEST_ROOT/report/health.html"
-grep -q 'health-trends/index.html' "$TEST_ROOT/report/health-trends.html"
+[[ ! -e "$TEST_ROOT/report/health-trends.html" ]]
 grep -q 'No business impact or personal ownership is invented' "$TEST_ROOT/report/narrative.html"
 grep -q 'portfolio/index.html' "$TEST_ROOT/report/portfolio.html"
 grep -q 'commits_by_month.png' "$TEST_ROOT/report/charts.html"
@@ -416,7 +416,12 @@ grep -q 'Potential secret findings</th><td class="number">1' "$TEST_ROOT/report/
 ! grep -q 'Unity version' "$TEST_ROOT/report/project-overview.html"
 ! grep -q '>Scenes<' "$TEST_ROOT/report/project-overview.html"
 
-grep -q 'executive-summary.html' "$TEST_ROOT/report/index.html"
+grep -q 'Understand the repository in eight answers' "$TEST_ROOT/report/index.html"
+grep -q 'data-report-search' "$TEST_ROOT/report/index.html"
+grep -q 'data-theme-toggle' "$TEST_ROOT/report/index.html"
+grep -q 'Raw Evidence' "$TEST_ROOT/report/index.html"
+grep -q 'Schema 1.1' "$TEST_ROOT/report/index.html"
+grep -q 'Canonical report.json' "$TEST_ROOT/report/raw-evidence.html"
 grep -q 'sample-project' "$TEST_ROOT/report/index.html"
 ! grep -q 'Unity version' "$TEST_ROOT/report/index.html"
 [[ ! -e "$TEST_ROOT/report/unity-analysis.html" ]]

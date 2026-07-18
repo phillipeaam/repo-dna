@@ -1,5 +1,9 @@
 # Changelog
 
+- Redesigned the primary HTML report as a decision-focused dashboard with
+  compact navigation, search, confidence legends, evidence links, dark mode,
+  print styling, and data-aware comparison/trend visibility.
+
 - Defined required, recommended, and optional dependency tiers; added a
   dependency-free partial-report path and actionable optional-feature warnings.
 
