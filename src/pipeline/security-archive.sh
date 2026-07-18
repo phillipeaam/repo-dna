@@ -24,6 +24,10 @@ create_analysis_charts
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/sbom.py" \
+    "$REPORT_DATA_DIR/report.json" "$SBOM_DIR" ||
+    die "Could not render the lockfile-derived CycloneDX SBOM."
+
 if [[ "$PROJECT_TYPE" == Android ]]; then
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/android_reports.py" \
         "$REPORT_DATA_DIR/report.json" "$ANDROID_DIR" \

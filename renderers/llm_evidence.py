@@ -132,6 +132,14 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         evidence("vulnerabilities", "security", "fact", f"Security scanner status is {vulnerabilities.get('status', 'not_scanned')}.", "high", ["#/generic_analysis/analysis/quality/vulnerabilities"], {"findings": vulnerabilities.get("findings"), "severities": vulnerabilities.get("severities", {})}, ["not_scanned and not_resolved do not mean vulnerability-free."]),
     ])
     dependency_resolution = quality.get("dependency_resolution", {})
+    dependency_inventory = analysis.get("dependency_inventory", {})
+    if dependency_inventory:
+        items.append(evidence(
+            "lockfile-sbom", "technology", "fact",
+            "A CycloneDX 1.6 SBOM was generated from supported repository lockfiles.",
+            "high", ["#/generic_analysis/analysis/dependency_inventory/summary"],
+            dependency_inventory.get("summary", {}), dependency_inventory.get("limitations", []),
+        ))
     if dependency_resolution:
         items.append(evidence(
             "dependency-resolution", "security", "fact",

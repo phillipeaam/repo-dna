@@ -388,6 +388,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     hotspot_explanation = '<p class="note">Composite hotspots rank files that may deserve attention by combining change frequency, code churn, current size, number of authors, and recency. A higher score suggests relevance or maintenance risk; it does not prove poor code quality.</p>'
 
     quality = analysis.get("quality", {})
+    dependency_inventory = analysis.get("dependency_inventory", {})
     complexity = analysis.get("code", {}).get("complexity", {})
     coverage_result = quality.get("coverage", {})
     test_result = quality.get("tests", {})
@@ -420,6 +421,9 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Vulnerability status", scanner_result.get("status", "Not assessed")),
         ("Imported security findings", scanner_result.get("findings") if scanner_result.get("findings") is not None else "Not available"),
         ("Dependencies correlated", dependency_summary.get("dependencies", 0)),
+        ("Lockfiles parsed", dependency_inventory.get("summary", {}).get("parsed_lockfiles", 0)),
+        ("SBOM components", dependency_inventory.get("summary", {}).get("components", 0)),
+        ("Transitive dependencies", dependency_inventory.get("summary", {}).get("transitive_components", 0)),
         ("Affected dependencies", dependency_summary.get("affected_dependencies", 0)),
         ("Dependency licenses resolved", dependency_summary.get("license_resolved", 0)),
         ("Dependency licenses requiring review", dependency_summary.get("license_review_required", 0)),
@@ -566,6 +570,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("contribution.html", "Contribution", table(labeled(history, list(history))) + "<h3>Personal achievement candidates</h3>" + achievement_table + achievement_note + "<h3>Technical impact before and after each contribution</h3>" + impact_summary_table + impact_table + impact_note + "<h3>Composite hotspots</h3>" + hotspot_explanation + hotspot_table + "<h3>System evolution</h3>" + evolution_table),
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Bus factor by system</h3>" + bus_factor_table + bus_factor_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
+        ("sbom.html", "SBOM and lockfiles", '<p>Open the lockfile-derived dependency inventory at <a href="../sbom/index.html">sbom/index.html</a>. The CycloneDX 1.6 artifact is available at <a href="../sbom/bom.json">sbom/bom.json</a>.</p>'),
         ("health.html", "Repository health", health_body),
         ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),
         ("narrative.html", "Evidence-based narrative", narrative_body),

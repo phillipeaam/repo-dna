@@ -26,6 +26,7 @@ One command creates a timestamped analysis package containing:
 - verified Flutter dependencies, widgets, routes, state management, bridges, tests, and flavors;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
+- lockfile-resolved dependency versions and a CycloneDX 1.6 software bill of materials;
 - ownership classification with confidence and evidence;
 - author-to-system activity ownership with percentages, ranking, and confidence;
 - estimated bus factor and activity concentration for each detected system;
@@ -50,6 +51,7 @@ sensitive content from the shareable package.
 |---|---|
 | Project detection | Detects Unity, Unreal, Godot, Android, Flutter, .NET, Node, Python, or falls back to a generic Git profile. |
 | Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. Python receives native AST analysis; other languages currently use an explicit heuristic fallback. |
+| Dependencies and SBOM | Resolves direct and transitive versions from supported lockfiles, emits Package URLs and dependency edges, generates CycloneDX 1.6 JSON, and feeds version evidence into vulnerability/license correlation. |
 | Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
@@ -85,6 +87,7 @@ Repository
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
 | Quality and compliance | Complexity plus imported coverage, test, linter, security-scanner, and license evidence. |
+| SBOM and lockfiles | Parsed lockfiles, exact versions, direct/transitive classification, PURLs, dependency evidence, and CycloneDX JSON. |
 | Repository health | Versioned score, dimension evidence, assessment coverage, and limitations. |
 | Health score trends | Historical scores, period delta, compatibility exclusions, and an optional PNG chart. |
 | Evidence-based narrative | Human-readable statements generated only from structured repository facts. |
@@ -159,6 +162,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Period comparison](docs/period-comparison.md)
 - [Health score trends](docs/health-trends.md)
 - [Quality result imports](docs/quality-imports.md)
+- [SBOM and lockfile resolution](docs/sbom.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
 - [Repository health score methodology](docs/health-score.md)
 - [Exclusion rules](EXCLUSIONS.md)
@@ -178,6 +182,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - ⚙ Engineering signal detection
 - Per-dependency vulnerability and license correlation from imported scanner,
   SBOM, SPDX, and license reports
+- Lockfile resolution and CycloneDX 1.6 SBOM generation
 - 📄 HTML, JSON, and CSV report generation
 - 📚 Portfolio and documentation support
 

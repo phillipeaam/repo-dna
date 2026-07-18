@@ -27,6 +27,7 @@ tests=(
     module_graph_test.sh
     architecture_insights_test.sh
     quality_importers_test.sh
+    dependency_inventory_test.sh
     period_comparison_test.sh
     health_trends_test.sh
     reporting_test.sh

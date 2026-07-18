@@ -40,6 +40,8 @@ REPORT_ROOT="$(find "$PROJECT_ROOT" -maxdepth 1 -type d -name '*_project_analysi
 [[ -n "$REPORT_ROOT" ]]
 [[ -s "$REPORT_ROOT/report/data/report.json" ]]
 [[ -s "$REPORT_ROOT/report/index.html" ]]
+[[ -s "$REPORT_ROOT/sbom/bom.json" ]]
+[[ -s "$REPORT_ROOT/sbom/index.html" ]]
 
 python - "$REPORT_ROOT" <<'PY'
 import json
@@ -57,6 +59,7 @@ canonical = json.loads((root / "report/data/report.json").read_text(encoding="ut
 assert canonical["schema_version"] == "1.1"
 assert canonical["project"]["type"] == ".NET"
 assert "generic_analysis" in canonical
+assert canonical["generic_analysis"]["analysis"]["dependency_inventory"]["sbom"]["bomFormat"] == "CycloneDX"
 print(f"validated {len(documents)} generated JSON documents")
 PY
 
@@ -64,10 +67,12 @@ if [[ -s "$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip" ]]; then
     ARCHIVE_PATH="$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip"
     unzip -Z1 "$ARCHIVE_PATH" > "$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])report[\\/]index\.html$' "$TEST_ROOT/archive-contents.txt"
+    grep -Eq '(^|[\\/])sbom[\\/]bom\.json$' "$TEST_ROOT/archive-contents.txt"
 elif [[ -s "$PROJECT_ROOT/$(basename "$REPORT_ROOT").tar.gz" ]]; then
     ARCHIVE_PATH="$PROJECT_ROOT/$(basename "$REPORT_ROOT").tar.gz"
     tar -tzf "$ARCHIVE_PATH" > "$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])report[\\/]index\.html$' "$TEST_ROOT/archive-contents.txt"
+    grep -Eq '(^|[\\/])sbom[\\/]bom\.json$' "$TEST_ROOT/archive-contents.txt"
 else
     printf 'Expected a generated ZIP or TAR.GZ archive.\n' >&2
     exit 1

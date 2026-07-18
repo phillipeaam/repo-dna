@@ -21,6 +21,7 @@ from onboarding import collect_onboarding
 from unity_analysis import analyze_unity
 from android_analysis import analyze_android
 from flutter_analysis import analyze_flutter
+from dependency_inventory import collect_dependency_inventory
 
 
 SOURCE_LANGUAGES = {
@@ -356,7 +357,8 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         generic["git"].get("technical_impact", {}),
         author_system_ownership,
     )
-    imported_quality = import_quality_results(root, generic["dependencies"])
+    dependency_inventory = collect_dependency_inventory(root, generic["dependencies"])
+    imported_quality = import_quality_results(root, generic["dependencies"], dependency_inventory)
     quality = {
         "code": code,
         **imported_quality,
@@ -390,6 +392,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         "unity": unity,
         "android": android,
         "flutter": flutter,
+        "dependency_inventory": dependency_inventory,
         "personal_achievement_candidates": achievement_candidates,
         "frameworks": frameworks,
         "graphs": graphs,

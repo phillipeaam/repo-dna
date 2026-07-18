@@ -365,8 +365,15 @@ def _license_category(licenses: list[str]) -> str:
     return "review_required"
 
 
-def _resolve_dependencies(dependencies: dict[str, Any], scanners: dict[str, Any], licenses: dict[str, Any]) -> dict[str, Any]:
+def _resolve_dependencies(dependencies: dict[str, Any], scanners: dict[str, Any], licenses: dict[str, Any], inventory: dict[str, Any]) -> dict[str, Any]:
     records: dict[str, dict[str, Any]] = {}
+    for component in inventory.get("components", []):
+        key = _normalized_package(component["name"])
+        record = records.setdefault(key, {"name": component["name"], "direct": False, "manifests": set(), "versions": set(), "vulnerabilities": [], "licenses": set(), "sources": set()})
+        record["direct"] = record["direct"] or component.get("direct", False)
+        if component.get("version"):
+            record["versions"].add(component["version"])
+        record["sources"].update(component.get("lockfiles", []))
     for manifest in dependencies.get("manifests", []):
         for name in manifest.get("dependencies", []):
             key = _normalized_package(name)
@@ -408,7 +415,7 @@ def _resolve_dependencies(dependencies: dict[str, Any], scanners: dict[str, Any]
             "license_unresolved": sum(item["license_status"] == "unresolved" for item in resolved),
         },
         "dependencies": resolved,
-        "method": "Normalized package identity correlated across manifests, scanner findings, SBOMs, and license reports",
+        "method": "Normalized package identity correlated across manifests, resolved lockfiles, scanners, SBOMs, and license reports",
         "limitations": [
             "not_resolved means that no per-dependency scanner result was correlated; it does not mean vulnerability-free",
             "License categories are triage signals, not legal advice or compatibility analysis",
@@ -416,7 +423,8 @@ def _resolve_dependencies(dependencies: dict[str, Any], scanners: dict[str, Any]
     }
 
 
-def import_quality_results(root: Path, dependencies: dict[str, Any]) -> dict[str, Any]:
+def import_quality_results(root: Path, dependencies: dict[str, Any], inventory: dict[str, Any] | None = None) -> dict[str, Any]:
     scanners = _scanners(root, len(dependencies.get("manifests", [])))
     licenses = _licenses(root)
-    return {"coverage": _coverage(root), "tests": _tests(root), "linters": _linters(root), "vulnerabilities": scanners, "dependency_licenses": licenses, "dependency_resolution": _resolve_dependencies(dependencies, scanners, licenses)}
+    inventory = inventory or {}
+    return {"coverage": _coverage(root), "tests": _tests(root), "linters": _linters(root), "vulnerabilities": scanners, "dependency_licenses": licenses, "dependency_resolution": _resolve_dependencies(dependencies, scanners, licenses, inventory)}

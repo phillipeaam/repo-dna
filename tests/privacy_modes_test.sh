@@ -51,6 +51,7 @@ default_report="$(find_report "$default_fixture")"
 [[ -f "$default_report/report/data/report.json" ]]
 [[ -f "$default_report/report/data/generic-analysis.json" ]]
 [[ -f "$default_report/report/index.html" ]]
+[[ -f "$default_report/sbom/bom.json" ]]
 grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
 grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/executive-summary.html" ]]
@@ -91,6 +92,8 @@ strict_report="$(find_report "$strict_fixture")"
 [[ ! -d "$strict_report/source" ]]
 [[ ! -f "$strict_report/data/history_commits.csv" ]]
 [[ -f "$strict_report/llm/evidence.json" ]]
+[[ -f "$strict_report/sbom/bom.json" ]]
+! grep -q '"bom-ref"' "$strict_report/sbom/bom.json"
 [[ -n "$(find "$strict_report/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)" ]]
 strict_snapshot="$(find "$strict_report/snapshots" -maxdepth 1 -type f -name '*.json' -print -quit)"
 grep -q '"commit": ""' "$strict_snapshot"

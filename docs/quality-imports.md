@@ -19,8 +19,8 @@ patterns. Files larger than 25 MB are rejected to bound memory consumption.
 Malformed reports receive `invalid`; absent reports receive `not_found` or
 `not_scanned`; successfully parsed reports receive `imported`.
 
-Normalized output correlates manifest package names with imported vulnerability
-and license metadata. It exports finding identifiers, severities, package
+Normalized output correlates manifest package names and lockfile-resolved
+versions with imported vulnerability and license metadata. It exports finding identifiers, severities, package
 versions, license identifiers, tool names, and report paths. Diagnostic messages,
 source snippets, vulnerable values, test names, and secret contents are not
 exported.

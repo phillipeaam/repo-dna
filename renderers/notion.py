@@ -56,6 +56,13 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "report/data/report.json#/generic_analysis/analysis/quality/coverage",
         ))
     dependency_resolution = quality_findings.get("dependency_resolution", {})
+    dependency_inventory = generic.get("analysis", {}).get("dependency_inventory", {})
+    if dependency_inventory.get("summary", {}).get("lockfiles", 0):
+        inventory_summary = dependency_inventory["summary"]
+        project_facts.append(fact(
+            f"RepoDNA parsed {inventory_summary.get('parsed_lockfiles', 0)} lockfiles and generated a CycloneDX SBOM with {inventory_summary.get('components', 0)} resolved components.",
+            "report/data/report.json#/generic_analysis/analysis/dependency_inventory/summary",
+        ))
     dependency_summary = dependency_resolution.get("summary", {})
     if dependency_summary.get("dependencies", 0):
         project_facts.append(fact(

@@ -116,6 +116,9 @@ SYSTEM_DOCUMENTATION_DIR="$OUTPUT_DIR/system-docs"
 # Define the evidence-backed developer onboarding dataset.
 ONBOARDING_DIR="$OUTPUT_DIR/onboarding"
 
+# Define the lockfile-derived CycloneDX software bill of materials.
+SBOM_DIR="$OUTPUT_DIR/sbom"
+
 # Define Android-only specialized reports without creating them for other stacks.
 ANDROID_DIR="$OUTPUT_DIR/android"
 
@@ -195,6 +198,7 @@ mkdir -p \
     "$HEALTH_TRENDS_DIR" \
     "$SYSTEM_DOCUMENTATION_DIR" \
     "$ONBOARDING_DIR" \
+    "$SBOM_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

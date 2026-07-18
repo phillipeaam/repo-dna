@@ -56,6 +56,7 @@ print_completion_summary() {
     printf '\nHealth score trends:\n  %s/health-trends/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nSystem documentation:\n  %s/system-docs/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nDeveloper onboarding:\n  %s/onboarding/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    printf '\nSoftware bill of materials:\n  %s/sbom/index.html\n' "$DISPLAY_OUTPUT_PATH"
     if [[ "$PROJECT_TYPE" == Android ]]; then
         printf '\nAndroid analysis:\n  %s/android/index.html\n' "$DISPLAY_OUTPUT_PATH"
     fi

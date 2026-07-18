@@ -459,6 +459,17 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     dependency_licenses["parse_errors"] = []
     dependency_resolution = analysis["quality"].get("dependency_resolution", {})
     dependency_resolution["dependencies"] = []
+    dependency_inventory = analysis.get("dependency_inventory", {})
+    dependency_inventory["components"] = []
+    dependency_inventory["parse_errors"] = []
+    dependency_inventory["lockfiles"] = [
+        {"path": f"Lockfile-{index}", "ecosystem": item.get("ecosystem", "Unknown"), "component_count": item.get("component_count", 0), "status": item.get("status", "unknown")}
+        for index, item in enumerate(dependency_inventory.get("lockfiles", []), 1)
+    ]
+    if "sbom" in dependency_inventory:
+        dependency_inventory["sbom"]["components"] = []
+        dependency_inventory["sbom"]["dependencies"] = []
+    dependency_inventory["status"] = "redacted_by_privacy_mode"
     analysis["quality"]["licenses"]["license_files"] = []
 
 
