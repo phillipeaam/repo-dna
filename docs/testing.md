@@ -33,6 +33,14 @@ use Git Bash. WSL is not represented by a GitHub-hosted runner and remains a
 manual or future self-hosted validation target.
 
 The lint job runs ShellCheck at error severity across Bash source and tests.
-`shfmt` currently enforces the main entrypoint and will expand gradually as
-existing modules are mechanically normalized. Bats may be adopted incrementally
-for new tests; rewriting the working Bash suite is not a prerequisite.
+`shfmt` enforces the entrypoint and selected maintained shell modules, expanding
+as older modules are mechanically normalized.
+
+The Bats suite in `tests/bats/` covers fast CLI, detection, exclusion, security,
+fixture-isolation, and runtime-fallback behavior. The existing standalone Bash
+tests remain the detailed integration suite; Bats calls the same public test
+scripts instead of maintaining duplicate assertions.
+
+`tests/artifact_contract_test.sh` performs a real analysis, parses every
+generated JSON document, checks the canonical report contract, verifies the HTML
+entrypoint, and confirms that the ZIP or TAR archive contains it.

@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing semantic-version tag to release, for example v1.2.3
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Validate release tag and changelog
+        run: bash ./scripts/release-notes.sh "$RELEASE_TAG" release-notes.md
+
+      - name: Package release and checksums
+        run: bash ./scripts/package-release.sh "$RELEASE_TAG" dist
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: repodna-${{ env.RELEASE_TAG }}
+          path: dist/*
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$RELEASE_TAG" dist/* \
+            --verify-tag \
+            --title "RepoDNA $RELEASE_TAG" \
+            --notes-file release-notes.md

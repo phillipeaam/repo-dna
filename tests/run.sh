@@ -31,6 +31,8 @@ tests=(
     health_trends_test.sh
     reporting_test.sh
     charts_test.sh
+    artifact_contract_test.sh
+    release_workflow_test.sh
     privacy_modes_test.sh
     edge_cases_test.sh
     runtime_fallbacks_test.sh

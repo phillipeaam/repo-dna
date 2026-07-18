@@ -7,39 +7,67 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
+    name: Bash quality
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Go for shfmt
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24.x'
-
-      - name: Install Bash linters
+      - name: Install Bash quality tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y shellcheck
-          go install mvdan.cc/sh/v3/cmd/shfmt@v3.10.0
+          sudo apt-get install -y bats shellcheck shfmt
 
       - name: ShellCheck
-        run: shellcheck --severity=error dna-analysis.sh src/**/*.sh tests/*.sh tests/helpers/*.sh
+        run: find dna-analysis.sh src tests scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=error
 
-      - name: Check entrypoint formatting
-        run: shfmt -d -i 4 -ci dna-analysis.sh
+      - name: Formatting check
+        run: shfmt -d -i 4 -ci dna-analysis.sh tests/artifact_contract_test.sh tests/helpers/fixture.sh
+
+      - name: Bats tests
+        run: bats --print-output-on-failure tests/bats
 
   test:
-    name: Test (${{ matrix.os }})
+    name: Full test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            requirements-ast.txt
+            requirements-reporting.txt
+
+      - name: Install runtime dependencies
+        run: python -m pip install -r requirements-ast.txt -r requirements-reporting.txt
+
+      - name: Compile Python modules
+        run: python -m compileall -q collectors renderers src/reports
+
+      - name: Run complete test suite
+        run: bash ./tests/run.sh
+
+  fixtures:
+    name: Fixtures (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 15
     defaults:
       run:
         shell: bash
@@ -52,12 +80,46 @@ jobs:
         with:
           python-version: '3.13'
           cache: pip
+          cache-dependency-path: requirements-reporting.txt
 
-      - name: Install report dependencies
+      - name: Install portable fixture dependencies
+        run: python -m pip install -r requirements-reporting.txt
+
+      - name: Run project fixtures
+        run: bash ./tests/fixtures_test.sh
+
+      - name: Run portable edge cases
+        run: bash ./tests/edge_cases_test.sh
+
+  artifacts:
+    name: Generated artifact contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            requirements-ast.txt
+            requirements-reporting.txt
+
+      - name: Install runtime dependencies
         run: python -m pip install -r requirements-ast.txt -r requirements-reporting.txt
 
-      - name: Compile Python modules
-        run: python -m compileall -q collectors renderers src/reports
+      - name: Generate and validate report archive
+        run: bash ./tests/artifact_contract_test.sh
 
-      - name: Run test suite
-        run: bash ./tests/run.sh
+      - name: Upload report archive on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-report-artifacts
+          path: |
+            **/*_project_analysis_*/summary/03_privacy_scan.txt
+            **/*_project_analysis_*/report/data/*.json
+          if-no-files-found: ignore
