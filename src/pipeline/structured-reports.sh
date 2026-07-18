@@ -2,7 +2,7 @@ write_structured_reports() {
 local CONTRIBUTION_TEXT PROJECT_IDENTITY_TEXT CURRENT_METRICS_TEXT
 local JSON_AUTHOR JSON_FIRST_COMMIT JSON_LAST_COMMIT
 local SOURCE_FOLDER_DESCRIPTION PROJECT_README_METADATA
-echo "[9/12] Writing summaries and structured data..."
+log_info "Writing summaries and structured data"
 
 # Build the Git-history summary fragment.
 if ((GIT_HISTORY[total_commits] > 0)); then

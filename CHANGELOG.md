@@ -1,5 +1,8 @@
 # Changelog
 
+- Added structured ERROR/WARN/INFO/DEBUG/TRACE logging, redacted on-disk debug
+  logs, and removed privacy-unsafe shell execution tracing.
+
 - Redesigned the primary HTML report as a decision-focused dashboard with
   compact navigation, search, confidence legends, evidence links, dark mode,
   print styling, and data-aware comparison/trend visibility.

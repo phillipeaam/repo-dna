@@ -1,7 +1,7 @@
 declare -gA CURRENT_METRICS=()
 
 collect_metrics() {
-echo "[4/12] Calculating current project metrics..."
+log_info "Calculating current project metrics"
 
 CURRENT_METRICS=(
     [csharp_files]=0 [csharp_lines]=0 [scenes]=0 [prefabs]=0

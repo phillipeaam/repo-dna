@@ -28,7 +28,7 @@ ZIP_PATH="$TEST_ROOT/report.zip"; PRIVACY_SCAN_FAILED=false
 mkdir -p "$OUTPUT_DIR"; printf 'report\n' > "$OUTPUT_DIR/index.html"
 command_exists() { return 1; }
 message="$(create_report_archive)"
-[[ "$message" == *'No supported archive command was found.'* ]]
+[[ "$message" == *'[WARN] No archive backend was found'* ]]
 [[ -f "$OUTPUT_DIR/index.html" && ! -f "$ZIP_PATH" ]]
 
 echo 'runtime fallback tests passed'

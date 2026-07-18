@@ -1,35 +1,36 @@
 #!/usr/bin/env bash
 
+archive_warn() {
+    if declare -F log_warn >/dev/null 2>&1; then log_warn "$*"; else printf '[WARN] %s\n' "$*"; fi
+}
+
 create_report_archive() {
+    if declare -F log_info >/dev/null 2>&1; then log_info "Creating report archive"; fi
     if [[ "$PRIVACY_SCAN_FAILED" == true ]]; then
-        echo "Warning: archive creation blocked by the privacy scan."
-        echo "Review summary/03_privacy_scan.txt before compressing the report."
+        archive_warn "Archive creation blocked by the privacy scan; review summary/03_privacy_scan.txt."
         return 0
     fi
     rm -f "$ZIP_PATH"
     if command_exists zip; then
         (cd "$(dirname "$OUTPUT_DIR")" && zip -qr "$ZIP_PATH" "$(basename "$OUTPUT_DIR")") ||
-            echo "Warning: zip could not create the archive."
+            archive_warn "ZIP backend could not create the archive."
     elif command_exists powershell.exe && command_exists cygpath; then
         local windows_output windows_zip
         windows_output="$(cygpath -aw "$OUTPUT_DIR")"
         windows_zip="$(cygpath -aw "$ZIP_PATH")"
         powershell.exe -NoProfile -Command \
             "Compress-Archive -LiteralPath '$windows_output' -DestinationPath '$windows_zip' -Force" \
-            >/dev/null 2>&1 || echo "Warning: PowerShell could not create the archive."
+            >/dev/null 2>&1 || archive_warn "PowerShell backend could not create the archive."
     elif command_exists tar; then
         TAR_PATH="$(dirname "$OUTPUT_DIR")/${REPORT_NAME}.tar.gz"
         (cd "$(dirname "$OUTPUT_DIR")" && tar -czf "$TAR_PATH" "$(basename "$OUTPUT_DIR")") ||
-            echo "Warning: tar could not create the archive."
+            archive_warn "TAR backend could not create the archive."
     else
-        echo "No supported archive command was found."
-        echo "The report folder was generated and can be compressed manually."
+        archive_warn "No archive backend was found; the report folder remains available."
     fi
 }
 
 print_completion_summary() {
-    echo "Potential secret findings: $POTENTIAL_SECRET_COUNT"
-    echo "[12/12] Finalizing..."
     echo ""
     echo "================================================================"
     echo "Analysis export completed"
@@ -80,5 +81,12 @@ print_completion_summary() {
     printf '\nAnalysis prompt:\n  %s/02_analysis_prompt.md\n\n' "$DISPLAY_SUMMARY_PATH"
     echo "Review confidential code, e-mails, URLs, credentials, and client names"
     echo "before sharing the generated package."
+    if [[ -n "${REPODNA_LOG_FILE:-}" ]]; then
+        if [[ "$PRIVACY_MODE" == strict ]]; then
+            printf 'Debug log:\n  %s/logs/repodna-debug.log\n' "$REPORT_NAME"
+        else
+            printf 'Debug log:\n  %s\n' "$REPODNA_LOG_FILE"
+        fi
+    fi
     echo "================================================================"
 }

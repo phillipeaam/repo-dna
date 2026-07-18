@@ -1,5 +1,5 @@
 write_guides() {
-echo "[8/12] Creating Notion-oriented evidence guides..."
+log_info "Creating Notion-oriented evidence guides"
 
 # Create the evidence guide.
 cat > "$SUMMARY_DIR/01_notion_evidence_guide.md" <<'EOF'

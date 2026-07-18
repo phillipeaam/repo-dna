@@ -1,5 +1,5 @@
 collect_metadata() {
-echo "[1/12] Reading repository and project metadata..."
+log_info "Reading repository and project metadata"
 
 # Read the current branch.
 CURRENT_BRANCH="$(git branch --show-current 2>/dev/null || true)"

@@ -43,6 +43,9 @@ jobs:
       - name: Dependency degradation contract
         run: bash tests/dependency_layers_test.sh
 
+      - name: Redacted logging contract
+        run: bash tests/logging_test.sh
+
   test:
     name: Full test suite
     runs-on: ubuntu-latest

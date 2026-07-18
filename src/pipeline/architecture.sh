@@ -1,5 +1,5 @@
 collect_architecture() {
-echo "[3/12] Detecting architecture, systems, and technologies..."
+log_info "Detecting architecture, systems, and technologies"
 
 local system_keywords
 system_keywords="$(system_keywords_pattern)"

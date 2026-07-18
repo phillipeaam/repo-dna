@@ -10,7 +10,7 @@ if [[ "${1:-}" == --json ]]; then
 fi
 
 tests=(
-    fixtures_test.sh architecture_test.sh arguments_test.sh cli_test.sh installation_test.sh dependency_layers_test.sh project_detection_test.sh
+    fixtures_test.sh architecture_test.sh arguments_test.sh cli_test.sh installation_test.sh dependency_layers_test.sh logging_test.sh project_detection_test.sh
     exclusions_test.sh ownership_test.sh author_system_ownership_test.sh bus_factor_test.sh
     system_documentation_test.sh onboarding_test.sh technical_impact_test.sh
     achievement_candidates_test.sh git_history_test.sh delivery_analysis_test.sh

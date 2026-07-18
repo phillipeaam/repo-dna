@@ -33,3 +33,15 @@ Graphviz, archive backends, temporary-directory writes, current-directory
 permissions, locale, UTF-8 signals, and Bash compatibility before a long run.
 Missing recommended dependencies produce a partial result (exit `5`); missing
 optional dependencies only skip the feature that uses them.
+
+## Logging
+
+Runtime messages use `ERROR`, `WARN`, `INFO`, `DEBUG`, and `TRACE`. Normal CLI
+output remains concise; `--verbose` streams informational progress. `--debug`
+enables deliberate debug events and writes `logs/repodna-debug.log` inside the
+report folder. Set `REPODNA_LOG_LEVEL=TRACE` for internal trace events.
+
+Debug logging does not use shell execution tracing. Before a message is written
+to disk, RepoDNA masks URLs, e-mail addresses, credential-like assignments,
+Bearer values, and absolute paths. Source content, commit contents, secret
+values, command expansions, and environment dumps must never be logged.

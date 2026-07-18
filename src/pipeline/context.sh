@@ -15,14 +15,12 @@ fi
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
 PARTIAL_ANALYSIS=false
 if [[ -n "$STRUCTURED_PYTHON" ]] && ! "$STRUCTURED_PYTHON" -c 'import jsonschema' >/dev/null 2>&1; then
-    printf '%s\n' 'Warning: the recommended JSON Schema module was not found.' >&2
-    printf '%s\n' "  Install with: $STRUCTURED_PYTHON -m pip install -r $SCRIPT_DIR/requirements-reporting.txt" >&2
+    log_warn "JSON Schema is unavailable; structured reporting will use the partial fallback. Install requirements-reporting.txt."
     STRUCTURED_PYTHON=''
 fi
 if [[ -z "$STRUCTURED_PYTHON" ]]; then
     PARTIAL_ANALYSIS=true
-    printf '%s\n' 'Warning: the recommended Python reporting runtime is unavailable. Structured analysis will be skipped.' >&2
-    printf '%s\n' '  Install Python 3.11+ and requirements-reporting.txt, or set REPO_DNA_PYTHON.' >&2
+    log_warn "Python reporting runtime unavailable; structured analysis will be skipped. Install Python 3.11+ and requirements-reporting.txt."
 fi
 
 # Require execution inside a Git repository.
@@ -238,6 +236,10 @@ mkdir -p \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."
+
+logger_attach_file "$OUTPUT_DIR/logs/repodna-debug.log" ||
+    die "Could not initialize the debug log."
+log_trace "Debug log attached after output initialization."
 
 if [[ "$INCLUDE_SOURCE" == true ]]; then
     mkdir -p \

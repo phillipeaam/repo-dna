@@ -356,6 +356,10 @@ repodna analyze .
 repodna --version
 ```
 
+Use `repodna analyze . --debug` when diagnostics are needed. The redacted log
+is written to `logs/repodna-debug.log` inside the generated analysis; normal
+mode shows only the concise execution summary.
+
 The default command location is `~/.local/bin/repodna`, including under Git
 Bash (`C:\Users\Your Name\.local\bin\repodna`). See the
 [installation and update guide](docs/installation.md) for `PATH`, custom

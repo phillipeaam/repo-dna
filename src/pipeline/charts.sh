@@ -1,5 +1,5 @@
 create_optional_charts() {
-echo "[10/12] Creating optional charts..."
+log_info "Creating optional charts"
 
 # Create charts only when detailed, non-strict commit data exists.
 if ((GIT_HISTORY[total_commits] > 0)) && [[ "$PRIVACY_MODE" != strict ]]; then
@@ -14,11 +14,9 @@ if ((GIT_HISTORY[total_commits] > 0)) && [[ "$PRIVACY_MODE" != strict ]]; then
     else
         # Explain why charts were skipped.
         if [[ -z "$STRUCTURED_PYTHON" ]]; then
-            echo "Warning: Python 3.11+ was not found. Graph generation was skipped."
-            echo "  Install Python and run: python -m pip install matplotlib"
+            log_warn "Python 3.11+ unavailable; graph generation skipped. Install Python and Matplotlib."
         else
-            echo "Warning: Matplotlib was not found. Graph generation was skipped."
-            echo "  Install with: $STRUCTURED_PYTHON -m pip install matplotlib"
+            log_warn "Matplotlib unavailable; graph generation skipped. Install with: python -m pip install matplotlib"
         fi
     fi
 fi

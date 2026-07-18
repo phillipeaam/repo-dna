@@ -22,6 +22,12 @@ set -o pipefail
 # Record the Bash process start time for the final execution summary.
 EXECUTION_STARTED_AT=$SECONDS
 
+# Load structured, redacted runtime logging before other modules emit messages.
+# shellcheck source=src/core/logging.sh
+source "$SCRIPT_DIR/src/core/logging.sh"
+logger_init || { printf '%s\n' '[ERROR] Could not initialize logging.' >&2; exit 1; }
+trap logger_cleanup EXIT
+
 # Load project-type and source-root detection.
 # shellcheck source=src/detectors/project-type.sh
 source "$SCRIPT_DIR/src/detectors/project-type.sh"
@@ -85,13 +91,19 @@ source "$SCRIPT_DIR/src/pipeline/structured-reports.sh"
 
 # Orchestrate the analysis explicitly; filenames do not define execution order.
 initialize_analysis_context
+log_debug "Analysis context initialized for project type $PROJECT_TYPE."
 collect_metadata
+log_debug "Repository metadata collected."
 collect_inventory
+log_debug "Repository inventory collected."
 collect_architecture
+log_debug "Architecture and technology signals collected."
 collect_metrics
+log_debug "Current repository metrics calculated."
 apply_source_policy
 if [[ "$NO_HISTORY" == false ]]; then
     collect_git_history
+    log_debug "${GIT_HISTORY[total_commits]} commits matched the configured history filters."
     collect_collaboration
 else
     git_history_reset

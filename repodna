@@ -27,7 +27,7 @@ Analyze options:
   --compare <file>      Compare with a previous snapshot
   --verbose             Stream engine progress
   --quiet               Print only errors
-  --debug               Trace the engine and retain its log
+  --debug               Write a redacted diagnostic log under report logs
 
 Exit codes: 0 success, 1 analysis error, 2 invalid arguments,
 3 missing dependency, 4 privacy/security block, 5 partial analysis.
@@ -108,8 +108,7 @@ analyze() {
     if [[ "$verbosity" == verbose ]]; then
         bash "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" 2>&1 | tee "$log_file"; status=${PIPESTATUS[0]}
     elif [[ "$verbosity" == debug ]]; then
-        REPODNA_DEBUG=1 bash -x "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" 2>&1 | tee "$log_file"; status=${PIPESTATUS[0]}
-        printf 'Debug log: %s\n' "$log_file"
+        REPODNA_LOG_LEVEL=DEBUG bash "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" 2>&1 | tee "$log_file"; status=${PIPESTATUS[0]}
     else
         bash "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" >"$log_file" 2>&1; status=$?
     fi
@@ -119,12 +118,12 @@ analyze() {
             printf '⚠ Partial analysis completed because a recommended dependency is unavailable.\n'
             printf '\nReport (%s):\n%s\n' "$format" "$report_path"
         fi
-        [[ "$verbosity" == debug ]] || rm -f "$log_file"
+        rm -f "$log_file"
         return 5
     elif [[ "$status" -ne 0 ]]; then
         printf '✗ Analysis failed (exit %d).\n' "$status" >&2
         [[ "$verbosity" == quiet ]] || tail -n 20 "$log_file" >&2
-        [[ "$verbosity" == debug ]] || rm -f "$log_file"
+        rm -f "$log_file"
         return "$status"
     fi
     report_path="$(awk '/^Start here:/{getline; sub(/^[[:space:]]+/,""); print; exit}' "$log_file")"
@@ -143,7 +142,7 @@ PY
         [[ "$secrets" -eq 0 ]] && printf '✓ No potential secrets require review\n' || printf '⚠ %s potential secrets require review\n' "$secrets"
         printf '\nReport (%s):\n%s\n' "$format" "$report_path"
     fi
-    [[ "$verbosity" == debug ]] || rm -f "$log_file"
+    rm -f "$log_file"
 }
 
 command_name="${1:-help}"; [[ $# -eq 0 ]] || shift

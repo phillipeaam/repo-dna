@@ -1,5 +1,5 @@
 apply_source_policy() {
-echo "[5/12] Applying source export and privacy policy..."
+log_info "Applying source export and privacy policy"
 
 if [[ "$INCLUDE_SOURCE" == true ]]; then
     while IFS= read -r source_file; do

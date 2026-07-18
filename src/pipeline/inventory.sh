@@ -1,5 +1,5 @@
 collect_inventory() {
-echo "[2/12] Exporting project structure and asset inventories..."
+log_info "Exporting project structure and asset inventories"
 
 # Export a project tree without requiring the tree command, respecting exclusions.
 analysis_find -type f -print 2>/dev/null |

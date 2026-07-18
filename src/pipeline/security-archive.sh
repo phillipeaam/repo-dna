@@ -1,11 +1,12 @@
 run_security_and_archive() {
-echo "[11/12] Scanning privacy and creating the archive..."
+log_info "Scanning privacy and creating the archive"
 
 PRIVACY_SCAN_FAILED=false
 sanitize_strict_reports
 POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
+log_debug "$POTENTIAL_SECRET_COUNT potential secret findings require review."
 
 if [[ -z "$STRUCTURED_PYTHON" ]]; then
     write_basic_partial_report || die "Could not create the dependency-free partial report."

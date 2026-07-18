@@ -1,5 +1,5 @@
 collect_collaboration() {
-echo "[7/12] Exporting collaboration and repository history..."
+log_info "Exporting collaboration and repository history"
 
 if [[ "$PRIVACY_MODE" == strict ]]; then
     git shortlog -sn --all 2>/dev/null |

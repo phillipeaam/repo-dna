@@ -3,8 +3,7 @@
 # Return success when a command exists.
 die() {
     local exit_code="${2:-1}"
-    echo ""
-    echo "Error: $1" >&2
+    if declare -F log_error >/dev/null 2>&1; then log_error "$1"; else printf '\nError: %s\n' "$1" >&2; fi
     exit "$exit_code"
 }
 
