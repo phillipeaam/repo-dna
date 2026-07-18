@@ -113,6 +113,9 @@ HEALTH_TRENDS_DIR="$OUTPUT_DIR/health-trends"
 # Define per-system evidence documentation outputs.
 SYSTEM_DOCUMENTATION_DIR="$OUTPUT_DIR/system-docs"
 
+# Define the evidence-backed developer onboarding dataset.
+ONBOARDING_DIR="$OUTPUT_DIR/onboarding"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 
@@ -185,6 +188,7 @@ mkdir -p \
     "$COMPARISON_DIR" \
     "$HEALTH_TRENDS_DIR" \
     "$SYSTEM_DOCUMENTATION_DIR" \
+    "$ONBOARDING_DIR" \
     "$PORTFOLIO_DIR" \
     "$GRAPHS_DIR" ||
     die "Could not create the report folders."

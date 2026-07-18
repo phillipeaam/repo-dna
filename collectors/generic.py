@@ -354,6 +354,9 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
         item["system"] = system_name_map.get(item["system"], "Module")
         for author in item.get("critical_authors", []):
             author["author"] = author_name_map.get(author["author"], "Contributor")
+    onboarding = analysis.get("onboarding", {})
+    onboarding["commands"] = []
+    onboarding["status"] = "redacted_by_privacy_mode"
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",

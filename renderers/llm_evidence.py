@@ -192,6 +192,14 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             {key: system.get(key) for key in ("bus_factor", "risk", "authors_with_activity", "total_commit_touches", "covered_activity_percent", "system_confidence")},
             ["This is historical activity concentration, not proof of exclusive knowledge, replaceability, or formal ownership."], True,
         ))
+    for index, command in enumerate(analysis.get("onboarding", {}).get("commands", [])[:50], 1):
+        suggested = command.get("classification") == "suggested"
+        items.append(evidence(
+            f"onboarding-command-{index}", "technology", "candidate" if suggested else "fact",
+            f"Onboarding command: {command['command']} ({command.get('purpose', 'purpose unknown')}).",
+            "medium" if suggested else "high", ["#/generic_analysis/analysis/onboarding/commands"],
+            command, ["Suggested commands were not executed and require team confirmation."] if suggested else ["Declared command existence does not prove that all local prerequisites are installed."], suggested,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

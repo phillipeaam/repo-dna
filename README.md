@@ -27,6 +27,7 @@ One command creates a timestamped analysis package containing:
 - author-to-system activity ownership with percentages, ranking, and confidence;
 - estimated bus factor and activity concentration for each detected system;
 - structured HTML and JSON documentation for every detected system;
+- an evidence-backed onboarding dataset with entrypoints, commands, and repository landmarks;
 - before/after technical impact signals for individual Git contributions;
 - confirmation-gated personal achievement candidates for an explicit author scope;
 - validated point-in-time analysis snapshots with optional Git persistence;
@@ -141,6 +142,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Author and system activity ownership](docs/author-system-ownership.md)
 - [Bus factor by system](docs/bus-factor.md)
 - [Structured documentation by system](docs/system-documentation.md)
+- [Developer onboarding dataset](docs/onboarding-dataset.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)

@@ -105,6 +105,7 @@ assert analysis["quality"]["vulnerabilities"]["status"] == "not_scanned"
 assert analysis["health"]["version"] == "1.1"
 assert analysis["health"]["score"] is not None
 assert analysis["narrative_facts"]
+assert analysis["onboarding"]["status"] == "collected"
 assert analysis["personal_achievement_candidates"]["status"] == "requires_author_filter"
 assert analysis["personal_achievement_candidates"]["candidates"] == []
 PY
@@ -154,6 +155,8 @@ assert all(item["author"].startswith("Contributor-") for item in ownership["rela
 assert all(item["system"].startswith("Module-") for item in ownership["relationships"])
 assert all(item["system"].startswith("Module-") for item in data["analysis"]["bus_factor_by_system"]["systems"])
 assert all(author["author"].startswith("Contributor-") for item in data["analysis"]["bus_factor_by_system"]["systems"] for author in item["critical_authors"])
+assert data["analysis"]["onboarding"]["status"] == "redacted_by_privacy_mode"
+assert data["analysis"]["onboarding"]["commands"] == []
 assert "Canonical Developer" not in text
 PY
 

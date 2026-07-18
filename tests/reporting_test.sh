@@ -209,6 +209,7 @@ fi
 "$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json" --schema "$SOURCE_ROOT/schemas/llm-evidence-1.0.0.schema.json"
 "$PYTHON" "$SOURCE_ROOT/renderers/snapshot.py" "$TEST_ROOT/report.json" "$TEST_ROOT/snapshots/fixture.json" --schema "$SOURCE_ROOT/schemas/analysis-snapshot-1.0.0.schema.json" --commit 0123456789abcdef0123456789abcdef01234567 --branch feature/test
 "$PYTHON" "$SOURCE_ROOT/renderers/system_documentation.py" "$TEST_ROOT/report.json" "$TEST_ROOT/system-docs" --schema "$SOURCE_ROOT/schemas/system-documentation-1.0.0.schema.json"
+"$PYTHON" "$SOURCE_ROOT/renderers/onboarding.py" "$TEST_ROOT/report.json" "$TEST_ROOT/onboarding" --schema "$SOURCE_ROOT/schemas/onboarding-dataset-1.0.0.schema.json"
 "$PYTHON" - "$TEST_ROOT/snapshots/fixture.json" "$SOURCE_ROOT/schemas/analysis-snapshot-1.0.0.schema.json" <<'PY'
 import json
 import sys
@@ -271,6 +272,7 @@ for report_name in \
     technologies.html \
     systems.html \
     system-documentation.html \
+    onboarding.html \
     graphs.html \
     contribution.html \
     collaboration.html \
@@ -305,6 +307,8 @@ grep -q 'Declared dependency entries' "$TEST_ROOT/report/technologies.html"
 grep -q 'does not necessarily represent unique' "$TEST_ROOT/report/technologies.html"
 grep -q 'Data/Persistence' "$TEST_ROOT/report/systems.html"
 grep -q 'system-docs/index.html' "$TEST_ROOT/report/system-documentation.html"
+grep -q 'onboarding/index.html' "$TEST_ROOT/report/onboarding.html"
+[[ -s "$TEST_ROOT/onboarding/index.html" && -s "$TEST_ROOT/onboarding/dataset.json" ]]
 grep -q 'Data/Persistence' "$TEST_ROOT/system-docs/index.html"
 [[ -s "$TEST_ROOT/system-docs/systems/data-persistence.html" ]]
 [[ -s "$TEST_ROOT/system-docs/data/data-persistence.json" ]]

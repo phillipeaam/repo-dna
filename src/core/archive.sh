@@ -55,6 +55,7 @@ print_completion_summary() {
     printf '\nPeriod comparison:\n  %s/comparison/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nHealth score trends:\n  %s/health-trends/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nSystem documentation:\n  %s/system-docs/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    printf '\nDeveloper onboarding:\n  %s/onboarding/index.html\n' "$DISPLAY_OUTPUT_PATH"
     if [[ "$SAVE_SNAPSHOT" == true ]]; then
         printf '\nPersisted snapshot:\n  %s/.repodna/snapshots/%s\n' "$REPO_ROOT" "$SNAPSHOT_NAME"
     fi
