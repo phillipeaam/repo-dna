@@ -1,0 +1,7 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/phillipeaam/repo-dna/schemas/android-analysis-1.0.0.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["$schema","schema_version","artifact_type","status","summary","manifests","gradle","components","component_counts","permissions","screens","resources","data_layer","networking","tests","method","limitations"],
+  "properties":{"$schema":{"const":"./android-analysis-1.0.0.schema.json"},"schema_version":{"const":"1.0.0"},"artifact_type":{"const":"repodna_android_analysis"},"status":{"enum":["assessed","redacted_by_privacy_mode"]},"summary":{"type":"object"},"manifests":{"type":"array"},"gradle":{"type":"object"},"components":{"type":"array"},"component_counts":{"type":"object"},"permissions":{"type":"array"},"screens":{"type":"array"},"resources":{"type":"object"},"data_layer":{"type":"object"},"networking":{"type":"object"},"tests":{"type":"object"},"method":{"type":"string"},"limitations":{"type":"array","items":{"type":"string"}}}
+}

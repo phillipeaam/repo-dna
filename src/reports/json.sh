@@ -28,6 +28,8 @@ report_dependency_manifest() {
                 printf 'build.gradle.kts'
             elif [[ -f build.gradle ]]; then
                 printf 'build.gradle'
+            else
+                find . -maxdepth 3 -type f \( -name build.gradle -o -name build.gradle.kts \) -print -quit 2>/dev/null
             fi
             ;;
         .NET)    find . -maxdepth 2 -type f -name '*.csproj' -print -quit 2>/dev/null ;;
@@ -55,12 +57,16 @@ write_structured_report_json() {
     local dependency_manifest
     local dependency_count
     local unity_analysis=false
+    local android_analysis=false
+    local flutter_analysis=false
     local csharp_analysis=false
     local generic_analysis_json
     local charts_json='[]'
     local -a chart_items=()
 
     [[ "$PROJECT_TYPE" == Unity ]] && unity_analysis=true
+    [[ "$PROJECT_TYPE" == Android ]] && android_analysis=true
+    [[ "$PROJECT_TYPE" == Flutter ]] && flutter_analysis=true
     [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
     dependency_manifest="$(report_dependency_manifest)"
     dependency_count="$(report_dependency_count "$dependency_manifest")"
@@ -112,6 +118,8 @@ write_structured_report_json() {
   },
   "analysis_profile": {
     "unity": $unity_analysis,
+    "android": $android_analysis,
+    "flutter": $flutter_analysis,
     "csharp": $csharp_analysis,
     "dependency_manifest": "$(json_escape "$dependency_manifest")"
   },

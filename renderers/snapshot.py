@@ -28,6 +28,8 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
     dependency_resolution = quality.get("dependency_resolution", {})
     unity = analysis.get("unity", {})
     unity_configuration = unity.get("configuration", {})
+    android = analysis.get("android", {})
+    flutter = analysis.get("flutter", {})
     generated_at = data.get("generated_at", "")
     return {
         "$schema": f"./{SCHEMA_FILE}",
@@ -72,6 +74,22 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
                 "enabled_scene_count": unity_configuration.get("build", {}).get("enabled_scene_count", 0),
                 "asmdef_count": unity_configuration.get("assemblies", {}).get("asmdef_count", 0),
                 "test_assembly_count": len(unity_configuration.get("assemblies", {}).get("test_assemblies", [])),
+            },
+            "android": {
+                "status": android.get("status", "not_android"),
+                "summary": android.get("summary", {}),
+                "build_types": len(android.get("gradle", {}).get("build_types", [])),
+                "product_flavors": len(android.get("gradle", {}).get("product_flavors", [])),
+                "detected_data_technologies": sum(android.get("data_layer", {}).get("technologies", {}).values()),
+                "detected_networking_technologies": sum(android.get("networking", {}).get("technologies", {}).values()),
+            },
+            "flutter": {
+                "status": flutter.get("status", "not_flutter"),
+                "summary": flutter.get("summary", {}),
+                "state_management_approaches": len(flutter.get("state_management", [])),
+                "platform_channels": len(flutter.get("platform_channels", [])),
+                "android_flavors": len(flutter.get("flavors", {}).get("android", [])),
+                "ios_schemes": len(flutter.get("flavors", {}).get("ios_schemes", [])),
             },
         },
         "systems": [

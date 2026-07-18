@@ -216,6 +216,36 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             signal.get("confidence", "low"), ["#/generic_analysis/analysis/unity/signals"], signal,
             ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
         ))
+    android = analysis.get("android", {})
+    if android.get("status") in {"assessed", "redacted_by_privacy_mode"}:
+        items.append(evidence(
+            "android-analysis-summary", "technology", "fact",
+            f"Android analysis recorded {android.get('summary', {}).get('components', 0)} component signals, {android.get('summary', {}).get('screens', 0)} screens, and {android.get('summary', {}).get('permissions', 0)} declared permissions.",
+            "high", ["#/generic_analysis/analysis/android"], android.get("summary", {}),
+            ["Static declarations do not prove runtime use or behavior."],
+        ))
+    for index, component in enumerate(android.get("components", [])[:100], 1):
+        items.append(evidence(
+            f"android-component-{index}", "system", "fact" if component.get("manifest") else "inference",
+            f"Android {component['type']} evidence: {component['name']}.",
+            "high" if component.get("manifest") else "medium", ["#/generic_analysis/analysis/android/components"], component,
+            ["Naming-based source component classification requires inheritance confirmation."], not bool(component.get("manifest")),
+        ))
+    flutter = analysis.get("flutter", {})
+    if flutter.get("status") in {"assessed", "redacted_by_privacy_mode"}:
+        items.append(evidence(
+            "flutter-analysis-summary", "technology", "fact",
+            f"Verified Flutter analysis recorded {flutter.get('summary', {}).get('widgets', 0)} widgets, {flutter.get('summary', {}).get('screens', 0)} screens, and {flutter.get('summary', {}).get('routes', 0)} route signals.",
+            "high", ["#/generic_analysis/analysis/flutter"], flutter.get("summary", {}),
+            ["Routes and architecture can be created dynamically and require runtime confirmation."],
+        ))
+    for index, manager in enumerate(flutter.get("state_management", [])[:20], 1):
+        items.append(evidence(
+            f"flutter-state-{index}", "architecture", "inference",
+            f"Flutter state-management evidence matched {manager['name']} with {manager['confidence']} confidence.",
+            manager.get("confidence", "medium"), ["#/generic_analysis/analysis/flutter/state_management"], manager,
+            ["Package presence does not prove consistent application-wide architecture."], True,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

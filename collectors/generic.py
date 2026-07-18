@@ -372,6 +372,33 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     for signal in unity.get("signals", []):
         signal["path"] = "[redacted]"
         signal["lines"] = []
+    android = analysis.get("android", {})
+    if android.get("status") == "assessed":
+        android["status"] = "redacted_by_privacy_mode"
+        for key in ("manifests", "components", "permissions", "screens"):
+            android[key] = []
+        android.get("gradle", {})["files"] = []
+        android.get("gradle", {})["dependencies"] = []
+        android.get("data_layer", {})["files"] = []
+        android.get("networking", {})["files"] = []
+        android.get("resources", {})["layouts"] = []
+        android.get("resources", {})["navigation"] = []
+        android.get("resources", {})["by_type"] = {}
+        android.get("tests", {})["unit"] = []
+        android.get("tests", {})["instrumented"] = []
+    flutter = analysis.get("flutter", {})
+    if flutter.get("status") == "assessed":
+        flutter["status"] = "redacted_by_privacy_mode"
+        for key in ("widgets", "screens", "routes", "assets", "platform_channels"):
+            flutter[key] = []
+        flutter["pubspec"] = "[redacted]"
+        flutter["dependencies"] = {"runtime": {}, "development": {}}
+        flutter.get("localization", {})["arb_files"] = []
+        flutter.get("localization", {})["l10n_config"] = None
+        for manager in flutter.get("state_management", []): manager["evidence_files"] = []
+        flutter["native_bridges"] = {"files": [], "matched_channels": flutter.get("native_bridges", {}).get("matched_channels", 0)}
+        flutter["tests"] = {"unit": [], "integration": []}
+        flutter["flavors"] = {"android": [], "ios_schemes": [], "dart_entrypoints": []}
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",

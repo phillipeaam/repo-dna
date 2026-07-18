@@ -211,6 +211,8 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`health-trends/\`: compatible health-score history, exclusions, and optional chart
 - \`system-docs/\`: evidence-based HTML and JSON documentation per detected system
 - \`onboarding/\`: entrypoints, commands, repository map, workflow evidence, and unknowns
+$([[ "$PROJECT_TYPE" != Android ]] || printf '%s\n' '- `android/`: Android components, dependencies, permissions, screens, data, networking, and variants')
+$([[ "$PROJECT_TYPE" != Flutter ]] || printf '%s\n' '- `flutter/`: Flutter widgets, routes, state, localization, channels, tests, and flavors')
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 

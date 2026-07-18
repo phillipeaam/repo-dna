@@ -205,7 +205,7 @@ fi
     exit 1
 }
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
-"$PYTHON" - "$TEST_ROOT/report.json" "$TEST_ROOT/unity-report.json" <<'PY'
+"$PYTHON" - "$TEST_ROOT/report.json" "$TEST_ROOT/unity-report.json" "$TEST_ROOT/android-report.json" "$TEST_ROOT/flutter-report.json" <<'PY'
 import json, sys
 data=json.load(open(sys.argv[1],encoding="utf-8"))
 data["analysis_profile"]["unity"]=True
@@ -217,8 +217,18 @@ data["generic_analysis"]["analysis"]["unity"]={
  "signals":[{"type":"linq_in_frame_method","confidence":"medium","path":"Assets/_Project/Combat/Damage.cs","occurrences":1,"lines":[42],"rationale":"Review with profiling."}]
 }
 json.dump(data,open(sys.argv[2],"w",encoding="utf-8"))
+android=json.load(open(sys.argv[1],encoding="utf-8"))
+android["analysis_profile"]["android"]=True
+android["project"]["type"]="Android"
+json.dump(android,open(sys.argv[3],"w",encoding="utf-8"))
+flutter=json.load(open(sys.argv[1],encoding="utf-8"))
+flutter["analysis_profile"]["flutter"]=True
+flutter["project"]["type"]="Flutter"
+json.dump(flutter,open(sys.argv[4],"w",encoding="utf-8"))
 PY
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/unity-report.json" "$TEST_ROOT/unity-report/index.html"
+"$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/android-report.json" "$TEST_ROOT/android-report/index.html"
+"$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/flutter-report.json" "$TEST_ROOT/flutter-report/index.html"
 "$PYTHON" "$SOURCE_ROOT/renderers/notion.py" "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json"
 "$PYTHON" "$SOURCE_ROOT/renderers/llm_evidence.py" "$TEST_ROOT/report.json" "$TEST_ROOT/llm/evidence.json" --schema "$SOURCE_ROOT/schemas/llm-evidence-1.0.0.schema.json"
 "$PYTHON" "$SOURCE_ROOT/renderers/snapshot.py" "$TEST_ROOT/report.json" "$TEST_ROOT/snapshots/fixture.json" --schema "$SOURCE_ROOT/schemas/analysis-snapshot-1.0.0.schema.json" --commit 0123456789abcdef0123456789abcdef01234567 --branch feature/test
@@ -398,7 +408,13 @@ grep -q 'executive-summary.html' "$TEST_ROOT/report/index.html"
 grep -q 'sample-project' "$TEST_ROOT/report/index.html"
 ! grep -q 'Unity version' "$TEST_ROOT/report/index.html"
 [[ ! -e "$TEST_ROOT/report/unity-analysis.html" ]]
+[[ ! -e "$TEST_ROOT/report/android-analysis.html" ]]
+[[ ! -e "$TEST_ROOT/report/flutter-analysis.html" ]]
 [[ -s "$TEST_ROOT/unity-report/unity-analysis.html" ]]
+[[ -s "$TEST_ROOT/android-report/android-analysis.html" ]]
+grep -q 'android/index.html' "$TEST_ROOT/android-report/android-analysis.html"
+[[ -s "$TEST_ROOT/flutter-report/flutter-analysis.html" ]]
+grep -q 'flutter/index.html' "$TEST_ROOT/flutter-report/flutter-analysis.html"
 grep -q 'Combat' "$TEST_ROOT/unity-report/unity-analysis.html"
 grep -q '42' "$TEST_ROOT/unity-report/unity-analysis.html"
 grep -q 'heuristic review signals, not confirmed bugs' "$TEST_ROOT/unity-report/unity-analysis.html"

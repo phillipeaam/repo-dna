@@ -580,6 +580,10 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ]
     if profile["unity"]:
         sections.insert(4, ("unity-analysis.html", "Unity analysis", unity_body))
+    if profile.get("android") or project.get("type") == "Android":
+        sections.insert(4, ("android-analysis.html", "Android analysis", '<p>Open the specialized Android reports at <a href="../android/index.html">android/index.html</a>. Structured evidence is available in <a href="../android/analysis.json">analysis.json</a>.</p>'))
+    if profile.get("flutter") or project.get("type") == "Flutter":
+        sections.insert(4, ("flutter-analysis.html", "Flutter analysis", '<p>Open the specialized Flutter reports at <a href="../flutter/index.html">flutter/index.html</a>. Structured evidence is available in <a href="../flutter/analysis.json">analysis.json</a>.</p>'))
     top_language = generic.get("languages", [{}])[0].get("name", "Not detected") if generic.get("languages") else "Not detected"
     executive_body = '<section><h2>Repository at a glance</h2><p>This summary highlights the main measurable signals collected from the current repository and its Git history.</p><div class="metrics">' + metric_cards(headline) + "</div>"
     executive_body += table([

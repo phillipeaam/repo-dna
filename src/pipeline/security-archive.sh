@@ -24,6 +24,25 @@ create_analysis_charts
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
 
+if [[ "$PROJECT_TYPE" == Android ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/android_reports.py" \
+        "$REPORT_DATA_DIR/report.json" "$ANDROID_DIR" \
+        --schema "$SCRIPT_DIR/schemas/android-analysis-1.0.0.schema.json" ||
+        die "Could not render Android reports."
+    cp "$SCRIPT_DIR/schemas/android-analysis-1.0.0.schema.json" \
+        "$ANDROID_DIR/android-analysis-1.0.0.schema.json" ||
+        die "Could not copy the Android analysis schema."
+fi
+if [[ "$PROJECT_TYPE" == Flutter ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/flutter_reports.py" \
+        "$REPORT_DATA_DIR/report.json" "$FLUTTER_DIR" \
+        --schema "$SCRIPT_DIR/schemas/flutter-analysis-1.0.0.schema.json" ||
+        die "Could not render Flutter reports."
+    cp "$SCRIPT_DIR/schemas/flutter-analysis-1.0.0.schema.json" \
+        "$FLUTTER_DIR/flutter-analysis-1.0.0.schema.json" ||
+        die "Could not copy the Flutter analysis schema."
+fi
+
 SNAPSHOT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
 [[ "$PRIVACY_MODE" != strict ]] || SNAPSHOT_BRANCH='[redacted]'
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/snapshot.py" \

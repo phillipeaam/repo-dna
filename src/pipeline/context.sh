@@ -116,6 +116,12 @@ SYSTEM_DOCUMENTATION_DIR="$OUTPUT_DIR/system-docs"
 # Define the evidence-backed developer onboarding dataset.
 ONBOARDING_DIR="$OUTPUT_DIR/onboarding"
 
+# Define Android-only specialized reports without creating them for other stacks.
+ANDROID_DIR="$OUTPUT_DIR/android"
+
+# Define Flutter-only specialized reports without creating them for other stacks.
+FLUTTER_DIR="$OUTPUT_DIR/flutter"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 

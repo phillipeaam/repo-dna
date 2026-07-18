@@ -56,6 +56,12 @@ print_completion_summary() {
     printf '\nHealth score trends:\n  %s/health-trends/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nSystem documentation:\n  %s/system-docs/index.html\n' "$DISPLAY_OUTPUT_PATH"
     printf '\nDeveloper onboarding:\n  %s/onboarding/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    if [[ "$PROJECT_TYPE" == Android ]]; then
+        printf '\nAndroid analysis:\n  %s/android/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    fi
+    if [[ "$PROJECT_TYPE" == Flutter ]]; then
+        printf '\nFlutter analysis:\n  %s/flutter/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    fi
     if [[ "$SAVE_SNAPSHOT" == true ]]; then
         printf '\nPersisted snapshot:\n  %s/.repodna/snapshots/%s\n' "$REPO_ROOT" "$SNAPSHOT_NAME"
     fi

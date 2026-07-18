@@ -22,6 +22,8 @@ One command creates a timestamped analysis package containing:
 - stack-neutral repository inventory for any Git project;
 - specialized C# and Unity engineering signals when those stacks are detected;
 - Unity settings, evidence-backed gameplay categories, and heuristic performance signals;
+- Android components, screens, data/network layers, permissions, Gradle variants, and tests;
+- verified Flutter dependencies, widgets, routes, state management, bridges, tests, and flavors;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - ownership classification with confidence and evidence;
@@ -139,6 +141,8 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Architecture](docs/architecture.md)
 - [Framework analysis methodology](docs/framework-analysis.md)
 - [Improved Unity analysis](docs/unity-analysis.md)
+- [Android analysis](docs/android-analysis.md)
+- [Flutter analysis](docs/flutter-analysis.md)
 - [Module and dependency graphs](docs/dependency-graphs.md)
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)
