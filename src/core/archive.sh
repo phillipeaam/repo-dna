@@ -66,6 +66,9 @@ print_completion_summary() {
     if [[ "$PROJECT_TYPE" == Godot ]]; then
         printf '\nGodot analysis:\n  %s/godot/index.html\n' "$DISPLAY_OUTPUT_PATH"
     fi
+    if [[ "$PROJECT_TYPE" == Unreal ]]; then
+        printf '\nUnreal analysis:\n  %s/unreal/index.html\n' "$DISPLAY_OUTPUT_PATH"
+    fi
     if [[ "$SAVE_SNAPSHOT" == true ]]; then
         printf '\nPersisted snapshot:\n  %s/.repodna/snapshots/%s\n' "$REPO_ROOT" "$SNAPSHOT_NAME"
     fi

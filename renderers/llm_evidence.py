@@ -313,6 +313,29 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             signal.get("confidence", "medium"), ["#/generic_analysis/analysis/godot/signals"], signal,
             ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
         ))
+    unreal = analysis.get("unreal", {})
+    if unreal.get("status") in {"assessed", "redacted_by_privacy_mode"}:
+        summary = unreal.get("summary", {})
+        items.append(evidence(
+            "unreal-analysis-summary", "technology", "fact",
+            f"Unreal analysis recorded {summary.get('modules', 0)} modules, {summary.get('source_files', 0)} source files, {summary.get('reflected_types', 0)} reflected types, {summary.get('blueprint_assets', 0)} Content assets, and {summary.get('maps', 0)} maps.",
+            "high", ["#/generic_analysis/analysis/unreal"], summary,
+            ["Binary Blueprint graphs and map internals were not decoded."],
+        ))
+    for index, system in enumerate(unreal.get("gameplay_systems", [])[:50], 1):
+        items.append(evidence(
+            f"unreal-gameplay-{index}", "system", "inference",
+            f"Unreal gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
+            system.get("confidence", "medium"), ["#/generic_analysis/analysis/unreal/gameplay_systems"], system,
+            ["Gameplay categories are evidence-backed candidates requiring human confirmation."], True,
+        ))
+    for index, signal in enumerate(unreal.get("signals", [])[:100], 1):
+        items.append(evidence(
+            f"unreal-signal-{index}", "quality", "candidate",
+            f"Unreal review signal {signal['type']} was detected with {signal['confidence']} confidence.",
+            signal.get("confidence", "medium"), ["#/generic_analysis/analysis/unreal/signals"], signal,
+            ["This is a heuristic signal, not a confirmed bug; validate with code review and Unreal profiling tools."], True,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

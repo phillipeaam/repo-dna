@@ -1,0 +1,12 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/phillipeaam/repo-dna/schemas/report-1.1.0.schema.json","title":"RepoDNA canonical report","type":"object","additionalProperties":false,
+  "required":["$schema","schema_version","generated_at","privacy","project","analysis_profile","generic_analysis","current_metrics","architecture","technologies","systems","history","collaboration","risks","visualizations","evidence"],
+  "properties":{
+    "$schema":{"const":"./report-1.1.0.schema.json"},"schema_version":{"const":"1.1"},"generated_at":{"type":"string","minLength":1},
+    "privacy":{"type":"object","required":["mode","source_included"],"properties":{"mode":{"enum":["standard","strict"]},"source_included":{"type":"boolean"}}},
+    "project":{"type":"object","required":["name","type","product","company","code_root","unity_version"]},
+    "analysis_profile":{"type":"object","required":["unity","android","flutter","godot","unreal","csharp","dependency_manifest"],"properties":{"unity":{"type":"boolean"},"android":{"type":"boolean"},"flutter":{"type":"boolean"},"godot":{"type":"boolean"},"unreal":{"type":"boolean"},"csharp":{"type":"boolean"},"dependency_manifest":{"type":"string"}}},
+    "generic_analysis":{"$ref":"./generic-analysis-1.1.0.schema.json"},
+    "current_metrics":{"$ref":"#/$defs/object"},"architecture":{"$ref":"#/$defs/object"},"technologies":{"$ref":"#/$defs/object"},"systems":{"$ref":"#/$defs/object"},"history":{"type":"object","required":["scope","total_commits","merge_commits","non_merge_commits","active_days","first_date","last_date","lines_added","lines_removed","unique_paths_changed"]},"collaboration":{"$ref":"#/$defs/object"},"risks":{"$ref":"#/$defs/object"},"visualizations":{"type":"object","required":["charts"]},"evidence":{"$ref":"#/$defs/object"}
+  },"$defs":{"object":{"type":"object"}}
+}

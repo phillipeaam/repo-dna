@@ -27,6 +27,7 @@ tests=(
     android_analysis_test.sh
     flutter_analysis_test.sh
     godot_analysis_test.sh
+    unreal_analysis_test.sh
     module_graph_test.sh
     architecture_insights_test.sh
     quality_importers_test.sh
@@ -34,6 +35,7 @@ tests=(
     period_comparison_test.sh
     health_trends_test.sh
     reporting_test.sh
+    canonical_schema_test.sh
     charts_test.sh
     artifact_contract_test.sh
     release_workflow_test.sh

@@ -25,6 +25,7 @@ from dependency_inventory import collect_dependency_inventory
 from delivery_analysis import analyze_delivery
 from forge_import import import_forge_data
 from godot_analysis import analyze_godot
+from unreal_analysis import analyze_unreal
 
 
 SOURCE_LANGUAGES = {
@@ -356,6 +357,7 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
     android = analyze_android(root, generic["_files"], code, generic["git"])
     flutter = analyze_flutter(root, generic["_files"], generic["git"])
     godot = analyze_godot(root, generic["_files"], generic["git"])
+    unreal = analyze_unreal(root, generic["_files"], generic["git"])
     achievement_candidates = generate_achievement_candidates(
         generic["git"].get("author_filter", ""),
         generic["git"].get("technical_impact", {}),
@@ -402,6 +404,7 @@ def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | N
         "android": android,
         "flutter": flutter,
         "godot": godot,
+        "unreal": unreal,
         "dependency_inventory": dependency_inventory,
         "delivery": delivery,
         "forge_activity": forge_activity,

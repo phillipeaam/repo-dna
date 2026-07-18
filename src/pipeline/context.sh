@@ -135,6 +135,9 @@ FLUTTER_DIR="$OUTPUT_DIR/flutter"
 # Define Godot-only specialized reports without creating them for other stacks.
 GODOT_DIR="$OUTPUT_DIR/godot"
 
+# Define Unreal-only specialized reports without creating them for other stacks.
+UNREAL_DIR="$OUTPUT_DIR/unreal"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 

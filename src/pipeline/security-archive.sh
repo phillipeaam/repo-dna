@@ -15,6 +15,9 @@ if [[ -n "$STRUCTURED_PYTHON" ]]; then
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
         "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" "${GENERIC_COLLECTOR_ARGS[@]}" ||
         die "Could not collect the generic repository analysis."
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
+        "$GENERIC_ANALYSIS_FILE" "$SCRIPT_DIR/schemas/generic-analysis-1.1.0.schema.json" ||
+        die "Generic analysis JSON violates its schema."
 else
     printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \
         > "$GENERIC_ANALYSIS_FILE"
@@ -24,6 +27,13 @@ create_analysis_charts
 
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
+    "$REPORT_DATA_DIR/report.json" "$SCRIPT_DIR/schemas/report-1.1.0.schema.json" ||
+    die "Canonical report JSON violates its schema."
+cp "$SCRIPT_DIR/schemas/report-1.1.0.schema.json" "$REPORT_DATA_DIR/report-1.1.0.schema.json" ||
+    die "Could not package the canonical report schema."
+cp "$SCRIPT_DIR/schemas/generic-analysis-1.1.0.schema.json" "$REPORT_DATA_DIR/generic-analysis-1.1.0.schema.json" ||
+    die "Could not package the generic analysis schema."
 cp "$SCRIPT_DIR/schemas/forge-data-1.0.0.schema.json" "$REPORT_DATA_DIR/forge-data-1.0.0.schema.json" ||
     die "Could not package the provider-neutral forge-data schema."
 
@@ -57,6 +67,15 @@ if [[ "$PROJECT_TYPE" == Godot ]]; then
     cp "$SCRIPT_DIR/schemas/godot-analysis-1.0.0.schema.json" \
         "$GODOT_DIR/godot-analysis-1.0.0.schema.json" ||
         die "Could not copy the Godot analysis schema."
+fi
+if [[ "$PROJECT_TYPE" == Unreal ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/unreal_reports.py" \
+        "$REPORT_DATA_DIR/report.json" "$UNREAL_DIR" \
+        --schema "$SCRIPT_DIR/schemas/unreal-analysis-1.0.0.schema.json" ||
+        die "Could not render Unreal reports."
+    cp "$SCRIPT_DIR/schemas/unreal-analysis-1.0.0.schema.json" \
+        "$UNREAL_DIR/unreal-analysis-1.0.0.schema.json" ||
+        die "Could not copy the Unreal analysis schema."
 fi
 
 SNAPSHOT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
@@ -121,6 +140,11 @@ cp "$SCRIPT_DIR/schemas/onboarding-dataset-1.0.0.schema.json" \
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/notion.py" \
     "$REPORT_DATA_DIR/report.json" "$NOTION_DIR/evidence.json" ||
     die "Could not render the Notion evidence JSON."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
+    "$NOTION_DIR/evidence.json" "$SCRIPT_DIR/schemas/notion-evidence-1.0.0.schema.json" ||
+    die "Notion evidence JSON violates its schema."
+cp "$SCRIPT_DIR/schemas/notion-evidence-1.0.0.schema.json" "$NOTION_DIR/notion-evidence-1.0.0.schema.json" ||
+    die "Could not package the Notion evidence schema."
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/llm_evidence.py" \
     "$REPORT_DATA_DIR/report.json" "$LLM_DIR/evidence.json" \
     --schema "$SCRIPT_DIR/schemas/llm-evidence-1.0.0.schema.json" ||
@@ -134,6 +158,11 @@ PORTFOLIO_ARGS=()
     "$REPORT_DATA_DIR/report.json" "$PORTFOLIO_DIR/draft.json" "$PORTFOLIO_DIR/index.html" \
     "${PORTFOLIO_ARGS[@]}" ||
     die "Could not render the portfolio evidence draft."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
+    "$PORTFOLIO_DIR/draft.json" "$SCRIPT_DIR/schemas/portfolio-draft-1.0.0.schema.json" ||
+    die "Portfolio draft JSON violates its schema."
+cp "$SCRIPT_DIR/schemas/portfolio-draft-1.0.0.schema.json" "$PORTFOLIO_DIR/portfolio-draft-1.0.0.schema.json" ||
+    die "Could not package the portfolio draft schema."
 
 run_privacy_scan
 if [[ "$SAVE_SNAPSHOT" == true ]]; then

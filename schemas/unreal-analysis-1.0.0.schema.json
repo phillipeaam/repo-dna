@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/unreal-analysis-1.0.0.schema.json",
+  "title": "RepoDNA Unreal analysis", "type": "object", "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "status", "summary", "project", "modules", "targets", "plugins", "source", "blueprints_assets", "maps", "configuration", "input", "platforms", "tests", "gameplay_systems", "signals", "method", "limitations"],
+  "properties": {
+    "$schema": {"const": "./unreal-analysis-1.0.0.schema.json"}, "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_unreal_analysis"}, "status": {"enum": ["assessed", "redacted_by_privacy_mode"]},
+    "summary": {"type": "object"}, "project": {"type": "object"},
+    "modules": {"type": "array", "items": {"type": "object"}}, "targets": {"type": "array", "items": {"type": "object"}},
+    "plugins": {"type": "array", "items": {"type": "object"}}, "source": {"type": "array", "items": {"type": "object"}},
+    "blueprints_assets": {"type": "object"}, "maps": {"type": "array", "items": {"type": "string"}},
+    "configuration": {"type": "array", "items": {"type": "object"}}, "input": {"type": "object"},
+    "platforms": {"type": "array", "items": {"type": "string"}}, "tests": {"type": "object"},
+    "gameplay_systems": {"type": "array", "items": {"type": "object"}}, "signals": {"type": "array", "items": {"type": "object"}},
+    "method": {"type": "string"}, "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -103,6 +103,13 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             f"Godot project markers were detected with {summary.get('scenes', 0)} scenes and {summary.get('scripts', 0)} scripts analyzed.",
             "report/data/report.json#/generic_analysis/analysis/godot",
         ))
+    if profile.get("unreal"):
+        unreal = generic.get("analysis", {}).get("unreal", {})
+        summary = unreal.get("summary", {})
+        technology_facts.append(fact(
+            f"Unreal project markers were detected with {summary.get('modules', 0)} modules, {summary.get('source_files', 0)} C++ source files, and {summary.get('blueprint_assets', 0)} binary Content assets inventoried.",
+            "report/data/report.json#/generic_analysis/analysis/unreal",
+        ))
     if technologies["dependency_count"] > 0:
         technology_facts.append(fact(
             f"Dependency manifest contains approximately {technologies['dependency_count']} entries.",
@@ -160,6 +167,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
     ]
 
     return {
+        "$schema": "./notion-evidence-1.0.0.schema.json",
         "schema_version": "1.0",
         "generated_at": data["generated_at"],
         "classification_model": {

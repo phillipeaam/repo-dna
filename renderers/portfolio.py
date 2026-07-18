@@ -76,6 +76,7 @@ def build(data: dict[str, Any], confirmations: dict[str, Any]) -> dict[str, Any]
     all_claims = claims + generated_candidates + achievements
     approved = [item for item in all_claims if item["approved"]]
     return {
+        "$schema": "./portfolio-draft-1.0.0.schema.json",
         "schema_version": "1.0",
         "status": "approved" if all_claims and len(approved) == len(all_claims) else "confirmation_required",
         "candidate": {

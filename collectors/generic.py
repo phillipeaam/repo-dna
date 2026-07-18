@@ -417,6 +417,18 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
             system["scripts"] = []
             system["scenes"] = []
             system["primary_directories"] = []
+    unreal = analysis.get("unreal", {})
+    if unreal.get("status") == "assessed":
+        unreal["status"] = "redacted_by_privacy_mode"
+        unreal["project"] = {"path": "[redacted]", "modules": [], "plugins": [], "target_platforms": []}
+        for key in ("modules", "targets", "plugins", "source", "maps", "configuration", "signals"):
+            unreal[key] = []
+        unreal["blueprints_assets"] = {"files": [], "count": unreal.get("blueprints_assets", {}).get("count", 0), "naming_prefixes": {}}
+        unreal["input"] = {"declarations": [], "count": unreal.get("input", {}).get("count", 0)}
+        unreal["tests"] = {"files": [], "automation_macros": unreal.get("tests", {}).get("automation_macros", 0)}
+        for system in unreal.get("gameplay_systems", []):
+            system["files"] = []
+            system["primary_directories"] = []
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",
@@ -579,6 +591,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     modules.sort(key=lambda item: item["file_count"], reverse=True)
 
     result = {
+        "$schema": "./generic-analysis-1.1.0.schema.json",
         "schema_version": "1.1",
         "collector": "generic",
         "file_count": len(files),
