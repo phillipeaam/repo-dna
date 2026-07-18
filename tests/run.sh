@@ -21,6 +21,7 @@ tests=(
     forge_import_test.sh
     security_scan_test.sh
     generic_collector_test.sh
+    author_alias_validation_test.sh
     ast_analysis_test.sh
     framework_analysis_test.sh
     unity_analysis_test.sh

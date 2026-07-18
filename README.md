@@ -175,6 +175,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [LLM evidence package](docs/llm-evidence.md)
 - [Canonical JSON contracts](docs/canonical-json-contracts.md)
 - [Composite hotspot model](docs/hotspot-model.md)
+- [Author alias configuration](docs/author-aliases.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)
@@ -376,6 +377,12 @@ Phillipe Augusto:
 
 Standard reports show the canonical contributor name and commit count. Strict
 privacy mode replaces names and does not export e-mail addresses.
+
+The file uses a deliberately small validated YAML-like grammar. Only canonical
+author headings plus `names:` and `emails:` lists are accepted. Empty aliases,
+unknown or repeated sections, invalid e-mails, duplicate canonical identities,
+and case-insensitive alias collisions stop the analysis with the exact source
+line. See [Author alias configuration](docs/author-aliases.md).
 
 Without `--author`, the collaboration report covers the complete Git history
 and creates paginated contributor pages with 20 canonical identities per page.

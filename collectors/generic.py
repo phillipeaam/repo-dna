@@ -70,27 +70,80 @@ def git(root: Path, *args: str) -> str:
 
 
 def load_author_aliases(root: Path) -> tuple[dict[str, str], dict[str, str]]:
-    """Parse the intentionally small YAML-like .repodna-authors format."""
+    """Parse and validate the intentionally small .repodna-authors grammar."""
     name_aliases: dict[str, str] = {}
     email_aliases: dict[str, str] = {}
     path = root / ".repodna-authors"
     if not path.is_file():
         return name_aliases, email_aliases
+    name_origins: dict[str, tuple[str, int]] = {}
+    email_origins: dict[str, tuple[str, int]] = {}
+    canonical_origins: dict[str, int] = {}
     canonical = ""
     section = ""
-    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        if raw and not raw[0].isspace() and raw.rstrip().endswith(":"):
-            canonical = raw.rstrip()[:-1].strip()
-            name_aliases[canonical.casefold()] = canonical
-            section = ""
-        elif canonical and raw.strip() in {"names:", "emails:"}:
-            section = raw.strip()[:-1]
-        elif canonical and raw.strip().startswith("-"):
-            value = raw.strip()[1:].strip().strip('"\'')
-            if section == "names":
-                name_aliases[value.casefold()] = canonical
-            elif section == "emails":
-                email_aliases[value.casefold()] = canonical
+    section_line = 0
+    section_entries = 0
+    seen_sections: set[str] = set()
+
+    def fail(line: int, message: str) -> None:
+        raise ValueError(f"{path.name}:{line}: {message}")
+
+    def finish_section(next_line: int) -> None:
+        if section and section_entries == 0:
+            fail(section_line or next_line, f"section '{section}' for '{canonical}' must contain at least one alias")
+
+    def register(target: dict[str, str], origins: dict[str, tuple[str, int]], value: str, line: int, kind: str) -> None:
+        key = value.casefold()
+        if key in origins:
+            owner, original_line = origins[key]
+            fail(line, f"duplicate {kind} alias '{value}'; already assigned to '{owner}' on line {original_line}")
+        origins[key] = (canonical, line)
+        target[key] = canonical
+
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    for line_number, raw in enumerate(lines, 1):
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if raw == raw.lstrip() and stripped.endswith(":"):
+            finish_section(line_number)
+            canonical = stripped[:-1].strip()
+            if not canonical:
+                fail(line_number, "canonical author name cannot be empty")
+            key = canonical.casefold()
+            if key in canonical_origins:
+                fail(line_number, f"duplicate canonical author '{canonical}'; first declared on line {canonical_origins[key]}")
+            if key in name_origins:
+                owner, original_line = name_origins[key]
+                fail(line_number, f"canonical author '{canonical}' collides with an alias for '{owner}' on line {original_line}")
+            canonical_origins[key] = line_number
+            name_origins[key] = (canonical, line_number)
+            name_aliases[key] = canonical
+            section = ""; section_entries = 0; seen_sections = set()
+            continue
+        if not canonical:
+            fail(line_number, "alias section or value appears before a canonical author")
+        if stripped.endswith(":") and not stripped.startswith("-"):
+            finish_section(line_number)
+            candidate = stripped[:-1].strip()
+            if candidate not in {"names", "emails"}:
+                fail(line_number, f"unknown section '{candidate}'; expected 'names' or 'emails'")
+            if candidate in seen_sections:
+                fail(line_number, f"duplicate section '{candidate}' for '{canonical}'")
+            section = candidate; section_line = line_number; section_entries = 0; seen_sections.add(candidate)
+            continue
+        if not stripped.startswith("-"):
+            fail(line_number, "expected a canonical author, 'names:', 'emails:', or an alias list item")
+        if not section:
+            fail(line_number, f"alias for '{canonical}' is not inside a 'names' or 'emails' section")
+        value = stripped[1:].strip().strip('"\'').strip()
+        if not value:
+            fail(line_number, f"{section} alias cannot be empty")
+        if section == "emails" and not re.fullmatch(r"[^@\s]+@[^@\s]+", value):
+            fail(line_number, f"invalid email alias '{value}'")
+        register(name_aliases if section == "names" else email_aliases, name_origins if section == "names" else email_origins, value, line_number, section[:-1])
+        section_entries += 1
+    finish_section(len(lines) + 1)
     return name_aliases, email_aliases
 
 
