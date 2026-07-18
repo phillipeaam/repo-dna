@@ -75,7 +75,9 @@ assert impact["status"] == "assessed" and impact["contributions_analyzed"] == 3
 assert all(item["author"] in {"Canonical Developer", "Focused Developer"} for item in impact["contributions"])
 assert all({"before", "after", "delta", "signals", "measurement_confidence"} <= item.keys() for item in impact["contributions"])
 assert any(item["path"] == "src/main.py" for item in data["git"]["hotspots"])
-assert {"current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
+assert {"model", "version", "current_lines", "authors", "days_since_last_change", "score"} <= data["git"]["hotspots"][0].keys()
+assert data["git"]["hotspot_model"]["model"] == "repodna-composite-hotspot"
+assert data["git"]["hotspot_model"]["version"] == "1.0"
 assert data["git"]["coauthorship"][0]["commits"] == 1
 assert sum(data["git"]["system_evolution"]["Data/Persistence"].values()) == 1
 assert "Combat" not in data["git"]["system_evolution"]

@@ -38,6 +38,20 @@ HARD_EXCLUDES = {
 }
 HARD_EXCLUDED_PATHS = {"tests/fixtures"}
 
+HOTSPOT_MODEL = {
+    "model": "repodna-composite-hotspot",
+    "version": "1.0",
+    "formula": "commits*2 + churn/50 + current_lines/100 + authors*3 + 30/(days_since_last_change+30)",
+    "components": {
+        "commits": {"weight": 2.0, "meaning": "unique commits touching the file"},
+        "churn": {"divisor": 50.0, "meaning": "lines added plus removed"},
+        "current_lines": {"divisor": 100.0, "meaning": "current text line count"},
+        "authors": {"weight": 3.0, "meaning": "distinct historical authors"},
+        "recency": {"formula": "30/(days_since_last_change+30)", "meaning": "bounded recent-change contribution"},
+    },
+    "interpretation": "Relative review priority; not a code-quality, defect, or business-impact score.",
+}
+
 CONFIG_NAMES = {
     "package.json", "pyproject.toml", "requirements.txt", "setup.py", "setup.cfg",
     "pipfile", "cargo.toml", "go.mod", "composer.json", "pubspec.yaml", "pom.xml",
@@ -245,7 +259,7 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
             days_since = 0
         author_count = len(file_authors[path])
         score = round(commits * 2 + churn[path] / 50 + size_lines / 100 + author_count * 3 + 30 / (days_since + 30), 2)
-        hotspots.append({"path": path, "commits": commits, "churn": churn[path], "current_lines": size_lines, "authors": author_count, "days_since_last_change": days_since, "score": score})
+        hotspots.append({"path": path, "model": HOTSPOT_MODEL["model"], "version": HOTSPOT_MODEL["version"], "commits": commits, "churn": churn[path], "current_lines": size_lines, "authors": author_count, "days_since_last_change": days_since, "score": score})
     hotspots.sort(key=lambda item: (item["score"], item["churn"]), reverse=True)
 
     for record in git(root, "log", "--all", *scope, "--format=%aN%x09%aE%x1f%B%x1e").split("\x1e"):
@@ -291,6 +305,7 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
             {"path": path, "commits": count} for path, count in change_commits.most_common(50)
         ],
         "hotspots": hotspots[:50],
+        "hotspot_model": HOTSPOT_MODEL,
         "technical_impact": technical_impact,
         "_file_author_activity": {
             path: {

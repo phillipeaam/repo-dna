@@ -57,6 +57,7 @@ sensitive content from the shareable package.
 | Generic analysis | Counts files and lines by language; lists largest files, directories, modules, configuration, documentation, tests, CI/CD, Docker, and dependencies. Python receives native AST analysis; other languages currently use an explicit heuristic fallback. |
 | Dependencies and SBOM | Resolves direct and transitive versions from supported lockfiles, emits Package URLs and dependency edges, generates CycloneDX 1.6 JSON, and feeds version evidence into vulnerability/license correlation. |
 | Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
+| Hotspot model | Uses the documented `repodna-composite-hotspot` model and persists its version in reports and snapshots so incompatible scores are never compared. |
 | Releases and CI | Reconstructs release ranges from local tags, measures cadence and unreleased changes, checks changelog coverage, and statically inventories CI providers, triggers, jobs, steps, permissions, actions, cache, and artifacts. |
 | Provider activity | Validates and imports a common JSON contract for GitHub/GitLab-style issues, pull/merge requests, participants, reviewers, and releases, with repository-wide or author-filtered metrics. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
@@ -173,6 +174,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
 - [Canonical JSON contracts](docs/canonical-json-contracts.md)
+- [Composite hotspot model](docs/hotspot-model.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)

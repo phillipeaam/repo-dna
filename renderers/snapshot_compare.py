@@ -64,23 +64,38 @@ def numeric_object(before: dict[str, Any], after: dict[str, Any]) -> dict[str, A
     return {key: metric(before.get(key), after.get(key)) for key in sorted(keys)}
 
 
+def hotspot_comparison(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
+    before_model, after_model = before.get("hotspot_model", {}), after.get("hotspot_model", {})
+    compatible = bool(before_model.get("version")) and before_model.get("model") == after_model.get("model") and before_model.get("version") == after_model.get("version")
+    if not compatible:
+        return {"comparable": False, "model": after_model, "files": []}
+    before_rows = {item.get("path"): item for item in before.get("hotspots", []) if item.get("path")}
+    after_rows = {item.get("path"): item for item in after.get("hotspots", []) if item.get("path")}
+    rows = [{"path": path, "score": metric(before_rows.get(path, {}).get("score"), after_rows.get(path, {}).get("score"))} for path in sorted(before_rows.keys() | after_rows.keys(), key=str.casefold)]
+    return {"comparable": True, "model": after_model, "files": rows}
+
+
 def compatibility(baseline: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
     warnings: list[str] = []
+    blocking_warnings: list[str] = []
     schema_compatible = (
         baseline.get("artifact_type") == current.get("artifact_type") == "repodna_analysis_snapshot"
         and major(baseline.get("schema_version")) == major(current.get("schema_version")) == "1"
     )
     if not schema_compatible:
-        warnings.append("Snapshot schema major versions are incompatible.")
+        blocking_warnings.append("Snapshot schema major versions are incompatible.")
     for key, label in (("privacy_mode", "privacy mode"), ("author_filter", "author filter"), ("git_scope", "Git scope")):
         if baseline.get("scope", {}).get(key) != current.get("scope", {}).get(key):
-            warnings.append(f"The {label} differs between snapshots.")
+            blocking_warnings.append(f"The {label} differs between snapshots.")
     if baseline.get("health", {}).get("model_version") != current.get("health", {}).get("model_version"):
-        warnings.append("The health-score model version differs between snapshots.")
+        blocking_warnings.append("The health-score model version differs between snapshots.")
     for key, label in (("name", "repository name"), ("type", "project type")):
         if baseline.get("repository", {}).get(key) != current.get("repository", {}).get(key):
-            warnings.append(f"The {label} differs between snapshots.")
-    comparable = schema_compatible and not warnings
+            blocking_warnings.append(f"The {label} differs between snapshots.")
+    if baseline.get("git", {}).get("hotspot_model", {}).get("version") != current.get("git", {}).get("hotspot_model", {}).get("version"):
+        warnings.append("Composite hotspot scores were not compared because their model versions differ.")
+    warnings = blocking_warnings + warnings
+    comparable = schema_compatible and not blocking_warnings
     return {"comparable": comparable, "schema_compatible": schema_compatible, "warnings": warnings}
 
 
@@ -134,6 +149,7 @@ def build(current: dict[str, Any], baseline: dict[str, Any] | None = None) -> di
         "contributors": metric(baseline.get("git", {}).get("contributors"), current.get("git", {}).get("contributors")),
         "churn": numeric_object(baseline.get("git", {}).get("churn", {}), current.get("git", {}).get("churn", {})),
         "technical_impact_summary": numeric_object(baseline.get("git", {}).get("technical_impact_summary", {}), current.get("git", {}).get("technical_impact_summary", {})),
+        "hotspots": hotspot_comparison(baseline.get("git", {}), current.get("git", {})),
     }
     document["risks"] = numeric_object(baseline.get("risks", {}), current.get("risks", {}))
     changes = []

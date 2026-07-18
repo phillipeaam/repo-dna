@@ -31,7 +31,7 @@ def snapshot(identifier, files, author="", version="1.0.0"):
         "systems": [{"name": "Core", "file_count": files, "lines": files * 10, "symbol_count": files, "import_references": 1}],
         "quality": {"coverage": {"line_coverage_percent": 70}, "tests": {"total": 2, "passed": 2}, "linters": {"issues": 1}, "vulnerabilities": {"findings": 0}, "dependencies": {"resolved": 3}},
         "health": {"score": 80 + files, "grade": "B", "assessment_coverage_percent": 90, "model_version": "1"},
-        "git": {"contributors": 2, "churn": {"total": files * 5}, "technical_impact_summary": {}}, "risks": {"potential_secret_findings": 0}
+        "git": {"contributors": 2, "churn": {"total": files * 5}, "hotspot_model": {"model": "repodna-composite-hotspot", "version": "1.0"}, "hotspots": [{"path": "src/app.py", "score": files * 2}], "technical_impact_summary": {}}, "risks": {"potential_secret_findings": 0}
     }
 
 baseline, current = snapshot("1", 10), snapshot("2", 14)
@@ -41,6 +41,13 @@ assert result["inventory"]["files"]["delta"] == 4
 assert result["languages"][0]["metrics"]["lines"]["delta"] == 40
 assert result["systems"][0]["metrics"]["file_count"]["delta"] == 4
 assert result["architecture"]["summary"]["symbols"]["delta"] == 4
+assert result["git"]["hotspots"]["comparable"] is True
+assert result["git"]["hotspots"]["files"][0]["score"]["delta"] == 8
+different_hotspot = snapshot("2", 14); different_hotspot["git"]["hotspot_model"]["version"] = "2.0"
+different_result = build(different_hotspot, baseline)
+assert different_result["status"] == "compared"
+assert different_result["git"]["hotspots"]["comparable"] is False
+assert any("hotspot" in warning.lower() for warning in different_result["compatibility"]["warnings"])
 assert build(current)["status"] == "no_baseline"
 assert build(snapshot("2", 14, author="Ada"), baseline)["status"] == "scope_mismatch"
 assert build(snapshot("2", 14, version="2.0.0"), baseline)["status"] == "incompatible_schema"

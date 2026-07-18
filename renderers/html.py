@@ -385,7 +385,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     systems_body += '<p class="note">System names combine module boundaries, symbols, imports, dependency manifests, and historical path evidence. They are candidates for review, not confirmed product architecture.</p>'
     systems_body += "<h3>Symbol and dependency-based candidates</h3>" + system_table
     systems_body += "<h3>Framework concepts</h3>" + framework_table
-    hotspot_explanation = '<p class="note">Composite hotspots rank files that may deserve attention by combining change frequency, code churn, current size, number of authors, and recency. A higher score suggests relevance or maintenance risk; it does not prove poor code quality.</p>'
+    hotspot_model = generic.get("git", {}).get("hotspot_model", {})
+    hotspot_explanation = f'<p class="note">Composite hotspots use <strong>{esc(hotspot_model.get("model", "legacy hotspot model"))} {esc(hotspot_model.get("version", "unversioned"))}</strong> to combine change frequency, code churn, current size, number of authors, and recency. A higher score suggests relative review priority; it does not prove poor code quality. Formula: <code>{esc(hotspot_model.get("formula", "not recorded"))}</code>.</p>'
 
     quality = analysis.get("quality", {})
     dependency_inventory = analysis.get("dependency_inventory", {})

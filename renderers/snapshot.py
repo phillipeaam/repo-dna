@@ -113,6 +113,7 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
         "git": {
             "contributors": git_data.get("contributors_count", 0),
             "churn": git_data.get("churn", {}),
+            "hotspot_model": git_data.get("hotspot_model", {}),
             "hotspots": git_data.get("hotspots", [])[:50],
             "technical_impact_summary": git_data.get("technical_impact", {}).get("summary", {}),
             "author_system_ownership_summary": analysis.get("author_system_ownership", {}).get("summary", {}),
