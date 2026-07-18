@@ -37,6 +37,9 @@ jobs:
       - name: CLI contract
         run: bash tests/cli_test.sh
 
+      - name: Installation contract
+        run: bash tests/installation_test.sh
+
   test:
     name: Full test suite
     runs-on: ubuntu-latest

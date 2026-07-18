@@ -1,5 +1,8 @@
 # Changelog
 
+- Added the user-local `install.sh` installer, repeatable update flow, installed
+  command contract, and single-source `repodna --version` behavior.
+
 - Added the public `repodna` 1.0 CLI with analyze/doctor/init/version/help commands, concise summaries, logging modes, stable exit codes, output and ignore overrides, and dependency/environment diagnostics.
 - Declared Windows/Git Bash as a tested 1.0 platform, added positional and `--repository` path targeting, native/MSYS separator normalization, Python Launcher discovery, CRLF/Unicode/long-path/ZIP tests, and a PowerShell-to-Git-Bash CI smoke test.
 - Added versioned test-execution evidence, complete-suite pass/fail aggregation, CI artifact publication, Python formatting validation, local-link verification, and portable Linux/macOS/Windows smoke gates.

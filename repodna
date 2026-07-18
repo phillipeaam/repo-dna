@@ -5,9 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 
 usage() {
+    printf 'RepoDNA %s\n\n' "$VERSION"
     cat <<'EOF'
-RepoDNA 1.0.0
-
 Usage:
   repodna analyze [repository] [options]
   repodna doctor

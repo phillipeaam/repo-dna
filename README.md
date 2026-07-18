@@ -214,6 +214,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Runtime requirements](docs/runtime-requirements.md)
 - [Windows and Git Bash support](docs/windows-support.md)
 - [Command-line interface and doctor](docs/cli.md)
+- [Installation and updates](docs/installation.md)
 - [Version 1.0 support policy](docs/v1-support-policy.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
@@ -340,6 +341,20 @@ commands can be written as `repodna analyze .`. `dna-analysis.sh` remains the
 compatible analysis engine. Use `repodna help` to list commands and stable exit
 codes. Generated reports are written to a timestamped directory in the analyzed
 repository; start with `report/index.html`.
+
+Install the command for the current user with:
+
+```bash
+./install.sh
+repodna doctor
+repodna analyze .
+repodna --version
+```
+
+The default command location is `~/.local/bin/repodna`, including under Git
+Bash (`C:\Users\Your Name\.local\bin\repodna`). See the
+[installation and update guide](docs/installation.md) for `PATH`, custom
+destinations, and the update procedure.
 
 Persist a compact snapshot for future period comparison with:
 
