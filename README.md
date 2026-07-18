@@ -6,11 +6,41 @@
 ![GitHub stars](https://img.shields.io/github/stars/phillipeaam/repo-dna?style=social)
 ![CI](https://github.com/phillipeaam/repo-dna/actions/workflows/ci.yml/badge.svg)
 
-> **Understand the architecture, evolution and engineering behind any repository.**
+> **Evidence-based understanding of a local Git repository.**
 
 ![banner.png](assets/images/banner.png)
 
-RepoDNA is an open-source repository analysis toolkit that combines **source code inspection**, **Git history**, **architecture discovery**, and **technology detection** to generate comprehensive engineering reports.
+RepoDNA is an open-source repository analysis toolkit that combines **source code inspection**, **Git history**, **architecture discovery**, and **technology detection** to generate evidence-based engineering reports.
+
+For version 1.0, RepoDNA promises a deliberately bounded outcome:
+
+> RepoDNA analyzes a local Git repository and produces evidence-based reports
+> about its technologies, architecture, systems, contribution history,
+> maintainability, risks, onboarding, and professional portfolio evidence.
+
+Repository evidence supports review and decision-making; it does not prove
+runtime behavior, business impact, formal ownership, security, or code quality.
+
+## Version 1.0 support contract
+
+The stable 1.0 core officially covers:
+
+- local Git repositories with available history;
+- stack-neutral generic analysis and unknown-stack fallback;
+- Bash and Python repositories as validated analysis ecosystems;
+- language, extension, technology, dependency-manifest, and repository inventory;
+- Git history, contributor scope, churn, hotspots, collaboration, and system evolution;
+- evidence-based module and system candidates;
+- basic architecture, imports, symbols, entrypoints, coupling, cycles, and boundaries when detectable;
+- maintainability and risk signals, plus explicit ingestion status for external quality tools;
+- onboarding and professional portfolio evidence with confirmation gates;
+- navigable HTML and versioned, validated JSON;
+- source-safe defaults, strict privacy mode, exclusions, and redacted secret findings.
+
+Specialized Unity, Unreal, Godot, Android, Flutter, .NET, Node, and framework
+adapters are included and tested, but they extend the generic contract. Their
+static signals do not imply that RepoDNA builds, runs, or fully understands
+those projects. See [Version 1.0 support policy](docs/v1-support-policy.md).
 
 Instead of simply counting files or commits, RepoDNA correlates repository structure, source code, technologies, design patterns, and Git history to produce evidence-based reports that help developers understand **what a project is, how it evolved, and where engineering effort was invested.**
 
@@ -19,7 +49,7 @@ Instead of simply counting files or commits, RepoDNA correlates repository struc
 One command creates a timestamped analysis package containing:
 
 - a linked HTML report that can be opened locally without a server;
-- stack-neutral repository inventory for any Git project;
+- stack-neutral repository inventory for a local Git project;
 - specialized C# and Unity engineering signals when those stacks are detected;
 - Unity settings, evidence-backed gameplay categories, and heuristic performance signals;
 - Android components, screens, data/network layers, permissions, Gradle variants, and tests;
@@ -178,6 +208,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Author alias configuration](docs/author-aliases.md)
 - [Git tags and releases](docs/git-tags-and-releases.md)
 - [Runtime requirements](docs/runtime-requirements.md)
+- [Version 1.0 support policy](docs/v1-support-policy.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
 - [Period comparison](docs/period-comparison.md)
@@ -587,7 +618,9 @@ generic analyzer and explicit parser/framework coverage.
 
 # 🚀 Vision
 
-RepoDNA aims to become a universal repository analysis platform capable of helping engineers understand any software project—regardless of language, framework, or engine.
+RepoDNA's long-term vision is broader repository understanding across languages,
+frameworks, and engines. That vision does not expand the bounded guarantees of
+the [version 1.0 support policy](docs/v1-support-policy.md).
 
 The long-term goal is to transform complex repositories into actionable engineering insights that support development, documentation, onboarding, technical reviews, and career growth.
 

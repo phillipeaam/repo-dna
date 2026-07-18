@@ -18,6 +18,8 @@ assert_fixture_type android-minimal Android
 assert_fixture_type flutter-minimal Flutter
 assert_fixture_type godot-minimal Godot
 assert_fixture_type unreal-minimal Unreal
+assert_fixture_type bash-minimal 'Generic Git repository'
+assert_fixture_type python-minimal Python
 assert_fixture_type generic-repo 'Generic Git repository'
 
 # Versioned fixtures must not contaminate analysis of RepoDNA itself.
@@ -29,5 +31,21 @@ python - "$TEST_ROOT/isolation.json" <<'PY'
 import json,sys
 data=json.load(open(sys.argv[1],encoding="utf-8")); assert data["file_count"]==1
 assert data["largest_files"][0]["path"]=="src/real.py"
+PY
+
+# Versioned 1.0 ecosystem fixtures must produce their promised language evidence.
+for fixture in bash-minimal python-minimal; do
+    destination="$TEST_ROOT/$fixture-analysis"
+    fixture_copy "$fixture" "$destination"
+    fixture_init_git "$destination"
+    fixture_commit_as "$destination" Fixture fixture@example.test Initial
+    python "$SOURCE_ROOT/collectors/generic.py" "$destination" "$TEST_ROOT/$fixture.json"
+done
+python - "$TEST_ROOT/bash-minimal.json" "$TEST_ROOT/python-minimal.json" <<'PY'
+import json,sys
+bash=json.load(open(sys.argv[1],encoding="utf-8")); python=json.load(open(sys.argv[2],encoding="utf-8"))
+assert any(item["name"]=="Shell" and item["files"]>=1 for item in bash["languages"])
+assert any(item["name"]=="Python" and item["files"]>=2 for item in python["languages"])
+assert python["analysis"]["architecture"]["parser_coverage"][0]["mode"]=="ast"
 PY
 echo 'fixture tests passed'

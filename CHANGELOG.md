@@ -9,5 +9,6 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- A bounded RepoDNA 1.0 support contract for local Git analysis, generic Bash/Python evidence, Git intelligence, basic architecture, quality/risk ingestion, onboarding, portfolio evidence, HTML/JSON reports, and privacy controls.
 - Cross-platform CI, Bats smoke tests, fixture validation, and generated-artifact contract checks.
 - Automated release packaging, SHA-256 checksums, changelog extraction, and GitHub Release publishing.
