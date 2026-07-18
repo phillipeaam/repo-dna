@@ -402,6 +402,21 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
         flutter["native_bridges"] = {"files": [], "matched_channels": flutter.get("native_bridges", {}).get("matched_channels", 0)}
         flutter["tests"] = {"unit": [], "integration": []}
         flutter["flavors"] = {"android": [], "ios_schemes": [], "dart_entrypoints": []}
+    godot = analysis.get("godot", {})
+    if godot.get("status") == "assessed":
+        godot["status"] = "redacted_by_privacy_mode"
+        godot.get("project", {})["name"] = "[redacted]"
+        godot.get("project", {})["main_scene"] = "[redacted]"
+        for key in ("scenes", "scripts", "resources", "autoloads", "input_actions", "plugins", "exports", "native_extensions", "signals"):
+            godot[key] = []
+        godot["scene_graph"] = {"nodes": [], "edges": [], "edge_count": godot.get("scene_graph", {}).get("edge_count", 0)}
+        godot["localization"] = {"translations": [], "locale_fallback": None}
+        godot["tests"] = {"files": [], "frameworks": godot.get("tests", {}).get("frameworks", [])}
+        for system in godot.get("gameplay_systems", []):
+            system["files"] = []
+            system["scripts"] = []
+            system["scenes"] = []
+            system["primary_directories"] = []
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",

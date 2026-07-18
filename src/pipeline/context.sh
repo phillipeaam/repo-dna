@@ -132,6 +132,9 @@ ANDROID_DIR="$OUTPUT_DIR/android"
 # Define Flutter-only specialized reports without creating them for other stacks.
 FLUTTER_DIR="$OUTPUT_DIR/flutter"
 
+# Define Godot-only specialized reports without creating them for other stacks.
+GODOT_DIR="$OUTPUT_DIR/godot"
+
 # Define approval-gated portfolio and CV evidence outputs.
 PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 

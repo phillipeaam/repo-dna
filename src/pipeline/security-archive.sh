@@ -49,6 +49,15 @@ if [[ "$PROJECT_TYPE" == Flutter ]]; then
         "$FLUTTER_DIR/flutter-analysis-1.0.0.schema.json" ||
         die "Could not copy the Flutter analysis schema."
 fi
+if [[ "$PROJECT_TYPE" == Godot ]]; then
+    "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/godot_reports.py" \
+        "$REPORT_DATA_DIR/report.json" "$GODOT_DIR" \
+        --schema "$SCRIPT_DIR/schemas/godot-analysis-1.0.0.schema.json" ||
+        die "Could not render Godot reports."
+    cp "$SCRIPT_DIR/schemas/godot-analysis-1.0.0.schema.json" \
+        "$GODOT_DIR/godot-analysis-1.0.0.schema.json" ||
+        die "Could not copy the Godot analysis schema."
+fi
 
 SNAPSHOT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
 [[ "$PRIVACY_MODE" != strict ]] || SNAPSHOT_BRANCH='[redacted]'

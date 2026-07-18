@@ -1,0 +1,15 @@
+config_version=5
+
+[application]
+config/name="Godot Minimal"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[autoload]
+SaveManager="*res://systems/save/save_manager.gd"
+
+[input]
+attack={"deadzone": 0.5, "events": []}
+
+[rendering]
+renderer/rendering_method="gl_compatibility"

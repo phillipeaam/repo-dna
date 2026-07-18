@@ -290,6 +290,29 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             manager.get("confidence", "medium"), ["#/generic_analysis/analysis/flutter/state_management"], manager,
             ["Package presence does not prove consistent application-wide architecture."], True,
         ))
+    godot = analysis.get("godot", {})
+    if godot.get("status") in {"assessed", "redacted_by_privacy_mode"}:
+        summary = godot.get("summary", {})
+        items.append(evidence(
+            "godot-analysis-summary", "technology", "fact",
+            f"Godot analysis recorded {summary.get('scenes', 0)} scenes, {summary.get('scripts', 0)} scripts, {summary.get('autoloads', 0)} autoloads, and {summary.get('export_presets', 0)} export presets.",
+            "high", ["#/generic_analysis/analysis/godot"], summary,
+            ["Static project files do not prove runtime behavior or successful exports."],
+        ))
+    for index, system in enumerate(godot.get("gameplay_systems", [])[:50], 1):
+        items.append(evidence(
+            f"godot-gameplay-{index}", "system", "inference",
+            f"Godot gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
+            system.get("confidence", "medium"), ["#/generic_analysis/analysis/godot/gameplay_systems"], system,
+            ["Gameplay categories are static evidence-based candidates and require human confirmation."], True,
+        ))
+    for index, signal in enumerate(godot.get("signals", [])[:100], 1):
+        items.append(evidence(
+            f"godot-signal-{index}", "quality", "candidate",
+            f"Godot review signal {signal['type']} was detected with {signal['confidence']} confidence.",
+            signal.get("confidence", "medium"), ["#/generic_analysis/analysis/godot/signals"], signal,
+            ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

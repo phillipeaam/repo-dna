@@ -24,6 +24,7 @@ One command creates a timestamped analysis package containing:
 - Unity settings, evidence-backed gameplay categories, and heuristic performance signals;
 - Android components, screens, data/network layers, permissions, Gradle variants, and tests;
 - verified Flutter dependencies, widgets, routes, state management, bridges, tests, and flavors;
+- Godot settings, scenes and node graphs, scripts/resources, autoloads, input, plugins, exports, gameplay categories, tests, native extensions, and review signals;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
 - local release cadence, per-tag change ranges, unreleased changes, changelog coverage, and static CI workflow evidence;
 - provider-neutral imports for issues, pull/merge requests, reviews, participants, and remote releases;
@@ -58,6 +59,7 @@ sensitive content from the shareable package.
 | Releases and CI | Reconstructs release ranges from local tags, measures cadence and unreleased changes, checks changelog coverage, and statically inventories CI providers, triggers, jobs, steps, permissions, actions, cache, and artifacts. |
 | Provider activity | Validates and imports a common JSON contract for GitHub/GitLab-style issues, pull/merge requests, participants, reviewers, and releases, with repository-wide or author-filtered metrics. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
+| Godot | Parses Godot 3/4 settings, text scenes/resources, GDScript and C#, autoloads, input, rendering, localization, plugins, exports, tests, native extensions, gameplay systems, and review signals. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
 | Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
 | Reporting | Produces navigable HTML, canonical JSON, Git CSV data, Notion evidence, an LLM-ready evidence package, security reports, and optional PNG charts. |
@@ -84,6 +86,7 @@ Repository
 | Architecture | Specialized architecture signals or generic module candidates and language composition. |
 | Technologies | Languages, line counts, dependency declarations, manifests, branches, and tags. |
 | Systems | Confirmed specialized signals or systems inferred from historical paths for review. |
+| Godot analysis | Configuration, scenes/nodes, scripts/resources, autoload/input, plugins/exports, gameplay evidence, tests/assets, and heuristic review signals. |
 | System documentation | Per-system facts, metrics, architecture, dependencies, evolution, ownership, bus factor, and explicit unknowns. |
 | Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
 | Collaboration | Contributors, co-authored commits, shared files, author-system activity, and bus factor by system. |
@@ -535,7 +538,7 @@ The future ATS résumé design and X-Y-Z evidence contract are documented in
 - [x] Python
 - [ ] iOS
 
-Specialized framework evidence is currently available for Unity, ASP.NET Core,
+Specialized framework evidence is currently available for Unity, Godot, ASP.NET Core,
 Spring, Android, Flutter, React, and Next.js. Other detected stacks retain the
 generic analyzer and explicit parser/framework coverage.
 

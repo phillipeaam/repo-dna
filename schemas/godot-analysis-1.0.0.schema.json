@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/godot-analysis-1.0.0.schema.json",
+  "title": "RepoDNA Godot analysis",
+  "type": "object", "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "status", "summary", "project", "scenes", "scene_graph", "scripts", "resources", "autoloads", "input_actions", "rendering", "localization", "plugins", "exports", "tests", "native_extensions", "assets", "gameplay_systems", "signals", "method", "limitations"],
+  "properties": {
+    "$schema": {"const": "./godot-analysis-1.0.0.schema.json"}, "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_godot_analysis"}, "status": {"enum": ["assessed", "redacted_by_privacy_mode"]},
+    "summary": {"type": "object"}, "project": {"type": "object"},
+    "scenes": {"type": "array", "items": {"type": "object"}}, "scene_graph": {"type": "object"},
+    "scripts": {"type": "array", "items": {"type": "object"}}, "resources": {"type": "array", "items": {"type": "object"}},
+    "autoloads": {"type": "array", "items": {"type": "object"}}, "input_actions": {"type": "array", "items": {"type": "string"}},
+    "rendering": {"type": "object"}, "localization": {"type": "object"},
+    "plugins": {"type": "array", "items": {"type": "object"}}, "exports": {"type": "array", "items": {"type": "object"}},
+    "tests": {"type": "object"}, "native_extensions": {"type": "array", "items": {"type": "string"}}, "assets": {"type": "object"},
+    "gameplay_systems": {"type": "array", "items": {"type": "object"}}, "signals": {"type": "array", "items": {"type": "object"}},
+    "method": {"type": "string"}, "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

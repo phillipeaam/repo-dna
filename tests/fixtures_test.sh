@@ -16,6 +16,7 @@ assert_fixture_type() {
 assert_fixture_type unity-minimal Unity
 assert_fixture_type android-minimal Android
 assert_fixture_type flutter-minimal Flutter
+assert_fixture_type godot-minimal Godot
 assert_fixture_type generic-repo 'Generic Git repository'
 
 # Versioned fixtures must not contaminate analysis of RepoDNA itself.

@@ -59,6 +59,7 @@ write_structured_report_json() {
     local unity_analysis=false
     local android_analysis=false
     local flutter_analysis=false
+    local godot_analysis=false
     local csharp_analysis=false
     local generic_analysis_json
     local charts_json='[]'
@@ -67,6 +68,7 @@ write_structured_report_json() {
     [[ "$PROJECT_TYPE" == Unity ]] && unity_analysis=true
     [[ "$PROJECT_TYPE" == Android ]] && android_analysis=true
     [[ "$PROJECT_TYPE" == Flutter ]] && flutter_analysis=true
+    [[ "$PROJECT_TYPE" == Godot ]] && godot_analysis=true
     [[ "$PROJECT_TYPE" == Unity || "$PROJECT_TYPE" == .NET ]] && csharp_analysis=true
     dependency_manifest="$(report_dependency_manifest)"
     dependency_count="$(report_dependency_count "$dependency_manifest")"
@@ -120,6 +122,7 @@ write_structured_report_json() {
     "unity": $unity_analysis,
     "android": $android_analysis,
     "flutter": $flutter_analysis,
+    "godot": $godot_analysis,
     "csharp": $csharp_analysis,
     "dependency_manifest": "$(json_escape "$dependency_manifest")"
   },

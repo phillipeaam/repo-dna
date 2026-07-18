@@ -96,6 +96,13 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         technology_facts.append(fact("C# is present in the analyzed source tree.", "report/data/report.json#/current_metrics/csharp_files"))
     if profile["unity"]:
         technology_facts.append(fact("Unity project markers were detected.", "report/data/report.json#/analysis_profile/unity"))
+    if profile.get("godot"):
+        godot = generic.get("analysis", {}).get("godot", {})
+        summary = godot.get("summary", {})
+        technology_facts.append(fact(
+            f"Godot project markers were detected with {summary.get('scenes', 0)} scenes and {summary.get('scripts', 0)} scripts analyzed.",
+            "report/data/report.json#/generic_analysis/analysis/godot",
+        ))
     if technologies["dependency_count"] > 0:
         technology_facts.append(fact(
             f"Dependency manifest contains approximately {technologies['dependency_count']} entries.",

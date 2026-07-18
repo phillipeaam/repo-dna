@@ -26,6 +26,7 @@ tests=(
     unity_analysis_test.sh
     android_analysis_test.sh
     flutter_analysis_test.sh
+    godot_analysis_test.sh
     module_graph_test.sh
     architecture_insights_test.sh
     quality_importers_test.sh

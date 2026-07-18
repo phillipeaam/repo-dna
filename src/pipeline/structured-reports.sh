@@ -214,6 +214,7 @@ $SOURCE_FOLDER_DESCRIPTION
 - \`sbom/\`: lockfile-derived dependency inventory and CycloneDX 1.6 JSON
 $([[ "$PROJECT_TYPE" != Android ]] || printf '%s\n' '- `android/`: Android components, dependencies, permissions, screens, data, networking, and variants')
 $([[ "$PROJECT_TYPE" != Flutter ]] || printf '%s\n' '- `flutter/`: Flutter widgets, routes, state, localization, channels, tests, and flavors')
+$([[ "$PROJECT_TYPE" != Godot ]] || printf '%s\n' '- `godot/`: Godot project settings, scenes, scripts, resources, gameplay systems, plugins, exports, and review signals')
 - \`portfolio/\`: approval-gated portfolio and CV evidence draft
 - \`graphs/\`: optional charts
 
