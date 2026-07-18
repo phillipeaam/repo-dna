@@ -218,6 +218,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Period comparison](docs/period-comparison.md)
 - [Health score trends](docs/health-trends.md)
 - [Quality result imports](docs/quality-imports.md)
+- [Heuristic secret scanning and allowlists](docs/secret-scanning.md)
 - [Facts, inferences, and unobserved evidence](docs/evidence-classification.md)
 - [SBOM and lockfile resolution](docs/sbom.md)
 - [ATS and X-Y-Z résumé design](docs/ats-xyz-resume-design.md)
@@ -466,8 +467,12 @@ Every run also creates `security/potential_secrets.txt`. This report checks
 analyzable files, including relevant untracked files, for possible API keys, Bearer tokens, private keys,
 connection strings, Firebase and AWS credentials, authenticated Git remotes,
 passwords, webhook URLs, private package registries, and internal domains or
-private network addresses. Findings contain only the relative path, line number,
-category, and `Value: [REDACTED]`; matched values are never written to the report.
+private network addresses. Findings contain only severity, repository-relative
+path, line number, category, and a strongly masked preview; matched values are
+never written in full. Common placeholders are ignored, `.repodna-ignore` is
+honored, and reviewed false positives can be listed in
+`.repodna-secrets-allowlist` without recording the secret itself. See the
+[secret-scanning contract](docs/secret-scanning.md).
 
 ## Structured Reports
 

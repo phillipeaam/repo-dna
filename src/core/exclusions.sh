@@ -28,6 +28,7 @@ declare -gar IGNORED_DIRS=(
     Packages
     .git
     .repodna
+    .idea
     tests/fixtures
 )
 

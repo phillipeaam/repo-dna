@@ -73,8 +73,9 @@ for chart in churn_by_month.png hotspots.png systems.png authors.png system_evol
     [[ -s "$default_report/graphs/$chart" ]]
     grep -q "$chart" "$default_report/report/charts.html"
 done
-grep -q 'Type: possible API token' "$default_report/security/potential_secrets.txt"
-grep -q 'Value: \[REDACTED\]' "$default_report/security/potential_secrets.txt"
+grep -q 'Potential possible API token' "$default_report/security/potential_secrets.txt"
+grep -q 'Severity: High' "$default_report/security/potential_secrets.txt"
+grep -q 'Preview: tes\*\*\*\*alue' "$default_report/security/potential_secrets.txt"
 ! grep -q 'test-secret-value' "$default_report/security/potential_secrets.txt"
 ! find "$default_report/source" -type f -name '*.cs' -print -quit 2>/dev/null | grep -q .
 printf '%s\n' 'default mode passed'

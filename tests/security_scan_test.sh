@@ -26,11 +26,18 @@ registry=https://packages.corp.example/npm/;_authToken=registry-secret
 service = api.company.internal
 EOF
 
+cp "$SOURCE_ROOT/tests/fixtures/secrets-fake/detections.env" "$TEST_ROOT/fixture-secrets.env"
+cp "$SOURCE_ROOT/tests/fixtures/secrets-fake/false-positives.env" "$TEST_ROOT/false-positives.env"
+printf '%s\n' 'ignored.env' > "$TEST_ROOT/.repodna-ignore"
+printf '%s\n' 'API_KEY=ignored-secret-value-12345' > "$TEST_ROOT/ignored.env"
+printf '%s\n' 'secrets.txt|8|password' > "$TEST_ROOT/.repodna-secrets-allowlist"
+
 git -C "$TEST_ROOT" init -q
 git -C "$TEST_ROOT" add secrets.txt
 git -C "$TEST_ROOT" remote add private 'https://remote-user:remote-password@git.example.test/private.git'
 
 REPORT_NAME='generated-report'
+REPO_ROOT="$TEST_ROOT"
 POTENTIAL_SECRET_COUNT=0
 
 cd "$TEST_ROOT"
@@ -43,22 +50,32 @@ for expected_type in \
     'connection string' \
     'Firebase configuration' \
     'AWS credential' \
-    'Git remote credential or private remote' \
+    'Git remote credential' \
     'password' \
     'webhook URL' \
     'private package registry' \
     'internal domain or private network address'; do
-    grep -q "Type: $expected_type" "$TEST_ROOT/potential_secrets.txt"
+    grep -q "Potential $expected_type" "$TEST_ROOT/potential_secrets.txt"
 done
 
-grep -q 'Value: \[REDACTED\]' "$TEST_ROOT/potential_secrets.txt"
-grep -q 'secrets.txt:1' "$TEST_ROOT/potential_secrets.txt"
-grep -q '.git/config:' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Severity: Critical' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Severity: High' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Severity: Medium' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Severity: Low' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'File: secrets.txt' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Line: 1' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'Preview: fak\*\*\*\*7D2A' "$TEST_ROOT/potential_secrets.txt"
+grep -q 'not a replacement for a dedicated security scanner' "$TEST_ROOT/potential_secrets.txt"
+! grep -q 'File: ignored.env' "$TEST_ROOT/potential_secrets.txt"
+! grep -q 'File: false-positives.env' "$TEST_ROOT/potential_secrets.txt"
+# The allowlist suppresses only the password finding on line 8.
+! grep -q '^Line: 8$' "$TEST_ROOT/potential_secrets.txt"
 ! grep -q 'super-secret-api-value' "$TEST_ROOT/potential_secrets.txt"
 ! grep -q 'bearer-token-value-12345' "$TEST_ROOT/potential_secrets.txt"
 ! grep -q 'database-secret' "$TEST_ROOT/potential_secrets.txt"
 ! grep -q 'registry-secret' "$TEST_ROOT/potential_secrets.txt"
 ! grep -q 'remote-password' "$TEST_ROOT/potential_secrets.txt"
+! grep -q 'fake-live-shaped-token-7D2A' "$TEST_ROOT/potential_secrets.txt"
 [[ "$POTENTIAL_SECRET_COUNT" -gt 0 ]]
 
 printf '%s\n' 'security scan tests passed'
