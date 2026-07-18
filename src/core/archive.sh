@@ -8,7 +8,7 @@ create_report_archive() {
     fi
     rm -f "$ZIP_PATH"
     if command_exists zip; then
-        (cd "$REPO_ROOT" && zip -qr "$ZIP_PATH" "$REPORT_NAME") ||
+        (cd "$(dirname "$OUTPUT_DIR")" && zip -qr "$ZIP_PATH" "$(basename "$OUTPUT_DIR")") ||
             echo "Warning: zip could not create the archive."
     elif command_exists powershell.exe && command_exists cygpath; then
         local windows_output windows_zip
@@ -18,8 +18,8 @@ create_report_archive() {
             "Compress-Archive -LiteralPath '$windows_output' -DestinationPath '$windows_zip' -Force" \
             >/dev/null 2>&1 || echo "Warning: PowerShell could not create the archive."
     elif command_exists tar; then
-        TAR_PATH="$REPO_ROOT/${REPORT_NAME}.tar.gz"
-        (cd "$REPO_ROOT" && tar -czf "$TAR_PATH" "$REPORT_NAME") ||
+        TAR_PATH="$(dirname "$OUTPUT_DIR")/${REPORT_NAME}.tar.gz"
+        (cd "$(dirname "$OUTPUT_DIR")" && tar -czf "$TAR_PATH" "$(basename "$OUTPUT_DIR")") ||
             echo "Warning: tar could not create the archive."
     else
         echo "No supported archive command was found."

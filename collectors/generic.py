@@ -736,7 +736,7 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis["quality"]["licenses"]["license_files"] = []
 
 
-def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "", forge_data: Path | None = None) -> dict[str, Any]:
+def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "", forge_data: Path | None = None, no_history: bool = False) -> dict[str, Any]:
     files: list[dict[str, Any]] = []
     language_files: Counter[str] = Counter()
     language_lines: Counter[str] = Counter()
@@ -834,7 +834,15 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
         "dependencies": {"manifests": manifests, "total": sum(item["dependency_count"] for item in manifests)},
         "technology_inventory": {},
         "possible_modules": modules[:50],
-        "git": collect_git(root, privacy_mode, author_filter),
+        "git": collect_git(root, privacy_mode, author_filter) if not no_history else {
+            "author_filter": author_filter, "scope": "disabled", "contributors_count": 0, "contributors": [],
+            "author_aliases_configured": 0, "coauthorship": [], "shared_files": [], "system_evolution": {},
+            "branches_count": 0, "branches": [], "tags_count": 0, "tags": [], "recent_tags": [],
+            "history_by_month": {}, "history_by_year": {}, "churn": {"lines_added": 0, "lines_removed": 0, "total": 0},
+            "most_changed_files": [], "hotspots": [], "hotspot_model": HOTSPOT_MODEL,
+            "technical_impact": {"status": "not_observed", "contributions_analyzed": 0, "contributions": [], "summary": {}},
+            "_file_author_activity": {}, "message": "Git history collection was disabled by the user."
+        },
         "_files": files,
     }
     result["analysis"] = analyze_repository(root, result, forge_data)
@@ -860,9 +868,10 @@ def main() -> int:
     parser.add_argument("--privacy-mode", choices=("standard", "strict"), default="standard")
     parser.add_argument("--author", default="")
     parser.add_argument("--forge-data", type=Path)
+    parser.add_argument("--no-history", action="store_true")
     args = parser.parse_args()
     try:
-        data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author, args.forge_data.resolve() if args.forge_data else None)
+        data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author, args.forge_data.resolve() if args.forge_data else None, args.no_history)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

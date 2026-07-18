@@ -37,9 +37,9 @@ git -C "$PROJECT_ROOT" config user.email 'ci-fixture@example.test'
 git -C "$PROJECT_ROOT" add .
 git -C "$PROJECT_ROOT" commit -qm 'Create artifact fixture'
 
-(cd "$PROJECT_ROOT" && bash ./dna-analysis.sh >/dev/null)
+bash "$SOURCE_ROOT/repodna" analyze "$PROJECT_ROOT" --output "$PROJECT_ROOT/generated report" --quiet
 
-REPORT_ROOT="$(find "$PROJECT_ROOT" -maxdepth 1 -type d -name '*_project_analysis_*' -print -quit)"
+REPORT_ROOT="$PROJECT_ROOT/generated report"
 [[ -n "$REPORT_ROOT" ]]
 [[ -s "$REPORT_ROOT/report/data/report.json" ]]
 [[ -s "$REPORT_ROOT/report/index.html" ]]

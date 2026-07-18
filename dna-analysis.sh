@@ -49,6 +49,11 @@ source "$SCRIPT_DIR/src/git/history-metrics.sh"
 source "$SCRIPT_DIR/src/git/history-specialized.sh"
 
 parse_arguments "$@"
+if [[ -n "$TARGET_REPOSITORY" ]]; then
+    TARGET_REPOSITORY="$(normalize_repository_path "$TARGET_REPOSITORY")"
+    [[ -d "$TARGET_REPOSITORY" ]] || die "Repository path does not exist: $TARGET_REPOSITORY"
+    cd -- "$TARGET_REPOSITORY" || die "Could not enter repository path: $TARGET_REPOSITORY"
+fi
 
 # Load independent pipeline modules. Sourcing only declares functions.
 # shellcheck source=src/pipeline/architecture.sh
@@ -83,9 +88,15 @@ collect_inventory
 collect_architecture
 collect_metrics
 apply_source_policy
-collect_git_history
-collect_collaboration
+if [[ "$NO_HISTORY" == false ]]; then
+    collect_git_history
+    collect_collaboration
+else
+    git_history_reset
+    write_no_matching_commits_report
+fi
 write_guides
 write_structured_reports
-create_optional_charts
+[[ "$NO_GRAPHS" == true ]] || create_optional_charts
 run_security_and_archive
+[[ "${PRIVACY_SCAN_FAILED:-false}" != true ]] || exit 4

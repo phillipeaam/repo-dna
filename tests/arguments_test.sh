@@ -12,6 +12,7 @@ parse_arguments
 [[ "$SAVE_SNAPSHOT" == false ]]
 [[ -z "$COMPARE_WITH" ]]
 [[ -z "$FORGE_DATA" ]]
+[[ -z "$TARGET_REPOSITORY" ]]
 [[ ${#OWNED_ROOTS[@]} -eq 0 ]]
 
 parse_arguments --author Developer --since 2024-01-01 --until 2025-01-01 \
@@ -35,6 +36,18 @@ parse_arguments --compare-with previous.json
 
 parse_arguments --forge-data forge.json
 [[ "$FORGE_DATA" == forge.json ]]
+
+parse_arguments '/c/Users/Phillipe Augusto/Development/repo-dna' --author Developer
+[[ "$TARGET_REPOSITORY" == '/c/Users/Phillipe Augusto/Development/repo-dna' ]]
+[[ "$AUTHOR" == Developer ]]
+
+parse_arguments --repository 'C:\Users\Phillipe Augusto\Development\repo-dna'
+[[ "$TARGET_REPOSITORY" == 'C:\Users\Phillipe Augusto\Development\repo-dna' ]]
+
+if (parse_arguments first-repository second-repository) >/dev/null 2>&1; then
+    echo 'Multiple repository paths were accepted.' >&2
+    exit 1
+fi
 
 if (parse_arguments --privacy-mode unsafe) >/dev/null 2>&1; then
     echo 'Invalid privacy mode was accepted.' >&2

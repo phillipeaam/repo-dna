@@ -51,6 +51,7 @@ The Linux validation runs the complete Bash/Python-backed suite, ShellCheck,
 Bats, the Python formatting contract, JSON Schema validation, documentation and
 generated-HTML link checks, fixture report generation, and archive validation.
 Portable fixture and smoke tests run on Linux, macOS, and Windows/Git Bash.
+The Windows contract is documented in [Windows and Git Bash support](windows-support.md).
 
 The lint job runs ShellCheck at error severity across Bash source and tests.
 `shfmt` enforces the entrypoint and selected maintained shell modules, expanding

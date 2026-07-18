@@ -2,9 +2,10 @@
 
 # Return success when a command exists.
 die() {
+    local exit_code="${2:-1}"
     echo ""
     echo "Error: $1" >&2
-    exit 1
+    exit "$exit_code"
 }
 
 command_exists() {
@@ -19,13 +20,24 @@ resolve_python_runtime() {
         printf '%s' "$REPO_DNA_PYTHON"
         return 0
     fi
-    for candidate in python3 python; do
+    for candidate in python3 python py; do
         if command_exists "$candidate" && "$candidate" -c 'import sys; raise SystemExit(sys.version_info < (3, 11))' >/dev/null 2>&1; then
             command -v "$candidate"
             return 0
         fi
     done
     return 1
+}
+
+# Convert Windows-native paths when running under Git Bash/MSYS.
+normalize_repository_path() {
+    local value="$1"
+    value="${value//\\//}"
+    if [[ "$value" =~ ^[A-Za-z]:/ ]] && command_exists cygpath; then
+        cygpath -u "$value"
+    else
+        printf '%s' "$value"
+    fi
 }
 
 format_duration() {

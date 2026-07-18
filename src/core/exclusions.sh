@@ -34,7 +34,7 @@ declare -gar IGNORED_DIRS=(
 
 # Load directory entries from .repodna-ignore.
 _load_repodna_ignore_directories() {
-    local config_file="${REPO_ROOT}/.repodna-ignore"
+    local config_file="${IGNORE_FILE:-${REPO_ROOT}/.repodna-ignore}"
     local pattern
 
     [[ -f "$config_file" ]] || return 0

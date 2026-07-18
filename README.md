@@ -212,6 +212,8 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Author alias configuration](docs/author-aliases.md)
 - [Git tags and releases](docs/git-tags-and-releases.md)
 - [Runtime requirements](docs/runtime-requirements.md)
+- [Windows and Git Bash support](docs/windows-support.md)
+- [Command-line interface and doctor](docs/cli.md)
 - [Version 1.0 support policy](docs/v1-support-policy.md)
 - [Charts and visual evidence](docs/charts.md)
 - [Versioned analysis snapshots](docs/analysis-snapshots.md)
@@ -325,27 +327,31 @@ REPO_DNA_PYTHON=/path/to/python bash ./dna-analysis.sh
 
 ## Quick start
 
-Run RepoDNA from the root of the Git repository you want to analyze:
+Use the public CLI from the RepoDNA checkout:
 
 ```bash
-bash /path/to/repo-dna/dna-analysis.sh
+bash /path/to/repo-dna/repodna analyze .
+bash /path/to/repo-dna/repodna analyze ./project
+bash /path/to/repo-dna/repodna doctor
 ```
 
-Use `bash ./dna-analysis.sh --help` from the RepoDNA checkout to list every
-option. Generated reports are written to a timestamped directory in the
-analyzed repository; start with `report/index.html`.
+After adding the checkout to `PATH` and marking `repodna` executable, the same
+commands can be written as `repodna analyze .`. `dna-analysis.sh` remains the
+compatible analysis engine. Use `repodna help` to list commands and stable exit
+codes. Generated reports are written to a timestamped directory in the analyzed
+repository; start with `report/index.html`.
 
 Persist a compact snapshot for future period comparison with:
 
 ```bash
-bash ./dna-analysis.sh --save-snapshot
+bash ./repodna analyze . --snapshot
 ```
 
 On later runs, RepoDNA automatically compares against the latest persisted
 snapshot. Select a specific baseline with:
 
 ```bash
-bash ./dna-analysis.sh --compare-with .repodna/snapshots/<snapshot>.json
+bash ./repodna analyze . --compare .repodna/snapshots/<snapshot>.json
 ```
 
 To add personally confirmed portfolio context, copy

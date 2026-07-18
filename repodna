@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+
+usage() {
+    cat <<'EOF'
+RepoDNA 1.0.0
+
+Usage:
+  repodna analyze [repository] [options]
+  repodna doctor
+  repodna init [repository]
+  repodna version
+  repodna help
+
+Analyze options:
+  --output <path>       Output directory (must not already exist)
+  --author <identity>   Filter Git evidence to one contributor
+  --format <format>     Preferred entry format: all, html, json, or csv
+  --privacy <mode>      standard or strict
+  --ignore-file <path>  Custom RepoDNA ignore file
+  --no-source-export    Explicitly retain the source-safe default
+  --no-graphs           Skip optional charts and graphs
+  --no-history          Skip Git history collection
+  --snapshot            Persist the generated snapshot
+  --compare <file>      Compare with a previous snapshot
+  --verbose             Stream engine progress
+  --quiet               Print only errors
+  --debug               Trace the engine and retain its log
+
+Exit codes: 0 success, 1 analysis error, 2 invalid arguments,
+3 missing dependency, 4 privacy/security block, 5 partial analysis.
+EOF
+}
+
+doctor_item() { printf '%-16s %s %s\n' "$1" "$2" "$3"; }
+
+doctor() {
+    local missing=0 python_runtime='' version_value temp_file
+    printf 'RepoDNA %s doctor\n\n' "$VERSION"
+    if command -v git >/dev/null 2>&1; then doctor_item Git '✓' "$(git --version | sed 's/^git version //')"; else doctor_item Git '✗' 'Required'; missing=1; fi
+    if ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3))); then doctor_item Bash '✓' "$BASH_VERSION"; else doctor_item Bash '✗' "$BASH_VERSION (4.3+ required)"; missing=1; fi
+    # shellcheck source=src/core/runtime.sh
+    source "$ROOT/src/core/runtime.sh"
+    python_runtime="$(resolve_python_runtime || true)"
+    if [[ -n "$python_runtime" ]]; then
+        version_value="$("$python_runtime" -c 'import platform; print(platform.python_version())' 2>/dev/null)"
+        doctor_item Python '✓' "$version_value ($python_runtime)"
+        for module in 'Matplotlib:matplotlib' 'Tree-sitter:tree_sitter' 'JSON Schema:jsonschema'; do
+            local label="${module%%:*}" import_name="${module#*:}"
+            if "$python_runtime" -c "import $import_name" >/dev/null 2>&1; then doctor_item "$label" '✓' 'Installed'; else doctor_item "$label" '⚠' 'Optional module not installed'; fi
+        done
+    else doctor_item Python '✗' 'Python 3.11+ required'; missing=1
+    fi
+    command -v shellcheck >/dev/null 2>&1 && doctor_item ShellCheck '✓' "$(shellcheck --version | awk '/^version:/{print $2}')" || doctor_item ShellCheck '⚠' 'Optional; required for contributors'
+    command -v dot >/dev/null 2>&1 && doctor_item Graphviz '✓' "$(dot -V 2>&1 | sed 's/^dot - graphviz version //')" || doctor_item Graphviz '○' 'Optional'
+    if command -v zip >/dev/null 2>&1 || command -v powershell.exe >/dev/null 2>&1 || command -v tar >/dev/null 2>&1; then doctor_item Archive '✓' 'ZIP/PowerShell/TAR backend available'; else doctor_item Archive '⚠' 'No archive backend; folder output remains available'; fi
+    temp_file="${TMPDIR:-/tmp}/repodna-doctor-$$"
+    if (printf test > "$temp_file" && rm -f "$temp_file") 2>/dev/null; then doctor_item 'Temp directory' '✓' "${TMPDIR:-/tmp}"; else doctor_item 'Temp directory' '✗' 'Not writable'; missing=1; fi
+    [[ -r . && -w . ]] && doctor_item Permissions '✓' 'Current directory readable/writable' || doctor_item Permissions '⚠' 'Current directory is not both readable and writable'
+    doctor_item Locale "$([[ "${LC_ALL:-${LANG:-}}" == *UTF-8* || "${LC_ALL:-${LANG:-}}" == *utf8* ]] && printf '✓' || printf '⚠')" "${LC_ALL:-${LANG:-unset}}"
+    [[ "$missing" -eq 0 ]] || return 3
+}
+
+init_config() {
+    local target="${1:-.}"
+    [[ -d "$target" ]] || { printf 'Error: directory does not exist: %s\n' "$target" >&2; return 2; }
+    [[ -f "$target/.repodna-ignore" ]] || printf '%s\n' '# Paths excluded from RepoDNA analysis' 'node_modules/' 'vendor/' > "$target/.repodna-ignore"
+    [[ -f "$target/.repodna-secrets-allowlist" ]] || printf '%s\n' '# path-pattern|line-or-*|finding-type-or-*' > "$target/.repodna-secrets-allowlist"
+    [[ -f "$target/.repodna-authors" ]] || printf '%s\n' '# Canonical Name:' '#   names:' '#     - Commit Name' '#   emails:' '#     - developer@example.com' > "$target/.repodna-authors"
+    mkdir -p "$target/.repodna"
+    printf 'RepoDNA configuration initialized in %s\n' "$(cd "$target" && pwd)"
+}
+
+analyze() {
+    local repository='.' format=all verbosity=normal log_file status report_path metrics history_disabled=false
+    local -a engine_args=()
+    if [[ $# -gt 0 && "$1" != --* ]]; then repository="$1"; shift; fi
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --output|--author|--ignore-file) [[ -n "${2:-}" ]] || return 2; engine_args+=("$1" "$2"); shift 2 ;;
+            --format) [[ "${2:-}" =~ ^(all|html|json|csv)$ ]] || { printf 'Invalid format: %s\n' "${2:-}" >&2; return 2; }; format="$2"; shift 2 ;;
+            --privacy) [[ -n "${2:-}" ]] || return 2; engine_args+=(--privacy-mode "$2"); shift 2 ;;
+            --compare) [[ -n "${2:-}" ]] || return 2; engine_args+=(--compare-with "$2"); shift 2 ;;
+            --no-source-export) shift ;;
+            --no-graphs) engine_args+=("$1"); shift ;;
+            --no-history) engine_args+=("$1"); history_disabled=true; shift ;;
+            --snapshot) engine_args+=(--save-snapshot); shift ;;
+            --verbose) verbosity=verbose; shift ;;
+            --quiet) verbosity=quiet; shift ;;
+            --debug) verbosity=debug; shift ;;
+            --*) printf 'Unknown analyze option: %s\n' "$1" >&2; return 2 ;;
+            *) printf 'Unexpected argument: %s\n' "$1" >&2; return 2 ;;
+        esac
+    done
+    log_file="$(mktemp "${TMPDIR:-/tmp}/repodna-analyze.XXXXXX")" || return 1
+    [[ "$verbosity" == quiet ]] || printf 'RepoDNA %s\n\n✓ Repository detected: %s\n' "$VERSION" "$repository"
+    if [[ "$verbosity" == verbose ]]; then
+        bash "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" 2>&1 | tee "$log_file"; status=${PIPESTATUS[0]}
+    elif [[ "$verbosity" == debug ]]; then
+        REPODNA_DEBUG=1 bash -x "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" 2>&1 | tee "$log_file"; status=${PIPESTATUS[0]}
+        printf 'Debug log: %s\n' "$log_file"
+    else
+        bash "$ROOT/dna-analysis.sh" "$repository" "${engine_args[@]}" >"$log_file" 2>&1; status=$?
+    fi
+    if [[ "$status" -ne 0 ]]; then
+        printf '✗ Analysis failed (exit %d).\n' "$status" >&2
+        [[ "$verbosity" == quiet ]] || tail -n 20 "$log_file" >&2
+        [[ "$verbosity" == debug ]] || rm -f "$log_file"
+        return "$status"
+    fi
+    report_path="$(awk '/^Start here:/{getline; sub(/^[[:space:]]+/,""); print; exit}' "$log_file")"
+    if [[ -f "$report_path/../data/report.json" ]]; then
+        metrics="$(python - "$report_path/../data/report.json" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1],encoding='utf-8')); g=d['generic_analysis']; a=g['analysis']
+print(g.get('file_count',0), len(a.get('systems',[])), len(list(__import__('pathlib').Path(sys.argv[1]).parents[1].glob('*.html'))), d.get('risks',{}).get('potential_secret_findings',0))
+PY
+)"
+    else metrics='0 0 0 0'; fi
+    read -r files modules reports secrets <<< "$metrics"
+    if [[ "$verbosity" != quiet ]]; then
+        [[ "$history_disabled" == true ]] && printf '○ Git history skipped\n' || printf '✓ Git history collected\n'
+        printf '✓ %s files analyzed\n✓ %s modules identified\n✓ %s reports generated\n' "$files" "$modules" "$reports"
+        [[ "$secrets" -eq 0 ]] && printf '✓ No potential secrets require review\n' || printf '⚠ %s potential secrets require review\n' "$secrets"
+        printf '\nReport (%s):\n%s\n' "$format" "$report_path"
+    fi
+    [[ "$verbosity" == debug ]] || rm -f "$log_file"
+}
+
+command_name="${1:-help}"; [[ $# -eq 0 ]] || shift
+case "$command_name" in
+    analyze) analyze "$@" ;;
+    doctor) [[ $# -eq 0 ]] || { printf 'doctor accepts no arguments\n' >&2; exit 2; }; doctor ;;
+    init) [[ $# -le 1 ]] || exit 2; init_config "${1:-.}" ;;
+    version|--version|-V) printf 'RepoDNA %s\n' "$VERSION" ;;
+    help|--help|-h) usage ;;
+    *) printf 'Unknown command: %s\n\n' "$command_name" >&2; usage >&2; exit 2 ;;
+esac

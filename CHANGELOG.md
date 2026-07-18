@@ -1,5 +1,7 @@
 # Changelog
 
+- Added the public `repodna` 1.0 CLI with analyze/doctor/init/version/help commands, concise summaries, logging modes, stable exit codes, output and ignore overrides, and dependency/environment diagnostics.
+- Declared Windows/Git Bash as a tested 1.0 platform, added positional and `--repository` path targeting, native/MSYS separator normalization, Python Launcher discovery, CRLF/Unicode/long-path/ZIP tests, and a PowerShell-to-Git-Bash CI smoke test.
 - Added versioned test-execution evidence, complete-suite pass/fail aggregation, CI artifact publication, Python formatting validation, local-link verification, and portable Linux/macOS/Windows smoke gates.
 - Reworked heuristic secret detection with placeholder suppression, safe previews, four severity levels, `.repodna-ignore`, value-free allowlists, dedicated fake-secret fixtures, and explicit security-scanner limitations.
 - Reworked repository health model 2.0 to separate Health Score, Evidence Coverage, and confidence, with six normalized dimensions and explicit explanations for proven losses, unsupported analysis, unavailable information, and external tools not executed.

@@ -1,6 +1,6 @@
 initialize_analysis_context() {
 # Require Git.
-command_exists git || die "Git is not installed or is not available in PATH."
+command_exists git || die "Git is not installed or is not available in PATH." 3
 
 if [[ -n "$PORTFOLIO_PROFILE" ]]; then
     [[ -f "$PORTFOLIO_PROFILE" ]] || die "Portfolio profile not found: $PORTFOLIO_PROFILE"
@@ -14,7 +14,7 @@ fi
 # Resolve Python once so collectors, renderers, and charts use the same runtime.
 STRUCTURED_PYTHON="$(resolve_python_runtime || true)"
 [[ -n "$STRUCTURED_PYTHON" ]] ||
-    die "Python 3.11 or newer is required to generate the standardized reports. Install a compatible runtime or set REPO_DNA_PYTHON."
+    die "Python 3.11 or newer is required to generate the standardized reports. Install a compatible runtime or set REPO_DNA_PYTHON." 3
 
 # Require execution inside a Git repository.
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
@@ -22,6 +22,12 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 
 # Resolve the repository root.
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+if [[ -n "$IGNORE_FILE" ]]; then
+    IGNORE_FILE="$(normalize_repository_path "$IGNORE_FILE")"
+    [[ "$IGNORE_FILE" == /* ]] || IGNORE_FILE="$REPO_ROOT/$IGNORE_FILE"
+    [[ -f "$IGNORE_FILE" ]] || die "Ignore file not found: $IGNORE_FILE" 2
+fi
 
 if [[ -z "$FORGE_DATA" && -f "$REPO_ROOT/.repodna/forge-data.json" ]]; then
     FORGE_DATA="$REPO_ROOT/.repodna/forge-data.json"
@@ -69,7 +75,15 @@ SAFE_REPO_NAME="$(
 REPORT_NAME="${SAFE_REPO_NAME}_project_analysis_${TIMESTAMP}"
 
 # Define the report root.
-OUTPUT_DIR="$REPO_ROOT/$REPORT_NAME"
+if [[ -n "$OUTPUT_OVERRIDE" ]]; then
+    OUTPUT_OVERRIDE="$(normalize_repository_path "$OUTPUT_OVERRIDE")"
+    [[ "$OUTPUT_OVERRIDE" == /* ]] || OUTPUT_OVERRIDE="$REPO_ROOT/$OUTPUT_OVERRIDE"
+    [[ ! -e "$OUTPUT_OVERRIDE" ]] || die "Output path already exists: $OUTPUT_OVERRIDE" 2
+    OUTPUT_DIR="$OUTPUT_OVERRIDE"
+    REPORT_NAME="$(basename "$OUTPUT_DIR")"
+else
+    OUTPUT_DIR="$REPO_ROOT/$REPORT_NAME"
+fi
 
 # Define the summary folder.
 SUMMARY_DIR="$OUTPUT_DIR/summary"
@@ -145,7 +159,7 @@ PORTFOLIO_DIR="$OUTPUT_DIR/portfolio"
 GRAPHS_DIR="$OUTPUT_DIR/graphs"
 
 # Define the expected ZIP path.
-ZIP_PATH="$REPO_ROOT/${REPORT_NAME}.zip"
+ZIP_PATH="$(dirname "$OUTPUT_DIR")/${REPORT_NAME}.zip"
 
 DISPLAY_OUTPUT_PATH="$OUTPUT_DIR"
 DISPLAY_SUMMARY_PATH="$SUMMARY_DIR"

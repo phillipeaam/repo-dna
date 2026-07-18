@@ -11,6 +11,7 @@ GENERIC_ANALYSIS_FILE="$OUTPUT_DIR/.generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
     [[ -z "$AUTHOR" ]] || GENERIC_COLLECTOR_ARGS+=(--author "$AUTHOR")
+    [[ "$NO_HISTORY" == false ]] || GENERIC_COLLECTOR_ARGS+=(--no-history)
     [[ -z "$FORGE_DATA" ]] || GENERIC_COLLECTOR_ARGS+=(--forge-data "$FORGE_DATA")
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
         "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" "${GENERIC_COLLECTOR_ARGS[@]}" ||
@@ -23,7 +24,7 @@ else
         > "$GENERIC_ANALYSIS_FILE"
 fi
 
-create_analysis_charts
+[[ "$NO_GRAPHS" == true ]] || create_analysis_charts
 
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
