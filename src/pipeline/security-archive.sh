@@ -11,6 +11,7 @@ GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
     [[ -z "$AUTHOR" ]] || GENERIC_COLLECTOR_ARGS+=(--author "$AUTHOR")
+    [[ -z "$FORGE_DATA" ]] || GENERIC_COLLECTOR_ARGS+=(--forge-data "$FORGE_DATA")
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/generic.py" \
         "$REPO_ROOT" "$GENERIC_ANALYSIS_FILE" "${GENERIC_COLLECTOR_ARGS[@]}" ||
         die "Could not collect the generic repository analysis."
@@ -23,6 +24,8 @@ create_analysis_charts
 
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
+cp "$SCRIPT_DIR/schemas/forge-data-1.0.0.schema.json" "$REPORT_DATA_DIR/forge-data-1.0.0.schema.json" ||
+    die "Could not package the provider-neutral forge-data schema."
 
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/sbom.py" \
     "$REPORT_DATA_DIR/report.json" "$SBOM_DIR" ||

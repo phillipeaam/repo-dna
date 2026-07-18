@@ -23,6 +23,7 @@ from android_analysis import analyze_android
 from flutter_analysis import analyze_flutter
 from dependency_inventory import collect_dependency_inventory
 from delivery_analysis import analyze_delivery
+from forge_import import import_forge_data
 
 
 SOURCE_LANGUAGES = {
@@ -341,7 +342,7 @@ def build_narrative_facts(generic: dict[str, Any], code: dict[str, Any], systems
     return facts
 
 
-def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
+def analyze_repository(root: Path, generic: dict[str, Any], forge_data: Path | None = None) -> dict[str, Any]:
     code = analyze_code(root, generic["_files"])
     frameworks = analyze_frameworks(generic["_files"], code, generic["dependencies"])
     graphs = build_graphs(root, generic["_files"], code["imports"], generic["dependencies"])
@@ -360,6 +361,10 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
     )
     dependency_inventory = collect_dependency_inventory(root, generic["dependencies"])
     delivery = analyze_delivery(root, generic.get("ci_cd_files", []))
+    forge_activity = import_forge_data(
+        forge_data, generic["git"].get("author_filter", ""),
+        "standard", [item["tag"] for item in delivery.get("releases", {}).get("releases", [])],
+    )
     imported_quality = import_quality_results(root, generic["dependencies"], dependency_inventory)
     quality = {
         "code": code,
@@ -396,6 +401,7 @@ def analyze_repository(root: Path, generic: dict[str, Any]) -> dict[str, Any]:
         "flutter": flutter,
         "dependency_inventory": dependency_inventory,
         "delivery": delivery,
+        "forge_activity": forge_activity,
         "personal_achievement_candidates": achievement_candidates,
         "frameworks": frameworks,
         "graphs": graphs,

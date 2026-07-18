@@ -20,13 +20,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$PROJECT_ROOT/src"
+mkdir -p "$PROJECT_ROOT/src" "$PROJECT_ROOT/.repodna"
 cp "$SOURCE_ROOT/dna-analysis.sh" "$PROJECT_ROOT/"
 for directory in collectors renderers schemas src; do
     cp -R "$SOURCE_ROOT/$directory" "$PROJECT_ROOT/"
 done
 printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$PROJECT_ROOT/sample.csproj"
 printf '%s\n' 'namespace Sample { public sealed class Program { } }' > "$PROJECT_ROOT/src/Program.cs"
+cat > "$PROJECT_ROOT/.repodna/forge-data.json" <<'JSON'
+{"$schema":"./forge-data-1.0.0.schema.json","schema_version":"1.0.0","artifact_type":"repodna_forge_data","provider":"github","exported_at":"2026-07-18T12:00:00Z","repository":{"name":"sample-project","owner":null,"host":"github.com","external_id":"1"},"scope":{"complete":true,"from":null,"to":null,"notes":[]},"issues":[],"pull_requests":[],"releases":[]}
+JSON
 
 git -C "$PROJECT_ROOT" init -q
 git -C "$PROJECT_ROOT" config user.name 'CI Fixture'
@@ -63,6 +66,7 @@ assert "generic_analysis" in canonical
 assert canonical["generic_analysis"]["analysis"]["dependency_inventory"]["sbom"]["bomFormat"] == "CycloneDX"
 assert canonical["generic_analysis"]["analysis"]["delivery"]["releases"]["status"] == "assessed"
 assert "ci" in canonical["generic_analysis"]["analysis"]["delivery"]
+assert canonical["generic_analysis"]["analysis"]["forge_activity"]["status"] == "imported"
 print(f"validated {len(documents)} generated JSON documents")
 PY
 

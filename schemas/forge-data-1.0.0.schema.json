@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phillipeaam/repo-dna/schemas/forge-data-1.0.0.schema.json",
+  "title": "RepoDNA provider-neutral forge data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_type", "provider", "exported_at", "repository", "scope", "issues", "pull_requests", "releases"],
+  "properties": {
+    "$schema": {"const": "./forge-data-1.0.0.schema.json"},
+    "schema_version": {"const": "1.0.0"},
+    "artifact_type": {"const": "repodna_forge_data"},
+    "provider": {"enum": ["github", "gitlab", "bitbucket", "azure_devops", "other"]},
+    "exported_at": {"type": "string", "format": "date-time"},
+    "repository": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1}, "owner": {"type": ["string", "null"]},
+        "host": {"type": ["string", "null"]}, "external_id": {"type": ["string", "null"]}
+      }
+    },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["complete"],
+      "properties": {
+        "complete": {"type": "boolean"}, "from": {"type": ["string", "null"], "format": "date-time"},
+        "to": {"type": ["string", "null"], "format": "date-time"}, "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "issues": {"type": "array", "items": {"$ref": "#/$defs/issue"}},
+    "pull_requests": {"type": "array", "items": {"$ref": "#/$defs/pull_request"}},
+    "releases": {"type": "array", "items": {"$ref": "#/$defs/release"}}
+  },
+  "$defs": {
+    "nullable_time": {"type": ["string", "null"], "format": "date-time"},
+    "identity": {
+      "type": "object", "additionalProperties": false, "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "username": {"type": ["string", "null"]},
+        "display_name": {"type": ["string", "null"]}, "aliases": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "item_base": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "number": {"type": ["integer", "string"]},
+        "title": {"type": "string", "minLength": 1}, "state": {"type": "string"}, "url": {"type": ["string", "null"], "format": "uri"},
+        "created_at": {"type": "string", "format": "date-time"}, "closed_at": {"$ref": "#/$defs/nullable_time"},
+        "author": {"$ref": "#/$defs/identity"}, "labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "issue": {
+      "allOf": [
+        {"$ref": "#/$defs/item_base"},
+        {"type": "object", "additionalProperties": false,
+          "required": ["id", "number", "title", "state", "created_at", "author", "labels", "assignees", "comments_count"],
+          "properties": {
+            "id": true, "number": true, "title": true, "state": {"enum": ["open", "closed"]}, "url": true, "created_at": true, "closed_at": true, "author": true, "labels": true,
+            "assignees": {"type": "array", "items": {"$ref": "#/$defs/identity"}}, "milestone": {"type": ["string", "null"]},
+            "comments_count": {"type": "integer", "minimum": 0}, "confidential": {"type": "boolean", "default": false}
+          }
+        }
+      ]
+    },
+    "pull_request": {
+      "allOf": [
+        {"$ref": "#/$defs/item_base"},
+        {"type": "object", "additionalProperties": false,
+          "required": ["id", "number", "title", "state", "draft", "created_at", "author", "labels", "participants", "reviewers"],
+          "properties": {
+            "id": true, "number": true, "title": true, "state": {"enum": ["open", "closed", "merged"]}, "url": true, "created_at": true, "closed_at": true, "author": true, "labels": true,
+            "draft": {"type": "boolean"}, "merged_at": {"$ref": "#/$defs/nullable_time"}, "merge_commit": {"type": ["string", "null"]},
+            "source_branch": {"type": ["string", "null"]}, "target_branch": {"type": ["string", "null"]},
+            "participants": {"type": "array", "items": {"$ref": "#/$defs/identity"}}, "reviewers": {"type": "array", "items": {"$ref": "#/$defs/identity"}},
+            "commits_count": {"type": ["integer", "null"], "minimum": 0}, "changed_files": {"type": ["integer", "null"], "minimum": 0},
+            "additions": {"type": ["integer", "null"], "minimum": 0}, "deletions": {"type": ["integer", "null"], "minimum": 0},
+            "comments_count": {"type": ["integer", "null"], "minimum": 0}, "review_comments_count": {"type": ["integer", "null"], "minimum": 0}
+          }
+        }
+      ]
+    },
+    "release": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "tag", "name", "draft", "prerelease", "published_at", "author", "assets_count"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "tag": {"type": "string", "minLength": 1}, "name": {"type": ["string", "null"]},
+        "draft": {"type": "boolean"}, "prerelease": {"type": "boolean"}, "published_at": {"$ref": "#/$defs/nullable_time"},
+        "author": {"$ref": "#/$defs/identity"}, "assets_count": {"type": "integer", "minimum": 0}, "url": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

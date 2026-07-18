@@ -1,0 +1,19 @@
+{
+  "$schema": "./forge-data-1.0.0.schema.json",
+  "schema_version": "1.0.0",
+  "artifact_type": "repodna_forge_data",
+  "provider": "github",
+  "exported_at": "2026-07-18T12:00:00Z",
+  "repository": {"name": "example", "owner": "organization", "host": "github.com", "external_id": "repository-1"},
+  "scope": {"complete": false, "from": null, "to": null, "notes": ["Example data only"]},
+  "issues": [
+    {
+      "id": "issue-1", "number": 10, "title": "Example issue", "state": "closed", "url": null,
+      "created_at": "2026-07-01T10:00:00Z", "closed_at": "2026-07-02T10:00:00Z",
+      "author": {"id": "user-1", "username": "developer", "display_name": "Developer", "aliases": []},
+      "labels": ["documentation"], "assignees": [], "milestone": null, "comments_count": 2, "confidential": false
+    }
+  ],
+  "pull_requests": [],
+  "releases": []
+}

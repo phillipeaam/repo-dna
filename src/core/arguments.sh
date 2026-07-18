@@ -8,6 +8,7 @@ show_usage() {
         '  --until <date>            Include commits on or before this date.' \
         '  --owned-root <path>       Mark a path as project-owned (repeatable).' \
         '  --portfolio-profile <file>  Add personally confirmed portfolio claims.' \
+        '  --forge-data <file>       Import normalized issues, pull requests, and releases.' \
         '  --include-source          Copy classified C# source into the report.' \
         '  --save-snapshot           Persist a versioned snapshot under .repodna/snapshots.' \
         '  --compare-with <file>     Compare this run with a previous analysis snapshot.' \
@@ -31,9 +32,10 @@ parse_arguments() {
     COMPARE_WITH=''
     PRIVACY_MODE='standard'
     PORTFOLIO_PROFILE=''
+    FORGE_DATA=''
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --author|--since|--until|--owned-root|-owned-root|--privacy-mode|--portfolio-profile|--compare-with)
+            --author|--since|--until|--owned-root|-owned-root|--privacy-mode|--portfolio-profile|--compare-with|--forge-data)
                 [[ -n "${2:-}" ]] || die "Option $1 requires a value."
                 case "$1" in
                     --author) AUTHOR="$2" ;;
@@ -43,6 +45,7 @@ parse_arguments() {
                     --privacy-mode) PRIVACY_MODE="$2" ;;
                     --portfolio-profile) PORTFOLIO_PROFILE="$2" ;;
                     --compare-with) COMPARE_WITH="$2" ;;
+                    --forge-data) FORGE_DATA="$2" ;;
                 esac
                 shift 2 ;;
             --include-source) INCLUDE_SOURCE=true; shift ;;

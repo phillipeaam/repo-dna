@@ -178,6 +178,24 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             ci_analysis.get("summary", {}), ci_analysis.get("limitations", []),
         ))
 
+    forge_activity = analysis.get("forge_activity", {})
+    if forge_activity.get("status") in {"imported", "redacted_by_privacy_mode"}:
+        items.append(evidence(
+            "imported-forge-activity", "collaboration", "fact",
+            f"The normalized {forge_activity.get('provider') or 'forge'} export contains {forge_activity.get('summary', {}).get('issues', 0)} issues, {forge_activity.get('summary', {}).get('pull_requests', 0)} pull/merge requests, and {forge_activity.get('summary', {}).get('releases', 0)} releases in the selected scope.",
+            "high", ["#/generic_analysis/analysis/forge_activity/summary"],
+            {"summary": forge_activity.get("summary", {}), "issue_metrics": forge_activity.get("issue_metrics", {}), "pull_request_metrics": forge_activity.get("pull_request_metrics", {}), "release_metrics": forge_activity.get("release_metrics", {})},
+            forge_activity.get("limitations", []),
+        ))
+        for index, pull_request in enumerate(forge_activity.get("pull_requests", [])[:50], 1):
+            items.append(evidence(
+                f"imported-pull-request-{index}", "contribution", "fact",
+                f"Imported pull/merge request #{pull_request.get('number')}: {pull_request.get('title')}",
+                "high", ["#/generic_analysis/analysis/forge_activity/pull_requests"],
+                {key: pull_request.get(key) for key in ("state", "draft", "created_at", "merged_at", "commits_count", "changed_files", "additions", "deletions", "review_comments_count", "selected_author_roles")},
+                ["Provider participation is activity evidence, not proof of ownership or impact."],
+            ))
+
     health = analysis.get("health", {})
     if health:
         items.append(evidence(

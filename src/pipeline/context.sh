@@ -23,6 +23,13 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 # Resolve the repository root.
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
+if [[ -z "$FORGE_DATA" && -f "$REPO_ROOT/.repodna/forge-data.json" ]]; then
+    FORGE_DATA="$REPO_ROOT/.repodna/forge-data.json"
+elif [[ -n "$FORGE_DATA" ]]; then
+    [[ -f "$FORGE_DATA" ]] || die "Forge data file not found: $FORGE_DATA"
+    FORGE_DATA="$(cd "$(dirname "$FORGE_DATA")" && pwd)/$(basename "$FORGE_DATA")"
+fi
+
 # Load directory exclusion management after REPO_ROOT is available.
 # shellcheck source=src/core/exclusions.sh
 source "$SCRIPT_DIR/src/core/exclusions.sh"
@@ -236,6 +243,7 @@ echo "Code root  : $CODE_ROOT"
 echo "Owned roots: ${OWNED_ROOTS[*]:-automatic classification only}"
 echo "Source     : $INCLUDE_SOURCE"
 echo "Privacy    : $PRIVACY_MODE"
+echo "Forge data : $([[ -n "$FORGE_DATA" ]] && printf configured || printf not-configured)"
 echo "Output     : $DISPLAY_OUTPUT_PATH"
 echo "================================================================"
 echo ""

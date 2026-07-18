@@ -26,6 +26,7 @@ One command creates a timestamped analysis package containing:
 - verified Flutter dependencies, widgets, routes, state management, bridges, tests, and flavors;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
 - local release cadence, per-tag change ranges, unreleased changes, changelog coverage, and static CI workflow evidence;
+- provider-neutral imports for issues, pull/merge requests, reviews, participants, and remote releases;
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - lockfile-resolved dependency versions and a CycloneDX 1.6 software bill of materials;
 - ownership classification with confidence and evidence;
@@ -55,6 +56,7 @@ sensitive content from the shareable package.
 | Dependencies and SBOM | Resolves direct and transitive versions from supported lockfiles, emits Package URLs and dependency edges, generates CycloneDX 1.6 JSON, and feeds version evidence into vulnerability/license correlation. |
 | Git intelligence | Normalizes author aliases; calculates history by period, churn, frequently changed files, composite hotspots, co-authorship, shared files, and system evolution. |
 | Releases and CI | Reconstructs release ranges from local tags, measures cadence and unreleased changes, checks changelog coverage, and statically inventories CI providers, triggers, jobs, steps, permissions, actions, cache, and artifacts. |
+| Provider activity | Validates and imports a common JSON contract for GitHub/GitLab-style issues, pull/merge requests, participants, reviewers, and releases, with repository-wide or author-filtered metrics. |
 | C# and Unity | Detects architecture signals, interfaces, systems, technical-debt markers, Unity assets, scenes, prefabs, shaders, assembly definitions, and Editor tooling. |
 | Ownership | Combines paths, manifests, `.asmdef`, submodules, copyright signals, Git tracking, `.repodna-ignore`, and manual owned roots. |
 | Privacy | Keeps source opt-in, supports strict mode, redacts secret values, scans the final package, and blocks archive creation when configured sensitive content remains. |
@@ -86,6 +88,7 @@ Repository
 | Contribution | Git scope, additions/removals, changed paths, composite hotspots, and system evolution. |
 | Collaboration | Contributors, co-authored commits, shared files, author-system activity, and bus factor by system. |
 | Releases and CI | Local tags, cadence, per-release commits/churn, unreleased work, changelog coverage, workflows, triggers, jobs, and delivery/security signals. |
+| Issues, PRs, and releases | Imported provider scope, issue lifecycle, pull/merge request activity, reviews, time-to-merge, remote releases, participants, and local-tag correlation. |
 | Risks | Potential secrets and ownership classifications requiring review. |
 | Notion evidence | Repository facts, inferences, evidence, and personal claims that still require confirmation. |
 | LLM evidence | Compact facts, inferences, candidates, provenance, confidence, caveats, and unknowns for downstream language models. |
@@ -158,6 +161,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Automated testing and fixtures](docs/testing.md)
 - [CI/CD and releases](docs/ci-cd.md)
 - [Local release and CI analysis](docs/local-delivery-analysis.md)
+- [Provider-neutral forge data](docs/forge-data.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
@@ -188,6 +192,7 @@ does not claim that runtime configuration is valid or that a feature is complete
   SBOM, SPDX, and license reports
 - Lockfile resolution and CycloneDX 1.6 SBOM generation
 - Local release cadence, changelog coverage, and static CI workflow analysis
+- Versioned provider-neutral imports for issues, pull/merge requests, and releases
 - 📄 HTML, JSON, and CSV report generation
 - 📚 Portfolio and documentation support
 
@@ -299,6 +304,13 @@ bash ./dna-analysis.sh --portfolio-profile path/to/confirmations.json
 Portfolio profiles are rejected in strict privacy mode because they may contain
 personal information. Without a profile, RepoDNA still creates a draft, but all
 personal attribution remains marked as requiring confirmation.
+
+Import provider activity explicitly, or place the same contract at
+`.repodna/forge-data.json` for automatic discovery:
+
+```bash
+bash ./dna-analysis.sh --forge-data path/to/forge-data.json
+```
 
 ## Customizing Directory Exclusions
 

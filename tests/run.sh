@@ -18,6 +18,7 @@ tests=(
     achievement_candidates_test.sh
     git_history_test.sh
     delivery_analysis_test.sh
+    forge_import_test.sh
     security_scan_test.sh
     generic_collector_test.sh
     ast_analysis_test.sh

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tomllib
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -482,10 +483,20 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     ci_analysis["workflows"] = []
     ci_analysis["parse_errors"] = []
     ci_analysis["status"] = "redacted_by_privacy_mode"
+    forge_activity = analysis.get("forge_activity", {})
+    if forge_activity.get("status") == "imported":
+        forge_activity["repository"] = {"name": "[redacted]", "owner": None, "host": None, "external_id": None}
+        forge_activity.get("scope", {})["source_file"] = "[redacted]"
+        forge_activity["issues"] = []
+        forge_activity["pull_requests"] = []
+        forge_activity["releases"] = []
+        forge_activity["top_labels"] = []
+        forge_activity["release_correlation"] = {key: value if isinstance(value, int) else [] for key, value in forge_activity.get("release_correlation", {}).items()}
+        forge_activity["status"] = "redacted_by_privacy_mode"
     analysis["quality"]["licenses"]["license_files"] = []
 
 
-def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "") -> dict[str, Any]:
+def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "", forge_data: Path | None = None) -> dict[str, Any]:
     files: list[dict[str, Any]] = []
     language_files: Counter[str] = Counter()
     language_lines: Counter[str] = Counter()
@@ -579,7 +590,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
         "git": collect_git(root, privacy_mode, author_filter),
         "_files": files,
     }
-    result["analysis"] = analyze_repository(root, result)
+    result["analysis"] = analyze_repository(root, result, forge_data)
     result.pop("_files")
     result["git"].pop("_file_author_activity", None)
     if privacy_mode == "strict":
@@ -594,8 +605,13 @@ def main() -> int:
     parser.add_argument("--report-name", default="")
     parser.add_argument("--privacy-mode", choices=("standard", "strict"), default="standard")
     parser.add_argument("--author", default="")
+    parser.add_argument("--forge-data", type=Path)
     args = parser.parse_args()
-    data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author)
+    try:
+        data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author, args.forge_data.resolve() if args.forge_data else None)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return 0

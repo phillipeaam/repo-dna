@@ -11,6 +11,7 @@ parse_arguments
 [[ "$INCLUDE_SOURCE" == false && "$PRIVACY_MODE" == standard ]]
 [[ "$SAVE_SNAPSHOT" == false ]]
 [[ -z "$COMPARE_WITH" ]]
+[[ -z "$FORGE_DATA" ]]
 [[ ${#OWNED_ROOTS[@]} -eq 0 ]]
 
 parse_arguments --author Developer --since 2024-01-01 --until 2025-01-01 \
@@ -31,6 +32,9 @@ parse_arguments --save-snapshot
 
 parse_arguments --compare-with previous.json
 [[ "$COMPARE_WITH" == previous.json ]]
+
+parse_arguments --forge-data forge.json
+[[ "$FORGE_DATA" == forge.json ]]
 
 if (parse_arguments --privacy-mode unsafe) >/dev/null 2>&1; then
     echo 'Invalid privacy mode was accepted.' >&2

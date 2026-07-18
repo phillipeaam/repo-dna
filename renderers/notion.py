@@ -140,6 +140,18 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "confirmation_required": True,
         })
 
+    forge_activity = generic.get("analysis", {}).get("forge_activity", {})
+    forge_contributions = [
+        {
+            "kind": "fact", "statement": f"Imported pull/merge request #{item.get('number')}: {item.get('title')}",
+            "evidence": ["report/data/report.json#/generic_analysis/analysis/forge_activity/pull_requests"],
+            "state": item.get("state"), "merged_at": item.get("merged_at"), "changed_files": item.get("changed_files"),
+            "additions": item.get("additions"), "deletions": item.get("deletions"), "selected_author_roles": item.get("selected_author_roles", []),
+            "personal_attribution": "provider activity only", "confidence": "high", "confirmation_required": True,
+        }
+        for item in forge_activity.get("pull_requests", [])[:100]
+    ]
+
     return {
         "schema_version": "1.0",
         "generated_at": data["generated_at"],
@@ -178,7 +190,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
                 "impact_interpretation": "unconfirmed", "confirmation_required": True,
             }
             for item in technical_impact.get("contributions", [])[:100]
-        ],
+        ] + forge_contributions,
         "technologies": technology_facts,
         "collaboration_signals": [
             fact(
@@ -196,7 +208,10 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
                 "confirmation_required": True,
             }
             for item in activity_ownership.get("relationships", [])[:50]
-        ],
+        ] + ([fact(
+            f"Imported provider activity includes {forge_activity.get('collaboration', {}).get('unique_people', 0)} unique participants and {forge_activity.get('collaboration', {}).get('reviewers', 0)} reviewers.",
+            "report/data/report.json#/generic_analysis/analysis/forge_activity/collaboration",
+        )] if forge_activity.get("status") in {"imported", "redacted_by_privacy_mode"} else []),
         "personal_data": [],
         "personal_achievement_candidates": achievement_candidates,
         "claims_requiring_confirmation": [

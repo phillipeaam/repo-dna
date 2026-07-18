@@ -512,6 +512,47 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ) if ci_rows else '<p class="empty">No supported local CI configuration was found.</p>')
     delivery_body += '<p class="note">Release evidence comes from local tags and Git ranges. CI evidence describes configuration only; it does not prove successful runs, deployments, approvals, or published remote releases.</p>'
 
+    forge_activity = analysis.get("forge_activity", {})
+    forge_summary = forge_activity.get("summary", {})
+    issue_metrics = forge_activity.get("issue_metrics", {})
+    pull_request_metrics = forge_activity.get("pull_request_metrics", {})
+    release_metrics = forge_activity.get("release_metrics", {})
+    identity_name = lambda value: value.get("display_name") or value.get("username") or value.get("id", "Unknown")
+    imported_issue_rows = [[
+        item.get("number"), item.get("title"), item.get("state"), identity_name(item.get("author", {})),
+        item.get("created_at"), item.get("closed_at") or "Open", item.get("comments_count", 0),
+        ", ".join(item.get("labels", [])), ", ".join(item.get("selected_author_roles", [])),
+    ] for item in forge_activity.get("issues", [])]
+    imported_pr_rows = [[
+        item.get("number"), item.get("title"), item.get("state"), "Yes" if item.get("draft") else "No",
+        identity_name(item.get("author", {})), item.get("created_at"), item.get("merged_at") or "Not merged",
+        item.get("changed_files") if item.get("changed_files") is not None else "Unknown",
+        item.get("additions") if item.get("additions") is not None else "Unknown",
+        item.get("deletions") if item.get("deletions") is not None else "Unknown",
+        len(item.get("reviewers", [])), ", ".join(item.get("selected_author_roles", [])),
+    ] for item in forge_activity.get("pull_requests", [])]
+    imported_release_rows = [[
+        item.get("tag"), item.get("name") or "", item.get("published_at") or "Not published",
+        "Yes" if item.get("draft") else "No", "Yes" if item.get("prerelease") else "No",
+        item.get("assets_count", 0), identity_name(item.get("author", {})),
+    ] for item in forge_activity.get("releases", [])]
+    forge_body = table([
+        ("Import status", forge_activity.get("status", "not_imported")), ("Provider", forge_activity.get("provider") or "Not available"),
+        ("Author filter", forge_activity.get("scope", {}).get("author_filter") or "Repository-wide"),
+        ("Complete export", "Yes" if forge_activity.get("scope", {}).get("complete") else "No or unknown"),
+        ("Issues in scope", forge_summary.get("issues", 0)), ("Open issues", issue_metrics.get("open", 0)),
+        ("Closed issues", issue_metrics.get("closed", 0)), ("Average issue close days", issue_metrics.get("average_close_days") if issue_metrics.get("average_close_days") is not None else "Not available"),
+        ("Pull/merge requests in scope", forge_summary.get("pull_requests", 0)), ("Merged pull/merge requests", pull_request_metrics.get("merged", 0)),
+        ("Merge rate", f"{pull_request_metrics['merge_rate_percent']}%" if pull_request_metrics.get("merge_rate_percent") is not None else "Not available"),
+        ("Average time to merge", f"{pull_request_metrics['average_time_to_merge_days']} days" if pull_request_metrics.get("average_time_to_merge_days") is not None else "Not available"),
+        ("Imported releases", release_metrics.get("total", 0)), ("Release assets", release_metrics.get("assets", 0)),
+        ("Unique participants", forge_activity.get("collaboration", {}).get("unique_people", 0)),
+    ])
+    forge_body += "<h3>Imported issues</h3>" + (data_table(["Number", "Title", "State", "Author", "Created", "Closed", "Comments", "Labels", "Selected-author roles"], imported_issue_rows, {0, 6}) if imported_issue_rows else '<p class="empty">No imported issues are available in this scope.</p>')
+    forge_body += "<h3>Imported pull/merge requests</h3>" + (data_table(["Number", "Title", "State", "Draft", "Author", "Created", "Merged", "Files", "Added", "Deleted", "Reviewers", "Selected-author roles"], imported_pr_rows, {0, 7, 8, 9, 10}) if imported_pr_rows else '<p class="empty">No imported pull or merge requests are available in this scope.</p>')
+    forge_body += "<h3>Imported releases</h3>" + (data_table(["Tag", "Name", "Published", "Draft", "Prerelease", "Assets", "Author"], imported_release_rows, {5}) if imported_release_rows else '<p class="empty">No imported releases are available in this scope.</p>')
+    forge_body += '<p class="note">Imported activity reflects the supplied export, not live provider state. Participation is evidence of activity, not proof of ownership, quality, or business impact.</p>'
+
     narrative_facts = analysis.get("narrative_facts", [])
     narrative_body = '<p class="note">Every sentence below is generated from a structured fact and retains an evidence pointer. No business impact or personal ownership is invented.</p>'
     narrative_body += "".join(
@@ -611,6 +652,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("collaboration.html", "Collaboration", table(labeled(collaboration, list(collaboration))) + "<h3>Contributors</h3>" + contributor_directory + contributor_table + "<h3>Author and system activity ownership</h3>" + ownership_table + ownership_note + "<h3>Bus factor by system</h3>" + bus_factor_table + bus_factor_note + "<h3>Co-authored commits</h3>" + coauthor_table + "<h3>Files shared by authors</h3>" + shared_table + '<p class="empty">Contributor and ownership signals approximate Git activity; they do not prove exclusive authorship or code review.</p>'),
         ("quality.html", "Quality and compliance", quality_body),
         ("delivery.html", "Releases and CI", delivery_body),
+        ("forge-activity.html", "Issues, PRs, and releases", forge_body),
         ("sbom.html", "SBOM and lockfiles", '<p>Open the lockfile-derived dependency inventory at <a href="../sbom/index.html">sbom/index.html</a>. The CycloneDX 1.6 artifact is available at <a href="../sbom/bom.json">sbom/bom.json</a>.</p>'),
         ("health.html", "Repository health", health_body),
         ("health-trends.html", "Health score trends", '<p>Open the versioned health-score series at <a href="../health-trends/index.html">health-trends/index.html</a>. Its validated data is available in <a href="../health-trends/trends.json">trends.json</a>.</p>'),

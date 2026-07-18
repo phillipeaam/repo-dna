@@ -21,7 +21,7 @@ trap cleanup EXIT
 create_fixture() {
     local fixture="$1"
 
-    mkdir -p "$fixture/renderers" "$fixture/collectors" "$fixture/schemas" "$fixture/src/code"
+    mkdir -p "$fixture/renderers" "$fixture/collectors" "$fixture/schemas" "$fixture/src/code" "$fixture/.repodna"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/renderers/"*.py "$fixture/renderers/"
     cp -R "$SOURCE_ROOT/collectors/." "$fixture/collectors/"
@@ -29,6 +29,9 @@ create_fixture() {
     cp -R "$SOURCE_ROOT/src/." "$fixture/src/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
     printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/code/Example.cs"
+    cat > "$fixture/.repodna/forge-data.json" <<'JSON'
+{"$schema":"./forge-data-1.0.0.schema.json","schema_version":"1.0.0","artifact_type":"repodna_forge_data","provider":"gitlab","exported_at":"2026-07-18T12:00:00Z","repository":{"name":"Confidential Client Alpha","owner":"private-team","host":"gitlab.private.example.test","external_id":"9"},"scope":{"complete":true,"from":null,"to":null,"notes":[]},"issues":[{"id":"i1","number":1,"title":"Confidential Client Alpha launch","state":"open","url":"https://gitlab.private.example.test/issues/1","created_at":"2026-07-01T00:00:00Z","closed_at":null,"author":{"id":"u1","username":"private-user","display_name":"Private Developer","aliases":[]},"labels":["client-alpha"],"assignees":[],"milestone":null,"comments_count":0,"confidential":false}],"pull_requests":[],"releases":[]}
+JSON
 
     git -C "$fixture" init -q
     git -C "$fixture" config user.name 'Private Developer'
@@ -107,6 +110,8 @@ grep -q 'Result: passed' "$strict_report/summary/03_privacy_scan.txt"
 ! grep -RFiq 'https://example.test/private/repository.git' "$strict_report"
 ! grep -RFiq 'Confidential project setup' "$strict_report"
 ! grep -Fqi 'private@example.test' "$strict_report/llm/evidence.json"
+! grep -RFiq 'Confidential Client Alpha' "$strict_report"
+! grep -RFiq 'gitlab.private.example.test' "$strict_report"
 printf '%s\n' 'strict mode passed'
 
 printf '%s\n' 'privacy mode tests passed'
