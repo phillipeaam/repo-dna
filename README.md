@@ -149,6 +149,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Bus factor by system](docs/bus-factor.md)
 - [Structured documentation by system](docs/system-documentation.md)
 - [Developer onboarding dataset](docs/onboarding-dataset.md)
+- [Automated testing and fixtures](docs/testing.md)
 - [Technical impact before and after contributions](docs/technical-impact.md)
 - [Personal achievement candidates](docs/achievement-candidates.md)
 - [LLM evidence package](docs/llm-evidence.md)
@@ -473,8 +474,9 @@ Run the complete local suite with:
 bash ./tests/run.sh
 ```
 
-The same suite runs on Linux for every push and pull request through GitHub
-Actions.
+The same suite runs on Linux, macOS, and Windows Git Bash for every push and pull
+request through GitHub Actions. CI also applies ShellCheck and an incremental
+shfmt formatting gate. See [Automated testing and fixtures](docs/testing.md).
 
 Python 3.11 or newer is required because HTML is now the standard report format. RepoDNA
 stops early with an installation hint when it cannot resolve an executable

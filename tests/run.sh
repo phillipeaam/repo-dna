@@ -4,6 +4,7 @@ set -euo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tests=(
+    fixtures_test.sh
     architecture_test.sh
     arguments_test.sh
     project_detection_test.sh
@@ -31,6 +32,8 @@ tests=(
     reporting_test.sh
     charts_test.sh
     privacy_modes_test.sh
+    edge_cases_test.sh
+    runtime_fallbacks_test.sh
 )
 
 for test_file in "${tests[@]}"; do

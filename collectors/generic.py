@@ -35,6 +35,7 @@ HARD_EXCLUDES = {
     "obj", "bin", "build", "builds", "dist", ".venv", "venv", "__pycache__",
     ".next", ".nuxt", "coverage",
 }
+HARD_EXCLUDED_PATHS = {"tests/fixtures"}
 
 CONFIG_NAMES = {
     "package.json", "pyproject.toml", "requirements.txt", "setup.py", "setup.cfg",
@@ -47,7 +48,8 @@ CONFIG_NAMES = {
 
 def git(root: Path, *args: str) -> str:
     result = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, errors="replace"
+        ["git", "-C", str(root), *args], capture_output=True, text=True,
+        encoding="utf-8", errors="replace"
     )
     return result.stdout if result.returncode == 0 else ""
 
@@ -476,10 +478,12 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
 
     for current, dir_names, file_names in os.walk(root):
         current_path = Path(current)
+        current_relative = current_path.relative_to(root).as_posix()
         dir_names[:] = [
             directory for directory in dir_names
             if directory.lower() not in HARD_EXCLUDES and directory != report_name
             and not re.match(r".*_project_analysis_\d{4}-\d{2}-\d{2}_", directory)
+            and f"{current_relative}/{directory}".lstrip("./") not in HARD_EXCLUDED_PATHS
         ]
         for file_name in file_names:
             path = current_path / file_name

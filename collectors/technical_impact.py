@@ -26,7 +26,8 @@ DECISION_PATTERN = re.compile(r"\b(?:if|elif|else\s+if|for|while|case|catch|exce
 
 def _git(root: Path, *args: str) -> str:
     result = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, errors="replace"
+        ["git", "-C", str(root), *args], capture_output=True, text=True,
+        encoding="utf-8", errors="replace"
     )
     return result.stdout if result.returncode == 0 else ""
 

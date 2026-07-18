@@ -1,0 +1,1 @@
+print("caminho com acentos")

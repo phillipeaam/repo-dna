@@ -6,11 +6,12 @@ SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d -p "$SOURCE_ROOT" .exclusions-test.XXXXXX)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
-mkdir -p "$TEST_ROOT/src" "$TEST_ROOT/vendor" "$TEST_ROOT/Ignored" "$TEST_ROOT/generated-report"
+mkdir -p "$TEST_ROOT/src" "$TEST_ROOT/vendor" "$TEST_ROOT/Ignored" "$TEST_ROOT/generated-report" "$TEST_ROOT/tests/fixtures/fake-project"
 printf 'visible\n' > "$TEST_ROOT/src/visible.txt"
 printf 'hidden\n' > "$TEST_ROOT/vendor/dependency.txt"
 printf 'hidden\n' > "$TEST_ROOT/Ignored/custom.txt"
 printf 'hidden\n' > "$TEST_ROOT/generated-report/report.txt"
+printf 'hidden\n' > "$TEST_ROOT/tests/fixtures/fake-project/fixture.txt"
 printf 'Ignored/\n' > "$TEST_ROOT/.repodna-ignore"
 
 REPO_ROOT="$TEST_ROOT"
@@ -24,6 +25,7 @@ grep -q './src/visible.txt' <<< "$results"
 ! grep -q 'vendor/dependency.txt' <<< "$results"
 ! grep -q 'Ignored/custom.txt' <<< "$results"
 ! grep -q 'generated-report/report.txt' <<< "$results"
+! grep -q 'tests/fixtures/fake-project/fixture.txt' <<< "$results"
 [[ "$(count_files_matching '*.txt')" == 1 ]]
 
 grep -q visible < <(analysis_grep -n 'visible')

@@ -1,0 +1,1 @@
+# Directory without Git metadata

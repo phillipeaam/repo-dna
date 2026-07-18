@@ -1,0 +1,6 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/phillipeaam/repo-dna/schemas/flutter-analysis-1.0.0.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["$schema","schema_version","artifact_type","status","summary","pubspec","dependencies","widgets","screens","routes","state_management","localization","assets","platform_channels","native_bridges","tests","flavors","method","limitations"],
+  "properties":{"$schema":{"const":"./flutter-analysis-1.0.0.schema.json"},"schema_version":{"const":"1.0.0"},"artifact_type":{"const":"repodna_flutter_analysis"},"status":{"enum":["assessed","redacted_by_privacy_mode"]},"summary":{"type":"object"},"pubspec":{"type":"string"},"dependencies":{"type":"object"},"widgets":{"type":"array"},"screens":{"type":"array"},"routes":{"type":"array"},"state_management":{"type":"array"},"localization":{"type":"object"},"assets":{"type":"array"},"platform_channels":{"type":"array"},"native_bridges":{"type":"object"},"tests":{"type":"object"},"flavors":{"type":"object"},"method":{"type":"string"},"limitations":{"type":"array","items":{"type":"string"}}}
+}

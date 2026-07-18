@@ -2,11 +2,17 @@
 
 set -euo pipefail
 
+trap 'printf "privacy_modes_test.sh failed at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
+
 SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d -p "$SOURCE_ROOT" .privacy-test.XXXXXX)"
 
 cleanup() {
     cd "$SOURCE_ROOT" || return
+    if [[ "${KEEP_TEST_ROOT:-false}" == true ]]; then
+        printf 'Privacy test workspace retained at: %s\n' "$TEST_ROOT" >&2
+        return
+    fi
     rm -rf "$TEST_ROOT" 2>/dev/null || true
 }
 
@@ -15,10 +21,11 @@ trap cleanup EXIT
 create_fixture() {
     local fixture="$1"
 
-    mkdir -p "$fixture/renderers" "$fixture/collectors" "$fixture/src/code"
+    mkdir -p "$fixture/renderers" "$fixture/collectors" "$fixture/schemas" "$fixture/src/code"
     cp "$SOURCE_ROOT/dna-analysis.sh" "$fixture/"
     cp "$SOURCE_ROOT/renderers/"*.py "$fixture/renderers/"
     cp -R "$SOURCE_ROOT/collectors/." "$fixture/collectors/"
+    cp -R "$SOURCE_ROOT/schemas/." "$fixture/schemas/"
     cp -R "$SOURCE_ROOT/src/." "$fixture/src/"
     printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$fixture/sample.csproj"
     printf '%s\n' 'namespace Sample { public class Example { string api_key = "test-secret-value"; } }' > "$fixture/src/code/Example.cs"
