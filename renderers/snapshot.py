@@ -26,6 +26,8 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
     quality = analysis.get("quality", {})
     git_data = generic.get("git", {})
     dependency_resolution = quality.get("dependency_resolution", {})
+    unity = analysis.get("unity", {})
+    unity_configuration = unity.get("configuration", {})
     generated_at = data.get("generated_at", "")
     return {
         "$schema": f"./{SCHEMA_FILE}",
@@ -61,6 +63,16 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
             "parser_coverage": architecture.get("parser_coverage", []),
             "frameworks": analysis.get("frameworks", {}).get("detected", []),
             "graph_summary": analysis.get("graphs", {}).get("summary", {}),
+            "unity": {
+                "status": unity.get("status", "not_unity"),
+                "summary": unity.get("summary", {}),
+                "render_pipeline": unity_configuration.get("rendering", {}).get("pipeline"),
+                "input_system": unity_configuration.get("input", {}).get("system"),
+                "package_count": len(unity_configuration.get("packages", {})),
+                "enabled_scene_count": unity_configuration.get("build", {}).get("enabled_scene_count", 0),
+                "asmdef_count": unity_configuration.get("assemblies", {}).get("asmdef_count", 0),
+                "test_assembly_count": len(unity_configuration.get("assemblies", {}).get("test_assemblies", [])),
+            },
         },
         "systems": [
             {key: system.get(key) for key in ("name", "confidence", "file_count", "lines", "symbol_count", "import_references", "languages")}

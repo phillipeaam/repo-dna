@@ -200,6 +200,22 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
             "medium" if suggested else "high", ["#/generic_analysis/analysis/onboarding/commands"],
             command, ["Suggested commands were not executed and require team confirmation."] if suggested else ["Declared command existence does not prove that all local prerequisites are installed."], suggested,
         ))
+    unity = analysis.get("unity", {})
+    for index, system in enumerate(unity.get("gameplay_systems", [])[:50], 1):
+        items.append(evidence(
+            f"unity-gameplay-{index}", "system", "inference",
+            f"Unity gameplay category {system['name']} matched {system['file_count']} files with {system['confidence']} confidence.",
+            system.get("confidence", "low"), ["#/generic_analysis/analysis/unity/gameplay_systems"],
+            {key: system.get(key) for key in ("score", "file_count", "primary_directories", "git")},
+            ["Gameplay categories are inferred from paths, symbols, imports, and Git evidence and require confirmation."], True,
+        ))
+    for index, signal in enumerate(unity.get("signals", [])[:100], 1):
+        items.append(evidence(
+            f"unity-signal-{index}", "quality", "candidate",
+            f"Unity review signal {signal['type']} was detected with {signal['confidence']} confidence.",
+            signal.get("confidence", "low"), ["#/generic_analysis/analysis/unity/signals"], signal,
+            ["This is a heuristic signal, not a confirmed bug; validate with code review and profiling."], True,
+        ))
     technical_impact = git_data.get("technical_impact", {})
     for index, contribution in enumerate(technical_impact.get("contributions", [])[:MAX_CONTRIBUTIONS], 1):
         items.append(evidence(

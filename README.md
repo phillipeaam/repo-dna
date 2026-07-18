@@ -21,6 +21,7 @@ One command creates a timestamped analysis package containing:
 - a linked HTML report that can be opened locally without a server;
 - stack-neutral repository inventory for any Git project;
 - specialized C# and Unity engineering signals when those stacks are detected;
+- Unity settings, evidence-backed gameplay categories, and heuristic performance signals;
 - Git history, churn, contributors, collaboration signals, and composite hotspots;
 - technology, dependency-manifest, test, CI/CD, Docker, and documentation inventories;
 - ownership classification with confidence and evidence;
@@ -137,6 +138,7 @@ does not claim that runtime configuration is valid or that a feature is complete
 - [Bash Cheat Sheet](docs/bash-cheatsheet.md)
 - [Architecture](docs/architecture.md)
 - [Framework analysis methodology](docs/framework-analysis.md)
+- [Improved Unity analysis](docs/unity-analysis.md)
 - [Module and dependency graphs](docs/dependency-graphs.md)
 - [Architecture insights methodology](docs/architecture-insights.md)
 - [Author and system activity ownership](docs/author-system-ownership.md)

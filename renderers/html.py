@@ -526,6 +526,35 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     ]
     capability_table = data_table(["Analysis capability", "Status", "Evidence produced"], capability_rows)
 
+    unity_analysis = analysis.get("unity", {})
+    unity_config = unity_analysis.get("configuration", {})
+    unity_system_rows = [
+        [item["name"], item["confidence"], item["file_count"], item["score"], ", ".join(item.get("primary_directories", [])), item.get("git", {}).get("matching_commit_touches", 0), len(item.get("git", {}).get("frequently_changed_files", []))]
+        for item in unity_analysis.get("gameplay_systems", [])
+    ]
+    unity_signal_rows = [
+        [item["type"], item["confidence"], item["path"], item["occurrences"], ", ".join(map(str, item.get("lines", []))), item["rationale"]]
+        for item in unity_analysis.get("signals", [])
+    ]
+    unity_body = ""
+    if profile["unity"]:
+        unity_body = table([
+            ("Enabled build scenes", unity_config.get("build", {}).get("enabled_scene_count", 0)),
+            ("Render pipeline", unity_config.get("rendering", {}).get("pipeline", "Unknown")),
+            ("Input system", unity_config.get("input", {}).get("system", "Unknown")),
+            ("Packages", len(unity_config.get("packages", {}))),
+            ("Quality levels", len(unity_config.get("quality_levels", []))),
+            ("Assembly definitions", unity_config.get("assemblies", {}).get("asmdef_count", 0)),
+            ("Test assemblies", len(unity_config.get("assemblies", {}).get("test_assemblies", []))),
+            ("Native plugins", len(unity_config.get("native_plugins", []))),
+        ])
+        unity_body += "<h3>Enabled scenes</h3>" + item_list(unity_config.get("build", {}).get("enabled_scenes", []))
+        unity_body += "<h3>Packages and versions</h3>" + table(list(unity_config.get("packages", {}).items()))
+        unity_body += "<h3>Gameplay systems</h3>" + (data_table(["Category", "Confidence", "Files", "Evidence score", "Primary directories", "Git commit touches", "Frequently changed files"], unity_system_rows, {2, 3, 5, 6}) if unity_system_rows else empty)
+        unity_body += '<p class="note">Gameplay categories are inferred from paths, AST symbols, imports, and Git activity and require confirmation.</p>'
+        unity_body += "<h3>Performance and risk signals</h3>" + (data_table(["Signal", "Confidence", "Path", "Occurrences", "Lines", "Why review"], unity_signal_rows, {3}) if unity_signal_rows else empty)
+        unity_body += '<p class="note">These are heuristic review signals, not confirmed bugs. Validate them through code review, profiling, runtime tests, and Unity-specific tooling.</p>'
+
     sections = [
         ("project-overview.html", "Project overview", table(overview) + "<h3>Repository inventory</h3>" + inventory + "<h3>Largest files</h3>" + largest_table + "<h3>Main directories</h3>" + directory_table),
         ("architecture.html", "Architecture", architecture_body),
@@ -549,6 +578,8 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ]) + '<p><a href="../security/potential_secrets.txt">Open redacted security evidence</a></p>'),
         ("notion-evidence.html", "Notion evidence", notion_body),
     ]
+    if profile["unity"]:
+        sections.insert(4, ("unity-analysis.html", "Unity analysis", unity_body))
     top_language = generic.get("languages", [{}])[0].get("name", "Not detected") if generic.get("languages") else "Not detected"
     executive_body = '<section><h2>Repository at a glance</h2><p>This summary highlights the main measurable signals collected from the current repository and its Git history.</p><div class="metrics">' + metric_cards(headline) + "</div>"
     executive_body += table([

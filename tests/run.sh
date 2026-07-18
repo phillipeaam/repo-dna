@@ -20,6 +20,7 @@ tests=(
     generic_collector_test.sh
     ast_analysis_test.sh
     framework_analysis_test.sh
+    unity_analysis_test.sh
     module_graph_test.sh
     architecture_insights_test.sh
     quality_importers_test.sh

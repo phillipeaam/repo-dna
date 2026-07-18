@@ -357,6 +357,21 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     onboarding = analysis.get("onboarding", {})
     onboarding["commands"] = []
     onboarding["status"] = "redacted_by_privacy_mode"
+    unity = analysis.get("unity", {})
+    unity_config = unity.get("configuration", {})
+    unity_config.get("build", {})["enabled_scenes"] = []
+    unity_config.get("player", {})["define_symbols"] = []
+    unity_config.get("addressables", {})["groups"] = []
+    unity_config.get("assemblies", {})["test_assemblies"] = []
+    unity_config["native_plugins"] = []
+    unity_config["platform_specific_code"] = []
+    for system in unity.get("gameplay_systems", []):
+        system["files"] = []
+        system["primary_directories"] = []
+        system.get("git", {})["frequently_changed_files"] = []
+    for signal in unity.get("signals", []):
+        signal["path"] = "[redacted]"
+        signal["lines"] = []
     for index, symbol in enumerate(analysis["code"]["symbols"], 1):
         sanitized_symbol = {
             "name": f"Symbol-{index}",
