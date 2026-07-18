@@ -97,7 +97,7 @@ Current Project Metrics
 Project type: $PROJECT_TYPE
 Code root: $CODE_ROOT
 
-Stack-neutral metrics are available in report/data/generic-analysis.json and
+Stack-neutral metrics are available in report/data/report.json and
 the standardized HTML reports. No Unity or C# specialized collector was run.
 EOF
 fi

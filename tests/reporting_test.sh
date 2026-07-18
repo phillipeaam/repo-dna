@@ -204,6 +204,7 @@ fi
     echo "Python is required for structured reporting tests." >&2
     exit 1
 }
+"$PYTHON" "$SOURCE_ROOT/renderers/canonical_model.py" "$TEST_ROOT/report.json"
 "$PYTHON" "$SOURCE_ROOT/renderers/html.py" "$TEST_ROOT/report.json" "$TEST_ROOT/report/index.html"
 "$PYTHON" - "$TEST_ROOT/report.json" "$TEST_ROOT/unity-report.json" "$TEST_ROOT/android-report.json" "$TEST_ROOT/flutter-report.json" <<'PY'
 import json, sys
@@ -279,6 +280,16 @@ invalid["schema_version"] = "9.9.9"
 assert any(list(error.absolute_path) == ["schema_version"] for error in validator.iter_errors(invalid))
 PY
 "$PYTHON" "$SOURCE_ROOT/renderers/portfolio.py" "$TEST_ROOT/report.json" "$TEST_ROOT/portfolio/draft.json" "$TEST_ROOT/portfolio/index.html"
+"$PYTHON" - "$TEST_ROOT/report.json" "$TEST_ROOT/notion/evidence.json" "$TEST_ROOT/llm/evidence.json" "$TEST_ROOT/onboarding/dataset.json" "$TEST_ROOT/portfolio/draft.json" "$TEST_ROOT/system-docs/systems.json" "$TEST_ROOT/snapshots/fixture.json" <<'PY'
+import json, sys
+documents = [json.load(open(path, encoding="utf-8")) for path in sys.argv[1:]]
+canonical = documents[0]["canonical_metrics"]
+for document in documents[1:5]:
+    assert document["canonical_metrics"] == canonical
+assert documents[5]["canonical_metrics"] == canonical
+assert documents[5]["system_count"] == canonical["system_count"]
+assert documents[6]["canonical_metrics"] == canonical
+PY
 cat > "$TEST_ROOT/confirmations.json" <<'JSON'
 {
   "candidate_name": "Confirmed Developer",

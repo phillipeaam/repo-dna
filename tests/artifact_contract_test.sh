@@ -60,17 +60,19 @@ for path in documents:
         json.load(stream)
 
 canonical = json.loads((root / "report/data/report.json").read_text(encoding="utf-8"))
-assert canonical["schema_version"] == "1.1"
-assert canonical["$schema"] == "./report-1.1.0.schema.json"
+assert canonical["schema_version"] == "1.2"
+assert canonical["$schema"] == "./report-1.2.0.schema.json"
 assert canonical["project"]["type"] == ".NET"
 assert "generic_analysis" in canonical
+assert set(canonical["canonical_metrics"]) == {"technology_count", "dependency_count", "system_count", "configuration_file_count", "test_file_count"}
 assert canonical["generic_analysis"]["analysis"]["dependency_inventory"]["sbom"]["bomFormat"] == "CycloneDX"
 assert canonical["generic_analysis"]["analysis"]["delivery"]["releases"]["status"] == "assessed"
 assert "ci" in canonical["generic_analysis"]["analysis"]["delivery"]
 assert canonical["generic_analysis"]["analysis"]["forge_activity"]["status"] == "imported"
 assert canonical["generic_analysis"]["$schema"] == "./generic-analysis-1.1.0.schema.json"
-assert (root / "report/data/report-1.1.0.schema.json").is_file()
+assert (root / "report/data/report-1.2.0.schema.json").is_file()
 assert (root / "report/data/generic-analysis-1.1.0.schema.json").is_file()
+assert not (root / "report/data/generic-analysis.json").exists()
 assert (root / "notion/notion-evidence-1.0.0.schema.json").is_file()
 assert (root / "portfolio/portfolio-draft-1.0.0.schema.json").is_file()
 print(f"validated {len(documents)} generated JSON documents")

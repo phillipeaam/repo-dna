@@ -52,10 +52,11 @@ default_report="$(find_report "$default_fixture")"
 [[ -n "$default_report" ]]
 [[ -f "$default_report/security/potential_secrets.txt" ]]
 [[ -f "$default_report/report/data/report.json" ]]
-[[ -f "$default_report/report/data/generic-analysis.json" ]]
+[[ ! -e "$default_report/report/data/generic-analysis.json" ]]
 [[ -f "$default_report/report/index.html" ]]
 [[ -f "$default_report/sbom/bom.json" ]]
-grep -q '"schema_version": "1.1"' "$default_report/report/data/report.json"
+grep -q '"schema_version": "1.2"' "$default_report/report/data/report.json"
+grep -q '"canonical_metrics"' "$default_report/report/data/report.json"
 grep -q '"generic_analysis"' "$default_report/report/data/report.json"
 [[ -f "$default_report/report/executive-summary.html" ]]
 [[ -f "$default_report/notion/evidence.json" ]]

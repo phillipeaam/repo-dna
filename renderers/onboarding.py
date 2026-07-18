@@ -27,6 +27,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         "artifact_type": "repodna_onboarding_dataset", "generated_at": data.get("generated_at", ""),
         "project": {key: data.get("project", {}).get(key) for key in ("name", "type", "code_root")},
         "privacy_mode": data.get("privacy", {}).get("mode", "standard"),
+        "canonical_metrics": data.get("canonical_metrics", {}),
         "start_here": {
             "entrypoints": architecture.get("entrypoints", []),
             "commands": onboarding.get("commands", []),

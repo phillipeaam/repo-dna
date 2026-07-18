@@ -4,7 +4,7 @@
   "title": "RepoDNA Analysis Snapshot",
   "type": "object",
   "additionalProperties": false,
-  "required": ["$schema", "schema_version", "artifact_type", "snapshot_id", "generated_at", "repository", "scope", "inventory", "architecture", "systems", "quality", "health", "git", "risks", "provenance"],
+  "required": ["$schema", "schema_version", "artifact_type", "snapshot_id", "generated_at", "repository", "scope", "canonical_metrics", "inventory", "architecture", "systems", "quality", "health", "git", "risks", "provenance"],
   "properties": {
     "$schema": {"const": "./analysis-snapshot-1.0.0.schema.json"},
     "schema_version": {"const": "1.0.0"},
@@ -27,6 +27,7 @@
         "git_scope": {"type": "string"}, "source_included": {"type": "boolean"}
       }
     },
+    "canonical_metrics": {"$ref": "#/$defs/object"},
     "inventory": {"$ref": "#/$defs/object"},
     "architecture": {"$ref": "#/$defs/object"},
     "systems": {"type": "array", "items": {"$ref": "#/$defs/object"}},

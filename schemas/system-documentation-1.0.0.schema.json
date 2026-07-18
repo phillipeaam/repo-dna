@@ -5,7 +5,7 @@
     "system": {"type": "object", "required": ["$schema", "schema_version", "artifact_type", "id", "name", "path", "confidence", "confirmation_required", "metrics", "languages", "dependency_manifests", "entrypoints", "symbols", "architecture", "git_evolution", "activity_ownership", "bus_factor", "facts", "inferences", "unknowns", "limitations"], "properties": {"artifact_type": {"const": "repodna_system_documentation"}, "id": {"type": "string", "minLength": 1}, "name": {"type": "string"}, "unknowns": {"type": "array", "items": {"type": "string"}}}}
   },
   "oneOf": [
-    {"type": "object", "required": ["$schema", "schema_version", "artifact_type", "project", "generated_at", "system_count", "systems", "limitations"], "properties": {"artifact_type": {"const": "repodna_system_documentation_catalog"}, "schema_version": {"const": "1.0.0"}, "system_count": {"type": "integer", "minimum": 0}, "systems": {"type": "array", "items": {"$ref": "#/$defs/system"}}}},
+    {"type": "object", "required": ["$schema", "schema_version", "artifact_type", "project", "generated_at", "canonical_metrics", "system_count", "systems", "limitations"], "properties": {"artifact_type": {"const": "repodna_system_documentation_catalog"}, "schema_version": {"const": "1.0.0"}, "canonical_metrics": {"type": "object"}, "system_count": {"type": "integer", "minimum": 0}, "systems": {"type": "array", "items": {"$ref": "#/$defs/system"}}}},
     {"$ref": "#/$defs/system"}
   ]
 }

@@ -373,6 +373,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         "generated_at": data.get("generated_at"),
         "privacy": privacy,
         "repository": {"name": project.get("name"), "type": project.get("type"), "code_root": project.get("code_root")},
+        "canonical_metrics": data.get("canonical_metrics", {}),
         "llm_contract": {
             "purpose": "Answer questions and draft documentation using traceable repository evidence.",
             "rules": [
@@ -404,7 +405,6 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         },
         "source_manifest": {
             "canonical": "report/data/report.json",
-            "generic": "report/data/generic-analysis.json",
             "notion": "notion/evidence.json",
             "portfolio": "portfolio/draft.json",
         },

@@ -72,7 +72,10 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         "$schema": f"./{SCHEMA_FILE}", "schema_version": VERSION,
         "artifact_type": "repodna_system_documentation_catalog",
         "project": {"name": data.get("project", {}).get("name"), "type": data.get("project", {}).get("type")},
-        "generated_at": data.get("generated_at", ""), "system_count": len(documents), "systems": documents,
+        "generated_at": data.get("generated_at", ""),
+        "canonical_metrics": data.get("canonical_metrics", {}),
+        "system_count": data.get("canonical_metrics", {}).get("system_count", len(documents)),
+        "systems": documents,
         "limitations": ["Documents contain repository evidence and explicit inferences; product purpose and current ownership require confirmation."],
     }
 

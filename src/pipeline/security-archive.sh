@@ -7,7 +7,7 @@ POTENTIAL_SECRET_COUNT=0
 write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
     die "Could not create the potential secrets report."
 
-GENERIC_ANALYSIS_FILE="$REPORT_DATA_DIR/generic-analysis.json"
+GENERIC_ANALYSIS_FILE="$OUTPUT_DIR/.generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
     GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
     [[ -z "$AUTHOR" ]] || GENERIC_COLLECTOR_ARGS+=(--author "$AUTHOR")
@@ -27,10 +27,13 @@ create_analysis_charts
 
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
     die "Could not create the canonical report JSON."
+"$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/canonical_model.py" \
+    "$REPORT_DATA_DIR/report.json" || die "Could not finalize the canonical analysis model."
+rm -f "$GENERIC_ANALYSIS_FILE"
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
-    "$REPORT_DATA_DIR/report.json" "$SCRIPT_DIR/schemas/report-1.1.0.schema.json" ||
+    "$REPORT_DATA_DIR/report.json" "$SCRIPT_DIR/schemas/report-1.2.0.schema.json" ||
     die "Canonical report JSON violates its schema."
-cp "$SCRIPT_DIR/schemas/report-1.1.0.schema.json" "$REPORT_DATA_DIR/report-1.1.0.schema.json" ||
+cp "$SCRIPT_DIR/schemas/report-1.2.0.schema.json" "$REPORT_DATA_DIR/report-1.2.0.schema.json" ||
     die "Could not package the canonical report schema."
 cp "$SCRIPT_DIR/schemas/generic-analysis-1.1.0.schema.json" "$REPORT_DATA_DIR/generic-analysis-1.1.0.schema.json" ||
     die "Could not package the generic analysis schema."

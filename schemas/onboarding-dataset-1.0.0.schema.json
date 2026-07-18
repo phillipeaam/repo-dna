@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/phillipeaam/repo-dna/schemas/onboarding-dataset-1.0.0.schema.json",
   "type": "object", "additionalProperties": false,
-  "required": ["$schema", "schema_version", "artifact_type", "generated_at", "project", "privacy_mode", "start_here", "repository_map", "engineering_workflow", "collaboration", "recommended_reading", "unknowns", "limitations"],
+  "required": ["$schema", "schema_version", "artifact_type", "generated_at", "project", "privacy_mode", "canonical_metrics", "start_here", "repository_map", "engineering_workflow", "collaboration", "recommended_reading", "unknowns", "limitations"],
   "properties": {
     "$schema": {"const": "./onboarding-dataset-1.0.0.schema.json"}, "schema_version": {"const": "1.0.0"}, "artifact_type": {"const": "repodna_onboarding_dataset"},
-    "generated_at": {"type": "string"}, "project": {"type": "object"}, "privacy_mode": {"enum": ["standard", "strict"]},
+    "generated_at": {"type": "string"}, "project": {"type": "object"}, "privacy_mode": {"enum": ["standard", "strict"]}, "canonical_metrics": {"type": "object"},
     "start_here": {"type": "object", "required": ["entrypoints", "commands", "primary_documentation"], "properties": {"entrypoints": {"type": "array"}, "commands": {"type": "array", "items": {"type": "object", "required": ["command", "purpose", "source", "classification", "confirmation_required"]}}, "primary_documentation": {"type": "array"}}},
     "repository_map": {"type": "object"}, "engineering_workflow": {"type": "object"}, "collaboration": {"type": "object"},
     "recommended_reading": {"type": "array"}, "unknowns": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}

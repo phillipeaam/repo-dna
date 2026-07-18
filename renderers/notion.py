@@ -170,6 +170,7 @@ def build(data: dict[str, Any]) -> dict[str, Any]:
         "$schema": "./notion-evidence-1.0.0.schema.json",
         "schema_version": "1.0",
         "generated_at": data["generated_at"],
+        "canonical_metrics": data.get("canonical_metrics", {}),
         "classification_model": {
             "fact": "Directly supported by collected repository data.",
             "evidence": "A path or JSON pointer supporting a statement.",

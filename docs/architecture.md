@@ -34,7 +34,7 @@ dna-analysis.sh
 
 Core modules must not source pipeline modules. Collectors do not write reports,
 and renderers do not inspect the repository. Both communicate through
-`report/data/report.json` and `report/data/generic-analysis.json`.
+`report/data/report.json`. Collector staging files are private pipeline details.
 
 `collectors/insights.py` enriches the generic collector output with
 language-aware symbols, imports, architecture and pattern signals, system

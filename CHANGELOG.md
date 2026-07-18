@@ -7,6 +7,9 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- Made `report/data/report.json` the sole public analysis source, added shared
+  `canonical_metrics`, and removed the exported generic collector staging file.
+
 ### Added
 
 - A bounded RepoDNA 1.0 support contract for local Git analysis, generic Bash/Python evidence, Git intelligence, basic architecture, quality/risk ingestion, onboarding, portfolio evidence, HTML/JSON reports, and privacy controls.

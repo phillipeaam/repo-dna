@@ -37,6 +37,7 @@ tests=(
     health_trends_test.sh
     reporting_test.sh
     canonical_schema_test.sh
+    canonical_model_test.sh
     charts_test.sh
     artifact_contract_test.sh
     release_workflow_test.sh

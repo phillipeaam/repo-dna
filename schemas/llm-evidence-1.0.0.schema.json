@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": [
     "$schema", "schema_version", "artifact_type", "generated_at", "privacy",
-    "repository", "llm_contract", "evidence_summary", "evidence_items",
+    "repository", "canonical_metrics", "llm_contract", "evidence_summary", "evidence_items",
     "unknowns", "human_confirmation", "source_manifest", "truncation"
   ],
   "properties": {
@@ -26,6 +26,7 @@
         "code_root": {"type": ["string", "null"]}
       }
     },
+    "canonical_metrics": {"type": "object"},
     "llm_contract": {
       "type": "object",
       "additionalProperties": false,
@@ -63,10 +64,9 @@
     "source_manifest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["canonical", "generic", "notion", "portfolio"],
+      "required": ["canonical", "notion", "portfolio"],
       "properties": {
         "canonical": {"type": "string"},
-        "generic": {"type": "string"},
         "notion": {"type": "string"},
         "portfolio": {"type": "string"}
       }

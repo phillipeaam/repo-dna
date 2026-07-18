@@ -84,6 +84,7 @@ def build(data: dict[str, Any], confirmations: dict[str, Any]) -> dict[str, Any]
             "target_role": confirmations.get("target_role", "Unconfirmed"),
         },
         "repository": data["project"]["name"],
+        "canonical_metrics": data.get("canonical_metrics", {}),
         "claims": claims,
         "achievement_candidates": generated_candidates,
         "xyz_achievements": achievements,

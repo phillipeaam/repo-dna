@@ -489,8 +489,9 @@ report/
     └── report.json
 ```
 
-Legacy evidence files remain available during the migration, but standardized
-reports are HTML and no longer read Bash variables or collector output directly.
+Standardized reports are derived from `report.json` and no longer read Bash
+variables or collector staging output directly. The collector staging JSON is
+deleted after the canonical model is finalized.
 Every page links to the other report sections and can be opened locally without
 a web server. Notion-ready structured evidence remains available at
 `notion/evidence.json`; it explicitly separates facts, supporting evidence,
@@ -504,13 +505,15 @@ prefabs, ScriptableObjects, MonoBehaviours, shaders, Addressables, and UI Toolki
 metrics are hidden for non-Unity projects. Unsupported project types receive an
 explicit coverage note instead of a misleading table full of Unity zeroes.
 
-The stack-neutral collector always writes
-`report/data/generic-analysis.json`. It inventories languages and extensions,
+The stack-neutral collector populates the `generic_analysis` section of
+`report/data/report.json`. It inventories languages and extensions,
 file and line counts, largest files, directories, configuration, documentation,
 tests, CI/CD, Docker, dependency manifests, contributors, branches, tags,
 release tags, temporal history, churn, frequently changed files, hotspots, and
 possible modules. This dataset is embedded into the canonical `report.json` and
-is the fallback for unknown stacks.
+is the fallback for unknown stacks. The sibling `canonical_metrics` object is
+the official source for technology, dependency, system, configuration-file, and
+test-file counts used by every derived output.
 
 ## Internal architecture
 

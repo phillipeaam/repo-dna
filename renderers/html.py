@@ -110,6 +110,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     project = data["project"]
     profile = data.get("analysis_profile", {"unity": False, "csharp": True})
     generic = data.get("generic_analysis", {})
+    canonical = data.get("canonical_metrics", {})
     analysis = generic.get("analysis", {})
     metrics = data["current_metrics"]
     architecture = data["architecture"]
@@ -130,7 +131,7 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     if generic.get("available", True):
         headline[0:0] = [
             ("Files", generic.get("file_count", 0)),
-            ("Languages", len(generic.get("languages", []))),
+            ("Technologies", canonical.get("technology_count", 0)),
         ]
     if profile["csharp"]:
         headline[0:0] = [("C# files", metrics["csharp_files"]), ("C# lines", metrics["csharp_lines"])]
@@ -166,9 +167,9 @@ def render(data: dict[str, Any], output_path: Path) -> None:
     inventory = table([
         ("Files", generic.get("file_count", 0)),
         ("Languages", len(generic.get("languages", []))),
-        ("Configuration files", len(generic.get("configuration_files", []))),
+        ("Configuration files", canonical.get("configuration_file_count", 0)),
         ("Documentation files", len(generic.get("documentation_files", []))),
-        ("Test files", len(generic.get("test_files", []))),
+        ("Test files", canonical.get("test_file_count", 0)),
         ("CI/CD files", len(generic.get("ci_cd_files", []))),
         ("Docker files", len(generic.get("docker_files", []))),
     ])
@@ -300,9 +301,9 @@ def render(data: dict[str, Any], output_path: Path) -> None:
         ("Branches", git_data.get("branches_count", 0)),
         ("Tags", git_data.get("tags_count", 0)),
         ("Author aliases configured", git_data.get("author_aliases_configured", 0)),
-        ("Dependency declarations", generic.get("dependencies", {}).get("total", 0)),
+        ("Dependency declarations", canonical.get("dependency_count", 0)),
     ])
-    dependency_total = generic.get("dependencies", {}).get("total", technologies.get("dependency_count", 0))
+    dependency_total = canonical.get("dependency_count", 0)
     technology_body = table([("Declared dependency entries", dependency_total)])
     technology_body += '<p class="note">This is the number of dependency declarations found across detected manifest files. It does not necessarily represent unique or currently installed packages.</p>'
     if manifest_rows:

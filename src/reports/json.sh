@@ -106,8 +106,8 @@ write_structured_report_json() {
 
     cat > "$output_file" <<EOF
 {
-  "\$schema": "./report-1.1.0.schema.json",
-  "schema_version": "1.1",
+  "\$schema": "./report-1.2.0.schema.json",
+  "schema_version": "1.2",
   "generated_at": "$(json_escape "$GENERATED_AT")",
   "privacy": {
     "mode": "$(json_escape "$PRIVACY_MODE")",
@@ -131,6 +131,7 @@ write_structured_report_json() {
     "dependency_manifest": "$(json_escape "$dependency_manifest")"
   },
   "generic_analysis": $generic_analysis_json,
+  "canonical_metrics": {},
   "current_metrics": {
     "csharp_files": ${CURRENT_METRICS[csharp_files]:-0},
     "csharp_lines": ${CURRENT_METRICS[csharp_lines]:-0},

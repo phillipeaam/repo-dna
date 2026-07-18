@@ -32,7 +32,7 @@ PROJECT_IDENTITY_TEXT="Repository: $DISPLAY_REPO_NAME
 Project type: $PROJECT_TYPE
 Code root: $CODE_ROOT
 Generated at: $GENERATED_AT"
-CURRENT_METRICS_TEXT='See report/data/generic-analysis.json for stack-neutral metrics.'
+CURRENT_METRICS_TEXT='See report/data/report.json for canonical stack-neutral metrics.'
 if [[ "$PROJECT_TYPE" == Unity ]]; then
     PROJECT_IDENTITY_TEXT="$PROJECT_IDENTITY_TEXT
 Product name: $DISPLAY_PRODUCT_NAME

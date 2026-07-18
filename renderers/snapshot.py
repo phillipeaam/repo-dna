@@ -31,6 +31,7 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
     android = analysis.get("android", {})
     flutter = analysis.get("flutter", {})
     generated_at = data.get("generated_at", "")
+    canonical = data.get("canonical_metrics", {})
     return {
         "$schema": f"./{SCHEMA_FILE}",
         "schema_version": SCHEMA_VERSION,
@@ -49,15 +50,16 @@ def build(data: dict[str, Any], commit: str, branch: str) -> dict[str, Any]:
             "git_scope": git_data.get("scope", "repository"),
             "source_included": data.get("privacy", {}).get("source_included", False),
         },
+        "canonical_metrics": canonical,
         "inventory": {
             "files": generic.get("file_count", 0),
             "languages": generic.get("languages", []),
-            "configuration_files": generic.get("configuration_file_count", 0),
+            "configuration_files": canonical.get("configuration_file_count", 0),
             "documentation_files": generic.get("documentation_file_count", 0),
-            "test_files": generic.get("test_file_count", 0),
+            "test_files": canonical.get("test_file_count", 0),
             "ci_cd_files": generic.get("ci_cd_file_count", 0),
             "docker_files": generic.get("docker_file_count", 0),
-            "dependency_declarations": generic.get("dependencies", {}).get("total", 0),
+            "dependency_declarations": canonical.get("dependency_count", 0),
         },
         "architecture": {
             "summary": architecture.get("summary", {}),
