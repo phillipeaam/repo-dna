@@ -1,4 +1,4 @@
-# 🧬 RepoDNA
+# 🧬 RepoDNA (In development)
 
 ![License](https://img.shields.io/github/license/phillipeaam/repo-dna)
 ![GitHub last commit](https://img.shields.io/github/last-commit/phillipeaam/repo-dna)
