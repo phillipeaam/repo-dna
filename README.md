@@ -360,6 +360,19 @@ Use `repodna analyze . --debug` when diagnostics are needed. The redacted log
 is written to `logs/repodna-debug.log` inside the generated analysis; normal
 mode shows only the concise execution summary.
 
+For performance diagnostics, run with `--debug` and inspect the duration of
+each pipeline stage in `logs/repodna-debug.log`. RepoDNA scans secrets in one
+bounded Python worker pool and reuses a single historical-path scan instead of
+starting a process for every repository file. Whole-history rename detection is
+kept; the substantially more expensive copy detection is intentionally omitted.
+Large files above 10 MiB are skipped by the heuristic secret scanner and should
+be checked with a dedicated security scanner. Advanced limits can be adjusted
+with `REPODNA_SCAN_WORKERS`, `REPODNA_SECRET_MAX_FILE_BYTES`,
+`REPODNA_TECHNICAL_IMPACT_LIMIT`, and `REPODNA_IMPACT_FILES_PER_COMMIT`.
+Technical-impact history and changed source files are unlimited by default;
+the last two variables are explicit opt-ins that trade evidence completeness
+for runtime and are never applied automatically.
+
 The default command location is `~/.local/bin/repodna`, including under Git
 Bash (`C:\Users\Your Name\.local\bin\repodna`). See the
 [installation and update guide](docs/installation.md) for `PATH`, custom

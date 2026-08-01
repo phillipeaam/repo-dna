@@ -1,12 +1,22 @@
 run_security_and_archive() {
 log_info "Scanning privacy and creating the archive"
 
+local phase_started_at=$SECONDS
 PRIVACY_SCAN_FAILED=false
 sanitize_strict_reports
 POTENTIAL_SECRET_COUNT=0
-write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
-    die "Could not create the potential secrets report."
+if [[ -n "$STRUCTURED_PYTHON" ]]; then
+    SECRET_SCANNER_ARGS=(--report-name "$REPORT_NAME")
+    [[ -z "$IGNORE_FILE" ]] || SECRET_SCANNER_ARGS+=(--ignore-file "$IGNORE_FILE")
+    POTENTIAL_SECRET_COUNT="$("$STRUCTURED_PYTHON" "$SCRIPT_DIR/collectors/secrets.py" \
+        "$REPO_ROOT" "$SECURITY_DIR/potential_secrets.txt" "${SECRET_SCANNER_ARGS[@]}")" ||
+        die "Could not create the potential secrets report."
+else
+    write_potential_secrets_report "$SECURITY_DIR/potential_secrets.txt" ||
+        die "Could not create the potential secrets report."
+fi
 log_debug "$POTENTIAL_SECRET_COUNT potential secret findings require review."
+log_debug "Secret scan completed in $(format_duration "$((SECONDS - phase_started_at))")."
 
 if [[ -z "$STRUCTURED_PYTHON" ]]; then
     write_basic_partial_report || die "Could not create the dependency-free partial report."
@@ -18,7 +28,9 @@ fi
 
 GENERIC_ANALYSIS_FILE="$OUTPUT_DIR/.generic-analysis.json"
 if [[ -n "$STRUCTURED_PYTHON" ]]; then
+    phase_started_at=$SECONDS
     GENERIC_COLLECTOR_ARGS=(--report-name "$REPORT_NAME" --privacy-mode "$PRIVACY_MODE")
+    [[ -z "$IGNORE_FILE" ]] || GENERIC_COLLECTOR_ARGS+=(--ignore-file "$IGNORE_FILE")
     [[ -z "$AUTHOR" ]] || GENERIC_COLLECTOR_ARGS+=(--author "$AUTHOR")
     [[ "$NO_HISTORY" == false ]] || GENERIC_COLLECTOR_ARGS+=(--no-history)
     [[ -z "$FORGE_DATA" ]] || GENERIC_COLLECTOR_ARGS+=(--forge-data "$FORGE_DATA")
@@ -28,11 +40,13 @@ if [[ -n "$STRUCTURED_PYTHON" ]]; then
     "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/validate_json.py" \
         "$GENERIC_ANALYSIS_FILE" "$SCRIPT_DIR/schemas/generic-analysis-1.2.0.schema.json" ||
         die "Generic analysis JSON violates its schema."
+    log_debug "Canonical repository collection completed in $(format_duration "$((SECONDS - phase_started_at))")."
 else
     printf '%s\n' '{"schema_version":"1.0","collector":"generic","available":false,"reason":"Python runtime unavailable"}' \
         > "$GENERIC_ANALYSIS_FILE"
 fi
 
+phase_started_at=$SECONDS
 [[ "$NO_GRAPHS" == true ]] || create_analysis_charts
 
 write_structured_report_json "$REPORT_DATA_DIR/report.json" ||
@@ -51,6 +65,9 @@ cp "$SCRIPT_DIR/schemas/generic-analysis-core-1.0.0.schema.json" "$REPORT_DATA_D
     die "Could not package the canonical generic-analysis schema."
 cp "$SCRIPT_DIR/schemas/forge-data-1.0.0.schema.json" "$REPORT_DATA_DIR/forge-data-1.0.0.schema.json" ||
     die "Could not package the provider-neutral forge-data schema."
+log_debug "Canonical model finalization completed in $(format_duration "$((SECONDS - phase_started_at))")."
+
+phase_started_at=$SECONDS
 
 "$STRUCTURED_PYTHON" "$SCRIPT_DIR/renderers/sbom.py" \
     "$REPORT_DATA_DIR/report.json" "$SBOM_DIR" ||
@@ -178,7 +195,9 @@ PORTFOLIO_ARGS=()
     die "Portfolio draft JSON violates its schema."
 cp "$SCRIPT_DIR/schemas/portfolio-draft-1.0.0.schema.json" "$PORTFOLIO_DIR/portfolio-draft-1.0.0.schema.json" ||
     die "Could not package the portfolio draft schema."
+log_debug "Derived report rendering completed in $(format_duration "$((SECONDS - phase_started_at))")."
 
+phase_started_at=$SECONDS
 run_privacy_scan
 if [[ "$SAVE_SNAPSHOT" == true ]]; then
     mkdir -p "$PERSISTENT_SNAPSHOT_DIR" ||
@@ -190,5 +209,6 @@ if [[ "$SAVE_SNAPSHOT" == true ]]; then
         die "Could not persist the analysis snapshot schema."
 fi
 create_report_archive
+log_debug "Privacy verification and archive creation completed in $(format_duration "$((SECONDS - phase_started_at))")."
 print_completion_summary
 }

@@ -28,7 +28,9 @@ def _git(root: Path, *args: str) -> str:
 def _release_churn(root: Path, revision_range: str) -> tuple[int, int, int]:
     added = removed = 0
     files = set()
-    output = _git(root, "log", "--format=", "--numstat", "--find-renames", "--find-copies", revision_range)
+    # Whole-history copy detection is disproportionately expensive and can
+    # turn release comparisons into multi-hour operations on large repos.
+    output = _git(root, "log", "--format=", "--numstat", "--find-renames", revision_range)
     for line in output.splitlines():
         parts = line.split("\t", 2)
         if len(parts) == 3:

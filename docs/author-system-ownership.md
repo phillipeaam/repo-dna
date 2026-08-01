@@ -25,8 +25,9 @@ When `--author` is used, share of system activity is unavailable because other
 contributors are intentionally outside the selected Git scope. Author focus is
 still calculated within the selected author's detected-system activity.
 
-Renames and copies use Git's `--find-renames` and `--find-copies` processing, but
-historical ambiguity, squashed commits, shared accounts, generated code, and
+Renames use Git's `--find-renames` processing. Whole-history copy detection is
+intentionally omitted because its cost becomes prohibitive on large histories.
+Historical ambiguity, squashed commits, shared accounts, generated code, and
 missing history can still affect the result.
 
 The repository-wide relationships also feed the separate

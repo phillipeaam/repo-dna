@@ -64,7 +64,7 @@ def generate_achievement_candidates(
             "personal-scope-summary",
             "engineering_scope",
             "Author-scoped engineering contribution",
-            f"Contributed {len(contributions)} first-parent commits with {summary.get('total_churn', 0)} lines of churn across the analyzed history scope.",
+            f"Contributed {len(contributions)} matching commits with {summary.get('total_churn', 0)} lines of churn across the analyzed history scope.",
             [
                 f"{len(contributions)} commits matched the configured author identity and aliases.",
                 f"Changed-source line delta was {summary.get('net_changed_source_lines', 0)} within files touched by those commits.",

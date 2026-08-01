@@ -1,8 +1,8 @@
 # Technical impact before and after contributions
 
-RepoDNA treats each first-parent commit as a contribution and combines exact Git
-diff metrics with before/after measurements of the source files changed by that
-commit.
+RepoDNA treats every commit matching the configured Git scope as a contribution
+and combines exact Git diff metrics with before/after measurements of the source
+files changed by that commit.
 
 Exact diff evidence includes files touched, additions, deletions, churn, test
 files, documentation files, configuration files, dependency manifests, and
@@ -27,6 +27,8 @@ These signals describe technical change only. They do not establish improvement,
 quality, product impact, business impact, or developer performance. Merge history,
 squashes, missing history, binaries, and generated files can affect interpretation.
 
-RepoDNA analyzes up to the latest 200 matching commits on the first-parent chain.
-With `--author`, the selected contributions are filtered using configured aliases
-from `.repodna-authors`.
+By default RepoDNA analyzes the complete matching history and every changed
+source file. With `--author`, contributions are filtered using configured aliases
+from `.repodna-authors`. `REPODNA_TECHNICAL_IMPACT_LIMIT` and
+`REPODNA_IMPACT_FILES_PER_COMMIT` are optional performance overrides; setting
+either intentionally produces limited rather than complete evidence.

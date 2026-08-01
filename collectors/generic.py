@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -385,7 +386,7 @@ def collect_git(root: Path, privacy_mode: str, author_filter: str = "") -> dict[
     system_months: dict[str, Counter[str]] = defaultdict(Counter)
     current_author = "Unknown"
     current_date = ""
-    log_rows = git(root, "log", "--all", *scope, "--find-renames", "--find-copies", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
+    log_rows = git(root, "log", "--all", *scope, "--find-renames", "--numstat", "--date=iso-strict", "--pretty=tformat:__REPODNA_COMMIT__%x09%aN%x09%aE%x09%ad%x09%B%x00")
     for line in log_rows.replace("\x00", "\n").splitlines():
         if line.startswith("__REPODNA_COMMIT__\t"):
             change_commits.update(current_commit_files)
@@ -736,7 +737,26 @@ def sanitize_strict_result(result: dict[str, Any]) -> None:
     analysis["quality"]["licenses"]["license_files"] = []
 
 
-def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "", forge_data: Path | None = None, no_history: bool = False) -> dict[str, Any]:
+def load_ignore_patterns(path: Path | None) -> list[str]:
+    if not path or not path.is_file():
+        return []
+    return [
+        line.strip().removeprefix("./").replace("\\", "/")
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def path_is_ignored(relative: str, patterns: list[str]) -> bool:
+    for pattern in patterns:
+        if pattern.endswith("/") and (relative == pattern[:-1] or relative.startswith(pattern)):
+            return True
+        if fnmatch.fnmatch(relative, pattern):
+            return True
+    return False
+
+
+def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str = "", forge_data: Path | None = None, no_history: bool = False, ignore_file: Path | None = None) -> dict[str, Any]:
     files: list[dict[str, Any]] = []
     language_files: Counter[str] = Counter()
     language_lines: Counter[str] = Counter()
@@ -750,6 +770,7 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
     scripts: list[str] = []
     manifests: list[dict[str, Any]] = []
     module_stats: dict[str, Counter[str]] = defaultdict(Counter)
+    ignore_patterns = load_ignore_patterns(ignore_file or root / ".repodna-ignore")
 
     for current, dir_names, file_names in os.walk(root):
         current_path = Path(current)
@@ -759,11 +780,12 @@ def collect(root: Path, report_name: str, privacy_mode: str, author_filter: str 
             if directory.lower() not in HARD_EXCLUDES and directory != report_name
             and not re.match(r".*_project_analysis_\d{4}-\d{2}-\d{2}_", directory)
             and f"{current_relative}/{directory}".lstrip("./") not in HARD_EXCLUDED_PATHS
+            and not path_is_ignored(f"{current_relative}/{directory}/".lstrip("./"), ignore_patterns)
         ]
         for file_name in file_names:
             path = current_path / file_name
             relative = path.relative_to(root).as_posix()
-            if relative.endswith((".zip", ".tar.gz")):
+            if path.is_symlink() or relative.endswith((".zip", ".tar.gz")) or path_is_ignored(relative, ignore_patterns):
                 continue
             try:
                 size = path.stat().st_size
@@ -869,9 +891,10 @@ def main() -> int:
     parser.add_argument("--author", default="")
     parser.add_argument("--forge-data", type=Path)
     parser.add_argument("--no-history", action="store_true")
+    parser.add_argument("--ignore-file", type=Path)
     args = parser.parse_args()
     try:
-        data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author, args.forge_data.resolve() if args.forge_data else None, args.no_history)
+        data = collect(args.root.resolve(), args.report_name, args.privacy_mode, args.author, args.forge_data.resolve() if args.forge_data else None, args.no_history, args.ignore_file.resolve() if args.ignore_file else None)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

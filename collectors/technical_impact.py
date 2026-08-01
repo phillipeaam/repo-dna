@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -22,6 +23,16 @@ CONFIG_NAMES = MANIFEST_NAMES | {
     "global.json", "nuget.config", "settings.gradle", "settings.gradle.kts",
 }
 DECISION_PATTERN = re.compile(r"\b(?:if|elif|else\s+if|for|while|case|catch|except|when)\b|&&|\|\||\?", re.I)
+
+
+def _optional_positive_environment_integer(name: str) -> int | None:
+    raw = os.environ.get(name)
+    if raw is None or not raw.strip():
+        return None
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return None
 
 
 def _git(root: Path, *args: str) -> str:
@@ -73,9 +84,9 @@ class _BlobReader:
 
 def _numstat(root: Path, commit: str, parent: str) -> list[dict[str, Any]]:
     if parent:
-        raw = _git(root, "diff", "--numstat", "-z", "-M", "-C", parent, commit)
+        raw = _git(root, "diff", "--numstat", "-z", "-M", parent, commit)
     else:
-        raw = _git(root, "diff-tree", "--root", "--no-commit-id", "--numstat", "-z", "-r", "-M", "-C", commit)
+        raw = _git(root, "diff-tree", "--root", "--no-commit-id", "--numstat", "-z", "-r", "-M", commit)
     parts = raw.split("\0")
     rows: list[dict[str, Any]] = []
     index = 0
@@ -142,12 +153,16 @@ def collect_technical_impact(
     root: Path,
     scope_args: list[str],
     canonicalize: Callable[[str, str], str],
-    limit: int = 200,
+    limit: int | None = None,
 ) -> dict[str, Any]:
-    commit_rows = _git(
-        root, "log", "--first-parent", f"--max-count={limit}", *scope_args,
-        "--format=%H%x09%P%x09%aN%x09%aE%x09%aI%x09%s",
-    ).splitlines()
+    configured_limit = _optional_positive_environment_integer("REPODNA_TECHNICAL_IMPACT_LIMIT")
+    effective_limit = configured_limit if configured_limit is not None else limit
+    max_source_files = _optional_positive_environment_integer("REPODNA_IMPACT_FILES_PER_COMMIT")
+    log_args = ["log", "--all", *scope_args]
+    if effective_limit is not None:
+        log_args.append(f"--max-count={effective_limit}")
+    log_args.append("--format=%H%x09%P%x09%aN%x09%aE%x09%aI%x09%s")
+    commit_rows = _git(root, *log_args).splitlines()
     contributions = []
     blobs = _BlobReader(root)
     try:
@@ -168,6 +183,7 @@ def collect_technical_impact(
             after = {"source_lines": 0, "estimated_complexity": 0}
             measurable_source_files = 0
             systems = set()
+            measured_source_candidates = 0
             for item in files:
                 path = item["after_path"] or item["before_path"]
                 systems.add(_system(path))
@@ -189,6 +205,9 @@ def collect_technical_impact(
                 if suffix not in SOURCE_EXTENSIONS:
                     continue
                 touched["source_files"] += 1
+                measured_source_candidates += 1
+                if max_source_files is not None and measured_source_candidates > max_source_files:
+                    continue
                 before_content = blobs.read(parent, item["before_path"])
                 after_content = blobs.read(commit, item["after_path"])
                 before_lines, after_lines = _line_count(before_content), _line_count(after_content)
@@ -222,8 +241,9 @@ def collect_technical_impact(
     }
     return {
         "status": "assessed" if contributions else "insufficient_history",
-        "scope": "first-parent",
-        "limit": limit,
+        "scope": "all_matching_commits",
+        "limit": effective_limit,
+        "coverage": "complete" if effective_limit is None and max_source_files is None else "user_limited",
         "contributions_analyzed": len(contributions),
         "summary": summary,
         "contributions": list(reversed(contributions)),
@@ -232,6 +252,7 @@ def collect_technical_impact(
             "Technical impact describes repository change, not product, business, quality, or personal performance impact",
             "Before and after source metrics cover changed source files, not complete repository snapshots",
             "Estimated complexity is a language-neutral decision-token heuristic",
-            "Only the latest matching first-parent contributions up to the configured limit are analyzed",
+            "All matching commits and changed source files are analyzed unless the user explicitly configures a performance limit",
+            "Rename detection is enabled; expensive whole-history copy detection is intentionally omitted",
         ],
     }

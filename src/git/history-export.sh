@@ -55,7 +55,7 @@ Unique historical paths changed: ${GIT_HISTORY[unique_files]}
 $specialized
 
 Git statistics measure historical change volume, not exclusive ownership.
-Rename and copy detection is enabled, but imported packages and merges may still inflate values.
+Rename detection is enabled. Copy detection is omitted because it is prohibitively expensive on large histories.
 EOF
 }
 
@@ -64,19 +64,18 @@ export_git_history_details() {
     system_keywords="$(system_keywords_pattern)"
 
     if [[ "$PRIVACY_MODE" != strict ]]; then
-        analysis_git_log --date=iso-strict --pretty=format:'%ad | %h | %an <%ae> | %s' 2>/dev/null > "$CONTRIBUTION_DIR/01_commits.txt"
+        historical_commits | awk -F '\t' '{ print $1 " | " $2 " | " $4 " <" $5 "> | " $6 }' > "$CONTRIBUTION_DIR/01_commits.txt"
         {
             echo 'Date,Hash,FullHash,AuthorName,AuthorEmail,Subject'
-            analysis_git_log --date=short --pretty=format:'%ad%x09%h%x09%H%x09%an%x09%ae%x09%s' 2>/dev/null |
-                awk -F '\t' 'function csv(value) { gsub(/"/, "\"\"", value); return "\"" value "\"" } { print csv($1) "," csv($2) "," csv($3) "," csv($4) "," csv($5) "," csv($6) }'
+            historical_commits | awk -F '\t' 'function csv(value) { gsub(/"/, "\"\"", value); return "\"" value "\"" } { print csv(substr($1,1,10)) "," csv($2) "," csv($3) "," csv($4) "," csv($5) "," csv($6) }'
         } > "$DATA_DIR/history_commits.csv"
     fi
-    analysis_git_log --date=format:'%Y' --pretty=format:'%ad' 2>/dev/null | sort | uniq -c | awk '{ print $2 "\t" $1 }' > "$CONTRIBUTION_DIR/02_commits_by_year.txt"
-    analysis_git_log --date=format:'%Y-%m' --pretty=format:'%ad' 2>/dev/null | sort | uniq -c | awk '{ print $2 "\t" $1 }' > "$CONTRIBUTION_DIR/03_commits_by_month.txt"
-    analysis_git_log --name-only --pretty=format: 2>/dev/null | awk 'NF' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/04_top_changed_files.txt"
-    analysis_git_log --name-only --pretty=format: 2>/dev/null | awk 'NF { count = split($0, parts, "/"); if (count >= 3) print parts[1] "/" parts[2] "/" parts[3]; else if (count >= 2) print parts[1] "/" parts[2]; else print parts[1] }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/05_top_changed_directories.txt"
-    analysis_git_log --name-only --pretty=format: 2>/dev/null | awk 'NF { count = split($0, parts, "."); if (count > 1) print "." tolower(parts[count]); else print "[no_extension]" }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/06_changed_file_extensions.txt"
+    historical_commits | awk -F '\t' '{ print substr($1,1,4) }' | sort | uniq -c | awk '{ print $2 "\t" $1 }' > "$CONTRIBUTION_DIR/02_commits_by_year.txt"
+    historical_commits | awk -F '\t' '{ print substr($1,1,7) }' | sort | uniq -c | awk '{ print $2 "\t" $1 }' > "$CONTRIBUTION_DIR/03_commits_by_month.txt"
+    historical_path_changes | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/04_top_changed_files.txt"
+    historical_path_changes | awk 'NF { count = split($0, parts, "/"); if (count >= 3) print parts[1] "/" parts[2] "/" parts[3]; else if (count >= 2) print parts[1] "/" parts[2]; else print parts[1] }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/05_top_changed_directories.txt"
+    historical_path_changes | awk 'NF { count = split($0, parts, "."); if (count > 1) print "." tolower(parts[count]); else print "[no_extension]" }' | sort | uniq -c | sort -nr > "$CONTRIBUTION_DIR/06_changed_file_extensions.txt"
     if [[ "$PRIVACY_MODE" != strict ]]; then
-        analysis_git_log --pretty=format:'%s' 2>/dev/null | grep -Ei "$system_keywords" | sort > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
+        historical_commits | awk -F '\t' '{ print $6 }' | grep -Ei "$system_keywords" | sort > "$CONTRIBUTION_DIR/07_system_related_commit_subjects.txt" || true
     fi
 }

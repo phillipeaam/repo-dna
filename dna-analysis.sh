@@ -90,28 +90,28 @@ source "$SCRIPT_DIR/src/pipeline/source-policy.sh"
 source "$SCRIPT_DIR/src/pipeline/structured-reports.sh"
 
 # Orchestrate the analysis explicitly; filenames do not define execution order.
-initialize_analysis_context
+run_timed_stage "Analysis context initialization" initialize_analysis_context
 log_debug "Analysis context initialized for project type $PROJECT_TYPE."
-collect_metadata
+run_timed_stage "Repository metadata collection" collect_metadata
 log_debug "Repository metadata collected."
-collect_inventory
+run_timed_stage "Repository inventory collection" collect_inventory
 log_debug "Repository inventory collected."
-collect_architecture
+run_timed_stage "Architecture analysis" collect_architecture
 log_debug "Architecture and technology signals collected."
-collect_metrics
+run_timed_stage "Repository metrics collection" collect_metrics
 log_debug "Current repository metrics calculated."
-apply_source_policy
+run_timed_stage "Source and privacy policy" apply_source_policy
 if [[ "$NO_HISTORY" == false ]]; then
-    collect_git_history
+    run_timed_stage "Git history collection" collect_git_history
     log_debug "${GIT_HISTORY[total_commits]} commits matched the configured history filters."
-    collect_collaboration
+    run_timed_stage "Collaboration analysis" collect_collaboration
 else
     git_history_reset
     write_no_matching_commits_report
 fi
-write_guides
-write_structured_reports
-[[ "$NO_GRAPHS" == true ]] || create_optional_charts
-run_security_and_archive
+run_timed_stage "Evidence guide generation" write_guides
+run_timed_stage "Initial structured report generation" write_structured_reports
+[[ "$NO_GRAPHS" == true ]] || run_timed_stage "Optional chart generation" create_optional_charts
+run_timed_stage "Canonical reports, security scan, and archive" run_security_and_archive
 [[ "${PRIVACY_SCAN_FAILED:-false}" != true ]] || exit 4
 [[ "${PARTIAL_ANALYSIS:-false}" != true ]] || exit 5

@@ -78,4 +78,17 @@ grep -q 'not a replacement for a dedicated security scanner' "$TEST_ROOT/potenti
 ! grep -q 'fake-live-shaped-token-7D2A' "$TEST_ROOT/potential_secrets.txt"
 [[ "$POTENTIAL_SECRET_COUNT" -gt 0 ]]
 
+# The production path uses one bounded Python process instead of spawning
+# grep and awk for every file. It must preserve redaction and exclusions.
+python "$SOURCE_ROOT/collectors/secrets.py" "$TEST_ROOT" "$TEST_ROOT/python-secrets.txt" \
+    --report-name generated-report --ignore-file "$TEST_ROOT/.repodna-ignore" > "$TEST_ROOT/python-count.txt"
+[[ "$(cat "$TEST_ROOT/python-count.txt")" -gt 0 ]]
+for expected_type in 'possible API token' 'Bearer token' 'private key' 'AWS credential' 'password'; do
+    grep -q "Potential $expected_type" "$TEST_ROOT/python-secrets.txt"
+done
+! grep -q 'File: ignored.env' "$TEST_ROOT/python-secrets.txt"
+! grep -q 'File: false-positives.env' "$TEST_ROOT/python-secrets.txt"
+! grep -q '^Line: 8$' "$TEST_ROOT/python-secrets.txt"
+! grep -q 'fake-live-shaped-token-7D2A' "$TEST_ROOT/python-secrets.txt"
+
 printf '%s\n' 'security scan tests passed'

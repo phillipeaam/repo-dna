@@ -82,7 +82,11 @@ printf '%s\n' 'default mode passed'
 
 source_fixture="$TEST_ROOT/source-project"
 create_fixture "$source_fixture"
+set +e
 (cd "$source_fixture" && bash ./dna-analysis.sh --include-source >/dev/null)
+source_status=$?
+set -e
+[[ "$source_status" -eq 4 ]]
 source_report="$(find_report "$source_fixture")"
 find "$source_report/source" -type f -name '*.cs' -print -quit | grep -q .
 grep -q 'Result: blocked' "$source_report/summary/03_privacy_scan.txt"

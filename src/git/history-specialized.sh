@@ -10,5 +10,5 @@ collect_specialized_git_metrics() {
     GIT_HISTORY[historical_prefabs]="$(count_historical_files '\.prefab$')"
     GIT_HISTORY[historical_animations]="$(count_historical_files '\.(anim|controller|overridecontroller|playable)$')"
     GIT_HISTORY[historical_shaders]="$(count_historical_files '\.(shader|hlsl|cginc|compute|shadergraph)$')"
-    GIT_HISTORY[historical_editor_cs]="$(analysis_git_log --name-only --pretty=format: 2>/dev/null | awk '{ line = tolower($0); if (line ~ /\.cs$/ && line ~ /(^|\/)editor(\/|$)/) print $0 }' | sort -u | awk 'NF { count++ } END { print count + 0 }')"
+    GIT_HISTORY[historical_editor_cs]="$(historical_paths | awk '{ line = tolower($0); if (line ~ /\.cs$/ && line ~ /(^|\/)editor(\/|$)/) count++ } END { print count + 0 }')"
 }

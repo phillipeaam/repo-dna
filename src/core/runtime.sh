@@ -52,3 +52,15 @@ format_duration() {
         printf '%ds' "$seconds"
     fi
 }
+
+# Execute one pipeline stage in the current shell and record its duration in
+# debug logs. Keeping execution in-process preserves the shared Bash state.
+run_timed_stage() {
+    local label="$1" started_at status
+    shift
+    started_at=$SECONDS
+    "$@"
+    status=$?
+    log_debug "$label completed in $(format_duration "$((SECONDS - started_at))")."
+    return "$status"
+}
