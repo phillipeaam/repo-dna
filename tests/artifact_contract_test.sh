@@ -25,9 +25,9 @@ cp "$SOURCE_ROOT/dna-analysis.sh" "$PROJECT_ROOT/"
 for directory in collectors renderers schemas src; do
     cp -R "$SOURCE_ROOT/$directory" "$PROJECT_ROOT/"
 done
-printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' > "$PROJECT_ROOT/sample.csproj"
-printf '%s\n' 'namespace Sample { public sealed class Program { } }' > "$PROJECT_ROOT/src/Program.cs"
-cat > "$PROJECT_ROOT/.repodna/forge-data.json" <<'JSON'
+printf '%s\n' '<Project Sdk="Microsoft.NET.Sdk" />' >"$PROJECT_ROOT/sample.csproj"
+printf '%s\n' 'namespace Sample { public sealed class Program { } }' >"$PROJECT_ROOT/src/Program.cs"
+cat >"$PROJECT_ROOT/.repodna/forge-data.json" <<'JSON'
 {"$schema":"./forge-data-1.0.0.schema.json","schema_version":"1.0.0","artifact_type":"repodna_forge_data","provider":"github","exported_at":"2026-07-18T12:00:00Z","repository":{"name":"sample-project","owner":null,"host":"github.com","external_id":"1"},"scope":{"complete":true,"from":null,"to":null,"notes":[]},"issues":[],"pull_requests":[],"releases":[]}
 JSON
 
@@ -92,12 +92,12 @@ python "$SOURCE_ROOT/scripts/check-links.py" "$REPORT_ROOT/report"
 
 if [[ -s "$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip" ]]; then
     ARCHIVE_PATH="$PROJECT_ROOT/$(basename "$REPORT_ROOT").zip"
-    unzip -Z1 "$ARCHIVE_PATH" > "$TEST_ROOT/archive-contents.txt"
+    unzip -Z1 "$ARCHIVE_PATH" >"$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])report[\\/]index\.html$' "$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])sbom[\\/]bom\.json$' "$TEST_ROOT/archive-contents.txt"
 elif [[ -s "$PROJECT_ROOT/$(basename "$REPORT_ROOT").tar.gz" ]]; then
     ARCHIVE_PATH="$PROJECT_ROOT/$(basename "$REPORT_ROOT").tar.gz"
-    tar -tzf "$ARCHIVE_PATH" > "$TEST_ROOT/archive-contents.txt"
+    tar -tzf "$ARCHIVE_PATH" >"$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])report[\\/]index\.html$' "$TEST_ROOT/archive-contents.txt"
     grep -Eq '(^|[\\/])sbom[\\/]bom\.json$' "$TEST_ROOT/archive-contents.txt"
 else

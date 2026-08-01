@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 collect_git_history() {
     log_info "Collecting Git history and contribution metrics"
     git_history_reset

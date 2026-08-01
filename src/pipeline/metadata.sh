@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 collect_metadata() {
 log_info "Reading repository and project metadata"
 

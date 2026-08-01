@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 apply_source_policy() {
 log_info "Applying source export and privacy policy"
 

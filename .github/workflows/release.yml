@@ -27,7 +27,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag || github.ref_name }}
           fetch-depth: 0
@@ -39,7 +39,7 @@ jobs:
         run: bash ./scripts/package-release.sh "$RELEASE_TAG" dist
 
       - name: Upload workflow artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: repodna-${{ env.RELEASE_TAG }}
           path: dist/*

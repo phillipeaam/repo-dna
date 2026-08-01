@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 declare -gA CURRENT_METRICS=()
 
 collect_metrics() {

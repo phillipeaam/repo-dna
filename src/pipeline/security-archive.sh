@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 run_security_and_archive() {
 log_info "Scanning privacy and creating the archive"
 

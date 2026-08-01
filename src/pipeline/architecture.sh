@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 collect_architecture() {
 log_info "Detecting architecture, systems, and technologies"
 

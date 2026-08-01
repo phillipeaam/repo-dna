@@ -4,7 +4,10 @@ fixture_copy() {
     local fixture_name="$1"
     local destination="$2"
     local fixture_root="${TEST_DIR}/fixtures/${fixture_name}"
-    [[ -d "$fixture_root" ]] || { printf 'Fixture not found: %s\n' "$fixture_name" >&2; return 1; }
+    [[ -d "$fixture_root" ]] || {
+        printf 'Fixture not found: %s\n' "$fixture_name" >&2
+        return 1
+    }
     mkdir -p "$destination"
     cp -R "$fixture_root/." "$destination/"
 }

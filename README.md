@@ -1,6 +1,6 @@
 # RepoDNA
 
-[![CI](https://github.com/phillipeaam/repo-dna/actions/workflows/ci.yml/badge.svg)](https://github.com/phillipeaam/repo-dna/actions/workflows/ci.yml)
+[![Quality, tests, and fixtures](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml/badge.svg)](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml)
 [![License](https://img.shields.io/github/license/phillipeaam/repo-dna)](LICENSE)
 
 Evidence-based analysis for local Git repositories.

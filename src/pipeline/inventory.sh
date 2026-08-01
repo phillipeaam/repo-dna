@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 collect_inventory() {
 log_info "Exporting project structure and asset inventories"
 

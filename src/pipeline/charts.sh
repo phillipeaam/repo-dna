@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 create_optional_charts() {
 log_info "Creating optional charts"
 

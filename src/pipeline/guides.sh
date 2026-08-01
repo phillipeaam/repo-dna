@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 write_guides() {
 log_info "Creating Notion-oriented evidence guides"
 

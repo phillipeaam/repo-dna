@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 initialize_analysis_context() {
 # Require Git.
 command_exists git || die "Git is not installed or is not available in PATH." 3

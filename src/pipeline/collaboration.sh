@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 collect_collaboration() {
 log_info "Exporting collaboration and repository history"
 

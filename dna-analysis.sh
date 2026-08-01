@@ -25,7 +25,10 @@ EXECUTION_STARTED_AT=$SECONDS
 # Load structured, redacted runtime logging before other modules emit messages.
 # shellcheck source=src/core/logging.sh
 source "$SCRIPT_DIR/src/core/logging.sh"
-logger_init || { printf '%s\n' '[ERROR] Could not initialize logging.' >&2; exit 1; }
+logger_init || {
+    printf '%s\n' '[ERROR] Could not initialize logging.' >&2
+    exit 1
+}
 trap logger_cleanup EXIT
 
 # Load project-type and source-root detection.
