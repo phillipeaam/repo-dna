@@ -75,7 +75,7 @@ jobs:
       - name: Verify documentation links
         run: python scripts/check-links.py README.md docs
 
-      - name: Run complete test suite
+      - name: Run fast unit and contract suite
         run: bash ./tests/run.sh --json test-results/repodna-test-results.json
 
       - name: Validate consolidated test evidence

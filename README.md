@@ -630,6 +630,19 @@ Run the complete local suite with:
 bash ./tests/run.sh --json test-results/repodna-test-results.json
 ```
 
+The default runner executes the fast unit and contract suites. Full repository
+exports and platform integration tests remain available explicitly:
+
+```bash
+bash ./tests/run.sh --unit
+bash ./tests/run.sh --contract
+bash ./tests/run.sh --integration
+bash ./tests/run.sh --all
+```
+
+Integration tests intentionally generate complete reports, archives, privacy
+scans, or cross-platform fixtures and therefore take considerably longer.
+
 The same suite runs on Linux, macOS, and Windows Git Bash for every push and pull
 request through GitHub Actions. CI also applies ShellCheck and an incremental
 shfmt formatting gate, runs Bats smoke tests, and validates generated JSON and

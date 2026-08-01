@@ -21,6 +21,6 @@ set -e
 [[ -f "$OUTPUT/report/index.html" ]]
 [[ -f "$OUTPUT/report/data/report.json" ]]
 grep -q '"status": "partial"' "$OUTPUT/report/data/report.json"
-grep -q 'recommended Python reporting runtime is unavailable' "$TEMP/run.log"
+grep -q 'Python reporting runtime unavailable' "$TEMP/run.log"
 grep -q 'Status: partial analysis' "$TEMP/run.log"
 printf 'Dependency-layer tests passed\n'

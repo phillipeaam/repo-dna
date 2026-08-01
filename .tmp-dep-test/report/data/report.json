@@ -1,0 +1,17 @@
+{
+  "artifact_type": "repodna_partial_analysis",
+  "status": "partial",
+  "repository": "repo-dna",
+  "project_type": "Generic Git repository",
+  "metrics": {
+    "files_observed": 421,
+    "git_tracked_files": 245,
+    "commits_observed": 104
+  },
+  "unavailable_features": [
+    {
+      "dependency": "Python 3.11+ with JSON Schema support",
+      "features": ["canonical model", "HTML dashboards", "JSON Schema validation", "specialized analyzers", "SBOM", "snapshots"]
+    }
+  ]
+}

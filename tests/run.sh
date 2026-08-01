@@ -4,14 +4,23 @@ set -uo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTPUT_FILE=""
-if [[ "${1:-}" == --json ]]; then
-    [[ -n "${2:-}" ]] || { printf '%s\n' 'Usage: tests/run.sh [--json output.json]' >&2; exit 2; }
-    OUTPUT_FILE="$2"
-fi
+MODE="fast"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json)
+            [[ -n "${2:-}" ]] || { printf '%s\n' 'Usage: tests/run.sh [--unit|--contract|--integration|--all] [--json output.json]' >&2; exit 2; }
+            OUTPUT_FILE="$2"; shift 2 ;;
+        --unit|--contract|--integration|--all)
+            MODE="${1#--}"; shift ;;
+        *)
+            printf 'Unknown option: %s\n' "$1" >&2; exit 2 ;;
+    esac
+done
 
-tests=(
-    fixtures_test.sh architecture_test.sh arguments_test.sh cli_test.sh installation_test.sh dependency_layers_test.sh logging_test.sh project_detection_test.sh
-    exclusions_test.sh ownership_test.sh author_system_ownership_test.sh bus_factor_test.sh
+# Fast tests validate functions, collectors, schemas, and renderer contracts.
+unit_tests=(
+    architecture_test.sh arguments_test.sh project_detection_test.sh exclusions_test.sh
+    ownership_test.sh author_system_ownership_test.sh bus_factor_test.sh
     system_documentation_test.sh onboarding_test.sh technical_impact_test.sh
     achievement_candidates_test.sh git_history_test.sh delivery_analysis_test.sh
     forge_import_test.sh security_scan_test.sh generic_collector_test.sh
@@ -19,10 +28,30 @@ tests=(
     unity_analysis_test.sh android_analysis_test.sh flutter_analysis_test.sh
     godot_analysis_test.sh unreal_analysis_test.sh module_graph_test.sh
     architecture_insights_test.sh quality_importers_test.sh dependency_inventory_test.sh
-    period_comparison_test.sh health_trends_test.sh reporting_test.sh canonical_schema_test.sh
-    canonical_model_test.sh charts_test.sh artifact_contract_test.sh release_workflow_test.sh
-    privacy_modes_test.sh edge_cases_test.sh runtime_fallbacks_test.sh windows_compatibility_test.sh
+    period_comparison_test.sh health_trends_test.sh canonical_schema_test.sh
+    canonical_model_test.sh runtime_fallbacks_test.sh
 )
+
+contract_tests=(
+    cli_test.sh installation_test.sh dependency_layers_test.sh reporting_test.sh
+    charts_test.sh release_workflow_test.sh
+)
+
+# These intentionally execute a full analysis, copy complete repositories, or
+# validate archives and platform behavior. They remain available on demand.
+integration_tests=(
+    fixtures_test.sh logging_test.sh artifact_contract_test.sh
+    privacy_modes_test.sh edge_cases_test.sh windows_compatibility_test.sh
+)
+
+case "$MODE" in
+    unit) tests=("${unit_tests[@]}") ;;
+    contract) tests=("${contract_tests[@]}") ;;
+    integration) tests=("${integration_tests[@]}") ;;
+    all) tests=("${unit_tests[@]}" "${contract_tests[@]}" "${integration_tests[@]}") ;;
+    fast) tests=("${unit_tests[@]}" "${contract_tests[@]}") ;;
+    *) printf 'Invalid test mode: %s\n' "$MODE" >&2; exit 2 ;;
+esac
 
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 start_seconds=$SECONDS

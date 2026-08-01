@@ -62,6 +62,23 @@ fixture-isolation, and runtime-fallback behavior. The existing standalone Bash
 tests remain the detailed integration suite; Bats calls the same public test
 scripts instead of maintaining duplicate assertions.
 
+## Test modes
+
+`tests/run.sh` defaults to the fast unit and contract suites. Use explicit
+scopes when needed:
+
+```bash
+bash tests/run.sh --unit
+bash tests/run.sh --contract
+bash tests/run.sh --integration
+bash tests/run.sh --all
+```
+
+The integration scope contains full report generation, archive validation,
+privacy-mode exports, large edge-case fixtures, and Windows compatibility.
+These checks remain useful before releases but are intentionally excluded from
+the default feedback loop.
+
 `tests/artifact_contract_test.sh` performs a real analysis, parses every
 generated JSON document, checks the canonical report contract, verifies the HTML
 entrypoint, and confirms that the ZIP or TAR archive contains it.
