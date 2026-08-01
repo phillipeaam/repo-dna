@@ -1,0 +1,2 @@
+# Fixture and portability tests only require schema validation.
+jsonschema>=4.23,<5

@@ -109,10 +109,10 @@ jobs:
         with:
           python-version: '3.13'
           cache: pip
-          cache-dependency-path: requirements-reporting.txt
+          cache-dependency-path: requirements-fixtures.txt
 
       - name: Install portable fixture dependencies
-        run: python -m pip install -r requirements-reporting.txt
+        run: python -m pip install -r requirements-fixtures.txt
 
       - name: Run project fixtures
         run: bash ./tests/fixtures_test.sh
