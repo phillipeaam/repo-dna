@@ -20,12 +20,12 @@ PY
 mkdir -p "$TEMP/valid"
 cat > "$TEMP/valid/.repodna-authors" <<'EOF'
 # Canonical identities are case-insensitive.
-Phillipe Augusto:
+Example Contributor:
   names:
-    - Phillipe Augusto de Araújo Mendonça
-    - phillipe
+    - Example Contributor Full Name
+    - contributor
   emails:
-    - phillipe@example.test
+    - contributor@example.test
 EOF
 python - "$ROOT" "$TEMP/valid" <<'PY'
 import sys
@@ -33,8 +33,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(sys.argv[1]) / "collectors"))
 from generic import load_author_aliases
 names, emails = load_author_aliases(Path(sys.argv[2]))
-assert names["phillipe"] == "Phillipe Augusto"
-assert emails["phillipe@example.test"] == "Phillipe Augusto"
+assert names["contributor"] == "Example Contributor"
+assert emails["contributor@example.test"] == "Example Contributor"
 PY
 
 for name in unknown empty duplicate collision invalid_email empty_section; do mkdir -p "$TEMP/$name"; done

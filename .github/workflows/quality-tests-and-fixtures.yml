@@ -1,4 +1,4 @@
-name: RepoDNA Quality, Tests and Fixtures
+name: Read-only audit framework contracts
 
 on:
   push:
@@ -8,155 +8,33 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: framework-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Bash quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install Bash quality tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y bats shellcheck shfmt
-
-      - name: ShellCheck
-        run: find dna-analysis.sh src tests scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=error
-
-      - name: Formatting check
-        run: shfmt -d -i 4 -ci dna-analysis.sh tests/artifact_contract_test.sh tests/helpers/fixture.sh
-
-      - name: Bats tests
-        run: bats --print-output-on-failure tests/bats
-
-      - name: CLI contract
-        run: bash tests/cli_test.sh
-
-      - name: Installation contract
-        run: bash tests/installation_test.sh
-
-      - name: Dependency degradation contract
-        run: bash tests/dependency_layers_test.sh
-
-      - name: Redacted logging contract
-        run: bash tests/logging_test.sh
-
-  test:
-    name: Full test suite
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: |
-            requirements-ast.txt
-            requirements-reporting.txt
-
-      - name: Install runtime dependencies
-        run: python -m pip install -r requirements-ast.txt -r requirements-reporting.txt
-
-      - name: Compile Python modules
-        run: python -m compileall -q collectors renderers src/reports
-
-      - name: Python formatting contract
-        run: python scripts/check-python-format.py
-
-      - name: Verify documentation links
-        run: python scripts/check-links.py README.md docs
-
-      - name: Run fast unit and contract suite
-        run: bash ./tests/run.sh --json test-results/repodna-test-results.json
-
-      - name: Validate consolidated test evidence
-        if: always()
-        run: python renderers/validate_json.py test-results/repodna-test-results.json schemas/test-execution-1.0.0.schema.json
-
-      - name: Upload consolidated test evidence
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: repodna-test-execution
-          path: test-results/repodna-test-results.json
-
-  fixtures:
-    name: Smoke and fixtures (${{ matrix.os }})
+  framework-contracts:
+    name: Framework fixtures (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash
     steps:
-      - name: Checkout
+      - name: Checkout framework
         uses: actions/checkout@v5
 
-      - name: Set up Python
+      - name: Set up Python for framework privacy checks
         uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-          cache: pip
-          cache-dependency-path: requirements-fixtures.txt
 
-      - name: Install portable fixture dependencies
-        run: python -m pip install -r requirements-fixtures.txt
+      - name: Run framework contracts and privacy checks
+        run: bash ./tests/run.sh --framework
 
-      - name: Run project fixtures
-        run: bash ./tests/fixtures_test.sh
-
-      - name: Run portable edge cases
-        run: bash ./tests/edge_cases_test.sh
-
-      - name: Run Windows-path compatibility contract
-        run: bash ./tests/windows_compatibility_test.sh
-
-      - name: PowerShell launches Git Bash smoke test
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: '& "C:\Program Files\Git\bin\bash.exe" ./tests/windows_compatibility_test.sh'
-
-  artifacts:
-    name: Generated artifact contract
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: |
-            requirements-ast.txt
-            requirements-reporting.txt
-
-      - name: Install runtime dependencies
-        run: python -m pip install -r requirements-ast.txt -r requirements-reporting.txt
-
-      - name: Generate and validate report archive
-        run: bash ./tests/artifact_contract_test.sh
-
-      - name: Upload report archive on failure
-        if: failure()
-        uses: actions/upload-artifact@v6
-        with:
-          name: failed-report-artifacts
-          path: |
-            **/*_project_analysis_*/summary/03_privacy_scan.txt
-            **/*_project_analysis_*/report/data/*.json
-          if-no-files-found: ignore
+      - name: Check patch whitespace
+        if: runner.os != 'Windows'
+        run: git diff --check

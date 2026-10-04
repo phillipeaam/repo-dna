@@ -32,6 +32,14 @@ jobs:
           ref: ${{ inputs.tag || github.ref_name }}
           fetch-depth: 0
 
+      - name: Set up Python for release privacy checks
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Check release privacy
+        run: python scripts/check-public-context.py --ref "$RELEASE_TAG"
+
       - name: Validate release tag and changelog
         run: bash ./scripts/release-notes.sh "$RELEASE_TAG" release-notes.md
 

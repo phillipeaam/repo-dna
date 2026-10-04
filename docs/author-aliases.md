@@ -1,18 +1,21 @@
 # Author alias configuration
 
+> Historical collector format, retained for reference. The retired CLI is not
+> the supported audit path. All identities below are fictional examples.
+
 `.repodna-authors` groups multiple Git names and e-mail addresses under one
 canonical contributor identity. RepoDNA validates the complete file before
 calculating contributors, system activity ownership, bus factor, technical
 impact, or achievement candidates.
 
 ```yaml
-Phillipe Augusto:
+Example Contributor:
   names:
-    - Phillipe Augusto de Araújo Mendonça
-    - phillipe
+    - Example Contributor Full Name
+    - contributor
   emails:
-    - phillipe@example.com
-    - phillipe@company.example
+    - contributor@example.com
+    - contributor@company.example
 ```
 
 ## Grammar

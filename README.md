@@ -3,146 +3,62 @@
 [![Quality, tests, and fixtures](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml/badge.svg)](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml)
 [![License](https://img.shields.io/github/license/phillipeaam/repo-dna)](LICENSE)
 
-Evidence-based analysis for local Git repositories.
+RepoDNA is a Codex-guided framework for static, evidence-led repository audits. Its primary entry point is the `repodna-audit` skill under `.agents/skills/repodna-audit/`.
 
-![RepoDNA analysis overview](assets/images/banner.png)
+Each audited product has exactly one persistent user-facing result: `analysis-output/<safe-product-slug>.md`. The document combines the current project record, evidence, coverage, claims, questions and audit history. The framework does not create HTML, JSON/CSV reports, archives, Notion exports or attachments.
 
-RepoDNA helps answer:
+## Start an audit
 
-- What technologies and dependencies does this project use?
-- How is it organized and which systems are present?
-- Which files and areas changed most over time?
-- Where should a new contributor start?
-- Which evidence can support technical documentation or a portfolio?
+1. Open this checkout in Codex.
+2. Put a local repository copy under `target-repos/` and select it explicitly. Relate multiple repositories only when they are confirmed parts of the same product.
+3. Invoke the `repodna-audit` skill.
+4. The skill checks the effective host permissions before substantive inspection. It proceeds only when the selected host profile is recorded as supported in [the readonly fixture matrix](tests/fixtures/readonly-audit/README.md), the target and its real Git storage are protected from writes, and `analysis-output/` remains writable separately.
+5. Read the single Markdown result in `analysis-output/`.
 
-It produces evidence and signals from repository contents and Git history. It
-does not prove runtime behavior, formal ownership, business impact, security,
-or code quality.
+`target-repos/` and `analysis-output/` are Git-ignored for privacy. Ignore rules do not enforce filesystem permissions. If the host cannot prove the readonly boundary, the audit blocks; do not use a target inside a writable scope and assume a prompt or final status check protects it.
 
-## What it provides
+## Audit method
 
-- Generic repository analysis for any Git project;
-- project and technology detection;
-- modules, systems, architecture, imports, symbols, and entrypoints;
-- languages, dependencies, configuration, tests, CI/CD, Docker, and docs;
-- Git contributors, aliases, churn, hotspots, collaboration, and history;
-- quality, maintainability, privacy, and security signals;
-- optional Unity, .NET, Android, Flutter, Godot, Unreal, and framework adapters;
-- onboarding, system documentation, portfolio evidence, and LLM-ready JSON;
-- HTML dashboards, canonical JSON, CSV data, charts, snapshots, and comparisons.
+The approved method is entirely local: the constitution and feature specification
+govern requirements, while the skill, runbooks and contracts govern execution.
+Use the [incorporated methodology](specs/001-readonly-audit-framework/methodology.md)
+and [local coverage map](specs/001-readonly-audit-framework/source-inventory.md)
+for detailed rules. No access to original research pages, Notion account or
+connector is required. Optional external evidence about a selected target does
+not change the local method automatically.
 
-All conclusions include confidence, evidence, limitations, or an explicit
-`not_observed` status where appropriate.
+The workflow includes preparation, A1 forensic analysis, B1 production and architecture, B2 static runtime review, B3 release provenance, B4 publication readiness, source reconciliation, Markdown consolidation and final preservation checks. It records facts, inferences, personal accounts, conflicts and unknowns separately. It never executes target code, scripts, builds, tests, hooks, plugins, editor code or profiling. Dynamic validation belongs to a separate external process and is not started or orchestrated by this framework.
 
-## Quick start
+Start with [the skill entry point](.agents/skills/repodna-audit/SKILL.md) and [the workflow](.agents/skills/repodna-audit/references/workflow.md). The design and acceptance scenarios live in [the feature specification](specs/001-readonly-audit-framework/spec.md), [quickstart](specs/001-readonly-audit-framework/quickstart.md) and [fixture guide](tests/fixtures/readonly-audit/README.md).
 
-Requirements: Git, Bash 4.3+, and standard Unix tools. Python 3.11+ is
-recommended for complete reports, JSON Schema validation, and charts.
+## Migration status
 
-```bash
-git clone https://github.com/phillipeaam/repo-dna.git
-cd repo-dna
-python -m pip install -r requirements-reporting.txt
-bash ./repodna analyze /path/to/project
-```
+The former `repodna analyze` CLI, installer and multi-format report flow are retired. Their old entry points now stop with a migration message and do not inspect repositories. Historical collectors and renderers remain in the repository for reference, but are not part of the supported audit path; reuse requires an explicit readonly review and separation from the legacy output pipeline.
 
-The report is created in a timestamped directory inside the analyzed project.
-Open:
+## Validate framework contracts
 
-```text
-<analysis-directory>/report/index.html
-```
+Original research provenance can be kept under `private-context/`, which is
+ignored, optional and excluded from distribution. It is research input, not an
+audit deliverable. Versioned documentation uses generalized rules and fictional
+examples, without private project names or personal page metadata.
 
-Check the environment first:
+With Python 3.11+ and Git available, run `python scripts/check-public-context.py`
+before sharing. It checks current files and staged content for known metadata;
+an old staged copy still blocks after its working file is sanitized. Optional
+terms in `private-context/known-sensitive-terms.txt` help identify known private
+names. Patterns cannot identify all confidential information: review the content
+manually too, including binary files. Current cleanup does not remove information
+from existing Git history.
+The release packager also checks the exact tag tree with `--ref` before creating
+an archive, so a clean checkout does not bypass metadata checks on an older tag.
 
-```bash
-bash ./repodna doctor
-```
-
-Install the command for repeated use:
+Acceptance scripts use only synthetic framework fixtures; they must never inspect or execute a selected target. The CI runs these contracts on Linux, macOS and Windows. This validates portability of the fixture tests, not the Codex host's effective filesystem permissions.
 
 ```bash
-bash ./install.sh
-repodna analyze .
+bash tests/run.sh --framework
 ```
 
-## Common commands
-
-```bash
-repodna analyze . --debug
-repodna analyze . --privacy strict
-repodna analyze . --no-history --no-graphs
-repodna analyze . --snapshot
-repodna analyze . --compare .repodna/snapshots/<snapshot>.json
-repodna analyze . --author "Name or email"
-```
-
-Source code is excluded by default. Use `--include-source` only when sharing
-the code is intentional. `--privacy strict` always disables source export,
-redacts sensitive metadata, and blocks unsafe archives.
-
-## Reports
-
-`report/data/report.json` is the canonical analysis model. Other artifacts are
-derived from it:
-
-```text
-report/index.html       HTML dashboard
-report/data/report.json Canonical structured evidence
-notion/evidence.json    Notion-oriented evidence
-llm/evidence.json       LLM-oriented evidence
-portfolio/draft.json    Confirmation-gated portfolio evidence
-onboarding/dataset.json Onboarding data
-security/potential_secrets.txt
-```
-
-The dashboard covers overview, technologies, architecture, systems,
-contribution, quality, risks, onboarding, portfolio evidence, and raw data.
-
-## Test locally
-
-The default suite is intentionally fast and validates unit and contract
-behavior:
-
-```bash
-bash tests/run.sh --json test-results/repodna-test-results.json
-```
-
-Additional scopes are available when needed:
-
-```bash
-bash tests/run.sh --unit
-bash tests/run.sh --contract
-bash tests/run.sh --integration
-bash tests/run.sh --all
-```
-
-Integration tests generate complete reports, archives, privacy scans, or
-cross-platform fixtures and therefore take longer.
-
-## Privacy and exclusions
-
-Create `.repodna-ignore` to exclude paths and use
-`.repodna-secrets-allowlist` for reviewed false positives. Secret findings are
-heuristic, masked, and never a replacement for a dedicated security scanner.
-
-## Documentation
-
-- [Version 1.0 support policy](docs/v1-support-policy.md)
-- [Installation and updates](docs/installation.md)
-- [CLI and doctor](docs/cli.md)
-- [Architecture](docs/architecture.md)
-- [Generic analysis and delivery](docs/local-delivery-analysis.md)
-- [CI/CD and releases](docs/ci-cd.md)
-- [Testing](docs/testing.md)
-- [Privacy and secret scanning](docs/secret-scanning.md)
-- [Windows and Git Bash](docs/windows-support.md)
-- [Architecture insights](docs/architecture-insights.md)
-- [Dependency graphs and SBOM](docs/dependency-graphs.md)
-- [Health score methodology](docs/health-score.md)
-- [Canonical JSON contracts](docs/canonical-json-contracts.md)
-- [LLM evidence](docs/llm-evidence.md)
-- [Contributing](CONTRIBUTING.md)
+All Codex host profiles remain `unverified` in the [host matrix](tests/fixtures/readonly-audit/README.md), so a real audit currently blocks until a profile's readonly guarantees are validated and recorded. Legacy report-generation tests are excluded from the supported runner.
 
 ## License
 

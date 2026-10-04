@@ -1,0 +1,64 @@
+# Fixture Atlas
+
+> Documento 1.0.0 | Estado: partial | Atualizado: 2026-01-02
+> Método: fixture-1 | Baselines: repo-a@abc123
+
+## Start Here
+Produto fictício para validar recuperação com evidência.
+
+## At a Glance
+Fixture Atlas contém cliente e pacote compartilhado. [E-001]
+
+## Study Map
+- Contribuição: seção Papel, equipe e contribuições.
+- Arquitetura: seção Sistemas e arquitetura.
+- Release: seção Timeline e releases.
+
+## Baseline e preservação
+Snapshot sintético `repo-a@abc123`; fixture não corresponde a repositório real. [E-001]
+
+## Identidade e contexto
+Fixture Atlas foi identificado no inventário sintético. [E-001]
+
+## Papel, equipe e contribuições
+A alteração do pacote foi compartilhada; autoria individual não foi verificada. [E-002] [E-003]
+
+## Sistemas e arquitetura
+O cliente referencia o pacote local e possui configuração para consumir um serviço HTTP. Isto é uma observação estática, não prova execução. [E-004]
+
+## Decisões e trade-offs
+Não observado na fixture.
+
+## Timeline e releases
+A tag sintética `v1` existe, mas não há vínculo entre o artefato e um destino publicado. [E-005]
+
+## Projeção pública e claims
+Sem claims autorizadas para publicação.
+
+## Evidências e índice
+- [E-001] Inventário sintético do produto e baseline `repo-a@abc123`.
+- [E-002] Diff sintético no repositório do pacote.
+- [E-003] Referência do produto ao pacote na versão sintética.
+- [E-004] Código/configuração estática do cliente e endpoint configurado.
+- [E-005] Tag sintética sem binário ou destino correlacionado.
+
+## Cobertura e estado das etapas
+| Domínio | Estado | Motivo |
+|---|---|---|
+| B2 performance | not_measured | Nenhuma medição fornecida. |
+| Release pública | unresolved | Artefato não correlacionado ao destino. |
+
+## Questões, conflitos e bloqueios
+- [Q-001] Qual versão foi entregue publicamente? `unresolved`; procurar artefato correlacionado.
+- [Q-002] A aplicação mantém 60 FPS em dispositivos móveis? `not_measured`; não há medição.
+
+## Apêndices
+### A1 — Forense
+### B1 — Produção e arquitetura
+### B2 — Runtime estático
+### B3 — Release e procedência
+### B4 — Publicação e créditos
+### Reconciliação de fontes
+
+## Histórico de verificação
+- 2026-01-02: fixture sintética criada para contrato de recuperação.

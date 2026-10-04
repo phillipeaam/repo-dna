@@ -1,5 +1,9 @@
 # Windows and Git Bash support
 
+> Historical documentation for the retired CLI. The supported workflow and
+> current host gate are documented in [README](../README.md). The examples below
+> use fictional user paths; they do not declare current Codex host support.
+
 Windows 10/11 with Git Bash and Bash 4.3+ is an explicitly supported RepoDNA
 1.0 environment. Python 3.11+ may be exposed as `python3`, `python`, or the
 Windows Python Launcher `py`.
@@ -7,15 +11,15 @@ Windows Python Launcher `py`.
 Run RepoDNA from the repository:
 
 ```bash
-cd "/c/Users/Phillipe Augusto/Development/my-project"
+cd "/c/Users/<user>/Development/my-project"
 bash /e/repo-dna/dna-analysis.sh
 ```
 
 Or pass the repository explicitly:
 
 ```bash
-bash /e/repo-dna/dna-analysis.sh "/c/Users/Phillipe Augusto/Development/my-project"
-bash /e/repo-dna/dna-analysis.sh --repository "C:\Users\Phillipe Augusto\Development\my-project"
+bash /e/repo-dna/dna-analysis.sh "/c/Users/<user>/Development/my-project"
+bash /e/repo-dna/dna-analysis.sh --repository "C:\Users\<user>\Development\my-project"
 ```
 
 There must be whitespace between the script name and repository argument. For
