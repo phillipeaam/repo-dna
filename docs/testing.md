@@ -47,6 +47,10 @@ GitHub Actions runs the test suite on Ubuntu, macOS, and Windows. Windows comman
 use Git Bash. WSL is not represented by a GitHub-hosted runner and remains a
 manual or future self-hosted validation target.
 
+The portable fixture job installs only `requirements-fixtures.txt` (currently
+`jsonschema`). The full Linux test and artifact jobs install the reporting and
+AST requirement sets, including optional chart and parser dependencies.
+
 The Linux validation runs the complete Bash/Python-backed suite, ShellCheck,
 Bats, the Python formatting contract, JSON Schema validation, documentation and
 generated-HTML link checks, fixture report generation, and archive validation.
