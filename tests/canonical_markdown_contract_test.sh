@@ -15,7 +15,8 @@ fixture_dir = Path(sys.argv[2]).resolve()
 text = document.read_text(encoding="utf-8")
 required = [
     "## Start Here", "## At a Glance", "## Study Map",
-    "Documento 2.0.0", "## Prontidão editorial do projeto", "## Revisão opcional da superfície do portfólio",
+    "Documento 2.1.0", "## Índice técnico de tags", "## Registro técnico e ocorrências",
+    "## Roster de contribuidores", "## Prontidão editorial do projeto", "## Revisão opcional da superfície do portfólio",
     "## Baseline e preservação", "## Evidências e índice",
     "## Cobertura e estado das etapas", "## Questões, conflitos e bloqueios",
     "## Histórico de verificação", "### A1 — Forense", "### B1 — Produção e arquitetura",
@@ -44,5 +45,12 @@ if markdown_files != [document]:
     raise SystemExit("FAIL: fixture product must have exactly one canonical Markdown file")
 if not evidence_ids:
     raise SystemExit("FAIL: canonical record needs a recoverable evidence index")
+typed_ids = re.findall(r"(?m)^\s*-\s*\[((?:T|O|P|K)-\d{3})\]", text)
+if len(typed_ids) != len(set(typed_ids)):
+    raise SystemExit("FAIL: technical, occurrence, person and contribution IDs must be unique")
+typed_references = set(re.findall(r"\[(?:T|O|P|K)-\d{3}\]", text))
+required_typed = {"[T-001]", "[O-001]", "[P-001]", "[K-001]"}
+if not required_typed.issubset(typed_references) or "E-004" not in evidence_ids:
+    raise SystemExit("FAIL: schema 2.1 fixture needs linked technical/contributor records and evidence")
 print("PASS: canonical structure, unique IDs, evidence index, explicit unknowns and single Markdown fixture.")
 PY

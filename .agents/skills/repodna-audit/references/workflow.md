@@ -101,3 +101,15 @@ A prontidão editorial inclui quick scan com produto/contexto, papel/equipe/per�
 ## Revisão condicional de superfície
 
 Ativar somente quando o usuário selecionar explicitamente um site, protótipo ou material visual. Confirmar páginas/áreas e usar somente acesso público readonly. Não autenticar, submeter formulários, acionar contato/conversão, alterar estado, editar ou publicar. Registrar páginas, viewports e interações realmente observados. Cada dimensão do runbook tem evidência/localização e limites ou not_observed. Notas de 1 a 5 explicam o critério e são diagnóstico profissional, não pesquisa com usuários, benchmark ou certificação. Findings P0–P3 incluem impacto, recomendação, esforço, risco/dependência e confiança; registrar percurso, plano por fases e decisões humanas. Indisponibilidade não bloqueia análise de conteúdo/repositório.
+
+## Extensão técnica e de contribuições (US12/US13)
+
+Após B1 e A1, descubra candidatos por fontes locais estáticas e qualifique cada relação sem instalar ferramenta nem executar o alvo. A sequência de consulta é `tag faceta:slug → T-### → O-### → sistema/repo/baseline/localização → E-###`; o índice e as ocorrências ficam no mesmo Markdown. Alias aponta para conceito canônico somente quando inequívoco. Preserve eixos independentes de declaração, resolução, disponibilidade, uso observado, configuração, relação de dependência, versão, contexto, origem e atualidade. Consulta padrão de uso demonstrado retorna somente `observed_use` atual/revalidado, não stale; apresente outros resultados com perfil e qualificador explícitos.
+
+Classifique estruturas como padrão apenas com comportamento, participantes, relações e escopo; registre `inference` ou descrição comum se faltar prova. IA exige distinguir sinais de assistência de desenvolvimento, integração do produto, técnica e provedor/modelo. Codec depende de metadata apropriada já legível e nunca é deduzido da extensão.
+
+Reconcilie roster após as fontes A1/B4: crie `P-###`/`K-###`, mantenha pessoa/grupo/bot/ferramenta IA e papéis de author/committer/co-author/reviewer separados, declare fontes/janela/completude e inclua trabalho não codificado somente com evidência ou relato identificado. Não una aliases ambíguos nem herde stack. Vínculo de experiência individual precisa ligar P→K→O/T e citar evidência. Conflitos e gaps seguem como `unresolved`/`partial`.
+
+Na retomada/migração, mantenha `T/O/P/K` e IDs legados válidos, atualize no mesmo Markdown para 2.1.0, anote schema/baseline/vocabulário e mapeamentos, preserve removidos como históricos e marque conclusões afetadas como stale até revalidar. Heading não verificado nunca significa domínio completo.
+
+O inventário técnico e o roster entram na reconciliação/consolidação após B1/A1; devem compartilhar evidências sem substituir os registros genéricos. A seção de tags aponta para registros/ocorrências e o roster aponta para contribuições. A projeção de experiência individual usa somente vínculos explicitamente sustentados.

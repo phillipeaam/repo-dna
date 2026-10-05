@@ -1,6 +1,6 @@
 # Fixture Atlas
 
-> Documento 2.0.0 | Estado: partial | Atualizado: 2026-01-02
+> Documento 2.1.0 | Estado: partial | Atualizado: 2026-01-02
 > Método: fixture-1 | Baselines: repo-a@abc123
 
 ## Start Here
@@ -8,6 +8,20 @@ Produto fictício para validar recuperação com evidência.
 
 ## At a Glance
 Fixture Atlas contém cliente e pacote compartilhado. [E-001]
+
+## Índice técnico de tags
+| Conceito | Chave | Ocorrências | Perfil/estado |
+|---|---|---|---|
+| Pacote sintético | package:sample-kit | O-001 | exploratory: declared/resolved; uso do consumidor estático em `repo-a@abc123` |
+
+## Registro técnico e ocorrências
+- [T-001] Package `sample-kit`, ecossistema fictício; versão declarada 1.0 e resolvida 1.0.0. [E-003]
+- [O-001] T-001; repo-a@abc123; `packages/client/src/client.ts`; sistema `client`; contexto `runtime`; origem `own`; estado `observed_use`; atualidade `current`; não prova exercício/runtime. [E-004]
+
+## Roster de contribuidores
+Cobertura parcial: somente os créditos e diffs sintéticos enumerados foram examinados; não representa roster total.
+- [P-001] group: equipe sintética observada em [E-002]; identidade individual não resolvida.
+- [K-001] contribuição `shared` na integração do pacote no cliente, intervalo do snapshot sintético; fonte [E-002]; atribuição individual desconhecida.
 
 ## Study Map
 - Contribuição: seção Papel, equipe e contribuições.
@@ -43,6 +57,7 @@ Sem claims autorizadas para publicação.
 
 ## Evidências e índice
 - [E-001] Inventário sintético do produto e baseline `repo-a@abc123`.
+- [E-006] Manifest e lock fictícios de `sample-kit`, usados somente para declarar/resolver a dependência.
 - [E-002] Diff sintético no repositório do pacote.
 - [E-003] Referência do produto ao pacote na versão sintética.
 - [E-004] Código/configuração estática do cliente e endpoint configurado.

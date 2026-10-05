@@ -121,3 +121,26 @@
 As decisões derivam diretamente de FR-078–094, SC-017–027, dos contratos existentes de saída/readonly e da constituição v3.0.0. Uma seção nova no mesmo Markdown preserva navegação e compatibilidade com o objetivo da fonte de verdade única. Arquivo separado, export de Notion, implementação visual e perfil universal de portfólio contradizem a autoridade local, o limite de privacidade ou o escopo explicitado e foram descartados.
 
 Nenhuma dependência de tecnologia ou questão factual externa está pendente para planejar este complemento. Regras de acessibilidade e benchmarks só serão pesquisados durante uma avaliação quando houver decisão concreta que dependa disso; pesquisa não bloqueia a execução genérica.
+
+# Complemento de pesquisa e decisões — US12/US13 (2026-10-05)
+
+## Decisões
+
+- **D8 — Vocabulário local de tags**: usar facetas, chaves estáveis, rótulos e aliases versionados no método local. Catálogos, PURL, SKOS e SBOM ajudam a estruturar ou desambiguar dados quando disponíveis, mas não viram autoridade online nem formato obrigatório.
+- **D9 — Registros conectados**: identificar conceitos técnicos como `T-###`, ocorrências como `O-###`, pessoas/identidades como `P-###` e contribuições como `K-###`; relacioná-los a sistemas, repositórios/baselines e evidências existentes. IDs são locais ao documento canônico e não criam novos entregáveis.
+- **D10 — Estados não colapsados**: preservar os quatro estados de tecnologia atuais e definir critério por ocorrência. Manifest, lock, inventário de pacotes, arquivos disponíveis, uso consumidor e seleção de configuração são sinais separados; relação do package, versão, contexto e origem são dimensões adicionais.
+- **D11 — Descoberta estática**: manifests, locks, código, configurações, conteúdo serializado, metadata disponível e fontes Git locais dão candidatos. Confirmação requer consumo/finalidade/localização no sistema. Não instalar parser, dependência, registry ou ferramenta no alvo; nada de build/execução.
+- **D12 — Reconhecimento de padrões com prova estrutural**: registrar participantes, relação, comportamento, motivo/escopo e evidências. Nome em classe, pasta, pacote ou README não basta. Se o rótulo do padrão não for sustentável, relatar estrutura em palavras comuns ou inferência limitada.
+- **D13 — Sinais de IA em dimensões separadas**: assistência no processo, integração ao produto, técnica implementada e provedor/modelo são registros diferentes. Arquivos de instrução/configuração não provam uso em uma tarefa; declaração em commit também não prova autoria ou percentual gerado.
+- **D14 — Codec não é extensão**: reconhecer formato/contêiner e codec separadamente por metadata/configuração de stream existente; extensão isolada não estabelece codec. Codex permanece na faceta de ferramenta de agente.
+- **D15 — Lista de contribuidores limitada por cobertura**: combinar fontes Git e créditos/relatos autorizados, comunicar escopo/completude e aceitar contribuições não codificadas. Não derivar autoria a partir de CODEOWNERS, top contributors ou contagem isolada; alias ambíguo não se funde.
+- **D16 — Vínculo pessoal sustentado**: cada pessoa relacionada a tecnologia precisa de contribuição e evidência ligando-a à ocorrência/sistema. Tags do produto não são herdadas por participantes. Cargo, emprego e período observável permanecem distinções existentes.
+- **D17 — Perfis de consulta explícitos**: por padrão, uso demonstrado retorna ocorrências atuais, não stale, com `observed_use`; filtros para config ativa, experiência pessoal, exploratório, histórico e IA mantêm qualificadores e fontes.
+- **D18 — Migração aditiva**: novos relatórios usam schema `2.1.0`; relatórios `2.0.0` permanecem legíveis e recebem as seções no mesmo arquivo ao serem atualizados. Heading ausente no legado não equivale a `not_observed` nem a `not_applicable`.
+- **D19 — Pesquisa externa informativa**: fontes online consultadas ajudam a conceber o método; explicações externas de uma tecnologia não comprovam uso no alvo. A autoridade normativa permanece local e a execução é offline.
+
+## Racional e alternativas
+
+Estas decisões incorporam [research-tags-and-contributors.md](research-tags-and-contributors.md) e FR-095–113/SC-028–037. A relação `tag → registro → ocorrência → sistema/baseline → evidência` permite consultar tecnologia sem apagar qualificadores. O vínculo separado pessoa → contribuição → ocorrência impede converter stack coletiva em experiência individual. Um catálogo externo, detector instalado, saída SBOM, analytics de popularidade, coleta de prompts ou classificação por estilo aumentariam dependências ou produziriam alegações fora da evidência disponível e não foram escolhidos.
+
+Não há escolha de linguagem ou plataforma de implementação pendente: trata-se de extensão documental do framework e dos seus validadores de contrato. O detalhamento de tarefas estabelecerá a sequência por arquivos. Não foi necessária decisão adicional do usuário na clarificação; configuração versus atividade de IA e pessoa versus stack do produto já têm defaults normativos nesta spec.

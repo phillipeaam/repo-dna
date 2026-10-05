@@ -2,6 +2,7 @@
 
 **Purpose**: Validar completude e qualidade da especificação antes do planejamento.
 **Created**: 2026-10-03
+**Updated**: 2026-10-05
 **Feature**: [spec.md](../spec.md)
 **Marker Semantics**: [x] indica qualidade de requisitos revisada; não indica implementação concluída.
 
@@ -37,6 +38,9 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - A spec preserva a ordem de seções do template resolvido pelo mecanismo local de overrides/presets.
 - Nomes de pastas, skills e readonly são interfaces/restrições do produto solicitadas. Referências a domínios de stack descrevem o que analisar, sem selecionar a stack de implementação.
 - A pesquisa técnica, as fontes locais e exemplos ficam em methodology.md, separadas dos requisitos WHAT/WHY.
+- Para a extensão técnica de 2026-10-05, a pesquisa [research-tags-and-contributors.md](../research-tags-and-contributors.md) é material de entrada; decisões testáveis entraram na spec e nenhuma tecnologia pesquisada foi afirmada como usada por um alvo real.
+- O template efetivo foi resolvido pelo contrato local: overrides → presets → extensões → core. Não existem overrides, presets ou extensões de template no checkout; aplica-se `.specify/templates/spec-template.md`. A feature existente já possui seu diretório/checklist, portanto esta execução atualiza-os sem criar feature nova ou alterar `.specify/feature.json`.
+- Não há `.specify/extensions.yml`; nenhum hook before_specify/after_specify foi registrado ou exigido nesta execução.
 - O status distingue o fluxo de auditoria existente da extensão de prontidão editorial/avaliação de superfície ainda pendente de planejamento e implementação; especificar não é aprovar publicação.
 - FR-006 limita afirmações de preservação à cobertura observada; git status sozinho não basta.
 - FR-007 e FR-041 resolvem a diferença entre B2 das fontes, que admite profiling, e o contrato readonly desta feature: medições existentes são dados; execução dinâmica é externa e não é iniciada nem orquestrada pelo framework.
@@ -48,6 +52,10 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - Critérios de Featured são metas de pacote, não gates para arquivar/documentar; Archive/Playground permanece explorável. Quantidade de histórias é guiada por evidência, sem número obrigatório.
 - Brief, estratégia, categorias e decisões de design permanecem configuráveis. Nenhum dado de caso específico, identidade profissional, layout ou decisão não aprovada das fontes privadas foi transferido como padrão universal.
 - A constituição v2.0.0 governou a migração inicial; a atualização v3.0.0 flexibilizou o gate de host mantendo aviso e preservação qualificada. A data original de ratificação permanece TODO até confirmação.
+- A extensão de tags menciona linguagens, engines, packages, ferramentas e codecs como categorias dos dados que o RepoDNA deve analisar; não seleciona tecnologia para implementar o framework. Nenhuma API, dependência de implementação ou mudança no alvo foi especificada.
+- O foco técnico permanece consultável por leitores não técnicos: cada etiqueta exige finalidade, sistema, estado e rota até sua evidência. Jargão de tags serve a filtro; o relatório também deve permitir uma explicação em linguagem comum.
+- FR-095–113 foram revistos quanto a critérios observáveis: estado de pacote/uso, suporte estrutural de padrão, classes de sinal IA, identidade e créditos, perfis, migração, execução local e privacidade. Os SC-028–037 cobrem essas jornadas e os casos negativos.
+- A nova pesquisa não identifica tecnologias ou pessoas de qualquer repositório real; exemplos são explicitamente sintéticos. A especificação preserva atribuição qualificada e não calcula domínio, liderança ou percentuais de autoria.
 - Clarificação original de 2026-10-04: host enforcement era gate obrigatório. Revisão posterior de 2026-10-04 substitui essa decisão: perfil sem prova avisa e permite análise estática, com preservação não verificada; ver FR-008 e SC-013 atualizados.
 - Clarificação de 2026-10-04: há exatamente um entregável Markdown local por produto; relatórios HTML, JSON/CSV publicados, anexos e escrita/exportação para Notion estão fora do escopo.
 - Clarificação de 2026-10-04: pessoas podem copiar o Markdown para Notion/Docs depois; agentes de IA são consumidores previstos. SC-006 mede respostas rastreáveis de IA, e SC-011 continua medindo o tempo para encontrar como iniciar.
@@ -83,6 +91,22 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 | FR-087–088 | US4, US6, US10 | Experiência profissional/social proof qualificados; lineage e agrupamento sem dupla contagem | SC-019, SC-021 |
 | FR-089–091 | US11 | Revisão opcional da superfície, scorecard justificado e comparação contextual de alternativas | SC-022–023, SC-027 |
 | FR-092–094 | US5, US9, US11 | Pesquisa referenciada, decisões com estado e preservação readonly/Markdown único | SC-015, SC-023–024, SC-027 |
+| FR-095–099 | US12 | Tags normalizadas, ocorrências rastreáveis, relação/versão/contexto de pacotes e destaque sustentado | SC-028–029, SC-036 |
+| FR-100–101 | US12 | Padrões ligados a participantes, comportamento, escopo, origem e força da conclusão | SC-030 |
+| FR-102–104 | US12 | Assistência IA versus produto, atividade/modelo qualificados, codec versus contêiner e privacidade | SC-031–032, SC-037 |
+| FR-105–108 | US13 | Lista qualificada de pessoas, fontes/aliases, créditos além de código e vínculo individual evidenciado | SC-033–034, SC-037 |
+| FR-109–113 | US12–13 | Perfis de consulta, histórico/migração, Markdown único, operação local e privacidade | SC-028, SC-034–037 |
+
+## Focused Review: extensão de tags e contribuidores (2026-10-05)
+
+- [x] Cobertura reaproveitada sem duplicar as regras existentes de evidência, autoria, stack, saída única e privacidade.
+- [x] Taxonomia e estados são extensíveis e não exigem fonte, conexão, parser ou instalação externos.
+- [x] Filtros preservam baseline, escopo, estado, sistema e evidência; perfil pessoal requer vínculo próprio.
+- [x] Pacote declarado, versão resolvida, disponibilidade, uso observado e configuração ativa são distinguíveis.
+- [x] Nomes de padrão, instruções/agentes IA, extensão de mídia e diretório de propriedade não bastam isoladamente para alegações fortes.
+- [x] Lista de contribuidores comunica cobertura; considera fontes além de Git e mantém aliases/terceiros/bots/IA qualificados.
+- [x] Migração preserva histórico no Markdown único; T105/SC-025 segue reservado às validações finais.
+- [x] Exemplos e fixtures futuros não devem conter referências particulares ou identificadores de fontes privadas.
 
 ## Iteration Log
 
@@ -92,5 +116,6 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 4. Revisão inicial da decisão readonly do host: foi especificado gate de separação de permissões; a revisão posterior de 2026-10-04 atualizou FR-008/SC-013 e a constituição v3.0.0 para aviso sem bloqueio. A data original de ratificação continua pendente.
 5. Revisão após decisão de consumo por IA: SC-006 substitui o prazo de leitura humana por recuperação de respostas com evidência; SC-011 mantém o prazo de início do fluxo. Notion/Docs permanecem cópias posteriores fora do framework.
 6. Revisão após reconciliação e multi-repo: classificações de fontes e linhagem de contribuições compartilhadas devem preservar procedência e evitar dupla contagem; a matriz cobre FR-059–061.
-7. Complemento speckit-specify de 2026-10-05: 94/94 requisitos aparecem na matriz; acrescentadas US10–11 e SC-017–027 para cobrir prontidão editorial de projetos e avaliação condicional da superfície do portfólio. A extensão mantém a autoridade local, o Markdown único, a leitura readonly e a exclusão de dados de casos específicos.
+7. Complemento speckit-specify de 2026-10-05: US10–11 e SC-017–027 cobrem prontidão editorial e revisão de superfície; a matriz cobre FR-001–094.
+8. Complemento speckit-specify de 2026-10-05: incorporadas as lacunas de tags/ocorrências, dependências e pacotes, padrões, IA, codecs e autoria individual em US12–13, FR-095–113 e SC-028–037; a matriz agora cobre FR-001–113. O núcleo reusa requisitos anteriores de evidência, privacidade, autoria e Markdown único. Nenhuma dúvida material sem default seguro permaneceu; implementação e validação permanecem pendentes.
 

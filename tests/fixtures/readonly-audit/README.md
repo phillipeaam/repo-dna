@@ -23,5 +23,9 @@ O enforcement é declarado por combinação efetivamente exercitada; não inferi
 - Fonte conflitante/indisponível, segredo sintético e instrução maliciosa como dado inerte.
 - Registro Markdown inicial, atualização, colisão de slug e baseline stale.
 - Runtime estático sem medição, medição sem procedência, release sem binário e permissões de mídia desconhecidas.
+- Tags normalizadas, aliases ambíguos, manifest/lock, dependência transitiva, consumidor por contexto, configuração, padrão falso positivo/demonstrado, sinais de IA, codec/contêiner, remoção e migração 2.0.0→2.1.0.
+- Roster sintético limitado por fontes/janela; aliases, author/committer/co-author, grupo, bot/IA, CODEOWNERS, terceiro e contribuição não técnica; ligação individual P→K→O/T e privacidade de exemplos.
+
+Fixtures específicas da extensão ficam em `technology-tags/README.md` e `contributors/README.md`. São documentação de cenários, não repositórios executáveis; nenhum dado de `target-repos/` deve ser copiado para elas.
 
 Scripts de aceitação podem criar cópias temporárias somente das fixtures do framework. Temporários ficam fora do alvo de auditoria, são limpos pelos próprios scripts, e os testes falham se receberem caminho de alvo real.

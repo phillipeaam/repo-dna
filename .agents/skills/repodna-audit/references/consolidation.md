@@ -15,11 +15,13 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 ```markdown
 # <Nome do produto>
 
-> Documento 2.0.0 | Estado: <status> | Atualizado: <date>
+> Documento 2.1.0 | Estado: <status> | Atualizado: <date>
 > Método: <method-version> | Baselines: <repo@ref, ...>
 
 ## Start Here
 ## At a Glance
+## Índice técnico de tags
+## Roster de contribuidores
 ## Study Map
 ## Prontidão editorial do projeto
 ### Brief e papel editorial
@@ -47,7 +49,7 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 ## Histórico de verificação
 ```
 
-Novos documentos usam schema 2.0.0. Ao atualizar registro 1.0.0, preservar IDs, fontes e histórico recuperáveis, migrar no mesmo Markdown e documentar o mapeamento/gaps no histórico. Seções editoriais/superfície ausentes significam não avaliadas, não aprovação. Nunca gerar cópia paralela para migração.
+Novos documentos usam schema 2.1.0. Registros 1.0.0/2.0.0 permanecem legíveis; a próxima atualização migra no mesmo Markdown, preservando IDs, fontes e histórico recuperáveis e registrando baseline, versão de vocabulário, mapeamentos e lacunas. Áreas novas sem evidência ficam não avaliadas/não migradas; heading criado não comprova cobertura. Nunca gerar cópia paralela para migração.
 
 Headings são estáveis para consulta; mudança da versão do contrato registra migração e compatibilidade. Se uma seção não se aplica, registrar `not_applicable` e motivo em vez de removê-la silenciosamente.
 
@@ -105,3 +107,13 @@ Quando aplicável, registrar brief com origem/estado por campo, contexto do proj
 Case usa contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão, deixando lacunas. Inventário Featured acompanha imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links e confidencialidade. Separar disponibilidade da seleção; publicação recomenda 4–7 itens visuais significativos. Pacote não é gate.
 
 A seção de superfície só aparece após seleção explícita de site/protótipo/design. Registrar fonte, páginas, viewports e interações realmente vistos. Usar uma linha por cada dimensão/subdimensão de `positioning`, `narrative-information-architecture`, `discovery-grouping`, `cases-evidence`, `visual-readability`, `mobile-reflow`, `tablet-reflow`, `reading-order`, `touch-targets`, `keyboard-navigation`, `focus-visibility`, `accessible-names`, `semantic-structure`, `contrast`, `reduced-motion`, `animated-media-controls`, `contact-conversion`, `maintenance-consistency`, `unavailable-media` e `performance`; cada linha recebe finding fundamentado ou `not_observed`, evidência/localização e limite. Falhas de mídia só são registradas quando diretamente observáveis. Performance aceita apenas sinais estáticos observados sem execução ou medições já existentes/fornecidas com sua proveniência; não iniciar teste de carregamento, profiler, benchmark ou execução do alvo. O scorecard inclui status e, quando aplicável, nota/critério/confiança, evidência, impacto e limite. O registro também contém resumo executivo, percurso do visitante, findings priorizados, arquitetura/direção recomendada, gaps de conteúdo/evidência, plano por fases, decisões/perguntas pendentes e limitações. Recomendações apontam evidência e não equivalem a decisão/aprovação. Nota 1–5 tem critério/localização e é diagnóstico profissional. Finding inclui prioridade P0–P3, impacto, recomendação, esforço, risco/dependência e confiança. Não autenticar, submeter, acionar conversão, editar ou publicar; indisponibilidade não bloqueia análise de conteúdo.
+
+## Índice técnico e roster (schema 2.1.0)
+
+No `## Índice técnico de tags`, listar uma linha por conceito `T-###` com faceta/chave `faceta:slug`, rótulo/aliases, qualificador/perfil e links para ocorrências `O-###`. Cada ocorrência deve levar a sistema/finalidade, repo e baseline, localização, contexto, origem, versão/estado/atualidade, evidência recuperável e limite. Distinguir inventário exploratório de destaques; o destaque aponta para o mesmo registro e nunca duplica a contagem. Perfil padrão `observed_use` inclui apenas ocorrência atual/revalidada e não stale.
+
+Em cada `T-###`, incluir categoria/namespace quando aplicável, função demonstrada, aliases sem ambiguidade, relação do package, versões separadas, natureza (própria/terceiro/integração/gerada/desconhecida) e evidência. Padrões trazem participantes/comportamento/escopo. Assistência IA, integração IA de produto, técnica e provedor/modelo ficam separados. Codec e contêiner/formato ficam em campos distintos.
+
+Em `## Roster de contribuidores`, declarar “contribuidores identificados no escopo”, fontes, janela/baseline, completude e limites. Cada `P-###` tem tipo (pessoa, grupo, bot, ferramenta IA), fonte e estado de identidade/divulgação. Cada `K-###` tem natureza do trabalho, sistema, intervalo, repo/baseline, estado (individual, compartilhado, declarado/relatado ou desconhecido), evidência e wording seguro. Contribuição sem commit é válida quando evidenciada e relato pessoal continua identificado. Aliases conflitantes ficam separados.
+
+Experiência individual é uma projeção derivada do vínculo explícito `P-###` → `K-###` → `O-###`/`T-###`; exige E/F recuperável, baseline e caveat. Não herdar stack coletiva, usar CODEOWNERS como prova de implementação, creditar código a autor de asset, somar repetidamente trabalho compartilhado ou inferir cargo/liderança por atividade. Dados civis/de contato ou não autorizados são omitidos/mascarados; exemplos no método permanecem fictícios.

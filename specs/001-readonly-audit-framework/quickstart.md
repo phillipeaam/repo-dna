@@ -2,6 +2,8 @@
 
 Esta página define cenários que a futura skill deve suportar. Eles não foram executados durante o planejamento.
 
+**Extensão prevista**: schema 2.1.0 amplia o mesmo Markdown para tags, ocorrências e contribuidores; os casos novos abaixo também não foram executados nesta etapa.
+
 ## Requisitos
 
 - Checkout RepoDNA com skill Codex disponível.
@@ -47,6 +49,29 @@ Esta página define cenários que a futura skill deve suportar. Eles não foram 
 | Inventário de mídia Featured | Registrar separadamente os ativos disponíveis e os 4–7 itens significativos selecionados; se permissões/ativos faltarem, deixar o gap explícito em vez de inflar o conjunto |
 | Site/protótipo explicitamente no escopo | Registrar páginas, viewports e interações vistas; cada dimensão recebe evidência ou `not_observed`; nenhuma ação muda estado |
 | Alternativa visual/acessível ainda aberta | Comparar opções contra brief, descoberta, acessibilidade, manutenção e evidência; manter decisão pendente quando requer escolha humana |
+| Só manifest declara um framework | Mostrar declaração exploratória e fonte; não classificar como instalado, usado ou experiência individual |
+| Lock resolve uma dependência, mas arquivo não está disponível | Registrar versão resolvida segundo a fonte, com disponibilidade/instalação desconhecida |
+| Package transitivo é chamado pelo código próprio | Manter relação transitiva e uso estático observado em eixos distintos, apontando para o consumidor |
+| Package está no runtime, teste, editor, exemplo ou vendor | Preservar contexto/origem; o perfil de uso não mistura exemplo, dependência de teste ou terceiros com runtime próprio |
+| Alias de tag versus conceito homônimo | Sinônimos apontam para uma chave; conceitos próximos ou ambíguos permanecem distintos/pendentes |
+| Tipo chamado `Factory` sem criação encapsulada | Não classificar padrão sem participantes, comportamento e consumidor sustentados |
+| Componentes demonstram Strategy/Observer apenas num subsistema | Registrar estrutura, evidência e escopo local; não generalizar ao sistema inteiro |
+| `AGENTS.md` ou instruções específicas de assistente estão presentes | Registrar sinal de instrução/configuração e deixar atividade de ferramenta/tarefa sem prova como desconhecida |
+| SDK de IA declarado, sem fluxo consumidor | Registrar package/sinal exploratório; não afirmar integração funcional do produto |
+| Cliente de IA ligado a sistema e modelo configurado | Ligar integração, finalidade, configuração e ocorrências; manter execução/provedor/modelo efetivos sem prova como não verificados |
+| Commit menciona assistência de IA | Identificar como declaração atribuída, sem percentuais de código ou autoria exclusiva |
+| Contêiner/extensão de mídia sem metadados de stream | Identificar apenas formato demonstrado; codec desconhecido |
+| Arquivo de extensão `.mp4` e metadata de codec disponível em fonte estática | Registrar contêiner e codec em campos distintos e ligar fonte/baseline |
+| Autor, committer e coautor distintos | Preservar cada papel e fonte; não reduzir ao nome de quem integrou o commit |
+| Mesmo nome ou email compartilhado sem confirmação | Manter identidades distintas/pendentes e roster parcial |
+| CODEOWNERS ou review configurados sem prova de implementação | Registrar responsabilidade/revisão observada; não inferir autoria, cargo ou liderança |
+| Designer, artista, pessoa de áudio ou QA creditados fora do Git | Listar contribuição não codificada com fonte, atribuição e escopo |
+| Pessoa está listada na equipe mas não tem contribuição/ocorrência ligada | Não apresentar a stack do projeto como experiência pessoal dela |
+| Bot ou autor de asset de terceiro | Registrar automação/procedência numa seção/tipo próprio; não inflar a equipe de pessoas |
+| Fontes do roster incompletas, squash ou histórico raso | Dizer “contribuidores identificados no escopo”, listar fontes e lacunas; não alegar roster completo |
+| Atualização remove uma tecnologia | Preservar ocorrência passada como histórica e excluir do filtro de uso atual |
+| Relatório legado 2.0.0 | Na atualização, migrar para 2.1.0 no mesmo Markdown e registrar gaps/IDs preservados |
+| Sem rede, parser ou catálogo externo | Completar o que fontes locais sustentarem; listar não observados e limites, sem instalar ferramenta |
 
 ## Validação do complemento de privacidade e autoridade
 
@@ -74,8 +99,36 @@ instruções e cobertura, não comprova suporte do host para uma auditoria real.
 - Para superfície avaliada, conferir notas justificadas, dimensões `not_observed`, escopo observado, percurso, findings priorizados e ausência de autenticação, submissão ou alteração de estado.
 - Para SC-025, realizar a revisão cronometrada com leitor sem contexto e registrar tempos reais; inspeção estática do template comprova presença dos campos, mas não comprova que o limite de tempo foi atingido.
 - Para SC-026, conferir um case Featured da fixture: quatro a sete itens visuais significativos selecionados ou lacunas explícitas de mídia/permissão, separados do inventário disponível.
+- Para SC-028–030, verificar chaves/aliases/ocorrências, casos positivos/negativos de packages e padrões; percorrer tag até sistema, baseline e evidência.
+- Para SC-031–032, cobrir instruções/declarações/atividade IA e integração do produto, mais contêiner versus codec; usar apenas fixtures sintéticas e fontes estáticas locais.
+- Para SC-033–034, reconciliar identidades/fonte/cobertura e trabalho além de commits; comprovar que uma tecnologia só vira experiência individual mediante vínculo explícito sustentado.
+- Para SC-035–037, atualizar fixture 2.0.0, preservar o Markdown único e sua privacidade, e simular indisponibilidade de catálogo/rede sem lacuna silenciosa.
 
 **Estado de validação de SC-025 nesta implementação:** o roteiro e os casos sintéticos estão prontos, mas ainda não foi conduzida sessão cronometrada com leitor humano sem contexto. Portanto, a meta de 60 segundos/5–10 minutos está implementada como critério verificável, mas seu resultado empírico permanece pendente.
+
+## Consultas de tags e tecnologias (US12)
+
+Use os casos fictícios em `tests/fixtures/readonly-audit/technology-tags/README.md`. Para cada conceito, percorrer `faceta:slug → T-### → O-### → sistema/repo/baseline/localização → E-###`. Exemplos de perguntas reprodutíveis:
+
+1. Quais packages têm uso estático observado em runtime próprio neste baseline? Excluir declaração isolada, testes, editor, exemplos, terceiros e ocorrências stale; retornar sistema, localização e evidência.
+2. O que aparece apenas em manifest/lock e qual versão está declarada/resolvida? Não chamar disponível/instalado sem fonte local adequada.
+3. Que padrões foram sustentados por participantes, relações e comportamento, e em qual escopo? Manter candidatos e falsos positivos fora da lista afirmativa.
+4. Quais sinais existem para assistência de desenvolvimento, IA no produto, técnica e provedor/modelo? Mostrar cada dimensão separada e explicitar o que não pode ser verificado estaticamente.
+5. Que arquivos de mídia têm codec demonstrado por metadata disponível? Separar formato/contêiner e deixar codec desconhecido se só houver extensão.
+
+O contrato automatizado é `bash tests/technical_tags_contract_test.sh`; usa apenas fixtures e documentos do framework. A matriz valida consulta local/offline sem parser ou catálogo obrigatório.
+
+## Consultas de contribuidores e experiência individual (US13)
+
+Use `tests/fixtures/readonly-audit/contributors/README.md` e pergunte: “Quais contribuidores foram identificados dentro do escopo e por quais fontes?”, “Que trabalho não codificado tem suporte?”, “Quais tecnologias aparecem ligadas às contribuições desta pessoa?” e “Quais aliases, intervalos ou créditos permanecem incertos?”. Respostas de experiência precisam percorrer `P-### → K-### → O-###/T-### → E-###`, apontando baseline e limite. Sem a relação explícita, não devolver stack coletiva como competência individual.
+
+O contrato automatizado é `bash tests/contributor_attribution_contract_test.sh`; identidades e fontes são sintéticas. Ele valida cobertura incompleta, aliases pendentes, tipos de bot/terceiro, contribuições fora do Git e atribuição conservadora.
+
+## Migração de schema e uso sem rede
+
+Para `legacy-2.0.0`, atualizar o mesmo arquivo para 2.1.0, conservar IDs/fontes/histórico válidos e registrar baseline antiga, novo vocabulário, mapeamentos e campos ainda não avaliados. Ocorrências removidas seguem no histórico; evidências com baseline não revalidada ficam stale. Não concluir cobertura pelo aparecimento de headings. Repetir as consultas acima sem rede, catálogo ou parser e manter indisponibilidades explícitas; nenhum relatório adicional é criado.
+
+**Cobertura US12/US13**: o harness `bash tests/run.sh --framework` inclui os dois contratos novos, o contrato do Markdown 2.1.0 e a revisão de privacidade com valores sintéticos de tags/contribuidores. Os casos são documentação/fixtures do framework e nunca executam conteúdo de `target-repos/`.
 
 ## Consulta por agente de IA
 

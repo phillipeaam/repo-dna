@@ -34,3 +34,17 @@ Para cada sistema/feature registre nome/ID, comportamento/limite, repo e baselin
 Quando a projeção para portfólio fizer parte do escopo, registrar contexto do projeto separado do brief e papel editorial. A leitura rápida deve permitir localizar identidade/contexto e contribuição individual em até 60 segundos e linkar uma rota de evidência aprofundada de cerca de 5–10 minutos sem exigir todos os apêndices. Selecionar histórias pela força da evidência e relevância, não para preencher quantidade. Usar contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão; lacunas ficam explícitas e relato pessoal é atribuído.
 
 Para cargos, separar empregador/título formal/período de responsabilidades observadas ou relatadas. Recomendações mantêm texto exato, autor, fonte, contexto e permissão; não provam cargo, liderança, autoria ou impacto além do que declaram. Preservar lineage e identidade da contribuição entre produtos para evitar dupla contagem.
+
+## Padrões estruturais e vínculo técnico (US12)
+
+Uma ocorrência técnica usa `O-###` e liga `T-###` a repositório/baseline, localização recuperável, sistema/finalidade, contexto, origem, temporalidade e evidências. Para um padrão, registrar participantes, relações, comportamento que realiza o propósito, escopo e natureza (intenção declarada, estrutura observada, inferência, implementação própria ou integração de terceiro). Nome de classe, pasta, dependência ou README sem esse conjunto permanece pista; preferir descrição em linguagem comum quando a classificação conhecida não for sustentável. Relevância de um package destacado requer explicação do papel no sistema, consumidor e evidência; métricas de popularidade não são evidência.
+
+## Roster de contribuidores e atribuição (US13)
+
+Construir `P-###` para pessoa/grupo/bot/ferramenta IA como tipos distintos e `K-###` para cada contribuição identificável. Informar quais fontes entraram (autoria Git, coautoria, diffs representativos, créditos, revisão, relato consentido), janela de histórico, baseline/refs e cobertura. Chamar a lista de “contribuidores identificados no escopo”; declarar incompletude quando houver squash, histórico raso, ausência de Git ou fontes inacessíveis.
+
+Manter author, committer, co-author, pessoa que integrou, grupo, bot/IA, CODEOWNERS/reviewer e criador de asset de terceiro em papéis diferentes. CODEOWNERS ou estatística não prova que a pessoa implementou; crédito de asset não é autoria do código; uma revisão não é implementação. Resolver aliases apenas com evidência de continuidade suficiente; homônimos/emails compartilhados ficam separados e como questão aberta.
+
+Contribuição pode incluir código, arquitetura/design, arte, áudio, QA, revisão, documentação, acessibilidade/localização, build e operação. Trabalho sem commit é elegível quando existe fonte identificada; relato do usuário fica `personal_account`. Para consultar experiência, criar vínculo pessoa → contribuição → ocorrência/sistema/tecnologia com prova e limite. Sem vínculo, não projetar tags do produto para a pessoa. Não inferir emprego, cargo, duração, senioridade, liderança, exclusividade ou total da equipe pelo primeiro/último commit ou volume.
+
+Nome civil, contato e alias destinado a publicação têm autorização/divulgação separada. Usar IDs no núcleo do registro sempre que nome público não for necessário; não copiar metadados pessoais para exemplos ou fixtures do framework.

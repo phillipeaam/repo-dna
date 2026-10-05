@@ -35,6 +35,38 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 | **Observação de superfície** | URL/artefato, página, viewport, estado de acesso, interação realmente observada, evidência, dimensão, limite | Somente leitura e sem autenticação/submissão/alteração de estado. Dimensão indisponível recebe `not_observed`. |
 | **Finding de superfície** | dimensão, nota 1–5 opcional, critério, evidência/localização, impacto, prioridade P0–P3, esforço, risco/dependência, confiança, recomendação | Nota é diagnóstico profissional; finding aponta observação real. Lacunas são explicitadas sem alegação de teste/certificação/conversão. |
 
+## Entidades complementares — US12/US13
+
+| Entidade | Campos essenciais | Relações e validações |
+|---|---|---|
+| **Vocabulário/tag** | ID opcional do conceito, chave estável `faceta:slug`, faceta, rótulo, aliases, definição, relações hierárquicas e versão do vocabulário | Alias resolve a uma chave canônica; conceitos distintos não são fundidos por nome semelhante. Vocabulário é local, sem dependência de RDF/registry. |
+| **Registro técnico (`T-###`)** | Categoria, nome/namespace/ecossistema, tags, finalidade, relevância demonstrada, versões conhecidas, resumo e temporalidade | Descreve linguagem, engine/framework, package, serviço, ferramenta, prática, arquitetura/padrão, técnica/provedor/modelo de IA, codec/formato. Aponta para uma ou mais ocorrências. |
+| **Ocorrência (`O-###`)** | `T-###`, repositório/componente, baseline, caminho/símbolo/configuração/asset, sistema, finalidade, estado/natureza, contexto, origem, versões, exercício, atualidade, evidências e limites | Ocorrência específica, não sinônimo do conceito. Pode ser declarada, resolvida, instalada, candidata, observada ou ativa em contextos diferentes. |
+| **Identidade/contribuidor (`P-###`)** | Tipo pessoa/grupo/bot/ferramenta de IA, nome/alias autorizado, fonte, resolução de identidade, janela observada, completude e divulgação | Aliases não resolvidos permanecem separados/pendentes. Nome civil, contato ou perfil externo só quando necessário e autorizado. Bot/agente não é pessoa. |
+| **Contribuição (`K-###`)** | Tipo de trabalho, sistema/feature, repo/baseline/intervalo, estado individual/compartilhado/relatado/desconhecido, autoria, wording e fontes | Reutiliza evidências/findings; inclui código, design, arte, áudio, QA, revisão, documentação, acessibilidade/localização, build e operação quando evidenciados. |
+| **Vínculo de experiência** | `P-###` + `K-###` + `O-###`/`T-###`, papel na ocorrência, prova e limites | Relação explícita pessoa → contribuição → tecnologia/sistema. Não herda stack da equipe nem duplica contribuição compartilhada. |
+| **Perfil de consulta** | Finalidade/filtro e inclusão de estados, datas, escopo e prova mínima | Projeção efêmera do registro Markdown; não vira banco, catálogo/índice paralelo nem novo deliverable. |
+
+### Regras de serialização dos IDs US12/US13
+
+- IDs `T-###`, `O-###`, `P-###` e `K-###` são únicos dentro do documento canônico e nunca reutilizados para outra entidade; atualizações preservam IDs históricos válidos.
+- Todo `O-###` referencia um `T-###`, repo, baseline, localização recuperável, sistema/finalidade, contexto, origem, atualidade e pelo menos uma evidência ou motivo explícito de cobertura sem evidência.
+- Todo vínculo de experiência referencia `P-###` e `K-###`; para indicar domínio tecnológico também referencia `O-###` ou `T-###` e evidência que sustenta a relação. Ausência de ligação individual não é inferida da presença da tag no produto.
+- Alias mapeia para uma chave canônica somente quando não ambíguo. Em conflito, preservar candidatos separados com estado `unresolved` até existir evidência/decisão.
+- Em migração para 2.1.0, manter baseline anterior, vocabulário e mapeamento de cada campo recuperável; omissões e incompatibilidades permanecem como lacunas explícitas.
+
+### Campos/estados técnicos
+
+- Reutilizar a natureza existente `fact`, `inference`, `personal_account`, `conflict`, `unresolved` e os estados `installed`, `possible_use`, `observed_use`, `active_configuration`.
+- `declared` e `resolved` qualificam declaração/resolução da dependência; não substituem estado de uso. `installed` exige prova local de disponibilidade material instalada, não só manifest/lock. Versão declarada, resolvida, observada e release são distintas.
+- Relação de dependência (`direct`, `transitive`, `peer`, `optional`, `vendored`, `bundled`, `unknown`) e contexto (`runtime`, `editor`, `build`, `test`, `ci`, `documentation`, `sample`, `asset_pipeline`, `unknown`) são eixos independentes; usar apenas os valores justificáveis no ecossistema.
+- Origem distingue implementação própria, implementação/asset de terceiro, integração própria de terceiro, gerado e desconhecido.
+- Atualidade indica baseline atual, histórica/removida, desconhecida, stale ou revalidada; ocorrência stale não entra em filtro atual.
+- Codec, contêiner, extensão, configuração de importação e metadata de stream são dados independentes. Sem fonte suficiente, codec é `unknown`.
+- Assistência IA distingue configuração/instruções, relato, declaração de commit, atividade correlacionada e ausência de sinais; integração no produto, técnica, provedor e modelo têm registros próprios.
+- Padrão de software guarda participantes, relações, comportamento, propósito/escopo e se é estrutura observada, inferência, declaração, implementação própria ou integração de terceiros.
+- Pessoa tem janela observada de contribuições; intervalo de emprego/título formal usa a entidade profissional já existente e não é inferido da primeira/última aparição Git.
+
 ## Vocabulários controlados
 
 - **Cobertura**: complete, partial, not_observed, not_applicable, unavailable, not_verified.
@@ -42,6 +74,10 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 - **Sistema**: implemented, partial, prototype, planned_only, not_found_in_scope.
 - **Contribuição**: individually_verified, strongly_supported_shared, shared, unknown, unverified.
 - **Tecnologia**: installed, possible_use, observed_use, active_configuration.
+- **Relação/contabilidade de package**: direct, transitive, peer, optional, vendored, bundled, unknown; versões e contextos permanecem campos separados, não estados de conclusão.
+- **Atualidade técnica**: current, historical/removed, unknown, stale, revalidated; só ocorrência current/revalidated elegível ao perfil padrão.
+- **Atribuição de pessoa**: individual, shared, declared, unknown; tipo de contribuição/crédito, fonte e limite também devem ser registrados.
+- **Divulgação de identidade/claim**: permitted, restricted, unknown, com origem/escopo quando disponível; desconhecido não equivale a permissão.
 - **Runtime**: static_fact, static_risk, measured, not_measured.
 - **Release**: exact, strongly_supported, bounded_range, unresolved.
 - **Claim**: safe, qualified, internal_only, unsupported, rejected.
@@ -64,6 +100,11 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 9. Uma contribuição compartilhada mantém identidade estável entre repositórios e baselines; a linhagem alteração do pacote → versão → produto consumidor → release liga todas as evidências e a contribuição é contabilizada uma única vez.
 10. Brief, classificação editorial, observação de superfície e recomendações são contextuais/opcionais e não alteram evidência técnica nem aprovação humana.
 11. Uma avaliação de superfície ocupa uma seção do registro canônico do produto e não cria outro arquivo persistente.
+12. Tags no índice apontam a T/O; ocorrências apontam a repo/baseline/sistema/evidências; links quebrados invalidam a checagem do registro.
+13. Experiência individual exige vínculo sustentado P/K/T/O; presença no roster, manifest ou tag de projeto não cria vínculo automaticamente.
+14. Um conceito técnico pode ter várias ocorrências com contexto/estado diferentes; o filtro deriva delas e não reduz o conceito a um único estado global contraditório.
+15. A lista de pessoas declara fontes e cobertura; incompletude é permitida, mas não pode ser reportada como roster total comprovado.
+16. Todos os registros são serializados e atualizados no Markdown canônico 2.1.0; metadados fora dele são temporários e descartáveis.
 
 ## Ciclo de estados
 

@@ -4,9 +4,17 @@
 
 **Created**: 2026-10-03
 
-**Status**: Auditoria estática implementada; extensão de prontidão editorial e avaliação opcional da superfície do portfólio especificadas, pendentes de planejamento e implementação
+**Status**: Auditoria estática implementada; extensões de prontidão editorial, avaliação opcional da superfície do portfólio e catálogo rastreável de tecnologias/contribuições especificadas e planejadas, pendentes de implementação
 
 **Input**: User description: "Estudar o Notion e suas subpáginas somente para leitura, incorporar o método de avaliação ao RepoDNA e transformá-lo em um framework de skills e processos conduzidos por agente de IA. Receber repositórios em uma pasta ignorada pelo Git, analisá-los sem alterar nada e produzir uma página única de source of truth rica, completa e padronizada."
+
+### Session 2026-10-05 — tags técnicas e lista de contribuidores
+
+- Pedido incorporado à mesma feature: complementar a página Markdown canônica com tags e ocorrências rastreáveis de tecnologias, frameworks, pacotes, padrões, práticas, IA e codecs, além de uma lista qualificada de pessoas/contribuições.
+- Pesquisa de referência: [tags, tecnologias e contribuidores](research-tags-and-contributors.md). Ela propõe facetas normalizadas, estados separados por ocorrência, atribuição ligada à evidência e perguntas de aceitação; suas fontes descrevem métodos e vocabulários, não comprovam uso no alvo.
+- Decisões adotadas para esta especificação: reutilizar estados e IDs existentes; preservar declaração, disponibilidade, configuração, observação e temporalidade em eixos independentes; usar `observed_use` como perfil padrão de uso demonstrado; oferecer configuração ativa, histórico, inventário exploratório, assistência IA e experiência individual como consultas qualificadas distintas.
+- Nenhuma clarificação adicional foi necessária: a documentação local existente e a pesquisa fornecem defaults seguros. A presença de instruções de agente não prova uso em tarefa; `AGENTS.md` não identifica ferramenta específica; nomes ou estrutura sem comportamento não provam padrões; uma pessoa não herda a stack do projeto.
+- Escopo preservado: especificar o incremento, sem novo diretório de feature, integração externa, relatório separado, ferramentas obrigatórias ou reauditoria de alvo. T105/SC-025 continua reservado às validações finais.
 
 ## Clarifications
 
@@ -205,6 +213,38 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 5. **Given** URL, dispositivo, design file ou interação indisponível, **When** o agente conclui, **Then** informa limitações e não declara viewport, comportamento, responsividade, acessibilidade ou validação que não observou.
 6. **Given** uma recomendação ainda não aprovada, **When** o documento é consolidado, **Then** ela permanece recomendação para decisão humana e nenhuma página, arquivo de design ou implementação é alterado.
 
+### User Story 12 - Consultar tecnologias e padrões com evidências (Priority: P1)
+
+Como analista de portfólio ou agente que compara projetos, quero filtrar tecnologias, pacotes e padrões e chegar ao sistema e à evidência onde aparecem, para entender o que foi usado sem tratar listas de dependências como experiência demonstrada.
+
+**Why this priority**: Tags úteis dependem de saber o alcance real, a finalidade e a força da prova, tanto para identificar trabalhos relevantes quanto para preparar conversas de contratação.
+
+**Independent Test**: Usar casos sintéticos com manifests, locks, código em runtime/testes/exemplos, dependências de terceiros, configuração ativa, uso removido, nomes de padrões com falsos positivos e estruturas demonstradas. Fazer perguntas de filtro e verificar se cada resultado leva ao local, estado, baseline e evidência corretos.
+
+**Acceptance Scenarios**:
+
+1. **Given** tags com aliases e conceitos próximos, **When** consulto a tecnologia ou padrão, **Then** sinônimos chegam à chave correta e conceitos distintos continuam separados.
+2. **Given** uma dependência em manifest/lock sem consumidor observado, **When** consulto uso demonstrado, **Then** o resultado não a descreve como usada/instalada sem evidência e mantém sua declaração/resolução no inventário exploratório.
+3. **Given** tecnologia ligada a um sistema e ocorrência no código/configuração, **When** filtro pelo seu uso observado, **Then** encontro finalidade, localização, contexto, baseline, evidência e limite de exercício/publicação.
+4. **Given** nome de padrão em classe/documentação sem comportamento sustentado, **When** consulto padrões implementados, **Then** recebo candidato/inferência limitada ou estrutura descritiva, sem afirmar padrão como fato.
+5. **Given** ocorrência removida ou evidência obsoleta, **When** consulto estado atual e histórico, **Then** o resultado atual não mascara o registro histórico nem reaproveita evidência stale como atual.
+
+### User Story 13 - Identificar quem contribuiu e o alcance de sua experiência (Priority: P1)
+
+Como analista ou agente que prepara uma conversa de contratação, quero consultar pessoas e contribuições por evidências e sistemas, incluindo trabalho fora do código, para descrever com precisão o que cada pessoa fez sem atribuir a ela toda a stack do grupo.
+
+**Why this priority**: A utilidade de um portfólio para contratação depende de distinguir trabalho individual, compartilhado, declarado, de terceiro e desconhecido sem inferir senioridade ou liderança de atividade Git.
+
+**Independent Test**: Usar casos sintéticos de autores/committers/coautores, aliases ambíguos, CODEOWNERS, bot, grupo, crédito de mídia, relato fornecido, contribuições não técnicas e histórico raso. Consultar uma pessoa, uma tecnologia e a completude da lista; verificar vínculo, limites e ausência de herança automática da stack.
+
+**Acceptance Scenarios**:
+
+1. **Given** um contributor listado na equipe e tecnologias observadas no projeto, **When** consulto experiência individual, **Then** só aparecem tecnologias ligadas a contribuições próprias por evidência.
+2. **Given** aliases com suporte suficiente e aliases ambíguos, **When** a lista é consolidada, **Then** somente os primeiros são reconciliados e os demais permanecem como conflito/questão não resolvida.
+3. **Given** contribuições de documentação, QA, revisão, arte ou áudio sem commits, **When** suas fontes disponíveis sustentam essas contribuições, **Then** elas aparecem com tipo, fonte, estado de atribuição e limite.
+4. **Given** CODEOWNERS, commit de bot ou assistente e mídia de terceiro, **When** a lista é apresentada, **Then** responsabilidade, automação e procedência de terceiros não são convertidas em autoria de pessoa/equipe.
+5. **Given** histórico raso ou fontes de crédito incompletas, **When** consulto a lista, **Then** ela declara que reúne contribuidores identificados no escopo e mostra a cobertura incompleta.
+
 ### Edge Cases
 
 - Histórico raso, squashes, identidades ambíguas, bots, merges, refs quebradas e ausência de Git limitam autoria e reconstrução histórica; não impedem documentação estática parcial.
@@ -222,6 +262,11 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 - Um arquivo ignorado que já está no índice continua candidato a commit; a limpeza deve verificar o índice e os arquivos atuais.
 - A procedência local da pesquisa pode ficar indisponível; isso não reduz a disponibilidade do método generalizado nem autoriza divulgar seus dados.
 - A metodologia inclui orientação generalizada para transformar evidência de projeto em material de portfólio e avaliar uma superfície selecionada. Briefs, fatos pessoais, projetos, decisões de design e claims específicos são entradas contextuais, não padrões incorporados ao framework.
+- Um manifest/lock pode identificar declaração ou resolução sem comprovar instalação, integração, execução ou contribuição; nome de padrão não basta sem seus participantes e comportamento observáveis.
+- Configuração de assistente, SDK de IA, declaração em commit e atividade correlacionada têm forças diferentes; ausência de arquivos de instrução não comprova que IA nunca foi usada.
+- Codec, alias ou identidade de pessoa podem permanecer desconhecidos quando o escopo só contém extensão/contêiner, nome semelhante ou email compartilhado sem evidência suficiente.
+- Histórico limitado, squash, autoria compartilhada, CODEOWNERS sem implementação, pacote transitivo, código de exemplo/terceiro, evidência stale e acesso sem rede preservam cobertura parcial com limites declarados.
+- Um registro de tecnologia, ocorrência ou pessoa pode ficar parcial. Manifest, lock, extensão, nome de classe, instrução de agente, CODEOWNERS ou estatística de commits, isoladamente, não sustentam as conclusões mais fortes de uso funcional, atividade de IA, implementação de padrão, identidade, autoria ou liderança.
 
 ## Requirements *(mandatory)*
 
@@ -345,6 +390,40 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 - **FR-093**: Briefs e decisões editoriais MUST preservar estados aprovado/locked, provisório, histórico/superado e conflito, com origem e data quando conhecidas. O agente MUST sinalizar conflito material e pedir posicionamento humano quando não houver resolução segura; recência isolada de uma fonte não prova aprovação ou autoridade.
 - **FR-094**: As avaliações de conteúdo e de superfície MUST ser somente leitura. Elas MUST NOT executar código do alvo, alterar repositórios, páginas, protótipos ou arquivos de design, aprovar claims/permissões, publicar conteúdo, nem criar entregáveis persistentes adicionais.
 
+#### Tags, tecnologias e ocorrências
+
+- **FR-095**: O registro canônico MUST incluir índice consultável de tags ligadas a registros detalhados, ocorrências, sistemas e evidências. Cada conceito MUST ter chave canônica estável, faceta, rótulo legível e aliases de consulta quando conhecidos; sinônimos MUST resolver para uma chave sem fundir conceitos distintos. O índice MUST conservar os qualificadores que delimitam cada resultado.
+- **FR-096**: O inventário MUST cobrir linguagens, engines, frameworks, packages/bibliotecas, plataformas, serviços, ferramentas, práticas, domínios técnicos, estilos arquiteturais e padrões aplicáveis. Cada ocorrência MUST identificar repositório/componente e baseline, localização recuperável, sistema/finalidade, contexto (como runtime, editor, build, testes, CI, documentação ou exemplos), origem própria/terceira/gerada/desconhecida e evidências/limites aplicáveis.
+- **FR-097**: Classificação de tecnologia MUST manter separados presença/dependência declarada, resolução de versão, disponibilidade material, uso observado no fluxo do sistema e configuração ativa. `installed` MUST exigir evidência de disponibilidade instalada no escopo; manifest ou lock, sozinhos, provam declaração/resolução conforme o caso, não instalação. Os estados `possible_use`, `observed_use` e `active_configuration` MUST conservar seus significados e NÃO podem ser promovidos por nome, importação solta ou intenção documental sem a evidência apropriada.
+- **FR-098**: Packages MUST registrar, quando disponível sem execução, ecossistema, identidade/nome, namespace/origem, versão declarada, versão resolvida e relação do grafo (direta, transitiva, opcional, peer, vendorizada ou desconhecida), diferenciando esses dados de uso observado e contexto de consumo. Versões ausentes ou conflitos MUST permanecer explícitos; popularidade externa MUST NOT determinar detecção, relevância ou experiência.
+- **FR-099**: O relatório MUST poder destacar packages/tecnologias cuja função seja relevante e demonstrada para sistemas/contribuições, justificando a seleção pela evidência e finalidade técnica. Inventário abrangente e resumo destacado MUST ser ligados e não duplicados; métricas externas de popularidade, vagas ou downloads MUST NOT ser tratadas como prova de uso, qualidade ou domínio individual.
+
+#### Padrões, arquitetura e práticas
+
+- **FR-100**: Padrão arquitetural/de software só MUST ser nomeado quando seu comportamento, participantes, relações e escopo forem sustentados por ocorrência e evidência. Nomes de tipos/pastas, pacote instalado, diagrama/README declarativo ou palavra no código são pistas, não prova isolada; caso a semântica não seja suficiente, descrever a estrutura observada em linguagem comum ou marcar candidato/inferência com limites.
+- **FR-101**: Registros de padrão MUST distinguir intenção declarada, estrutura observada, inferência, implementação própria e utilização/integração de terceiro; MUST apontar participantes e ligações ao sistema. A ausência de exemplo conhecido não pode forçar a atribuição de padrão, e padrão observado não equivale a qualidade/certificação.
+
+#### IA e codecs
+
+- **FR-102**: O registro MUST distinguir assistência ao desenvolvimento por ferramentas/agentes, integração de IA no produto, técnica implementada e provedor/modelo configurado ou observado. Configuração/instruções, declaração atribuída, evidência de atividade correlacionada e fluxo de produto são níveis diferentes. Arquivo `AGENTS.md` sozinho MUST NOT identificar Codex nem outro produto; modelo/versão/provider não identificado MUST permanecer desconhecido.
+- **FR-103**: A atribuição de assistência por IA MUST NOT derivar de estilo do código, MUST NOT estimar fração humano/IA e MUST NOT atribuir ferramenta a alguém ou tarefa sem evidência apropriada. A IA usada pelo agente auditor MUST NOT ser convertida em claim sobre o desenvolvimento do alvo. Prompts, transcrições, dados privados, credenciais e endpoints restritos MUST ser omitidos ou redigidos segundo divulgação.
+- **FR-104**: O inventário MUST distinguir ferramentas Codex de codecs/formatos de mídia e registrar separadamente contêiner/formato, codec e configuração de processamento quando evidenciados. Extensão de arquivo ou contêiner, sem metadados/configuração que identifiquem o stream/codec, MUST resultar em codec desconhecido; ausência de ferramenta ou fonte de metadados MUST ser uma limitação, sem instalação ou execução de código do alvo.
+
+#### Pessoas, contribuições e consulta individual
+
+- **FR-105**: A seção existente de papel, equipe e contribuições MUST conter uma lista de pessoas/contribuidores identificados no escopo e informar cobertura/completude, fontes examinadas, identidades pendentes e limites temporais. Para cada identidade, registrar nome/alias publicável ou referência local permitida, papéis/contribuições observados ou declarados, sistemas/ocorrências associados, período observado, evidências e estado de atribuição/divulgação; campos não sustentados MUST permanecer desconhecidos.
+- **FR-106**: Investigação de identidade MUST distinguir autor, committer, coautor, equipe/grupo, bot, assistente de IA, responsável CODEOWNERS e criador de asset de terceiros. Aliases MUST NOT ser unidos por semelhança de nome, email compartilhado ou conveniência estatística; mapeamento explícito/evidência adequada, conflitos e resolução devem preservar procedência. Histórico Git, gráfico de contribuidores e contagens MUST ser tratados como fontes parciais com limitações, não como cadastro completo.
+- **FR-107**: A lista MUST admitir contribuições além de código, incluindo design, arte/animação, áudio, documentação, testes/QA, revisão, acessibilidade/localização, build/ferramentas e operação quando sustentadas. Papel formal/cargo/empregador MUST continuar distinto da participação observada ou relatada neste produto; responsabilidade configurada, contagem Git e relato pessoal não podem ser promovidos a autoria exclusiva ou liderança.
+- **FR-108**: A ligação entre pessoa, contribuição e tecnologia/sistema MUST ser explícita e sustentada por evidência independente da existência da tag no produto. Uma pessoa da equipe MUST NOT herdar automaticamente as tecnologias do projeto. Participação compartilhada permanece compartilhada, bots/agentes permanecem identificados como não pessoas e terceiros são creditados sem serem apresentados como equipe própria sem suporte.
+- **FR-109**: O documento MUST suportar consultas qualificadas distintas para uso demonstrado no projeto (`observed_use`), configuração ativa, experiência individual sustentada, inventário exploratório (declarado/candidato/conflitante), histórico/removido e assistência por IA. Perfil padrão de uso demonstrado MUST excluir somente declarados/candidatos e ocorrências históricas ou stale, sem ocultar essas categorias do registro detalhado; os demais perfis MUST mostrar escopo, estado, baseline, atribuição e caminho à evidência. Consulta individual exige vínculo próprio sustentado.
+
+#### Consolidação, atualização e privacidade técnica
+
+- **FR-110**: Tags, registros técnicos, ocorrências, pessoas e vínculos MUST reutilizar fontes/evidências, sistemas, contribuições e identificadores existentes sempre que possível, mantendo referências sem autoridade duplicada. O relatório MUST permanecer um único Markdown, com índice e conteúdo concordantes, sem catálogo, JSON, banco ou relatório persistente paralelo.
+- **FR-111**: Atualização MUST preservar estados e ocorrências históricas/removidas, identificar baseline e vocabulário, marcar evidências stale quando aplicável e revalidar classificação/atribuição afetada. Migração de relatório existente MUST ocorrer no mesmo arquivo, registrar lacunas e MUST NOT marcar áreas avaliadas sem suporte.
+- **FR-112**: Descoberta de tags e contribuidores MUST funcionar a partir de fontes locais autorizadas, em método estático, sem serviço/rede, catálogo externo, Notion, instalação de dependências/parser, build ou execução do alvo como requisito. Ferramentas/fonte pública opcional já disponível podem informar identidades/descrições, mas sua indisponibilidade MUST preservar o resultado local e sua limitação.
+- **FR-113**: A metodologia compartilhável MUST usar exemplos genéricos/fictícios e MUST NOT incluir nomes, empresas, projetos, aliases, contatos, prompts ou URLs privados. O relatório do projeto MUST registrar divulgação por campo quando pertinente e não publicar contatos pessoais, identidades civis, detalhes privados nem autoria de material de terceiros além do escopo autorizado.
+
 ### Key Entities *(include if feature involves data)*
 
 - **Projeto/produto**: identidade canônica, aliases, contexto, relações com produtos distintos e sua fonte de verdade.
@@ -366,6 +445,11 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 - **Registro profissional/social proof**: experiência, título formal, responsabilidades, datas e recomendação com fonte e permissão quando aplicável.
 - **Finding de superfície**: dimensão, viewport/localização, evidência, prioridade, impacto, recomendação, esforço relativo, risco e confiança.
 - **Método local**: conjunto normativo aprovado de instruções, regras e contratos, com correspondência por tema e sem dependência das fontes originais.
+- **Vocabulário/tag**: conceito técnico com chave/faceta estáveis, rótulo, aliases, relações, definição e versão de vocabulário.
+- **Registro técnico e ocorrência**: tecnologia, package, ferramenta, padrão, prática, técnica de IA ou codec e sua ocorrência localizada por repo/componente/baseline, finalidade, contexto, estado, origem, versão, evidência e limites.
+- **Pessoa/contribuidor**: pessoa, equipe/grupo, bot ou ferramenta de IA com identidade/alias, fonte, tipo de crédito, contribuições, sistemas ligados, período observado, resolução de identidade, completude e estado de divulgação.
+- **Vínculo de contribuição**: relação sustentada entre pessoa, contribuição, sistema/tecnologia e ocorrência, com autoria individual/compartilhada/declarada/desconhecida e fontes de evidência.
+- **Perfil de consulta**: critério selecionado de busca de tags para uso observado, configuração, experiência pessoal, inventário exploratório, histórico ou assistência IA; mantém estados e rotas de evidência.
 
 ## Success Criteria *(mandatory)*
 
@@ -399,6 +483,16 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 - **SC-025**: Em todos os documentos de aceitação com projeção editorial, um leitor não familiarizado localiza produto/contexto e contribuição individual em até 60 segundos; ao menos uma história selecionada oferece uma rota de evidência adequada a uma leitura aprofundada de cerca de 5–10 minutos, sem exigir a leitura integral dos apêndices.
 - **SC-026**: Cases Featured de aceitação apresentam uma seleção curta de aproximadamente 4–7 elementos visuais significativos ou registram com clareza as lacunas de mídia/permissão; a quantidade de arquivos disponíveis não é confundida com quantidade publicada.
 - **SC-027**: Na avaliação de superfícies, todas as dimensões do FR-089 recebem finding fundamentado ou estado `not_observed`; nenhuma propriedade de viewport, interação, performance, acessibilidade ou conversão é declarada sem observação ou medição indicada.
+- **SC-028**: Em 100% dos registros de tecnologia/padrão presentes no índice dos casos de aceitação, tags resolvem para facetas/chaves normalizadas e ocorrência detalhada com localização, sistema, baseline e evidência recuperável; aliases não geram identidade duplicada ou fusão incorreta.
+- **SC-029**: Nos casos com manifesto/lock isolado, disponibilidade ausente, versão divergente, pacote transitivo, terceiro, exemplo, teste, flag condicional e referência morta, estado/contexto permanecem separados e nenhuma declaração é apresentada como instalação, uso funcional ou versão exercitada sem suporte.
+- **SC-030**: Nos casos de aceitação de padrões com nome falso positivo, intenção documental, estrutura parcial, terceiro e padrão demonstrado, o relatório preserva natureza, participantes, escopo e prova; nenhum padrão recebe conclusão afirmativa sustentada apenas pelo nome de tipo/pasta.
+- **SC-031**: Nos casos de IA com AGENTS.md, instrução específica de ferramenta, SDK sem fluxo, integração estática, modelo configurado, atividade declarada/correlacionada e nenhum sinal, dimensão/fonte/limite ficam visíveis e nenhum uso, autoria, modelo ou percentual não sustentado é afirmado.
+- **SC-032**: Nos casos de mídia, contêiner/extensão isolados identificam apenas formato demonstrado; codec somente é listado quando uma fonte apropriada o identifica, mantendo Codex separado de codecs.
+- **SC-033**: Em todo relatório de aceitação, a lista de contribuidores informa escopo/completude/fontes; identidades não resolvidas e aliases conflitantes permanecem pendentes, histórico limitado deixa cobertura parcial e contribuições fora do Git continuam elegíveis quando evidenciadas.
+- **SC-034**: Em todos os casos de aceitação, tags técnicas só aparecem como experiência individual quando contribuição própria é ligada à ocorrência por evidência; autoria compartilhada, trabalho não técnico, bot/IA e créditos de terceiros mantêm seus tipos e limites.
+- **SC-035**: Casos de migração/atualização preservam no mesmo Markdown IDs e fontes válidos, registram baseline/vocabulário, mantêm removidos como históricos, identificam evidências stale e não declaram áreas novas completas por mera presença de headings.
+- **SC-036**: Toda a matriz de aceitação de tags/contribuições pode ser concluída com fontes locais e ferramentas já disponíveis; indisponibilidade de rede/catálogo/parser deixa cobertura/limites explícitos e não produz saída persistente fora do arquivo Markdown canônico.
+- **SC-037**: Conteúdo versionado da metodologia/fixtures usa exclusivamente exemplos sintéticos; zero nomes, empresas, projetos ou metadados pessoais de fontes privadas aparecem em tags, fontes demonstrativas ou vínculos de contribuidor.
 
 ## Assumptions
 
@@ -417,10 +511,15 @@ Como responsável por um site ou protótipo de portfólio, quero uma avaliação
 - A substituição da experiência autônoma atual foi solicitada. Compatibilidade com a CLI antiga não é requisito permanente; qualquer apoio temporário precisa de regra de transição.
 - A constituição v2.0.0 governou a migração inicial para skills, auditoria readonly e Markdown canônico; foi posteriormente atualizada para v3.0.0 para permitir análise estática procedural com aviso quando o host não comprova prevenção de escrita. A data original de ratificação segue pendente de confirmação; não foi inventada.
 - Os nomes de pastas são interfaces solicitadas do produto; escolhas de linguagens, estrutura de implementação, mecanismos de isolamento e formatos técnicos pertencem ao plano.
+- Chaves de tags são um vocabulário local versionado, extensível e passível de alias; não exigem RDF, SBOM formal ou taxonomia universal. Conceito não encontrado permanece identificável como não verificado ou candidato.
+- `installed` exige evidência local de disponibilidade do pacote/tecnologia; manifests e locks informam declaração/resolução, com estados distintos, sem presumir instalação ou build.
+- A lista é de contribuidores identificados no escopo, não necessariamente inventário legal/total da equipe. Relato pessoal é admissível se atribuído e não convertido em comprovação independente.
+- O perfil padrão de busca representa uso estático observado; configuração ativa e execução/release permanecem eixos separados. Nenhum perfil sozinho certifica qualidade, segurança ou competência.
+- Codex representa assistência/agente de desenvolvimento; codec representa codificação de mídia. Sistemas de IA de jogo ou de produto são categorizados pelas técnicas/integrações sustentadas, sem exigir modelos generativos.
 
 ## Scope and Dependencies
 
-Inclui framework de análise, método de evidência, auditoria estática profunda, reconciliação readonly, documentação canônica, projeções seguras, revisão e evolução. Inclui reaproveitamento seletivo das capacidades existentes.
+Inclui framework de análise, método de evidência, auditoria estática profunda, reconciliação readonly, documentação canônica com índice de tags/tecnologias/contribuidores, projeções seguras, revisão e evolução. Inclui reaproveitamento seletivo das capacidades existentes.
 
 Não inclui correção dos projetos auditados, transformação do alvo, aprovação jurídica de licenças, inferência de impacto sem dados, recuperação infinita de arquivos perdidos, implementação de site de portfólio ou publicação automática em serviço externo. Uma avaliação da superfície pública/desenho do portfólio é condicional e somente leitura; ela não constrói nem altera o site.
 
@@ -432,3 +531,4 @@ Dependências: acesso de leitura aos alvos selecionados; agente capaz de seguir 
 - [Mapa público de cobertura do método local](source-inventory.md)
 - [Privacidade e autoridade local](contracts/privacy-local-authority.md)
 - [Checklist de qualidade da especificação](checklists/requirements.md)
+- [Pesquisa de tags, tecnologias, padrões e contribuidores](research-tags-and-contributors.md)

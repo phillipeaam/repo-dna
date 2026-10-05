@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from /specs/001-readonly-audit-framework/spec.md
 
-**Status do planejamento**: O corpo histórico abaixo documenta a implementação-base e os complementos US8/US9, concluídos antes desta revisão. Esta atualização planeja somente US10/US11; decisões anteriores substituídas são históricas. Requisitos atuais são governados pela spec e constituição v3.0.0.
+**Status do planejamento**: O corpo histórico abaixo documenta a implementação-base e os complementos US8–US11. Esta atualização planeja US12–US13 (tags técnicas, consultas qualificadas e contribuição individual). Requisitos atuais são governados pela spec e constituição v3.0.0.
 
 ## Complemento de design — US10/US11 (2026-10-05)
 
@@ -48,6 +48,52 @@ Não há decisão tecnológica externa pendente. O desenho usa os contratos Mark
 - `tests/fixtures/readonly-audit/` e `tests/`: casos fictícios/contratuais; sem páginas ou dados pessoais reais.
 
 **Estratégia**: primeiro firmar termos compartilhados e seção opcional do relatório; entregar US10 como incremento P1; depois US11 com runbook condicional; finalizar rastreabilidade, início rápido e fixtures. A atualização não reabre fases anteriores concluídas nem implementa o site.
+
+## Complemento de design — US12/US13 (2026-10-05)
+
+### Resumo
+
+Estender a mesma fonte canônica para responder que tecnologia, framework, package, padrão, prática, ferramenta, técnica de IA e codec foram encontrados; em que sistema e contexto aparecem; que evidência permite qualificá-los; e quais contribuições de cada pessoa estão ligadas a essas ocorrências. O índice de tags será uma projeção legível de registros e ocorrências no Markdown atual, não um catálogo, relatório ou serviço separado.
+
+### Contexto técnico para esta extensão
+
+**Linguagem/versão**: documentos Markdown locais e instruções/fixtures já existentes; sem linguagem de produção ou dependência nova.
+**Dependências**: leitura estática de fontes locais, histórico Git já acessível e contexto fornecido voluntariamente. Fontes externas e parsers existentes são opcionais; ausência de rede não bloqueia a execução.
+**Persistência**: o relatório canônico existente passa a schema `2.1.0`, por adição de seções e campos compatíveis, no mesmo `analysis-output/<safe-product-slug>.md`. Nenhum arquivo secundário por tecnologia/pessoa é entregue.
+**Validação**: fixtures sintéticas para dependências declaradas/resolvidas/disponíveis/usadas/configuradas, padrões falso positivo e demonstrado, sinais de assistência IA e integração de produto, codec versus contêiner, aliases, contribuições não técnicas, consulta individual e migração. A extensão não executa o alvo.
+**Plataformas**: Windows, Linux e macOS sob o procedimento estático/readonly já governado.
+**Restrições**: FR-001–113, constituição v3.0.0 e contratos atuais; método local e único Markdown permanecem autoridade. Sem Notion, catálogo online obrigatório, instalação, build, execução, heurística de autoria, detecção IA por estilo ou transferência de dados privados à documentação do framework.
+**Escopo**: US12 (P1) e US13 (P1), acrescidas de navegação, cobertura, migração de schema e fixtures do mesmo contrato.
+
+### Decisões de design e pesquisa
+
+1. **Facetas locais**: usar chave `faceta:slug`, rótulo e aliases opcionais no vocabulário local versionado. PURL/SBOM, SKOS/RDF e catálogos externos informam conceitos possíveis; nenhum formato ou serviço externo passa a ser requisito.
+2. **IDs/relação**: `T-###` identifica registro técnico, `O-###` ocorrência localizada, `P-###` identidade e `K-###` contribuição; todos ligam-se aos `E-###`, `F-###`, `Q-###`, sistemas e baselines atuais. Índice e corpo do mesmo Markdown derivam desses registros.
+3. **Eixos independentes**: classificação atual preserva `installed`, `possible_use`, `observed_use`, `active_configuration`, condicionada a evidência própria. Declaração em manifest, versão resolvida em lock, pacote disponível, fluxo consumidor e configuração selecionada não são sinônimos; relação de dependência, versão, origem, contexto, temporalidade e exercício são campos separados.
+4. **Relevância**: inventário mantém candidatos/dependências; destaque editorial justifica papel técnico observado. Popularidade e listas de vagas não provam uso, qualidade, relevância ou domínio individual.
+5. **Padrões**: nomear padrão conhecido somente com relação/comportamento, participantes e escopo; classe, pasta e prosa são pistas. Distinguir estrutura observada, declaração, inferência limitada, integração de terceiro e implementação própria.
+6. **IA**: classificar separadamente assistência de desenvolvimento, integração do produto, técnica e provedor/modelo. Presença de instruções é sinal de preparação, não prova de atividade; declaração e registro de tarefa correlacionado têm forças distintas. Nunca inferir IA por estilo ou fração de linhas.
+7. **Mídia**: identificar separadamente contêiner/formato e codec; extensão sozinha não confirma codec. Sem metadados estáticos disponíveis, marcar desconhecido; não executar FFprobe ou binário do alvo.
+8. **Créditos**: lista informa fontes e cobertura, usa IDs estáveis e reconhece trabalho além de commits. Author, committer, coautor, CODEOWNERS, equipe, bot/IA e criadores de assets de terceiros permanecem categorias distintas. Aliases só se unem com evidência; trabalho relatado mantém `personal_account`.
+9. **Atribuição individual**: tags técnicas do projeto não são herdadas por uma pessoa. Ligação pessoa → contribuição → ocorrência/sistema precisa de prova própria; período observado não equivale a duração de emprego. Identidade/divulgação desconhecida limita a projeção pública.
+10. **Consultas**: o perfil padrão retorna `observed_use` atual, não stale e referenciado; perfil de configuração ativa, experiência individual sustentada, exploratório, histórico e assistência IA preservam qualificador/escopo/baseline/evidência.
+11. **Compatibilidade**: schema `2.1.0` é aditivo; relatórios 2.0.0 continuam legíveis e são migrados no mesmo arquivo ao atualizar. Ausência de nova seção em documento legado significa cobertura ainda não migrada, não ausência de tecnologia ou pessoa.
+12. **Sequência**: firmar modelo e contrato canônico, implementar descoberta/indexação da US12, estender créditos e vínculo individual da US13, integrar quickstart/migração e validar os cenários com dados fictícios. Nenhuma validação humana SC-025/T105 é antecipada.
+
+### Checagem constitucional pós-design
+
+**PASS**: fontes locais e não confiáveis são lidas sem execução; não há dependência externa; facts, inferências e relatos mantêm seus tipos; toda ocorrência preserva prova e limites; a ligação pessoal é conservadora; exemplos e fixtures são sintéticos; o único Markdown é a autoridade e migração mantém seu histórico. Nenhuma mudança ao alvo auditado ou à política de enforcement é permitida.
+
+### Estrutura de implementação desta extensão
+
+- `specs/001-readonly-audit-framework/data-model.md`: vocabulário, registros técnicos/ocorrências, pessoas e vínculos.
+- `contracts/source-of-truth-markdown.md` e `contracts/input-output.md`: headings, schema `2.1.0`, campos mínimos, consultas qualificadas e fontes estáticas permitidas.
+- `.agents/skills/repodna-audit/references/evidence-vocabulary.md`, `forensic-a1.md`, `production-b1.md`, `workflow.md`, `consolidation.md` e novos/atualizados runbooks necessários: descoberta e regras de atribuição.
+- `.agents/skills/repodna-audit/SKILL.md`: índice e navegação da skill principal.
+- `specs/001-readonly-audit-framework/research.md` e `quickstart.md`: decisões locais e cenários sintéticos verificáveis.
+- `tests/fixtures/readonly-audit/`, testes de contrato existentes e scripts públicos: casos sem identidades reais, com guard de privacidade preservado.
+
+**Estratégia incremental**: contratos e IDs compartilhados primeiro; US12 produz índice e registros tecnológicos com uso/contexto rastreáveis; US13 acrescenta lista de contribuidores e vínculos técnicos individuais; migração/consulta offline e fixtures fecham integração. SC-025/T105 permanece bloqueado para a validação humana final anteriormente combinada.
 
 ## Summary
 

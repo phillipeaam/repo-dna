@@ -20,6 +20,8 @@ Run this skill from the RepoDNA checkout. It is the only supported entry point f
 
 Read [workflow.md](references/workflow.md) first. Then load only applicable runbooks: [forensic A1](references/forensic-a1.md), [production B1](references/production-b1.md), [runtime B2](references/runtime-b2.md), [provenance B3](references/provenance-b3.md), [publication B4](references/publication-b4.md), optional [portfolio surface review](references/portfolio-surface-review.md), and [consolidation](references/consolidation.md). Use [evidence vocabulary](references/evidence-vocabulary.md) as shared contract and the [portfolio readiness contract](../../../specs/001-readonly-audit-framework/contracts/portfolio-readiness.md) when applicable.
 
+For technology/tag questions, follow the local `faceta:slug` index to `T-###`, `O-###`, system, baseline and evidence; use the qualified profiles in the production runbook. For contributor/experience questions, follow `P-###` → `K-###` → `O-###`/`T-###` and the attribution limits in forensic A1. Neither query profile creates an alternate report or database.
+
 ## Execution outline
 
 1. Ask the user to select one repository or explicitly relate several repositories to one product; clarify product identity and the person whose contribution is being investigated when relevant.

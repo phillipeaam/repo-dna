@@ -6,7 +6,7 @@
 
 **Tests**: Incluídas tarefas de aceitação porque a especificação define testes independentes e cenários observáveis por história. Não executar build/testes/código do repositório-alvo.
 
-**Organization**: Tarefas agrupadas pelas sete histórias da especificação e precedidas pelos gates compartilhados de governança e vocabulário.
+**Organization**: Tarefas agrupadas pelas treze histórias da especificação e precedidas pelos gates compartilhados de governança e vocabulário; as extensões US12/US13 estão nas Phases 24–27.
 
 **Revisão de decisão 2026-10-04**: Phase 16 atualiza o contrato de host readonly. T001–T074 preservam o registro da decisão original (gate obrigatório); para o comportamento vigente, Phase 16 e os artefatos atualizados prevalecem: enforcement não comprovado gera aviso, não bloqueio, e a preservação não pode ser chamada de garantida.
 
@@ -501,3 +501,109 @@ As fases abaixo complementam esta mesma feature e preservam T001–T078 como his
 ## Phase 23: Convergence
 
 - [X] T107 Completar o procedimento e o esqueleto canônico para orientar a avaliação por dimensão de FR-089, incluindo falha/indisponibilidade de mídia e sinais de performance somente quando já observáveis sem execução, e garantir os campos de resumo executivo, arquitetura/direção recomendada e gaps de conteúdo/evidência de FR-090; ampliar `tests/portfolio_surface_contract_test.sh` para validar o runbook e a saída canônica per FR-089–090 / SC-022 / SC-027 (partial).
+
+## Phase 24: Contratos e vocabulário compartilhados para US12/US13
+
+**Purpose**: Fixar a serialização de registros técnicos, ocorrências, pessoas e contribuições antes de implementar descoberta ou consultas, mantendo o único Markdown como autoridade.
+
+- [x] T108 [P] Atualizar `tests/fixtures/readonly-audit/README.md` com a matriz de casos sintéticos para tecnologias, padrões, IA, codecs, migração, contribuidores e privacidade conforme SC-028–037.
+- [x] T109 [P] Definir cenários independentes de contrato e invariantes de schema para tags, ocorrências, roster e vínculos de experiência em `tests/technical_tags_contract_test.sh`.
+- [x] T110 Atualizar o contrato canônico em `specs/001-readonly-audit-framework/contracts/source-of-truth-markdown.md` e `specs/001-readonly-audit-framework/contracts/input-output.md` para `T-###`, `O-###`, `P-###`, `K-###`, índice, roster, qualificadores e compatibilidade 2.1.0.
+- [x] T111 Atualizar `specs/001-readonly-audit-framework/data-model.md` e `.agents/skills/repodna-audit/references/evidence-vocabulary.md` com facetas/chaves/aliases, estados independentes, atualidade, relações package, tipos de identidade/contribuição e invariantes das FR-095–113.
+
+**Checkpoint**: Contratos definem a forma dos registros e a evidência mínima; nenhuma taxonomia externa ou saída persistente paralela se torna necessária.
+
+## Phase 25: User Story 12 - Consultar tecnologias e padrões com evidências (Priority: P1)
+
+**Goal**: Identificar tecnologias, dependências, padrões, IA e codecs por ocorrências localizadas, distinguindo declaração, disponibilidade, uso, configuração, origem e atualidade.
+
+**Independent Test**: Executar os cenários controlados da fixture de tecnologias contra os contratos de aceitação. Percorrer aliases, dependências, padrões, sinais de IA e mídia até ocorrência, sistema, baseline e evidência; confirmar que estados incertos ou históricos não viram uso atual. Nenhum artefato do alvo é executado.
+
+### Acceptance tasks
+
+- [x] T112 [P] [US12] Criar matriz sintética de manifests/locks, pacote transitivo, consumidor por contexto, disponibilidade, versões, alias, origem, remoção e evidência stale em `tests/fixtures/readonly-audit/technology-tags/README.md`.
+- [x] T113 [US12] Criar casos sintéticos positivos e negativos para participantes/comportamento de padrões, sinais de assistência e integração de IA, contêiner/formato versus codec em `tests/fixtures/readonly-audit/technology-tags/README.md`.
+- [x] T114 [P] [US12] Implementar as verificações da fixture para SC-028–032, incluindo resolução de alias sem fusão, e rastreio índice→T→O→sistema/baseline/evidência em `tests/technical_tags_contract_test.sh`.
+
+### Implementation tasks
+
+- [x] T115 [P] [US12] Definir descoberta estática local, fontes/limites e classificação de linguagem, engine, framework, package, ferramenta, serviço, plataforma e contexto em `.agents/skills/repodna-audit/references/production-b1.md`.
+- [x] T116 [P] [US12] Documentar requisitos de prova para nomear padrões, participantes, relações, escopo, autoria própria e integração de terceiro em `.agents/skills/repodna-audit/references/forensic-a1.md`.
+- [x] T117 [US12] Definir sinais separados de assistência de desenvolvimento, integração/IA do produto, técnica, provedor/modelo e codec/contêiner, sem execução ou inferência por estilo, em `.agents/skills/repodna-audit/references/production-b1.md`.
+- [x] T118 [US12] Incorporar descoberta, registro e consulta de `T-###`/`O-###`, resolução de aliases, estado/contexto/origem/atualidade e retorno de evidência no fluxo de `.agents/skills/repodna-audit/references/workflow.md`.
+- [x] T119 [US12] Atualizar o esqueleto de consolidação com índice de tags ligado a registros técnicos e ocorrências, e regra de destaque técnico sem duplicar inventário, em `.agents/skills/repodna-audit/references/consolidation.md`.
+- [x] T120 [US12] Atualizar navegação e referências locais da skill para a consulta de tecnologia/padrões e filtros qualificados em `.agents/skills/repodna-audit/SKILL.md`.
+- [x] T121 [P] [US12] Adicionar no `specs/001-readonly-audit-framework/quickstart.md` os cenários de aceitação e consultas reproduzíveis de SC-028–032 usando exclusivamente dados sintéticos.
+
+**Checkpoint**: US12 permite responder onde e em que condição cada conceito aparece; manifesto isolado, nome de padrão, instrução de IA, extensão ou contêiner não sustentam conclusões mais fortes.
+
+## Phase 26: User Story 13 - Identificar quem contribuiu e o alcance de sua experiência (Priority: P1)
+
+**Goal**: Registrar contribuidores e trabalho codificado ou não técnico com cobertura explícita, ligando experiência individual somente a contribuições e ocorrências sustentadas.
+
+**Independent Test**: Usar fixture sintética para autores, aliases ambíguos, CODEOWNERS, grupos, bots/agentes, mídia de terceiros, trabalho não técnico, histórico incompleto e relato atribuído. Consultar roster e experiência individual; confirmar fontes, cobertura parcial e ausência de herança automática da stack.
+
+### Acceptance tasks
+
+- [x] T122 [P] [US13] Criar fixture sintética de identidade/alias, tipos de contribuição, histórico limitado, autoria compartilhada, CODEOWNERS, bot/IA, terceiros e relato em `tests/fixtures/readonly-audit/contributors/README.md`.
+- [x] T123 [P] [US13] Implementar verificações de SC-033–034 e privacidade SC-037 para roster/cobertura, reconciliação conservadora, trabalho não técnico e vínculo P→K→T/O em `tests/contributor_attribution_contract_test.sh`.
+
+### Implementation tasks
+
+- [x] T124 [P] [US13] Documentar fontes, escopo, completude e limites para commits, coautoria, grupos, bot/IA, CODEOWNERS, assets e contribuições fora do Git em `.agents/skills/repodna-audit/references/forensic-a1.md`.
+- [x] T125 [US13] Definir reconciliação de identidades e criação de `P-###`/`K-###`, estados individual/compartilhado/relatado/desconhecido, divulgação e tratamento de conflito no fluxo de `.agents/skills/repodna-audit/references/workflow.md`.
+- [x] T126 [US13] Atualizar o registro canônico com roster escopado e vínculos pessoa→contribuição→tecnologia/ocorrência sustentados, sem herança de tags ou dupla contagem, em `.agents/skills/repodna-audit/references/consolidation.md`.
+- [x] T127 [US13] Adicionar ao `specs/001-readonly-audit-framework/quickstart.md` cenários de consulta individual, cobertura parcial e contribuições não técnicas para SC-033–034.
+- [x] T128 [P] [US13] Atualizar índice e navegação da skill para roster e experiência individual com limites explícitos em `.agents/skills/repodna-audit/SKILL.md`.
+
+**Checkpoint**: A lista declara quem foi identificado dentro de quais fontes/limites; experiência individual só é projetada quando o vínculo de evidência existir.
+
+## Phase 27: Integração, migração e cobertura final US12/US13
+
+**Purpose**: Validar coerência do arquivo canônico, migração legada, funcionamento offline e privacidade após integrar as duas histórias.
+
+- [x] T129 Documentar atualização 2.0.0→2.1.0, preservação de IDs/fontes/histórico e estados stale/removidos nos cenários de migração e consulta offline em `tests/fixtures/readonly-audit/technology-tags/README.md` e `specs/001-readonly-audit-framework/quickstart.md` per SC-035–036.
+- [x] T130 Estender `tests/public_context_test.sh` e `tests/run.sh` para incluir conteúdo sintético de tecnologia/contribuidores e garantir que nenhum identificador privado ou saída fora do Markdown canônico seja introduzido per SC-036–037.
+- [x] T131 Revisar navegação, caminhos, IDs, rastreabilidade FR-095–113/SC-028–037, compatibilidade 2.1.0 e privacidade nas instruções, contratos e fixtures em `specs/001-readonly-audit-framework/quickstart.md`; preservar T105 como validação humana pendente.
+
+## Dependências e ordem da extensão US12/US13
+
+- Phase 24 firma os formatos compartilhados antes da descoberta e da atribuição.
+- US12 (Phase 25) depende da Phase 24 e entrega a base de tags/ocorrências. US13 (Phase 26) depende dos registros O/T da US12 para ligar experiência individual a tecnologia demonstrada.
+- Phase 27 depende de US12 e US13; T129 pode ser preparado em paralelo às tarefas finais de integração, enquanto T130 depende das fixtures de ambas as histórias.
+- A tarefa T105 permanece pendente para as validações finais com leitor humano depois do registro; esta extensão não a antecipa nem a conclui.
+
+## Oportunidades paralelas da extensão
+
+- Phase 24: T108 e T109 são arquivos distintos; T110 e T111 editam contratos/modelo diferentes e dependem da revisão conceitual compartilhada.
+- US12: T112/T113 podem compor a mesma fixture pela mesma sequência; T114 depende delas. T115 e T116 tratam runbooks distintos; T121 pode avançar em arquivo independente.
+- US13: T122 e T123 podem ser preparados em arquivos distintos; T124/T128 também são independentes após o contrato; T125 precede T126.
+- Phase 27: T129 e a revisão inicial de T131 podem ocorrer em paralelo; T130 integra as fixtures e só deve fechar após US12/US13.
+
+## Estratégia incremental da extensão
+
+1. Firmar schema, identificadores, estados e cenários de aceitação (Phase 24).
+2. Entregar índice técnico consultável com evidência em US12.
+3. Acrescentar roster e experiência individual com ligação explícita em US13.
+4. Validar migração, operação offline, rastreabilidade e privacidade (Phase 27).
+
+## Rastreabilidade adicional US12/US13
+
+| Requisitos | Histórias/tarefas |
+|---|---|
+| FR-095–096 | US12: T109–T112, T118–T119; contrato: T110–T111 |
+| FR-097–099 | US12: T112, T114–T115, T118–T121 |
+| FR-100–101 | US12: T113–T116, T119, T121 |
+| FR-102–105 | US12: T113–T115, T117–T121 |
+| FR-106–108 | US13: T122–T126, T128 |
+| FR-109–110 | US12/US13: T110–T111, T118–T119, T125–T126, T131 |
+| FR-111–112 | Integração: T129–T131; US12: T118, T121 |
+| FR-113 | US13: T122–T123; Integração: T130–T131 |
+| SC-028–032 | US12: T112–T121 |
+| SC-033–034 | US13: T122–T128 |
+| SC-035–036 | Integração: T129–T131 |
+| SC-037 | US13: T122–T123; Integração: T130–T131 |
+
+## Phase 28: Convergence
+
+- [ ] T132 Conduzir com leitor humano sem contexto a validação cronometrada do registro canônico sintético atualizado para schema 2.1.0 em `tests/fixtures/readonly-audit/sample-product.md`; medir localização de produto/contexto e contribuição (meta ≤60 s) e percurso até evidência aprofundada (meta ~5–10 min), registrar perfil não identificável, tarefa, tempos, resultado e eventuais findings em `specs/001-readonly-audit-framework/quickstart.md` per SC-025 (partial).
