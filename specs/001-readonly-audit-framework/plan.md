@@ -8,7 +8,7 @@
 
 Entregar um fluxo de auditoria local guiado por uma skill principal do Codex, com processos reutilizáveis para preparação, A1, B1–B4, reconciliação, consolidação e revisão. O resultado persistente será exatamente um Markdown por produto em analysis-output/<slug>.md, com conclusões, evidências, índice, histórico e apêndices no mesmo arquivo.
 
-Os repositórios serão selecionados em target-repos/. A análise será exclusivamente estática: nenhum fluxo desta feature inicia ou orquestra execução de código, scripts, builds, testes, hooks, plugins, macros, código de editor ou profiling do alvo. Validação dinâmica fica fora do framework e pertence a processo externo independente. O plano também não chamará o CLI legado como está: seu pipeline entra no repositório e cria resultados ali. Capacidades úteis dos coletores existentes serão reaproveitadas seletivamente, após expor interfaces que não escrevam no alvo nem entreguem outros relatórios. A constituição foi atualizada para v2.0.0 antes da implementação, alinhando o produto à skill readonly e à fonte de verdade Markdown.
+Os repositórios serão selecionados em target-repos/. A análise será exclusivamente estática: nenhum fluxo desta feature inicia ou orquestra execução de código, scripts, builds, testes, hooks, plugins, macros, código de editor ou profiling do alvo. Validação dinâmica fica fora do framework e pertence a processo externo independente. O agente segue um procedimento de não escrita; enforcement do host é recomendado, mas a falta dele gera aviso e limitação de preservação, não bloqueio. O plano também não chamará o CLI legado como está: seu pipeline entra no repositório e cria resultados ali. Capacidades úteis dos coletores existentes serão reaproveitadas seletivamente, após expor interfaces que não escrevam no alvo nem entreguem outros relatórios. A constituição foi atualizada para v3.0.0 para refletir o fluxo procedural e a limitação explícita de preservação.
 
 ## Technical Context
 
@@ -20,7 +20,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 
 **Testing**: Validação documental e de contrato para as skills/Markdown, cenários de aceitação com fixtures incluindo alterações preexistentes e arquivos ignorados, verificação do alvo antes/depois e confirmação de um único arquivo Markdown final. As tarefas definirão os comandos existentes que ainda se aplicam; este planejamento não executa testes.
 
-**Target Platform**: Fluxo local no Codex em Windows/Git Bash, Linux ou macOS, condicionado a acesso efetivamente somente leitura ao alvo. Sem garantia da plataforma de que o agente ou os coletores não escrevam no alvo, o fluxo deve bloquear a análise.
+**Target Platform**: Fluxo local no Codex em Windows/Git Bash, Linux ou macOS. O agente atua por procedimento estático e não escrita intencional; quando o host não garante a fronteira, o fluxo avisa e marca preservação como não verificada/observada.
 
 **Project Type**: Framework local de auditoria conduzido por agente, integrado ao Codex e ao Spec Kit do repositório.
 
@@ -30,7 +30,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 - Ler o alvo como dado não confiável; nunca executar seus scripts, build, testes, hooks, plugins, macros ou código de editor.
 - Manter o produto estritamente estático: validação dinâmica/profiling não pode ser iniciada nem orquestrada pelo framework, mesmo quando solicitada; processos externos independentes estão fora do escopo e dos entregáveis.
 - Verificar caminho real, Git externo, submódulos, symlinks/junctions e colisões de slug.
-- Antes da leitura substantiva, comprovar que a política efetiva do host nega escrita no alvo e Git associado, mas permite gravar `analysis-output/`; bloquear se o alvo intersectar uma raiz gravável ou se a separação não puder ser verificada.
+- Antes da leitura substantiva, registrar política de escrita conhecida e alertar se o alvo/Git intersectar raiz gravável ou a política for desconhecida; não bloquear somente por essa razão. Manter `analysis-output/` fora do alvo e tratar comparação final como observação, não enforcement.
 - git status sozinho não comprova preservação; comparar conteúdo e estado observável dos arquivos dentro do escopo.
 - Gravar somente a entrega Markdown em analysis-output/; temporários de execução devem ficar fora dos alvos e ser removidos.
 - Não emitir HTML, relatórios JSON/CSV, pacotes ZIP, anexos por sistema, export para Notion ou publicação externa.
@@ -50,17 +50,17 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 |---|---|---|
 | I. Evidence-Based Analysis | PASS | Preservar distinção fato/inferência, evidência/limite e desconhecido; não elevar análise estática a prova de runtime. |
 | II. Generic Core and Additive Methods | PASS | Preservar base genérica; especializações aditivas não substituem evidência comum. |
-| III. Read-Only and Privacy by Default | PASS WITH HOST GATE | Exigir negação efetiva de escrita no alvo e Git associado, saída gravável separadamente e bloqueio fail-closed. |
+| III. Read-Only Procedure and Privacy by Default | PASS WITH DISCLOSED LIMITATION | Proibir escrita/execução intencional pelo agente; host enforcement recomendado, ausência gera aviso e proíbe claims de preservação garantida. |
 | IV. Versioned Markdown Source of Truth | PASS | Entregar um Markdown local versionado por produto sem relatórios ou anexos alternativos. |
 | V. Modular, Agent-Guided Method | PASS | Usar skill principal, runbooks focados, contratos por etapa e fixtures controladas. |
 | Product and Technology Constraints | PASS | O produto é local e Codex-guided; Bash/Python são ferramentas opcionais somente se respeitarem os contratos. |
 | Development Workflow | PASS WITH MIGRATION | Atualizar documentação, CI e retenção legada para refletir a experiência de skill/Markdown. |
 
-**Estado do gate**: A constituição v2.0.0 foi atualizada nesta mudança antes da implementação de runtime. A data original de ratificação permanece TODO até confirmação. O gate técnico ainda exige comprovar que o host permite ler o alvo, nega escrita no alvo/Git e mantém `analysis-output/` gravável separadamente; sem essa evidência, bloquear.
+**Estado do gate**: A constituição v3.0.0 substituiu o bloqueio por aviso e preservação observada quando enforcement não foi comprovado. A data original de ratificação permanece TODO até confirmação.
 
 ### Gate após design
 
-**PASS WITH READONLY HOST CAPABILITY GATE**: o desenho está alinhado à constituição v2.0.0. Nenhuma instrução de skill, regra de ignore ou comparação posterior substitui a negação efetiva de escrita; a análise bloqueia quando o host não prova a separação.
+**PASS WITH PROCEDURAL READONLY LIMITATION**: o desenho está alinhado à constituição v3.0.0. O agente não escreve intencionalmente e não executa o alvo. Ausência de host enforcement é registrada e reduz a confiança em preservação, sem impedir análise estática.
 
 ## Project Structure
 
@@ -113,7 +113,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 
 ### Constituição e sequência
 
-Princípios I/II preservam a semântica ao generalizar exemplos; III exige minimização; IV mantém um único entregável por auditoria; V mantém runbooks locais. Todos PASS para este complemento, sem emenda constitucional. A prova de host continua pendente e bloqueia auditorias reais.
+Princípios I/II preservam a semântica ao generalizar exemplos; III exige procedimento sem escrita intencional e transparência sobre enforcement; IV mantém um único entregável por auditoria; V mantém runbooks locais. A revisão 3.0.0 da constituição formaliza a mudança; prova de host é melhoria futura, não pré-requisito.
 
 Ordem: preservar procedência e configurar exclusão → testar casos sintéticos de privacidade → sanitizar conteúdo e índice → validar mapa local completo → revisar distribuição/documentação → executar guards e suite. Python 3.11+ é dependência de desenvolvimento dos guards, não requisito de conexão externa ou pacote instalado no alvo. Nenhuma pesquisa externa ou decisão de tecnologia está pendente.
 
@@ -127,4 +127,4 @@ O guard automatiza padrões conhecidos, não certifica ausência universal de da
 |---|---|---|
 | Migração constitucional v2.0.0 | O produto muda de CLI/relatórios para skill readonly e Markdown canônico, alterando contratos obrigatórios. | Manter os contratos v1.0.0 deixaria o produto novo em violação permanente da governança. |
 | Runbooks por etapa | A auditoria exige regras distintas de autoria, produção, runtime, release e publicação. | Um prompt longo e indiferenciado é difícil de revisar e fácil de executar parcialmente; uma única skill continua sendo o ponto de entrada. |
-| Gate de capacidade readonly | gitignore e texto de skill não impedem escrita no filesystem. | Confiar somente numa instrução ou num git status final daria garantia falsa. |
+| Enforcement de escrita do host | gitignore e texto de skill não impedem escrita no filesystem. | Nesta fase, não bloqueará o fluxo: o método declara o risco, não promete garantia e mantém prova de host como evolução futura. |

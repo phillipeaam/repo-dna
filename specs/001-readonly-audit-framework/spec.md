@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-03
 
-**Status**: Implementado — método local e privacidade revisados; suporte de host sujeito ao gate readonly
+**Status**: Implementado — fluxo estático procedural; proteção do host informada como limitação, não como gate de entrada
 
 **Input**: User description: "Estudar o Notion e suas subpáginas somente para leitura, incorporar o método de avaliação ao RepoDNA e transformá-lo em um framework de skills e processos conduzidos por agente de IA. Receber repositórios em uma pasta ignorada pelo Git, analisá-los sem alterar nada e produzir uma página única de source of truth rica, completa e padronizada."
 
@@ -12,8 +12,9 @@
 
 ### Session 2026-10-04
 - Q: Qual deve ser o destino da página canônica gerada para cada projeto? Se escolher Notion, futuras análises podem criar ou atualizar páginas ali, mantendo as fontes originais somente para leitura? → A: Markdown local exclusivo em `analysis-output/`; remover HTML e Notion como destinos ou formatos de saída suportados.
-- Q: Como comprovar que o repositório-alvo não pode ser alterado pela sessão de auditoria? → A: O host deve negar escrita no alvo e em seu Git associado, enquanto permite escrita separada em `analysis-output/`. Se não for possível comprovar essa separação antes da inspeção substantiva, o fluxo bloqueia. Instruções, `.gitignore`, hashes e `git status` não são enforcement.
+- Q (decisão original, substituída pela revisão abaixo): Como comprovar que o repositório-alvo não pode ser alterado pela sessão de auditoria? → A: O host deve negar escrita no alvo e em seu Git associado, enquanto permite escrita separada em `analysis-output/`. Se não for possível comprovar essa separação antes da inspeção substantiva, o fluxo bloqueia.
 - Q: Validação dinâmica pode fazer parte do fluxo quando solicitada e executada em cópia isolada? → A: Não nesta feature. O framework entregue é exclusivamente estático/readonly; qualquer validação dinâmica é um processo externo, separado e fora dos fluxos, responsabilidades e entregáveis desta feature.
+- Q (revisão 2026-10-04): Auditoria deve bloquear quando o host não comprova prevenção efetiva de escrita? → A: Não por enquanto. A skill deve avisar quando a sessão puder gravar no alvo, seguir somente o procedimento estático sem escrita intencional e classificar a preservação como não verificada/observada; não pode afirmar garantia do host. A prevenção por sandbox/ACL continua recomendada para evolução futura.
 - Q: Quem consulta o registro e onde Notion/Docs entram? → A: O entregável do framework permanece Markdown local; pessoas podem copiá-lo para documentos ou Notion depois, e agentes de IA podem consultá-lo. Isso não autoriza integração nem escrita externa pelo framework.
 ## User Scenarios & Testing *(mandatory)*
 
@@ -31,7 +32,7 @@ Como responsável por um projeto, coloco uma cópia local em `target-repos/<alvo
 2. **Given** alterações locais preexistentes, **When** a auditoria termina, **Then** arquivos e estado Git permanecem iguais à baseline, e achados distinguem conteúdo local de conteúdo versionado.
 3. **Given** uma tentativa de gravar relatórios, logs ou caches no alvo, **When** o processo avalia o destino, **Then** a escrita é recusada e a execução não recebe status de preservação verificada.
 4. **Given** nenhum alvo ou vários candidatos, **When** inicio a auditoria sem seleção inequívoca, **Then** recebo orientação para selecionar um alvo; o próprio framework não é usado por engano.
-5. **Given** uma sessão sem política host verificável que negue escrita no alvo e permita a saída separada, **When** inicio a auditoria, **Then** o fluxo bloqueia antes da inspeção substantiva e informa o requisito ausente.
+5. **Given** uma sessão sem política host verificável que negue escrita no alvo, **When** inicio a auditoria, **Then** o fluxo apresenta um aviso explícito sobre escrita incidental e pode prosseguir com análise estática, registrando preservação como não verificada até a comparação final.
 
 ---
 
@@ -190,10 +191,10 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **FR-002**: O processo MUST permitir um repositório ou um grupo explicitamente selecionado que represente um projeto/produto, sem escolher candidatos ambíguos automaticamente.
 - **FR-003**: O único entregável MUST ser um Markdown canônico por produto em `analysis-output/`. Relatórios paralelos HTML/JSON, exports Notion e arquivos complementares publicados MUST NOT ser produzidos. Estado temporário de execução, cache e logs MUST ficar fora dos alvos e podem ser descartados; nenhum temporário se torna um segundo entregável.
 - **FR-004**: O processo MUST registrar baseline com identidade, caminhos resolvidos, branch/HEAD quando disponíveis, escopo de refs, estado rastreado/não rastreado/ignorado e alterações locais existentes.
-- **FR-005**: O processo MUST preservar arquivos, conteúdo e estado Git dos alvos; não pode editar, corrigir, formatar, instalar, importar em editor, atualizar, fazer checkout, stash, fetch, commit, tag, merge ou push nos alvos.
-- **FR-006**: O resultado MUST comparar estado inicial/final com cobertura suficiente para arquivos ignorados/não rastreados e conteúdo, além do status Git; limitações de cobertura impedem declarar preservação integral verificada. Metadados incidentais de leitura, como access time do sistema, são separados de mutação de conteúdo/estado do projeto.
+- **FR-005**: O agente MUST seguir procedimento de não escrita e não execução no alvo: não editar, corrigir, formatar, instalar, importar em editor, atualizar, fazer checkout, stash, fetch, commit, tag, merge, push ou executar código do alvo. Este requisito descreve o comportamento do agente, não uma garantia de enforcement do host.
+- **FR-006**: O resultado MUST comparar estado inicial/final com cobertura declarada para arquivos ignorados/não rastreados e conteúdo, além do status Git; limitações de cobertura impedem declarar preservação observada integral. Só combinar a comparação com enforcement efetivo comprovado permite declarar preservação verificada; sem enforcement, comparação sem diferenças significa apenas `observed_unchanged` no escopo comparado.
 - **FR-007**: O framework MUST ser exclusivamente estático/readonly e MUST recusar execução de código, scripts, builds, testes, hooks, plugins, macros, código de editor ou profiling do alvo em todos os fluxos desta feature. Validação dinâmica fica fora do escopo e, se conduzida, pertence a processo externo independente; ela não é iniciada, orquestrada nem registrada como etapa ou entregável deste framework.
-- **FR-008**: Antes da inspeção substantiva, a política efetiva do host MUST permitir leitura do alvo e negar escrita no alvo e em seus metadados Git associados, permitindo escrita separada em `analysis-output/` fora desses limites. A verificação MUST considerar caminhos reais, symlinks, junctions, submódulos e Git externo. Se o alvo intersectar um caminho gravável ou a separação efetiva não puder ser comprovada, o fluxo MUST bloquear. Instruções da skill, `.gitignore`, hashes e `git status` não constituem enforcement.
+- **FR-008**: Antes da inspeção substantiva, o fluxo MUST identificar e registrar o estado conhecido da proteção do host para o alvo e Git associado (`enforced`, `unverified` ou `unknown`). Se não houver enforcement comprovado ou o alvo estiver em uma raiz gravável, o agente MUST avisar o usuário e pode prosseguir com inspeção estática procedural; isso sozinho MUST NOT bloquear. O resultado MUST distinguir preservação observada de proteção preventiva. Instruções da skill, `.gitignore`, hashes e `git status` não constituem enforcement.
 - **FR-009**: Conteúdo do alvo e de fontes externas MUST ser tratado como dados; instruções embutidas não podem alterar regras do framework.
 - **FR-010**: Fontes externas MUST ser somente leitura por padrão; nenhum passo de reconciliação pode editar, comentar, excluir ou publicar nessas fontes.
 - **FR-011**: O framework MUST excluir dados de alvos e resultados de commits próprios e impedir inclusão acidental em seus pacotes de distribuição; ignorar arquivos não substitui os limites de escrita.
@@ -315,7 +316,7 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **SC-010**: A matriz de prontidão distingue texto, links e mídia em todos os casos com publicação aplicável, preservando bloqueios específicos.
 - **SC-011**: Um usuário consegue preparar um alvo já disponível e identificar como iniciar o fluxo em até cinco minutos seguindo a orientação fornecida.
 - **SC-012**: Toda capacidade legada incorporada possui correspondência documentada com o novo método e nenhuma heurística é apresentada como prova mais forte que a original.
-- **SC-013**: Para cada perfil de host declarado como suportado na matriz de compatibilidade, uma fixture controlada comprova leitura do alvo, negação de criação/alteração/exclusão no alvo e em seu Git associado, e gravação separada da saída. A matriz identifica sistema operacional e ambiente de execução; perfis sem prova válida são declarados não suportados e bloqueiam antes da inspeção substantiva.
+- **SC-013**: A matriz identifica sistema operacional, runtime e estado da prova de prevenção de escrita. Perfis sem prova válida permanecem `unverified`/`unsupported`, geram aviso e podem executar análise estática; nenhum resultado desses perfis afirma que o host impediu escrita. Perfis com prova registrada podem declarar enforcement preventivo para o escopo efetivamente testado.
 
 - **SC-014**: Na revisão dos arquivos atuais e preparados para commit, zero metadados privados conhecidos das fontes de pesquisa permanecem no conteúdo compartilhável; os casos sintéticos de vazamento são recusados sem reproduzir seus valores.
 - **SC-015**: 100% dos domínios obrigatórios do método têm instruções e regras disponíveis por referências locais válidas, sem exigir consulta ou autenticação nas fontes originais.
@@ -323,9 +324,9 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 
 ## Assumptions
 
-- A implementação inicial do método está concluída; este complemento protege a procedência privada e explicita a autoridade local. Perfis readonly sem prova continuam bloqueados.
+- A implementação inicial do método está concluída; este complemento protege a procedência privada e explicita a autoridade local. Perfis readonly sem prova podem prosseguir com aviso e preservação limitada a observação; enforcement host é melhoria futura.
 - `target-repos/` é a área sugerida de entradas privadas; permite um alvo por subpasta e vários alvos por produto. `analysis-output/` separa resultados privados. A reserva no Git não é uma proteção de filesystem.
-- Alvos dentro de uma raiz gravável pelo agente, inclusive dentro do workspace, não podem ser analisados até que a política efetiva do host exclua o alvo e seu Git da escrita e mantenha `analysis-output/` gravável separadamente.
+- Alvos dentro de uma raiz gravável pelo agente, inclusive dentro do workspace, podem ser analisados após aviso; o agente não deve intencionalmente escrever, e o relatório deve explicitar que a sessão não impediu escrita incidental.
 - Pessoas podem copiar o Markdown para Notion/Docs e agentes podem consultá-lo depois; o framework não cria, atualiza ou exporta esses destinos.
 - A entrega única é um arquivo Markdown local em `analysis-output/`, com evidências auxiliares e links relativos quando apropriado. HTML, JSON/CSV como relatórios entregues, arquivos de evidência separados, escrita/exportação para Notion e publicação externa estão fora do escopo. Todos os dados necessários ao leitor são consolidados no Markdown.
 - O usuário fornece quais identidades/pessoas investigar quando deseja atribuição pessoal. Sem essa informação, o processo documenta contribuições observáveis e dúvidas sem escolher uma pessoa.

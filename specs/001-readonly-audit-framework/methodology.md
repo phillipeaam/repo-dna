@@ -312,6 +312,6 @@ Antes da implementação do runtime, uma atualização constitucional explícita
 
 Entregues para esta feature SDD: spec, síntese do método, inventário de fontes, checklists, plano, contratos, modelo e tarefas. A especificação do produto limita a futura entrega de cada auditoria a um único Markdown em `analysis-output/`.
 
-A skill, os runbooks, contratos, template de consolidação e contratos de aceitação estão disponíveis localmente. O CLI antigo está aposentado. A procedência original da pesquisa é privada e opcional; o mapa público mantém correspondência temática. Perfis de host continuam não verificados e auditorias reais bloqueiam até prova válida de isolamento.
+A skill, os runbooks, contratos, template de consolidação e contratos de aceitação estão disponíveis localmente. O CLI antigo está aposentado. A procedência original da pesquisa é privada e opcional; o mapa público mantém correspondência temática. Perfis de host não verificados permitem auditoria estática com aviso; preservação observada não é garantia de isolamento.
 
-Criar pasta ignorada ou escrever “readonly” em prompt não comprova isolamento. O plano precisa estabelecer enforcement e evidência de preservação para todo o fluxo antes de declarar a solução pronta.
+Criar pasta ignorada ou escrever “readonly” em prompt não comprova isolamento. Na versão atual, o agente segue o procedimento sem escrita intencional e declara a limitação; enforcement e prova de host são melhorias futuras para elevar a garantia de preservação.

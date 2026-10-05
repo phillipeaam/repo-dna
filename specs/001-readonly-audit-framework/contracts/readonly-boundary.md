@@ -10,25 +10,24 @@
 6. Não fazer checkout, clean, stash, fetch, refresh de índice, inicialização de submódulo, reset, commit, tag, merge ou push.
 7. Nenhum cache, temporário, log, índice ou relatório é criado no alvo.
 
-## Controle antes da análise
+## Procedimento antes da análise
 
-- A política efetiva do host MUST permitir leitura e impedir criação, alteração e exclusão pelo processo de análise no alvo e em seus diretórios Git reais.
-- A mesma política MUST permitir salvar o Markdown em analysis-output/, fora do alvo e de seus diretórios Git.
-- Validar a separação usando os caminhos canônicos e permissões efetivas antes da inspeção substantiva; bloquear com estado e motivo quando não puder ser comprovada.
-- Se o alvo intersectar uma raiz gravável do agente, bloquear, a menos que o host prove uma exclusão mais específica que negue escrita no alvo e Git associado.
-- Instruções de skill, .gitignore, hashes e git status não constituem controle preventivo de permissão.
-- Comparar estado inicial/final como defesa adicional, sem substituir controle preventivo.
-- Atributo filesystem read-only não é garantia se o mesmo processo puder removê-lo ou alterar as permissões.
+- O agente MUST seguir procedimento de não escrita: não editar, corrigir, formatar, instalar, importar, executar ou iniciar ferramentas do alvo.
+- Registrar o estado de proteção do host (`enforced`, `unverified` ou `unknown`) antes da inspeção, quando essa informação estiver disponível.
+- Se o alvo estiver em uma raiz gravável ou a política for desconhecida, avisar o usuário antes da leitura substantiva e continuar com status de preservação não verificado; isso não bloqueia por si só.
+- Salvar o Markdown em `analysis-output/`, fora do alvo e de seus diretórios Git. Se não for possível separar saída de alvo, pedir outro slug/destino ou bloquear por conflito de caminho.
+- Instruções, `.gitignore`, hashes, `git status` e atributos read-only não são controle preventivo. Não os descreva como tal.
+- Comparar estado inicial/final como observação de mudanças, não como prova de que nenhuma escrita incidental ocorreu.
 
-## Teste de capacidade do host
+## Validação opcional de capacidade do host
 
-- Em fixture controlada, comprovar que a identidade de auditoria consegue ler o alvo e não consegue criar, alterar ou excluir arquivo nele ou em seu Git associado.
-- Comprovar separadamente que a saída autorizada em analysis-output/ continua gravável.
-- Se qualquer controle não puder ser exercitado ou comprovado, declarar o perfil do host incompatível e bloquear antes da inspeção substantiva.
+- Em fixture controlada, pode-se comprovar que a identidade de auditoria consegue ler o alvo e não consegue criar, alterar ou excluir arquivo nele ou em seu Git associado.
+- Comprovar separadamente que a saída autorizada em `analysis-output/` continua gravável.
+- Se a prova não foi executada ou falhou, marcar o perfil `unverified`/`unsupported`, avisar e permitir a auditoria com preservação não verificada.
 
 ## Verificação
 
 - Registrar alterações preexistentes sem normalizar ou corrigir.
 - Verificar conteúdo/estado observável, incluindo paths untracked e ignored no escopo.
-- Concorrência ou cobertura incompleta resulta em preservação inconclusiva/parcial.
+- Concorrência ou cobertura incompleta resulta em preservação inconclusiva/parcial. Comparação sem diferenças permite dizer `observed_unchanged` somente para o escopo examinado; `verified` exige enforcement efetivo comprovado mais comparação suficiente. Sem enforcement, não há garantia preventiva.
 - git status limpo isoladamente nunca justifica declaração de preservação verificada.

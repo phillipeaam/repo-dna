@@ -2,16 +2,16 @@
 
 ## Objetivo e entradas
 
-Este é o fluxo normativo chamado pela skill principal. Entradas: repositório(s) selecionados explicitamente sob `target-repos/`, identidade/contexto declarado pelo usuário, matriz de host aprovada e destino local `analysis-output/<safe-product-slug>.md`. Nunca inferir que dois projetos são um só por organização, nome ou dependência.
+Este é o fluxo normativo chamado pela skill principal. Entradas: repositório(s) selecionados explicitamente sob `target-repos/`, identidade/contexto declarado pelo usuário, perfil de host observado (se conhecido) e destino local `analysis-output/<safe-product-slug>.md`. Nunca inferir que dois projetos são um só por organização, nome ou dependência.
 
 ## Gate 0 — perfil e caminhos reais (antes da inspeção substantiva)
 
-1. Identificar a combinação exata de sistema operacional, runtime/shell do agente e política de permissões apresentada pelo host. Ela deve corresponder a uma linha `supported` em `tests/fixtures/readonly-audit/README.md`, com prova controlada e política/perfil ainda válidos nesta sessão. Se o host não expõe evidência autoritativa do escopo de escrita, bloquear.
+1. Identificar o sistema operacional e o runtime/shell do agente. Registrar o perfil na matriz quando houver evidência; `unverified` significa que a proteção do host não foi comprovada, não que o método precise bloquear.
 2. Resolver caminho absoluto e canônico do alvo; resolver symlinks/junctions sem seguir para fora do escopo escolhido. Identificar submódulos e todos os metadados Git reais: arquivo `.git` de worktree, gitdir, common dir e object store externo. Não inicializar submódulos.
-3. Comparar cada caminho do alvo/Git com as raízes graváveis atuais fornecidas pelo host. Se houver interseção, só continuar se o host comprovar uma regra mais específica de negação de escrita. `target-repos/` dentro de uma raiz gravável normalmente falha este gate.
-4. Confirmar separadamente que `analysis-output/` é gravável e está fora de todos os caminhos protegidos. Verificar colisão de slug e identidade antes de escolher destino.
-5. Não tente escrever no alvo real para provar bloqueio. Provas de capacidade usam somente fixtures descartáveis próprias e seguem a matriz. Permissões declaradas sem enforcement efetivo não passam.
-6. Se qualquer condição falhar, registrar estado `blocked`, caminho/razão sem revelar segredo, próximo passo e cobertura `not_verified`; pode gravar um único registro Markdown de bloqueio em `analysis-output/` apenas se esse destino já passou no gate. Não ler arquivos de produto ou Git history além do mínimo necessário para resolver fronteira.
+3. Comparar os caminhos do alvo/Git com as raízes graváveis conhecidas pelo host. Se houver interseção ou a política não for conhecida, avisar que o agente pode gravar no alvo por acidente; isso não bloqueia o método.
+4. Verificar colisão de slug e identidade antes de escolher destino em `analysis-output/`. A saída deve ficar fora do alvo e do Git. Se o diretório não existir, criá-lo no checkout do framework; nunca dentro do alvo.
+5. Não tente escrever no alvo real para provar proteção. A matriz de fixtures documenta evidência de host, mas é opcional para iniciar uma auditoria; sem prova, registrar preservação como `not_verified` até a comparação final.
+6. Bloquear somente se o alvo for ambíguo, seu escopo real não puder ser resolvido com segurança, ou a saída conflitar com o alvo/outro produto. Não ler conteúdo substantivo até o usuário escolher claramente o alvo.
 
 ## Gate 1 — baseline reproduzível
 
@@ -29,7 +29,7 @@ Não normalizar nem corrigir o estado. Construir snapshot de conteúdo/inventár
 
 | Fase | Entrada e foco | Saída/checkpoint |
 |---|---|---|
-| Preparação | Identidade, produto/repos, baseline, escopo | Perfil aprovado, inventário e limitações |
+| Preparação | Identidade, produto/repos, baseline, escopo | Perfil e enforcement informados, inventário e limitações |
 | A1 Forense | Git, timeline, identidade e contribuições | Findings e atribuição qualificada |
 | B1 Produção | Sistemas, arquitetura, config, conteúdo, ferramentas | Mapa estrutural/tecnológico |
 | B2 Runtime | Inspeção estática e medições pré-existentes | Riscos estáticos, medidas com procedência ou plano futuro |
@@ -50,13 +50,13 @@ Registrar para cada domínio `complete`, `partial`, `not_observed`, `not_applica
 
 ## Gate final de preservação
 
-Após leitura, comparar conteúdo/inventário coberto e estado Git com a baseline, incluindo tracked, ignored e untracked dentro do escopo declarado. Não executar comandos de reparo. Concorrência ou cobertura incompleta impede declarar preservação integral verificada. A checagem final é defesa adicional, nunca substitui o enforcement do host.
+Após leitura, comparar conteúdo/inventário coberto e estado Git com a baseline, incluindo tracked, ignored e untracked dentro do escopo declarado. Não executar comandos de reparo. Concorrência ou cobertura incompleta impede declarar preservação observada integralmente. Sem enforcement preventivo comprovado, mesmo uma comparação sem diferenças registra apenas `observed_unchanged` no escopo verificado, não uma garantia de que o host impediu toda escrita.
 
-## Configuração exigida do host
+## Limites de proteção do host
 
-Antes de uma auditoria, o operador precisa configurar ou selecionar um perfil em que o processo de análise não consiga criar, alterar, excluir nem remover a proteção do alvo e dos metadados Git reais. `analysis-output/` deve permanecer gravável e fora desses caminhos. Use a política de permissões do host ou um mount/volume realmente readonly; marcar arquivos como readonly no mesmo usuário não é suficiente.
+O método pede que o agente não escreva nem execute nada do alvo, mas não exige que o operador configure sandbox, ACL ou mount readonly antes de começar. Quando a sessão pode gravar no alvo — inclusive se `target-repos/` estiver dentro do checkout — mostrar o aviso de risco antes da leitura e marcar a proteção como não verificada. `analysis-output/` deve ficar fora do alvo e do Git associado.
 
-No Codex, se as permissões da sessão tornam todo o checkout gravável e não expõem uma negação mais específica para o alvo, não coloque a cópia auditada nesse escopo e não prossiga. Use somente um caminho que o host forneça como leitura sem escrita para essa sessão, mantendo a saída no workspace gravável; resolva links/junctions para confirmar os caminhos canônicos. Refaça a prova de fixture quando sistema, runtime ou política mudar e atualize a matriz antes de declarar suporte. Se não for possível preparar e verificar a separação, o resultado correto é `blocked`.
+No Codex, se as permissões tornam o checkout gravável, ainda é permitido analisar uma cópia em `target-repos/` após o aviso. Use leitores estáticos e evite comandos capazes de atualizar Git, caches ou arquivos. A prova de fixture continua útil para elevar confiança futura, mas sua ausência não bloqueia. Se o usuário não aceitar o risco de sessão gravável, ele pode preparar um alvo protegido por meios próprios; isso é opcional nesta fase.
 
 ## Mapeamento resumido de requisitos para fases
 

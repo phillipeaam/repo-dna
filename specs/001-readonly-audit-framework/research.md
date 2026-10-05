@@ -50,19 +50,21 @@
 - Requerer manifesto/config extra em cada diretório: acrescenta configuração ao gesto simples de colocar a cópia do repo.
 - Agrupar automaticamente todos os alvos por organização/nome: arrisca misturar produtos distintos e autoria.
 
-### 4. Readonly requer um gate de capacidade, não apenas uma promessa
+### 4. Readonly procedural agora; enforcement do host como evolução futura
 
-**Decision**: A skill delimita caminhos reais, recusa execução do conteúdo do alvo e usa apenas comandos/leitores auditados. Antes da análise, confirma que a sessão não dispõe de escrita nos caminhos do alvo enquanto mantém analysis-output/ como local de entrega. Se o host não consegue assegurar a separação, interrompe antes de inspecionar em profundidade e diz o motivo. A validação final compara estado de entrada/final como detecção adicional, não substituto do gate.
+**Decision (revisada em 2026-10-04)**: A skill delimita caminhos reais, recusa execução e escrita intencional no alvo, e usa leitores estáticos. Quando a sessão tem escrita ou a política é desconhecida, avisa o usuário e pode prosseguir; o resultado descreve a preservação como não verificada/observada, sem alegar proteção do host. Uma fixture controlada pode elevar a confiança no futuro, mas não é pré-requisito do fluxo atual.
 
 **Rationale**: target-repos/ é ignorado pelo Git, mas continua dentro do checkout; .gitignore não limita permissão. O CLI atual usa cd "$REPO_ROOT", resolve o output padrão sob esse root e cria várias pastas/arquivos ali. Não é um caminho seguro de coleta.
 
-**Alternatives considered**:
-- Confiar apenas na skill dizendo “não escrever”: não é enforcement.
-- Fazer só git status no fim: ignora alterações untracked/ignored ou conteúdo alterado.
-- Marcar arquivos read-only e continuar com a mesma identidade/sandbox: atributo é reconfigurável e não equivale a isolamento do processo.
-- Executar builds/testes do alvo: contradiz readonly; resultados dinâmicos não pertencem ao fluxo padrão.
+**Trade-off aceito nesta fase**: procedimento e comparação não são enforcement; um bug, ferramenta incidental ou comportamento do host ainda pode gravar no alvo. Essa possibilidade deve ser avisada e nunca ocultada como garantia.
 
-**Condition**: Se não houver controle confiável de permissão no Codex host nos subcaminhos, a implementação deve escolher um mecanismo suportado pelo host fora da árvore do alvo ou manter o gate fechado. Não declarar que o controle existe antes de validar o host.
+**Alternatives considered**:
+- Bloquear até existir enforcement: mais seguro preventivamente, mas impede o uso inicial no host atual; adiado para evolução futura.
+- Fazer só git status no fim: ignora alterações untracked/ignored ou conteúdo alterado; por isso o workflow compara conteúdo e estado dentro da cobertura declarada.
+- Marcar arquivos read-only e continuar com a mesma identidade/sandbox: atributo é reconfigurável e não equivale a isolamento do processo.
+- Executar builds/testes do alvo: contradiz o escopo estático; resultados dinâmicos não pertencem ao fluxo padrão.
+
+**Condition**: Marcar o perfil de host como `enforced` somente após prova controlada. Enquanto isso, permitir uso procedural com aviso e preservar a distinção entre intenção do agente, estado observado e prevenção efetiva.
 
 ### 5. Reusar análise legada seletivamente
 

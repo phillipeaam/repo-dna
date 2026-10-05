@@ -4,16 +4,16 @@ Estas fixtures são dados sintéticos do framework. Nunca copiar dados de reposi
 
 ## Matriz autoritativa de perfis de host
 
-Um perfil combina sistema operacional, runtime/shell do agente e política de permissões efetiva. Só recebe estado `supported` após prova controlada demonstrar leitura do alvo-fixture, negação de criar/alterar/excluir nele e no Git associado, e escrita separada na saída. Até haver evidência revisada para a combinação, ela é `unverified` e tratada como não suportada.
+Uma combinação de sistema operacional, runtime/shell do agente e política de permissões efetiva forma um perfil. A prova controlada classifica o enforcement disponível (`enforced`, `unverified` ou `unsupported`). Esse estado informa a confiança de preservação e recomendações; `unverified` não bloqueia a auditoria estática. Só declarar enforcement preventivo após prova de leitura, negação de criar/alterar/excluir no alvo-fixture e Git associado, e escrita separada na saída.
 
 | Sistema operacional | Ambiente de execução | Estado | Prova/evidência | Revisado em |
 |---|---|---|---|---|
-| Windows | Codex host / PowerShell | unverified — bloqueia | pendente de execução controlada | — |
-| Windows | Codex host / Git Bash | unverified — bloqueia | pendente de execução controlada | — |
-| Linux | Codex host / shell configurado | unverified — bloqueia | pendente de execução controlada | — |
-| macOS | Codex host / shell configurado | unverified — bloqueia | pendente de execução controlada | — |
+| Windows | Codex host / PowerShell | unverified — aviso; prossegue sem garantia | pendente de execução controlada | — |
+| Windows | Codex host / Git Bash | unverified — aviso; prossegue sem garantia | pendente de execução controlada | — |
+| Linux | Codex host / shell configurado | unverified — aviso; prossegue sem garantia | pendente de execução controlada | — |
+| macOS | Codex host / shell configurado | unverified — aviso; prossegue sem garantia | pendente de execução controlada | — |
 
-O suporte é declarado por combinação efetivamente exercitada; não inferir cobertura de um shell/runtime para outro. A matriz é a autoridade para SC-013. CI executa a prova em cada combinação suportada; perfis não disponíveis em CI ficam não suportados até execução controlada registrada.
+O enforcement é declarado por combinação efetivamente exercitada; não inferir cobertura de um shell/runtime para outro. A matriz informa SC-013. CI executa a prova em perfis declarados `enforced`; perfis não disponíveis permanecem `unverified`, permitem análise procedural e não sustentam claims de proteção preventiva.
 
 ## Cenários previstos
 

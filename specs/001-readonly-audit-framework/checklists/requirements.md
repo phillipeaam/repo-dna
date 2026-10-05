@@ -44,7 +44,7 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - FR-022 e FR-052 mantêm verificação por tipo de claim e confirmação pessoal identificada.
 - FR-054 permite encerramento com lacunas não bloqueantes, evitando recuperação infinita.
 - A constituição v2.0.0 foi atualizada explicitamente antes da implementação para governar skills, auditoria readonly e Markdown canônico; a data original de ratificação permanece TODO até confirmação.
-- Clarificação de 2026-10-04: o host deve negar escrita no alvo e Git associado e permitir saída separada; incapacidade de comprovar isso bloqueia antes da inspeção substantiva.
+- Clarificação original de 2026-10-04: host enforcement era gate obrigatório. Revisão posterior de 2026-10-04 substitui essa decisão: perfil sem prova avisa e permite análise estática, com preservação não verificada; ver FR-008 e SC-013 atualizados.
 - Clarificação de 2026-10-04: há exatamente um entregável Markdown local por produto; relatórios HTML, JSON/CSV publicados, anexos e escrita/exportação para Notion estão fora do escopo.
 - Clarificação de 2026-10-04: pessoas podem copiar o Markdown para Notion/Docs depois; agentes de IA são consumidores previstos. SC-006 mede respostas rastreáveis de IA, e SC-011 continua medindo o tempo para encontrar como iniciar.
 - Não há extensions.yml nem hooks before_specify/after_specify registrados nesta checkout. A branch observada é feature/001-readonly-audit-framework.

@@ -12,10 +12,10 @@ Each audited product has exactly one persistent user-facing result: `analysis-ou
 1. Open this checkout in Codex.
 2. Put a local repository copy under `target-repos/` and select it explicitly. Relate multiple repositories only when they are confirmed parts of the same product.
 3. Invoke the `repodna-audit` skill.
-4. The skill checks the effective host permissions before substantive inspection. It proceeds only when the selected host profile is recorded as supported in [the readonly fixture matrix](tests/fixtures/readonly-audit/README.md), the target and its real Git storage are protected from writes, and `analysis-output/` remains writable separately.
+4. The skill checks the host profile and target/Git paths. If write prevention is unverified, it warns you and proceeds with static inspection; the report marks preservation as unverified/observed, never guaranteed.
 5. Read the single Markdown result in `analysis-output/`.
 
-`target-repos/` and `analysis-output/` are Git-ignored for privacy. Ignore rules do not enforce filesystem permissions. If the host cannot prove the readonly boundary, the audit blocks; do not use a target inside a writable scope and assume a prompt or final status check protects it.
+`target-repos/` and `analysis-output/` are Git-ignored for privacy. Ignore rules do not enforce filesystem permissions. The agent must not intentionally write to or execute the target, but a writable session can still permit incidental changes. Use a protected copy when available; otherwise review the preservation limitation in the final Markdown.
 
 ## Audit method
 
@@ -58,7 +58,7 @@ Acceptance scripts use only synthetic framework fixtures; they must never inspec
 bash tests/run.sh --framework
 ```
 
-All Codex host profiles remain `unverified` in the [host matrix](tests/fixtures/readonly-audit/README.md), so a real audit currently blocks until a profile's readonly guarantees are validated and recorded. Legacy report-generation tests are excluded from the supported runner.
+Codex host profiles may remain `unverified` in the [host matrix](tests/fixtures/readonly-audit/README.md); that status now warns and limits preservation claims instead of blocking static audits. Legacy report-generation tests are excluded from the supported runner.
 
 ## License
 

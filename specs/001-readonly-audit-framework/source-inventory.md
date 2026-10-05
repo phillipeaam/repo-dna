@@ -28,7 +28,7 @@ generalizados, sem alegar cópia integral ou revalidação dos fatos dos casos.
 | L11 | Reconciliação, classificação de fontes, conflitos, encerramento honesto de lacunas | [Método §11](methodology.md) e [consolidação](../../.agents/skills/repodna-audit/references/consolidation.md) |
 | L12 | Casos generalizados: prazos, migrações, sucessores, pacotes e claims superadas | [Método §12](methodology.md) e [workflow multi-repo](../../.agents/skills/repodna-audit/references/workflow.md) |
 | L13 | Capacidades existentes: reuso sem promover heurísticas, retirada do pipeline antigo | [Método §13](methodology.md) e [plano](plan.md) |
-| L14 | Limites: sem execução dinâmica, sem afirmação inventada e gate readonly do host | [Método §14](methodology.md) e [fronteira](contracts/readonly-boundary.md) |
+| L14 | Limites: sem execução dinâmica, sem afirmação inventada e aviso sobre proteção do host não comprovada | [Método §14](methodology.md) e [fronteira](contracts/readonly-boundary.md) |
 
 ## Autoridade e privacidade
 

@@ -8,6 +8,8 @@
 
 **Organization**: Tarefas agrupadas pelas sete histórias da especificação e precedidas pelos gates compartilhados de governança e vocabulário.
 
+**Revisão de decisão 2026-10-04**: Phase 16 atualiza o contrato de host readonly. T001–T074 preservam o registro da decisão original (gate obrigatório); para o comportamento vigente, Phase 16 e os artefatos atualizados prevalecem: enforcement não comprovado gera aviso, não bloqueio, e a preservação não pode ser chamada de garantida.
+
 ## Phase 1: Setup e gate de governança
 
 **Purpose**: Atualizar a autoridade do projeto antes de iniciar implementação incompatível e fixar áreas locais ignoradas.
@@ -245,6 +247,17 @@ ordem, sem gerar outra spec, trocar branch ou substituir tarefas já concluídas
 
 - [x] T074 Ampliar `scripts/check-public-context.py` e `tests/public_context_test.sh` para detectar caminhos pessoais em todo arquivo textual verificável, não só `.md`, `.txt` e `.rst`; cobrir ao menos `.py`, `.sh` e `.json` com exemplos fictícios e preservar a omissão de valores nos diagnósticos (FR-071, FR-073, SC-014; partial).
 
+## Phase 16: Uso procedural sem enforcement obrigatório
+
+**Purpose**: Permitir iniciar auditorias estáticas no host atual sem confundir instruções de não escrita com garantia de isolamento.
+
+- [x] T075 Atualizar a decisão vigente na mesma `spec.md`, revisar FR-005/006/008 e SC-013, preservar a decisão anterior como histórico, e emendar a constituição para v3.0.0 com aviso e preservação qualificada.
+- [x] T076 Alterar `.agents/skills/repodna-audit/SKILL.md` e `references/workflow.md` para permitir perfis `unverified` com aviso, bloquear somente seleção/escopo/saída ambíguos ou inseguros, e manter proibição de escrita/execução intencional.
+- [x] T077 Harmonizar contrato readonly, contrato Markdown, matriz de host, guia rápido, README, modelo, método, research, source inventory e checklists; separar `verified` (enforcement + comparação) de `observed_unchanged` (comparação sem enforcement).
+- [x] T078 Registrar os limites aceitos: ferramenta ou host ainda pode gravar incidentalmente; `.gitignore`, instruções e comparação não evitam isso, e tal risco permanece explícito até futura evolução de enforcement.
+
+**Estado atual**: Auditorias em `target-repos/` podem começar mesmo com a matriz `unverified`. A primeira resposta da skill deve avisar sobre o risco e confirmar a seleção do alvo; o documento final separa enforcement, preservação observada e cobertura incompleta.
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -360,5 +373,5 @@ Task: T021 publication-b4.md
 - O mapa público preserva os 14 temas metodológicos; as referências obrigatórias resolvem localmente sem consulta às fontes originais. Isso demonstra cobertura/instruções locais, não cópia integral das páginas ou suporte do host para auditorias reais.
 - Originais de pesquisa e exemplos antigos foram preservados somente na área privada ignorada. Nenhum conteúdo de `private-context/`, `target-repos/` ou `analysis-output/` está rastreado. Nenhuma fonte externa foi alterada e nenhum repositório-alvo foi executado.
 - As fontes privadas incorporadas nesta feature não tinham commits identificados nos caminhos de inventário/método. Exemplos pessoais da documentação e dos testes antigos já existem no histórico do projeto; a limpeza atual não elimina essa exposição. Histórico não foi reescrito.
-- Revisão automática cobre padrões de metadados e termos privados conhecidos; revisão humana de informações desconhecidas e binários continua necessária. A matriz Codex segue unverified e bloqueia auditorias reais até prova válida.
+- Revisão automática cobre padrões de metadados e termos privados conhecidos; revisão humana de informações desconhecidas e binários continua necessária. Histórico: a matriz Codex era unverified e bloqueava; Phase 16 remove esse bloqueio, mantendo aviso e preservação observacional.
 - Converge identificou uma limitação: caminhos pessoais eram verificados apenas em Markdown/texto simples. T074 removeu a restrição por extensão e acrescentou casos em `.py`, `.sh` e `.json`; os 11 contratos, a prova de redaction e o guard final de working tree/índice passaram em 2026-10-04.

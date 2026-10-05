@@ -38,7 +38,7 @@
 - [x] CHK017 Os critérios de aceitação permitem determinar objetivamente quando há exatamente um Markdown persistente por produto e nenhum entregável alternativo? [Measurability, Spec §SC-007–008]
 - [x] CHK018 Os critérios de aceitação cobrem cenários de preservação incompleta, autoria ambígua, release sem artefato correlacionado e desempenho não medido? [Scenario Coverage, Edge Case, Spec §SC-001, SC-005]
 - [x] CHK019 Os requisitos distinguem revisão/conclusão da auditoria de aprovação humana, segurança de publicação e autorização para publicar? [Clarity, Spec §FR-047–054, FR-067–068]
-- [x] CHK020 Os requisitos distinguem enforcement efetivo do host de instruções, gitignore e comparação posterior, definindo quando bloquear e como manter a saída gravável separadamente? [Clarity, Security, Spec §FR-008, SC-013]
+- [x] CHK020 (revisado em 2026-10-04) Os requisitos distinguem enforcement efetivo de procedimento e comparação observacional, exigindo aviso e limitando claims quando não há prova, sem bloquear a auditoria estática? [Clarity, Spec §FR-008, SC-013]
 - [x] CHK021 Os requisitos definem a procedência e as condições de comparação das medições e separam tamanho de build, configuração e risco estático de resultados de runtime? [Completeness, Clarity, Spec §FR-037–041]
 - [x] CHK022 Os requisitos avaliam separadamente permissão para link, embed, cópia, crop, download/rehosting e alteração de áudio, sem inferir autorização a partir da publicação existente? [Completeness, Edge Case, Spec §FR-047–051]
 - [x] CHK023 Os requisitos definem categorias distintas para itens reconciliados e exigem fonte e justificativa para cada classificação? [Completeness, Clarity, Spec §FR-059–060]

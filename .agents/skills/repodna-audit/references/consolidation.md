@@ -6,7 +6,7 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 
 1. Confirmar nome/identidade do produto e relação explícita entre repositórios antes de consolidar. Sem confirmação, manter registros separados e perguntar.
 2. Gerar slug previsível e seguro; se o caminho colidir com outro produto ou arquivo existente de identidade incerta, bloquear para escolha explícita. Nunca sobrescrever ou fundir por semelhança de nome.
-3. Confirmar que destino não intersecta alvo, Git externo, submódulo selecionado ou raiz protegida; o destino gravável continua apenas `analysis-output/`.
+3. Confirmar que destino não intersecta alvo, Git externo ou submódulo selecionado; o destino continua apenas `analysis-output/`, mesmo quando o restante do checkout é gravável.
 4. Criar/atualizar integralmente o mesmo Markdown do produto. Validar estrutura, IDs, links e conteúdo antes de substituir o arquivo. Não produzir anexos, JSON/HTML/CSV, diretórios por sistema, exports Notion ou segundo relatório.
 5. Em falha ou bloqueio, registrar estado e causa no documento canônico quando for seguro gravá-lo; não gerar relatório de erro separado.
 
@@ -59,9 +59,9 @@ Manter uma resposta atual por tema. Fontes antigas são classificadas como `inco
 
 ## Baseline e declaração de preservação
 
-O primeiro registro inclui `## Baseline e preservação` com identidade/caminhos canônicos dos alvos e Git associado, repos/refs/HEAD, estado tracked/untracked/ignored, instante, perfil readonly, método de inventário e cobertura/limites. Estado preexistente fica separado de alterações concorrentes ou posteriores.
+O primeiro registro inclui `## Baseline e preservação` com identidade/caminhos canônicos dos alvos e Git associado, repos/refs/HEAD, estado tracked/untracked/ignored, instante, estado de proteção do host (`enforced`, `unverified` ou `unknown`), método de inventário e cobertura/limites. Estado preexistente fica separado de alterações concorrentes ou posteriores.
 
-No fechamento, atualizar a mesma seção com verificação final por categoria, divergências, arquivos/famílias não cobertos e resultado `verified`, `partial` ou `inconclusive`. Só declarar `verified` para o conteúdo/estado que foi efetivamente coberto por baseline e comparação; `git status` isolado não basta. Se o gate falhar antes da leitura substantiva, declarar `blocked`/`not_verified`, motivo e ação necessária sem insinuar que houve análise ou preservação integral.
+No fechamento, atualizar a mesma seção com comparação final por categoria, divergências, arquivos/famílias não cobertos e estado `verified`, `observed_unchanged`, `changed`, `partial` ou `inconclusive`. `git status` isolado não basta. `verified` exige enforcement efetivo comprovado e cobertura de comparação suficiente; sem enforcement, mesmo sem divergências, registrar apenas `observed_unchanged` no escopo comparado, nunca `verified` como garantia preventiva.
 
 ## Histórias de engenharia e talking points
 

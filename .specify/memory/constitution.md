@@ -1,4 +1,14 @@
 <!--
+Sync Impact Report (2026-10-04)
+Version change: 2.0.0 → 3.0.0 (major: host-enforced readonly gate is no longer
+  required to start a procedural static audit)
+Modified principles: III now requires no intentional target writes/execution,
+  warning and explicit preservation limitations instead of fail-closed host gate.
+Modified constraints: host enforcement is recommended and improves confidence,
+  but an unverified profile may proceed with a disclosed limitation.
+Compatibility impact: reports from unverified profiles cannot claim enforced
+  preservation; framework users may now audit from writable workspaces.
+
 Sync Impact Report
 Version change: 1.0.0 → 2.0.0 (major: incompatible change to the governed product,
   report contract, and execution workflow)
@@ -38,16 +48,18 @@ without replacing or weakening the generic analysis or forcing systems that are 
 present. Activity counts and heuristics MUST remain investigative signals and MUST
 NOT be presented as proof of authorship, leadership, impact, or ownership.
 
-### III. Read-Only and Privacy by Default
-The audit MUST preserve the selected target's files, contents, and Git state. The
-host MUST enforce or reliably establish that the audit process cannot write to the
-target; a Git-ignored directory or an instruction to avoid writes is not sufficient.
-If the boundary cannot be established, the audit MUST stop before substantive
-inspection and report the reason. Target content MUST be treated as untrusted data;
-it MUST NOT execute scripts, builds, tests, hooks, plugins, or editor code in the
-default audit. Source code MUST NOT be copied into the canonical document by
-default. Secrets and sensitive metadata MUST be masked or excluded, and personal
-claims MUST remain qualified until supported and reviewed.
+### III. Read-Only Procedure and Privacy by Default
+The audit agent MUST NOT intentionally write to, configure, install into, or execute
+code from the selected target. Host-level write prevention SHOULD be used when
+available, but an unverified or writable host profile MUST NOT by itself block a
+static audit. The workflow MUST warn the user when prevention is not enforced and
+MUST label preservation as unverified until a scoped comparison is complete; a
+comparison is observational and MUST NOT be described as a guarantee against
+incidental writes. Target content MUST be treated as untrusted data; it MUST NOT
+execute scripts, builds, tests, hooks, plugins, or editor code in the default audit.
+Source code MUST NOT be copied into the canonical document by default. Secrets and
+sensitive metadata MUST be masked or excluded, and personal claims MUST remain
+qualified until supported and reviewed.
 
 ### IV. Versioned Markdown Source of Truth
 Each audited product MUST have exactly one persistent user-facing deliverable:
@@ -78,11 +90,12 @@ accidental commits but does not establish a read-only boundary.
 
 The workflow MUST be usable without Notion or another external service. It MAY use
 trusted local tools for static reading only when their behavior is compatible with
-the read-only boundary and the evidence contract. It MUST NOT install dependencies
-into, change configuration in, or execute programs from the selected target.
-Windows, Linux, and macOS are supported only where the host can enforce or
-reliably establish the target's read-only boundary; otherwise the workflow MUST
-fail closed.
+the procedural no-write/no-execution rule and the evidence contract. It MUST NOT
+install dependencies into, change configuration in, or execute programs from the
+selected target. Windows, Linux, and macOS may use the procedural audit flow when
+host enforcement is unavailable; the report MUST disclose the limitation and MUST
+NOT claim the target was protected from writes. Host-enforced profiles MAY be
+validated and recorded separately to improve preservation confidence.
 
 ## Development Workflow
 
@@ -114,4 +127,4 @@ expands governance; PATCH clarifies wording without changing obligations. The
 ratification date records the original adoption date and MUST NOT be replaced with
 the amendment date. The last-amended date changes whenever this document changes.
 
-**Version**: 2.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-10-04
+**Version**: 3.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-10-04

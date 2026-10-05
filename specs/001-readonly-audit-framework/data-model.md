@@ -8,8 +8,8 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 |---|---|---|
 | **Produto** | Nome canônico, aliases, contexto, slug Markdown, estado, links públicos verificados | Agrega um ou mais repositórios; possui um único arquivo canônico |
 | **Repositório-alvo** | Caminho selecionado/canônico, nome/remote quando disponíveis, papel no produto, snapshot/ref, estado local, limite de leitura | Pertence a um produto por seleção explícita ou relação evidenciada |
-| **Baseline** | Identidade do alvo, HEAD/branch/refs acessíveis, instante, conteúdo/inventário verificável, alterações locais, método/versão | Sessão usa uma ou mais; findings referenciam sua baseline |
-| **Sessão de auditoria** | Data, método/versão, etapas, cobertura, checkpoints, término/falha, verificação de preservação | Atualiza o registro canônico; não é arquivo entregue independente |
+| **Baseline** | Identidade do alvo, HEAD/branch/refs acessíveis, instante, conteúdo/inventário verificável, alterações locais, método/versão, estado de enforcement do host | Sessão usa uma ou mais; findings referenciam sua baseline |
+| **Sessão de auditoria** | Data, método/versão, etapas, cobertura, checkpoints, término/falha, enforcement informado e estado de preservação (`verified`, `observed_unchanged`, `changed`, `partial`, `inconclusive`) | Atualiza o registro canônico; não é arquivo entregue independente |
 | **Etapa** | ID, pré-condição, entrada, domínio/aplicabilidade, estado, resultado, motivo de falha | Pertence a uma sessão: preparação, A1, B1–B4, consolidação, reconciliação, revisão |
 | **Fonte/evidência** | ID estável, path/commit/URL, tipo, data, repo/snapshot, síntese permitida, divulgação, confiança e limites | Sustenta findings/claims; fonte primária ou contexto |
 | **Finding/conclusão** | ID, fato/inferência/relato/conflito, descrição, estado, confiança justificada, limites | Cita evidências; alimenta sistema, contribuição, release ou claim |
@@ -66,4 +66,4 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
     complete/partial -> consolidation -> reviewed_for_handoff
     baseline_changed -> stale (revalidar findings afetados antes de retomar)
 
-Bloquear é válido quando o host não garante acesso readonly, o alvo é ambíguo ou a baseline muda durante a sessão.
+Bloquear é válido quando o alvo é ambíguo, o escopo não pode ser resolvido ou a baseline muda durante a sessão. Host sem enforcement comprovado limita a preservação e gera aviso, mas não bloqueia análise estática.
