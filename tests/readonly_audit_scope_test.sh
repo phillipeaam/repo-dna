@@ -19,9 +19,9 @@ done
 for term in 'Windows' 'Linux' 'macOS' 'unverified' 'SC-013'; do
   grep -Fqi "$term" "$MATRIX" || { printf 'FAIL: host matrix missing profile evidence: %s\n' "$term" >&2; exit 1; }
 done
-grep -Fq 'impedir criação, alteração e exclusão' "$CONTRACT"
-grep -Fq 'permitir salvar o Markdown' "$CONTRACT"
-grep -Fq 'antes da inspeção substantiva' "$CONTRACT"
+grep -Fq 'continuar com status de preservação não verificado' "$CONTRACT"
+grep -Fq 'analysis-output/' "$CONTRACT"
+grep -Fiq 'antes da leitura substantiva' "$CONTRACT"
 grep -Fq 'em cada perfil suportado' "$TASKS"
 
 # Exercise a deny-write probe only against disposable test data, never a selected repository.
@@ -62,8 +62,8 @@ test -s "$OUTPUT/probe.txt"
 if test "$denied" -eq 1; then
   printf 'PROFILE PROBE: deny-write fixture passed; profile still requires matrix review.\n'
 else
-  printf 'PROFILE PROBE: unsupported; fixture accepted a write and the audit must block.\n'
+  printf 'PROFILE PROBE: unsupported; fixture accepted a write, so static audit proceeds only with warning and preservation unverified.\n'
   grep -Fq 'unverified' "$MATRIX"
 fi
 
-printf 'PASS: scope resolution, fail-closed host gate, separate output and profile matrix are specified.\n'
+printf 'PASS: scope resolution, procedural readonly warning, separate output and profile matrix are specified.\n'

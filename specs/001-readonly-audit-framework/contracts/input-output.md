@@ -5,6 +5,7 @@
 - Repositório selecionado em target-repos/<repo-name>/; o usuário escolhe a cópia.
 - Um produto pode abranger mais de um repositório. Relação e identidade são confirmadas antes de consolidar.
 - Contexto de autoria, links e permissões é opcional e recebe origem/qualificação.
+- Brief editorial, conjunto comparável de projetos e superfície/decisões visuais são entradas contextuais opcionais; nenhum serviço, Notion ou credencial é requisito.
 - Nenhum manifesto ou serviço externo é exigido na primeira versão.
 - Instruções normativas são locais. Procedência privada de pesquisa é opcional e não é entrada obrigatória de auditoria; seguir o [contrato de privacidade e autoridade](privacy-local-authority.md).
 
@@ -12,6 +13,7 @@
 
 - Um arquivo Markdown persistente analysis-output/<safe-product-slug>.md por produto.
 - O Markdown contém resumo, fatos atuais, análise dos domínios aplicáveis, claims/limites, evidências e índice, perguntas, cobertura, estado das etapas e verificação.
+- Quando aplicável, o mesmo Markdown contém readiness editorial por projeto e, se explicitamente solicitada, avaliação da superfície de portfólio com escopo realmente observado e lacunas.
 - Nova execução do mesmo produto atualiza a mesma autoridade e mantém histórico identificável.
 - Produto distinto usa arquivo distinto.
 - Slugs são estáveis; colisão interrompe o fluxo para escolha explícita, sem sobrescrever outro arquivo.

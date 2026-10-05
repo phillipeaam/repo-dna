@@ -18,7 +18,7 @@ Run this skill from the RepoDNA checkout. It is the only supported entry point f
 
 ## Required references
 
-Read [workflow.md](references/workflow.md) first. Then load only the applicable runbooks: [forensic A1](references/forensic-a1.md), [production B1](references/production-b1.md), [runtime B2](references/runtime-b2.md), [provenance B3](references/provenance-b3.md), [publication B4](references/publication-b4.md), and [consolidation](references/consolidation.md). Use [evidence vocabulary](references/evidence-vocabulary.md) as the shared contract.
+Read [workflow.md](references/workflow.md) first. Then load only applicable runbooks: [forensic A1](references/forensic-a1.md), [production B1](references/production-b1.md), [runtime B2](references/runtime-b2.md), [provenance B3](references/provenance-b3.md), [publication B4](references/publication-b4.md), optional [portfolio surface review](references/portfolio-surface-review.md), and [consolidation](references/consolidation.md). Use [evidence vocabulary](references/evidence-vocabulary.md) as shared contract and the [portfolio readiness contract](../../../specs/001-readonly-audit-framework/contracts/portfolio-readiness.md) when applicable.
 
 ## Execution outline
 
@@ -27,7 +27,8 @@ Read [workflow.md](references/workflow.md) first. Then load only the applicable 
 3. An unverified profile, writable-root overlap, or unavailable host policy is a visible risk, not a blocker. Warn the user before inspection, do not claim enforced read-only access, and continue with static inspection under the no-write/no-execution procedure. Stop only for an ambiguous target, an unsafe/unresolvable scope, or an output collision that cannot be resolved.
 4. Capture baseline and run applicable A1/B1/B2/B3/B4 phases. Record applicability, evidence, gaps, conflicts, and checkpoints; never silently skip a domain.
 5. Reconcile permitted external context read-only, then consolidate using references/consolidation.md.
-6. Verify the canonical Markdown contract, single-output rule, citations, claims, target preservation coverage, baseline and task checkpoints. If a check is incomplete, report partial rather than claiming full preservation.
+6. When portfolio representation is in scope, add project-specific editorial readiness and evidence-proportional case material. Include surface review only when the user explicitly selects a public site, prototype or design artifact.
+7. Verify the canonical Markdown contract, single-output rule, citations, claims, target preservation coverage, baseline and task checkpoints. If a check is incomplete, report partial rather than claiming full preservation.
 
 ## Completion states
 
@@ -49,7 +50,7 @@ account, connector or remote access is needed to recover this method.
 For each phase, load the corresponding sections of the locally incorporated
 [methodology](../../../specs/001-readonly-audit-framework/methodology.md) along with
 its focused runbook. Use the [local coverage map](../../../specs/001-readonly-audit-framework/source-inventory.md)
-to locate all fourteen incorporated themes. Do not reduce the extended rules to
+to locate all sixteen incorporated themes. Do not reduce the extended rules to
 only the runbook summary. Apply the [privacy contract](../../../specs/001-readonly-audit-framework/contracts/privacy-local-authority.md)
 when changing or sharing the framework. Optional external evidence supplied for
 an audited target never changes these local method rules automatically.

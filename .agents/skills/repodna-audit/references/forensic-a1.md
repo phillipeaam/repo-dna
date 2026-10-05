@@ -28,3 +28,9 @@ Findings `F-###` ligados a `E-###`, matriz sistema/contribuição, timeline com 
 ## Matriz de sistema/feature e contribuição
 
 Para cada sistema/feature registre nome/ID, comportamento/limite, repo e baseline, dependências, evidência, estado `implemented`, `partial`, `prototype`, `planned_only` ou `not_found_in_scope`, papel/contribuição (`created`, `extended`, `maintained`, `integrated`, `shared`, third-party, unknown), autoria verificada/compartilhada/desconhecida e wording permitido. Uma intenção documentada sem código não sai de `planned_only`; ausência só vale para o escopo efetivamente examinado.
+
+## Prontidão editorial e histórias de engenharia
+
+Quando a projeção para portfólio fizer parte do escopo, registrar contexto do projeto separado do brief e papel editorial. A leitura rápida deve permitir localizar identidade/contexto e contribuição individual em até 60 segundos e linkar uma rota de evidência aprofundada de cerca de 5–10 minutos sem exigir todos os apêndices. Selecionar histórias pela força da evidência e relevância, não para preencher quantidade. Usar contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão; lacunas ficam explícitas e relato pessoal é atribuído.
+
+Para cargos, separar empregador/título formal/período de responsabilidades observadas ou relatadas. Recomendações mantêm texto exato, autor, fonte, contexto e permissão; não provam cargo, liderança, autoria ou impacto além do que declaram. Preservar lineage e identidade da contribuição entre produtos para evitar dupla contagem.

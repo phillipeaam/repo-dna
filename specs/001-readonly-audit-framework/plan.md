@@ -1,8 +1,53 @@
-# Implementation Plan: Framework de auditoria readonly
+# Implementation Plan: Framework de auditoria readonly e prontidão para portfólio
 
-**Branch**: feature/001-readonly-audit-framework | **Date**: 2026-10-04 | **Spec**: [spec.md](spec.md)
+**Branch**: feature/001-readonly-audit-framework | **Date**: 2026-10-05 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from /specs/001-readonly-audit-framework/spec.md
+
+**Status do planejamento**: O corpo histórico abaixo documenta a implementação-base e os complementos US8/US9, concluídos antes desta revisão. Esta atualização planeja somente US10/US11; decisões anteriores substituídas são históricas. Requisitos atuais são governados pela spec e constituição v3.0.0.
+
+## Complemento de design — US10/US11 (2026-10-05)
+
+### Resumo
+
+Estender a mesma fonte de verdade Markdown com prontidão editorial por projeto (brief contextual opcional, papel editorial separado do contexto, leitura rápida, histórias de engenharia, pacotes proporcionais de evidência e matriz de prontidão) e, somente quando solicitado, avaliar uma superfície de portfólio observável. A avaliação de site/protótipo é uma seção no mesmo arquivo do produto, sem construir/publicar o site, criar relatório paralelo ou alterar a superfície. Nenhuma identidade, claim ou decisão específica dos materiais de pesquisa vira padrão do framework.
+
+### Contexto técnico para esta extensão
+
+**Linguagem/versão**: Markdown de skills, runbooks, contratos e fixtures; sem nova linguagem de produção.
+**Dependências**: Codex e artefatos locais existentes; navegador/acesso público somente quando a superfície for selecionada. Sem Notion, login, dependência nova ou serviço externo obrigatório.
+**Persistência**: Seções no mesmo `analysis-output/<safe-product-slug>.md`; brief e estado da decisão recebem origem e status. Nenhuma segunda saída persistente.
+**Validação**: Fixtures sintéticas do framework para cobertura de campos, evidência, classificação, estados `not_observed` e procedimento; nunca executar código de projeto auditado. Este plano não executa validação.
+**Plataformas**: Windows, Linux e macOS sob o procedimento readonly vigente; limitações de acesso/viewport são reportadas.
+**Restrições**: FR-001–077, contrato Markdown, constituição v3.0.0, FR-094; sem autenticação, ações de estado, submissão, edição ou publicação; fatos ausentes continuam desconhecidos.
+**Escopo**: US10 P1 e US11 P2, mais atualização de navegação/cobertura e roteiro de validação para o mesmo relatório.
+
+### Decisões e pesquisa
+
+1. **Compatibilidade do relatório**: adicionar seções opcionais e versionar a estrutura do Markdown; leitores de relatórios existentes devem tolerar ausência delas. Uma auditoria sem brief ou sem superfície continua válida.
+2. **Separação semântica**: guardar contexto do projeto, papel editorial, recomendação do agente e decisão humana em campos distintos. Ranking é permitido somente sobre inventário comparável explicitamente selecionado (FR-079/080).
+3. **Camadas editoriais**: uma leitura rápida aponta para evidência profunda no mesmo documento. Storytelling segue os campos FR-083 quando há suporte; pacote Featured é recomendação proporcional (FR-084), não gate de inclusão.
+4. **Proveniência e autorização**: cada claim, ativo, recomendação profissional e observação de superfície aponta para evidência/origem, status, baseline/contexto e limites. Permissão ou aprovação não é inferida (FR-085–088).
+5. **Avaliação da superfície**: usar contrato condicional independente do runbook de conteúdo. Registrar páginas, viewports e interações realmente vistas; pontuações 1–5 são julgamentos profissionais justificados, não benchmark/certificação. Cada dimensão ausente vira `not_observed` (FR-089–091).
+6. **Pesquisa externa**: opcional e limitada a decisões abertas relevantes; referências com título, URL e data, separadas de julgamentos (FR-092). Não é requisito para produzir análise.
+7. **Gates humanos**: conflito material ou decisão que dependa da pessoa usuária permanece pendente e é apresentada para resolução, sem tratar recomendação como aprovada (FR-093).
+
+Não há decisão tecnológica externa pendente. O desenho usa os contratos Markdown, workflow, runbooks e vocabulário locais; nenhuma pesquisa de concorrentes ou browsing é necessária para criar a capacidade genérica.
+
+### Checagem constitucional pós-design
+
+**PASS**: exatamente um Markdown persistente por produto; leitura estática/readonly; nenhuma execução no alvo; alegações e notas ligadas a evidência e limite; método utilizável sem Notion; recomendações permanecem distintas de decisões humanas; cobertura e limitações visíveis. Não muda host enforcement nem autoriza edição/publicação do site.
+
+### Estrutura de implementação desta extensão
+
+- `.agents/skills/repodna-audit/SKILL.md` e `references/workflow.md`: entrada condicional, sequência, dependências locais e checkpoints de US10/US11.
+- `references/consolidation.md`, `references/publication-b4.md`, `references/evidence-vocabulary.md`: seções no Markdown único e regras editoriais/claims/ativos.
+- novo `references/portfolio-surface-review.md`: escopo, método, rubrica, evidência e limites da revisão visual/interativa readonly.
+- `specs/001-readonly-audit-framework/contracts/source-of-truth-markdown.md`, `contracts/input-output.md` e novo `contracts/portfolio-readiness.md`: contrato de dados e resultado.
+- `data-model.md`, `methodology.md`, `source-inventory.md`, `quickstart.md`: entidades, cobertura local e validação planejada.
+- `tests/fixtures/readonly-audit/` e `tests/`: casos fictícios/contratuais; sem páginas ou dados pessoais reais.
+
+**Estratégia**: primeiro firmar termos compartilhados e seção opcional do relatório; entregar US10 como incremento P1; depois US11 com runbook condicional; finalizar rastreabilidade, início rápido e fixtures. A atualização não reabre fases anteriores concluídas nem implementa o site.
 
 ## Summary
 

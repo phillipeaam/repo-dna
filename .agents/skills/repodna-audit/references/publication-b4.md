@@ -19,3 +19,11 @@ Separar texto, links, imagens, vídeo, áudio e quantitativos. Cada linha usa `c
 ## Saída e checkpoint
 
 Claims e readiness entram no registro canônico com IDs e evidências. Recomendação editorial pode ser feita; publicação, alteração ou upload são fora do escopo.
+
+## Prontidão editorial proporcional e inventário Featured
+
+Separar contexto do projeto, papel editorial e estado da decisão. Conjunto não comparável não recebe ranking global. Cada claim pública mantém evidências, snapshot e caveat; recomendações e responsabilidades profissionais são atribuídas à fonte.
+
+Para Featured, inventariar como metas desejáveis: imagem/clipe principal; vídeo curto; 2–4 clipes/GIFs de sistemas; 3–6 screenshots; role/team/duration/platform/tech; 3–5 contribuições; 1–3 desafios; trade-offs; resultado/impacto/estado final; links públicos e confidencialidade quando necessária. Separar itens disponíveis dos selecionados. Case publicado recomenda 4–7 elementos visuais significativos. Supporting/Technical e Archive/Playground recebem pacote mais leve e continuam no inventário.
+
+Cada mídia declara a claim/comportamento demonstrado e distingue captura real, diagrama, proxy e placeholder. Proveniência, era, autoria, terceiros, legenda e permissões são registradas por ação. Falta de autorização deixa o item como lacuna, sem bloquear texto factual seguro.

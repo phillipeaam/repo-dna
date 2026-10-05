@@ -18,6 +18,8 @@ tests=(
     canonical_markdown_contract_test.sh
     evidence_separation_test.sh
     publication_readiness_test.sh
+    portfolio_readiness_contract_test.sh
+    portfolio_surface_contract_test.sh
     multirepo_audit_test.sh
     audit_resume_migration_test.sh
     private_paths_test.sh

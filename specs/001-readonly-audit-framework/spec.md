@@ -1,10 +1,10 @@
-# Feature Specification: Framework de auditoria readonly e Project Source of Truth
+# Feature Specification: Framework de auditoria readonly e prontidão para portfólio
 
 **Feature Branch**: `feature/001-readonly-audit-framework`
 
 **Created**: 2026-10-03
 
-**Status**: Implementado — fluxo estático procedural; proteção do host informada como limitação, não como gate de entrada
+**Status**: Auditoria estática implementada; extensão de prontidão editorial e avaliação opcional da superfície do portfólio especificadas, pendentes de planejamento e implementação
 
 **Input**: User description: "Estudar o Notion e suas subpáginas somente para leitura, incorporar o método de avaliação ao RepoDNA e transformá-lo em um framework de skills e processos conduzidos por agente de IA. Receber repositórios em uma pasta ignorada pelo Git, analisá-los sem alterar nada e produzir uma página única de source of truth rica, completa e padronizada."
 
@@ -16,6 +16,12 @@
 - Q: Validação dinâmica pode fazer parte do fluxo quando solicitada e executada em cópia isolada? → A: Não nesta feature. O framework entregue é exclusivamente estático/readonly; qualquer validação dinâmica é um processo externo, separado e fora dos fluxos, responsabilidades e entregáveis desta feature.
 - Q (revisão 2026-10-04): Auditoria deve bloquear quando o host não comprova prevenção efetiva de escrita? → A: Não por enquanto. A skill deve avisar quando a sessão puder gravar no alvo, seguir somente o procedimento estático sem escrita intencional e classificar a preservação como não verificada/observada; não pode afirmar garantia do host. A prevenção por sandbox/ACL continua recomendada para evolução futura.
 - Q: Quem consulta o registro e onde Notion/Docs entram? → A: O entregável do framework permanece Markdown local; pessoas podem copiá-lo para documentos ou Notion depois, e agentes de IA podem consultá-lo. Isso não autoriza integração nem escrita externa pelo framework.
+
+### Session 2026-10-05 — extensão de cobertura de portfólio
+
+- Pedido incorporado: comparar os requisitos reutilizáveis de conteúdo, curadoria, evidência, experiência profissional, recomendações e avaliação do portfólio nas páginas de pesquisa com a spec existente; complementar esta mesma feature com os requisitos que faltavam, sem criar outra spec.
+- Prompt aplicado pelo speckit-specify: “Amplie esta especificação existente, sem criar feature ou branch, para que o Markdown canônico resultante de uma auditoria ajude uma pessoa e um agente de IA a decidir como representar com segurança cada projeto em um portfólio. Incorpore os critérios reutilizáveis de briefing de público/cargo/canais, classificação editorial e justificativa de seleção, leitura rápida e aprofundamento técnico, contexto e ownership, histórias de engenharia, evidências e mídia, prontidão de claims, experiência profissional, recomendações e revisão da superfície do portfólio. Trate requisitos de Featured como pacote recomendado e proporcional; itens de Archive/Supporting recebem profundidade menor sem serem apagados. Quando a auditoria incluir um site ou protótipo de portfólio, avalie posicionamento, narrativa/arquitetura, descoberta de projetos, cases/evidências, direção visual, mobile, acessibilidade/interações, contato/conversão e manutenção; compare decisões que estiverem em aberto, considere especificações visuais fornecidas, registre o que foi realmente inspecionado, dimensões com notas justificadas, jornada do visitante, findings priorizados, decisões, próximos passos e fontes externas relevantes. Preserve o único Markdown local por produto, o procedimento de auditoria estática e a privacidade. Não use fatos, nomes, claims ou histórias específicas de outros estudos; não exija Notion nem outro serviço; não hardcode a identidade profissional, layout, tokens visuais, seleção de projetos ou número de histórias de um portfólio específico. Diferencie fatos, inferências, relato pessoal, recomendações e decisões humanas; deixe ausências como desconhecidas e não apresente recomendação como aprovação.”
+- Decisão de escopo: a extensão cobre prontidão de conteúdo e, somente quando solicitada e houver uma superfície observável, uma avaliação de apresentação. Não implementa nem publica o site. O método local mantém os critérios generalizados; brief e decisões de um portfólio específico são contexto opcional, identificados por origem e estado.
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Auditar um alvo sem modificá-lo (Priority: P1)
@@ -164,6 +170,41 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 2. **Given** um conflito entre uma página original e o método local aprovado, **When** sigo o framework, **Then** o método local governa; conteúdo externo é contexto opcional e não altera regras automaticamente.
 3. **Given** a sanitização de exemplos privados, **When** reviso o método local, **Then** os ensinamentos e limites aplicáveis permanecem documentados sem exigir recuperação do exemplo original.
 
+### User Story 10 - Preparar conteúdo de projeto para uma decisão editorial de portfólio (Priority: P1)
+
+Como pessoa responsável por um portfólio, quero que a fonte de verdade mostre o que um projeto comprova, onde ele se encaixa editorialmente e o que ainda falta para apresentá-lo, sem transformar evidência técnica em afirmação promocional.
+
+**Why this priority**: A documentação deve apoiar a seleção e a apresentação pública de projetos, preservando a contribuição individual, a força da prova e os limites de publicação.
+
+**Independent Test**: Fornecer projetos com contexto profissional, independente, técnico e de arquivo; briefs com diferentes cargos/públicos; mídia com permissões diferentes; e evidência incompleta. Verificar a leitura rápida, a classificação justificada, os pacotes proporcionais e a ausência de claims sem suporte.
+
+**Acceptance Scenarios**:
+
+1. **Given** um brief editorial informado pelo usuário, **When** a auditoria é consolidada, **Then** público, cargo(s), idioma, canais, sinais prioritários e restrições ficam registrados com origem e estado; campos ausentes não são inferidos.
+2. **Given** um conjunto comparável de projetos explicitamente fornecido, **When** o agente sugere seu papel editorial, **Then** diferencia Featured candidate, Strong supporting, Supporting/Technical e Archive/Playground, explica relevância, sinal distinto, força da evidência e limitações, e marca cada decisão como humana ou recomendação provisória.
+3. **Given** um projeto sem inventário comparável, **When** o agente avalia sua contribuição ao portfólio, **Then** informa aderência possível ao brief sem declarar ranking entre projetos que não foram comparados.
+4. **Given** uma pessoa ou agente que faz uma leitura rápida, **When** consulta a camada inicial, **Then** encontra produto/contexto, papel/equipe/período quando conhecidos, plataforma/tecnologia, contribuição individual, relevância para o brief, estado público e ressalva principal; detalhes técnicos e evidências têm navegação para leitura aprofundada.
+5. **Given** uma proposta de case, **When** o agente seleciona histórias, **Then** cada história segue contexto, ownership, problema, restrições, abordagem, trade-offs, evidência, resultado e reflexão quando disponíveis; quantidade e profundidade dependem da força da evidência e não são infladas para simetria.
+6. **Given** um projeto classificado como Featured ou como Supporting/Archive, **When** sua prontidão é avaliada, **Then** o pacote de evidências é proporcional ao papel: itens desejáveis de Featured aparecem como metas e lacunas, enquanto documentação factual de arquivo pode ser suficiente com resumo e fonte pública segura.
+7. **Given** media, resultado, experiência profissional ou recomendação sem atribuição/permissão suficiente, **When** o agente prepara a projeção, **Then** o estado de prontidão e o motivo são explícitos e a informação não é convertida em claim pública.
+
+### User Story 11 - Revisar uma superfície de portfólio quando ela fizer parte do escopo (Priority: P2)
+
+Como responsável por um site ou protótipo de portfólio, quero uma avaliação independente e acionável da experiência que o visitante realmente consegue observar, sem confundir julgamento profissional com pesquisa de usuários ou certificação.
+
+**Why this priority**: Uma análise de código e conteúdo não avalia por si só se recrutadores encontram projetos, compreendem contribuições ou chegam a provas e contato.
+
+**Independent Test**: Fornecer uma URL pública ou material de design selecionado, com mais de uma dimensão e viewport disponíveis, e comparar o relatório às observações capturadas. Repetir sem superfície renderizada para confirmar que lacunas de acesso viram “não observado”.
+
+**Acceptance Scenarios**:
+
+1. **Given** uma superfície de portfólio explicitamente incluída, **When** o agente a avalia, **Then** examina posicionamento/primeira impressão, narrativa e arquitetura de informação, descoberta de projetos, cases/evidências, direção visual, mobile, acessibilidade/interações, conversão/contato e manutenção, registrando fonte e alcance realmente observado.
+2. **Given** uma avaliação com notas, **When** o relatório apresenta placar de 1 a 5 por dimensão, **Then** cada nota tem critério e observação localizada, e é rotulada como diagnóstico profissional, não como benchmark, teste com recrutadores ou certificação.
+3. **Given** fricções ou lacunas observadas, **When** o relatório apresenta findings, **Then** cada item inclui prioridade, evidência/localização, impacto para visitante, recomendação, esforço relativo, dependência/risco e confiança; um percurso conciso de visitante e plano por fases sintetizam os principais achados.
+4. **Given** alternativas de arquitetura ou interação em decisão, **When** o agente as compara, **Then** considera descoberta, escaneabilidade, profundidade, mobile, acessibilidade, manutenção e alinhamento ao brief; não recomenda carrossel, filtro, autoplay ou outro padrão sem avaliar descoberta e controles acessíveis.
+5. **Given** URL, dispositivo, design file ou interação indisponível, **When** o agente conclui, **Then** informa limitações e não declara viewport, comportamento, responsividade, acessibilidade ou validação que não observou.
+6. **Given** uma recomendação ainda não aprovada, **When** o documento é consolidado, **Then** ela permanece recomendação para decisão humana e nenhuma página, arquivo de design ou implementação é alterado.
+
 ### Edge Cases
 
 - Histórico raso, squashes, identidades ambíguas, bots, merges, refs quebradas e ausência de Git limitam autoria e reconstrução histórica; não impedem documentação estática parcial.
@@ -180,6 +221,7 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - Resultado ausente de cobertura/profiling não equivale a zero; ausência de teste automatizado não torna uma cena de demonstração um teste.
 - Um arquivo ignorado que já está no índice continua candidato a commit; a limpeza deve verificar o índice e os arquivos atuais.
 - A procedência local da pesquisa pode ficar indisponível; isso não reduz a disponibilidade do método generalizado nem autoriza divulgar seus dados.
+- A metodologia inclui orientação generalizada para transformar evidência de projeto em material de portfólio e avaliar uma superfície selecionada. Briefs, fatos pessoais, projetos, decisões de design e claims específicos são entradas contextuais, não padrões incorporados ao framework.
 
 ## Requirements *(mandatory)*
 
@@ -224,7 +266,7 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **FR-029**: Arquitetura MUST refletir o alvo: composição, limites, dependências, fluxos de dados/eventos/estado, entradas, UI, persistência e serviços quando presentes.
 - **FR-030**: Planejado, implementado no código, configurado, exercitado, incluído em linhagem versionada e publicado MUST ser avaliações separadas.
 - **FR-031**: A timeline MUST agrupar fases significativas e separar cronologia do produto, contribuição individual, emprego, release e manutenção posterior.
-- **FR-032**: Histórias de engenharia MUST usar problema, restrição, abordagem, trade-off, resultado e evidência. Motivação, resultado ou reflexão não comprovados MUST permanecer lacunas ou relato pessoal identificado.
+- **FR-032**: Histórias de engenharia MUST tornar contexto, ownership, problema, restrições, abordagem, trade-offs, evidência e resultado recuperáveis; reflexão pessoal MUST ser identificada como relato. Campos sem suporte permanecem lacunas, e seleção/quantidade de histórias MUST acompanhar evidência e relevância sem obrigação de simetria.
 
 #### Aprofundamento B1/B2
 
@@ -256,7 +298,7 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 
 #### Consolidação, atualização e entrega
 
-- **FR-055**: A entrega MUST consistir em exatamente um arquivo Markdown canônico local por projeto/produto em `analysis-output/`, com status, data/baseline, Start Here, At a Glance, mapa de estudo, registro principal, projeção pública atual, questões, apêndices e índice de evidências. Headings e identificadores estáveis MUST permitir a pessoas e agentes recuperar assuntos e apontar evidências. Todos os resultados e referências necessários à leitura MUST ser consolidados nesse arquivo; nenhum relatório, export ou anexo em outro formato é entregue.
+- **FR-055**: A entrega MUST consistir em exatamente um arquivo Markdown canônico local por projeto/produto em `analysis-output/`, com status, data/baseline, Start Here, At a Glance, mapa de estudo, registro principal, avaliação de prontidão editorial para portfólio, projeção pública atual, questões, apêndices e índice de evidências; a avaliação da superfície do portfólio é incluída quando selecionada. Headings e identificadores estáveis MUST permitir a pessoas e agentes recuperar assuntos e apontar evidências. Todos os resultados e referências necessários à leitura MUST ser consolidados nesse arquivo; nenhum relatório, export ou anexo em outro formato é entregue.
 - **FR-056**: O registro principal MUST organizar verdade por assunto: produto, papel/equipe, contribuições, sistemas/arquitetura, decisões, timeline/release e evidência pública, sem impor leitura por ordem de auditoria.
 - **FR-057**: Apêndices longos MUST usar hierarquia, links internos e sumário Markdown; respostas atuais e bloqueios relevantes MUST permanecer visíveis no arquivo canônico.
 - **FR-058**: Papel, período, stack, contribuições, publicação, claims e perguntas MUST ter uma única resposta atual; versões anteriores ficam identificadas como históricas/superadas.
@@ -283,6 +325,26 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **FR-076**: Todas as regras obrigatórias de preparação, A1, B1–B4, evidência, reconciliação, consolidação e revisão MUST estar disponíveis localmente. Consultar contexto externo de um alvo é opcional e distinto de recuperar instruções necessárias para executar o método.
 - **FR-077**: A validação MUST demonstrar ausência de dependência das fontes originais e ausência de metadados privados conhecidos no conteúdo compartilhável, incluindo o índice. Verificações automáticas MUST declarar seu alcance e ser complementadas por revisão humana de informações que padrões não reconhecem.
 
+#### Prontidão editorial e avaliação de portfólio
+
+- **FR-078**: A pessoa usuária MAY fornecer um brief editorial com cargos e público pretendidos, idioma, canais de apresentação, competências/provas prioritárias, restrições de divulgação e especificações/decisões visuais aprovadas. O Markdown MUST registrar origem e estado desses dados (confirmado, provisório, histórico ou conflitante); brief ausente ou campo sem suporte MUST permanecer desconhecido, sem inferência automática.
+- **FR-079**: Para cada produto incluído em avaliação de portfólio, o registro MUST separar contexto (por exemplo, profissional/comercial, independente, jam ou técnico) de papel editorial (Featured candidate, Strong supporting, Supporting/Technical, Archive/Playground ou não classificado), registrar sua justificativa e preservar a distinção entre decisão humana e sugestão do agente. Uma classificação de menor destaque MUST NOT excluir automaticamente o projeto do inventário ou da possibilidade de exploração em Archive/Playground.
+- **FR-080**: Uma recomendação de seleção ou prioridade MUST considerar apenas um conjunto de projetos comparável e explicitamente selecionado, e explicar alinhamento ao brief, sinal profissional distinto, força/atualidade da evidência, disponibilidade pública, limitações e redundância. Sem esse conjunto, o relatório MAY avaliar aderência de um projeto, mas MUST NOT alegar ranking global ou seleção final do portfólio.
+- **FR-081**: A camada de leitura rápida MUST permitir identificar produto e contexto, papel/equipe/período, plataforma/engine/tecnologias, foco, contribuições individuais, relevância ao brief, estado público e ressalva principal quando conhecidos; a documentação MUST oferecer navegação para aprofundamento técnico. A ausência de fato não impede o resumo e deve ser declarada.
+- **FR-082**: A projeção editorial MUST poder propor título/linha de posicionamento, resumo curto, contribuições, relevância para o público, desafios, decisões, resultado/estado, links e ressalvas usando apenas claims rastreáveis. Texto deve priorizar trabalho demonstrado e contribuição sobre listas de ferramentas, evitar jargão desnecessário e manter facts, inferências e relatos distintos; proposta não equivale a aprovação humana.
+- **FR-083**: Cada história candidata MUST seguir um encadeamento recuperável de contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão, omitindo ou marcando campos sem evidência. O contexto do produto deve ser conciso (até dois parágrafos curtos); histórias devem identificar a contribuição individual frente ao trabalho de equipe. Para Featured, duas histórias fortes são o padrão editorial e duas a três podem ser usadas quando a evidência justifica; isso é orientação, não quantidade obrigatória. O framework MUST permitir profundidade e quantidade diferentes entre categorias e MUST NOT inventar motivação, resultado ou simetria narrativa.
+- **FR-084**: A prontidão por papel editorial MUST usar pacotes proporcionais. Para Featured, a referência de inventário desejável MUST poder acompanhar: uma imagem/clipe principal; um vídeo curto; dois a quatro clipes/GIFs de sistemas; três a seis screenshots; role/team/duration/platform/tech; três a cinco contribuições; um a três desafios; trade-offs; resultado/impacto/estado final; links públicos e nota de confidencialidade quando necessária. Um case Featured publicado SHOULD selecionar cerca de quatro a sete elementos visuais significativos (mídia principal, provas de histórias, diagrama opcional e apoio), evitando galeria excessiva; inventário disponível e elementos efetivamente usados são estados distintos. Metas não são gates absolutos para documentar ou publicar texto seguro. Supporting/Technical e Archive/Playground MAY usar resumo e evidência mais leves, mantendo identidade, contribuição e link/estado público quando disponíveis; ausência de mídia ou material incompleto MUST ser mostrada como lacuna, não como motivo automático para apagar a entrada.
+- **FR-085**: Cada evidência visual/auditiva candidata MUST apontar para o comportamento, implementação ou claim que demonstra e distinguir captura/produto real de diagrama conceitual, proxy ou placeholder. O método SHOULD priorizar mídia real e pública com atribuição segura; diagramas originais/generalizados são alternativa para arquitetura confidencial. Proveniência, era/versão, autoria, terceiros, legenda e permissões continuam avaliados por ação conforme FR-047–050.
+- **FR-086**: A matriz de prontidão editorial MUST avaliar separadamente texto, ownership, resultado/contexto público, build atual, artefato histórico, mídia visual/áudio/fontes, atribuição/permissões, links e claims quantitativas. Para cada item, registrar evidência, estado, condição, próximo passo e bloqueio específico; ausência de mídia não invalida automaticamente texto factual seguro.
+- **FR-087**: Quando experiência profissional fizer parte do brief, o registro MUST distinguir empregador, título formal, intervalo, responsabilidades observadas/relatadas e projetos relacionados, mantendo cronologia de emprego separada da cronologia do produto e sem converter responsabilidade prática em título formal. Recomendações/testemunhos MAY ser preparados para uso editorial somente com texto exato, autor, origem, contexto e permissão de publicação identificáveis; não provam ownership ou liderança além do que declaram.
+- **FR-088**: Relações entre projetos, produtos sucessores, produtos agrupados e funcionalidades compartilhadas MUST preservar lineage, evidência e autoria por produto. Agrupamento ou repetição de uma mesma contribuição MUST ser justificado e MUST NOT gerar dupla contagem ou claims conflitantes.
+- **FR-089**: Quando a pessoa usuária incluir explicitamente um site, protótipo ou material de design de portfólio, o framework MUST oferecer avaliação condicional de posicionamento/primeira impressão; ordem, propósito e redundância de páginas/seções; descoberta e agrupamento de projetos; cases/evidências; direção visual e legibilidade; reflow mobile/tablet; acessibilidade e interação (ordem de leitura, toque, teclado, foco, nomes acessíveis, semântica, contraste, reduced motion e controle de mídia animada); contato/conversão e manutenção/consistência entre conteúdo, implementação e fonte visual. MUST avaliar falhas/indisponibilidade de mídia e performance apenas no limite de sinais e medições disponíveis, sem alegar benchmark ou teste que não ocorreu. A avaliação MUST registrar URLs/artefatos, páginas, viewports e interações realmente observados; uma dimensão indisponível ou sem evidência é `not_observed`, sem bloquear a auditoria de conteúdo/repositório. A inspeção MUST usar acesso somente leitura, sem autenticação, submissão de formulários ou ações que alterem estado.
+- **FR-090**: A avaliação condicional de superfície MUST produzir no mesmo Markdown resumo executivo, placar por dimensão (1–5 com critério, observação e confiança), percurso de visitante, findings priorizados (P0–P3) com localização/evidência, impacto, recomendação, esforço relativo, risco/dependência e confiança, além de arquitetura/direção recomendada, gaps de conteúdo/evidência, plano por fases, decisões/perguntas e limitações. Notas são diagnóstico profissional, não benchmark de mercado, teste com usuários/recrutadores, certificação ou medida de conversão.
+- **FR-091**: Ao avaliar uma decisão visual ou de navegação em aberto, o agente MUST comparar as alternativas realmente consideradas segundo descoberta, escaneabilidade, profundidade, mobile, acessibilidade, manutenção e alinhamento ao brief; MUST explicar controles, foco e descoberta se recomendar carrossel/seletor, examinar necessidade de busca/filtros/contador em relação ao tamanho e diversidade do inventário e MUST NOT presumir autoplay/loop ou impor layout, cor, tipografia, número de projetos ou filtro sem justificativa contextual. Especificações visuais aprovadas fornecidas para aquela superfície são referência de conformidade; exemplos de outro projeto não são tokens universais.
+- **FR-092**: Pesquisa externa em uma avaliação de superfície MUST limitar-se a decisões relevantes e abertas, priorizar fontes confiáveis e atuais (incluindo padrões/fontes oficiais de acessibilidade quando aplicável), registrar título, link direto e data quando disponível, e separar recomendação geral, evidência da fonte e julgamento profissional. Estudos de domínios diferentes não devem ser extrapolados sem declarar limites. A falta de pesquisa externa MUST ser declarada quando ela for necessária para sustentar uma recomendação.
+- **FR-093**: Briefs e decisões editoriais MUST preservar estados aprovado/locked, provisório, histórico/superado e conflito, com origem e data quando conhecidas. O agente MUST sinalizar conflito material e pedir posicionamento humano quando não houver resolução segura; recência isolada de uma fonte não prova aprovação ou autoridade.
+- **FR-094**: As avaliações de conteúdo e de superfície MUST ser somente leitura. Elas MUST NOT executar código do alvo, alterar repositórios, páginas, protótipos ou arquivos de design, aprovar claims/permissões, publicar conteúdo, nem criar entregáveis persistentes adicionais.
+
 ### Key Entities *(include if feature involves data)*
 
 - **Projeto/produto**: identidade canônica, aliases, contexto, relações com produtos distintos e sua fonte de verdade.
@@ -298,6 +360,11 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **Questão/conflito**: tema, versões concorrentes, decisão, ação/evidência restante, responsável conhecido e bloqueio.
 - **Registro canônico**: arquivo Markdown local único por produto, com verdade atual, índice de evidências, apêndices e histórico de verificação.
 - **Procedência privada da pesquisa**: registro local opcional de fontes originais e metadados, separado do método compartilhável.
+- **Brief editorial**: cargos/públicos/canais/sinais prioritários e restrições declarados, com origem, vigência e estado de decisão.
+- **Papel editorial do projeto**: contexto, categoria, justificativa de aderência, força de evidência e decisão humana ou sugestão provisória.
+- **Ativo e pacote de apresentação**: mídia/claim demonstrada, era, permissão, atribuição e papel no nível editorial selecionado.
+- **Registro profissional/social proof**: experiência, título formal, responsabilidades, datas e recomendação com fonte e permissão quando aplicável.
+- **Finding de superfície**: dimensão, viewport/localização, evidência, prioridade, impacto, recomendação, esforço relativo, risco e confiança.
 - **Método local**: conjunto normativo aprovado de instruções, regras e contratos, com correspondência por tema e sem dependência das fontes originais.
 
 ## Success Criteria *(mandatory)*
@@ -309,7 +376,7 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **SC-003**: Cada domínio obrigatório tem resultado ou estado de cobertura com motivo; nenhum domínio desaparece silenciosamente.
 - **SC-004**: 100% das conclusões relevantes no registro principal têm referência recuperável, escopo, estado de evidência e limitação quando aplicável.
 - **SC-005**: Nos casos de aceitação com autoria ambígua, planejamento sem código, tag sem binário e desempenho não medido, nenhuma claim é promovida indevidamente.
-- **SC-006**: Dado um conjunto predefinido de perguntas sobre identidade do projeto, contribuições, arquitetura, release atual/histórico e limites, um agente de IA responde com referências recuperáveis para cada afirmação factual e declara como desconhecidas as respostas sem suporte; nenhuma resposta factual fica sem evidência citada.
+- **SC-006**: Dado um conjunto predefinido de perguntas sobre identidade do projeto, contribuições, arquitetura, release atual/histórico, adequação editorial, prontidão de evidências e limites, um agente de IA responde com referências recuperáveis para cada afirmação factual e declara como desconhecidas as respostas sem suporte; nenhuma resposta factual fica sem evidência citada.
 - **SC-007**: A entrega contém exatamente um arquivo Markdown persistente por produto em `analysis-output/`, sem relatório ou anexo alternativo, e uma resposta atual por tema de autoridade, inclusive no cenário com múltiplos repositórios.
 - **SC-008**: O fluxo produz exatamente um Markdown local por projeto pequeno, jogo e aplicação/serviço, com estrutura comparável e sem exigir conexão externa ou produzir artefatos alternativos.
 - **SC-009**: Uma sessão interrompida retoma sem perder evidências e detecta mudança de baseline antes de reutilizar conclusões.
@@ -321,6 +388,17 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - **SC-014**: Na revisão dos arquivos atuais e preparados para commit, zero metadados privados conhecidos das fontes de pesquisa permanecem no conteúdo compartilhável; os casos sintéticos de vazamento são recusados sem reproduzir seus valores.
 - **SC-015**: 100% dos domínios obrigatórios do método têm instruções e regras disponíveis por referências locais válidas, sem exigir consulta ou autenticação nas fontes originais.
 - **SC-016**: A limpeza preserva 100% dos temas metodológicos incorporados, com correspondência local verificável e nenhuma área privada de pesquisa incluída no conteúdo versionado ou distribuído.
+- **SC-017**: Em todos os casos de aceitação com brief presente ou ausente, o relatório registra origem/estado dos critérios editoriais e deixa como desconhecidos os dados de público, cargo, canal ou restrição que não foram fornecidos ou sustentados.
+- **SC-018**: Em todos os casos de aceitação com mais de um projeto, recomendações de papel/prioridade identificam conjunto comparado, rationale e estado humano/provisório; sem conjunto comparável, nenhum ranking global é produzido.
+- **SC-019**: 100% dos resumos e propostas de case nos casos de aceitação têm referências para claims factuais, distinguem contribuição individual/equipe e mantêm campos de história sem prova como lacunas ou relato identificado.
+- **SC-020**: Casos Featured e Archive/Supporting produzem pacotes de prontidão proporcionais: os itens desejáveis de Featured e seus gaps ficam visíveis, sem impedir documentação ou texto factual seguro por falta de assets.
+- **SC-021**: Nos casos com experiência profissional, recomendação, mídia sem permissão, case histórico ou claim de performance sem medição, o relatório não infere cargo, autorização, estado atual, autoria ou resultado não provado e mostra o bloqueio/limite correspondente.
+- **SC-022**: Quando uma superfície de portfólio é incluída, toda nota, finding e recomendação contém suporte observável e limite de avaliação; o relatório identifica dimensões não observadas e não afirma testes, certificação ou conversão sem evidência.
+- **SC-023**: A avaliação de superfície registra as viewports/interações realmente observadas e inclui sumário, percurso, prioridades e plano de ação no mesmo Markdown; nenhuma superfície ou fonte externa é modificada.
+- **SC-024**: Todo conteúdo adicional do framework permanece genérico e utilizável sem Notion; nomes, claims, layout, tokens e decisões de casos/portfólios pesquisados não são promovidos a padrão universal.
+- **SC-025**: Em todos os documentos de aceitação com projeção editorial, um leitor não familiarizado localiza produto/contexto e contribuição individual em até 60 segundos; ao menos uma história selecionada oferece uma rota de evidência adequada a uma leitura aprofundada de cerca de 5–10 minutos, sem exigir a leitura integral dos apêndices.
+- **SC-026**: Cases Featured de aceitação apresentam uma seleção curta de aproximadamente 4–7 elementos visuais significativos ou registram com clareza as lacunas de mídia/permissão; a quantidade de arquivos disponíveis não é confundida com quantidade publicada.
+- **SC-027**: Na avaliação de superfícies, todas as dimensões do FR-089 recebem finding fundamentado ou estado `not_observed`; nenhuma propriedade de viewport, interação, performance, acessibilidade ou conversão é declarada sem observação ou medição indicada.
 
 ## Assumptions
 
@@ -334,17 +412,17 @@ Como usuário, quero que este projeto seja a autoridade do método de análise. 
 - Fonte desconhecida e histórico incompleto são resultados válidos; o método exige declarar limites, não recuperar tudo a qualquer custo.
 - Validação dinâmica está fora de todos os fluxos desta feature. Artefatos e medições existentes podem ser analisados como dados; o framework não inicia nem orquestra execução de código/build/teste/profiling, mesmo mediante solicitação. Um processo externo independente fica fora deste contrato.
 - As fontes originais serviram à pesquisa inicial. O método local generalizado é a autoridade normativa; a procedência privada é opcional e os fatos particulares não integram o framework compartilhável nem comprovam futuros alvos.
-- A metodologia incorporada é reutilizável para jogos e software geral. Estratégia do site, identidade profissional específica, geometria de layouts e número fixo de histórias não definem contratos universais.
+- A metodologia é reutilizável para jogos e software geral. Critérios editoriais e de avaliação de superfície são locais e configuráveis; identidade profissional, estratégia/IA de um site, layout, design tokens e seleção de projetos não são hardcoded. Narrativas seguem estrutura reutilizável, sem impor número fixo de histórias.
 - As fontes externas nesta pesquisa permaneceram somente leitura. Sua reconciliação no futuro produz recomendações e registros locais.
 - A substituição da experiência autônoma atual foi solicitada. Compatibilidade com a CLI antiga não é requisito permanente; qualquer apoio temporário precisa de regra de transição.
-- A constituição foi atualizada explicitamente para v2.0.0 antes da implementação para governar skills, processo readonly e Markdown canônico. A data original de ratificação segue pendente de confirmação; não foi inventada.
+- A constituição v2.0.0 governou a migração inicial para skills, auditoria readonly e Markdown canônico; foi posteriormente atualizada para v3.0.0 para permitir análise estática procedural com aviso quando o host não comprova prevenção de escrita. A data original de ratificação segue pendente de confirmação; não foi inventada.
 - Os nomes de pastas são interfaces solicitadas do produto; escolhas de linguagens, estrutura de implementação, mecanismos de isolamento e formatos técnicos pertencem ao plano.
 
 ## Scope and Dependencies
 
 Inclui framework de análise, método de evidência, auditoria estática profunda, reconciliação readonly, documentação canônica, projeções seguras, revisão e evolução. Inclui reaproveitamento seletivo das capacidades existentes.
 
-Não inclui correção dos projetos auditados, transformação do alvo, aprovação jurídica de licenças, inferência de impacto sem dados, recuperação infinita de arquivos perdidos, implementação de site de portfólio ou publicação automática em serviço externo.
+Não inclui correção dos projetos auditados, transformação do alvo, aprovação jurídica de licenças, inferência de impacto sem dados, recuperação infinita de arquivos perdidos, implementação de site de portfólio ou publicação automática em serviço externo. Uma avaliação da superfície pública/desenho do portfólio é condicional e somente leitura; ela não constrói nem altera o site.
 
 Dependências: acesso de leitura aos alvos selecionados; agente capaz de seguir o método; ferramentas opcionais com cobertura/fallback declarado; contexto fornecido pelo usuário para autoria e fontes adicionais; governança atualizada antes da mudança arquitetural.
 

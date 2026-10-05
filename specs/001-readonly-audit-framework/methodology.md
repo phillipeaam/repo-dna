@@ -315,3 +315,21 @@ Entregues para esta feature SDD: spec, síntese do método, inventário de fonte
 A skill, os runbooks, contratos, template de consolidação e contratos de aceitação estão disponíveis localmente. O CLI antigo está aposentado. A procedência original da pesquisa é privada e opcional; o mapa público mantém correspondência temática. Perfis de host não verificados permitem auditoria estática com aviso; preservação observada não é garantia de isolamento.
 
 Criar pasta ignorada ou escrever “readonly” em prompt não comprova isolamento. Na versão atual, o agente segue o procedimento sem escrita intencional e declara a limitação; enforcement e prova de host são melhorias futuras para elevar a garantia de preservação.
+
+## 15. Prontidão editorial para portfólio
+
+Brief de público, cargos, idioma, canais, provas e restrições é opcional e recebe origem/estado por campo. Separar o contexto (profissional, independente, jam, técnico ou desconhecido) do papel editorial sugerido/decidido. Só comparar seleção relativa quando existe conjunto explicitamente comparável; sem ele, registrar aderência possível sem ranking.
+
+A leitura rápida deve orientar em cerca de um minuto e apontar ao aprofundamento no mesmo documento. Case percorre contexto, ownership, problema, restrições, abordagem, trade-offs, evidência, resultado e reflexão quando houver suporte. A quantidade de histórias acompanha evidência e relevância. Pacotes Featured apresentam metas recomendadas e gaps (incluindo papéis, contribuição, desafios, mídia e prova); Supporting/Archive permanece consultável com profundidade proporcional. Mídia demonstra uma claim concreta e registra se é captura, diagrama, proxy ou placeholder, além de proveniência e permissão por ação.
+
+Na fixture Featured, o inventário desejável deve contemplar imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs de sistemas, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links públicos e confidencialidade quando necessária. Registrar os itens disponíveis separadamente dos selecionados: publicação recomenda cerca de 4–7 itens visuais significativos. Assets ausentes ou sem permissão tornam-se gaps explícitos e não removem o projeto.
+
+Validar SC-025 com leitor não familiarizado: cronometar busca de produto/contexto e contribuição (até 60 segundos) e acesso à evidência de um case (aproximadamente 5–10 minutos). Registrar perfil, tarefa, documento e tempos observados; checklist documental ou avaliação automatizada do esqueleto não prova sucesso temporal.
+
+Avaliar separadamente prontidão de texto, contribuição, resultados, mídia/áudio, permissões e claims. Recomendações e testemunhos profissionais são atribuídos ao autor/contexto e não comprovam sozinhos cargo, autoria ou impacto. Linhagem de produto/sucessor preserva contribuição compartilhada sem duplicação. Uma lacuna material pede decisão humana.
+
+## 16. Revisão opcional da superfície de portfólio
+
+Executar somente se URL, protótipo ou material de design for explicitamente incluído. Registrar URL/artefato, páginas, viewports, estados e interações efetivamente inspecionados. Percorrer posicionamento, narrativa/arquitetura, descoberta, cases e evidências, visual/legibilidade, reflow móvel/tablet, acessibilidade e controles, contato/conversão, consistência/manutenção. Pontuações 1–5 são diagnóstico profissional com critério e evidência localizada; não representam pesquisa de recrutador, benchmark ou certificação.
+
+Cada finding recebe prioridade P0–P3, impacto, recomendação, esforço, risco/dependência e confiança; incluir rota concisa do visitante e plano por fases. Cobrir cada dimensão com observação fundamentada ou `not_observed`. Comparar alternativas abertas com descoberta, escaneabilidade, profundidade, mobile, acessibilidade, manutenção e brief fornecido. Usar apenas leitura: sem autenticação, formulários, ações de estado, edição ou publicação. Sinais ausentes não viram propriedades testadas ou medidas.

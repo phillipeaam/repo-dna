@@ -89,3 +89,15 @@ e consultar o [mapa local](../../../../specs/001-readonly-audit-framework/source
 A procedência original da pesquisa é opcional e privada. Nenhuma fonte externa
 é exigida para recuperar regras; contexto externo de um alvo é evidência opcional
 e não redefine o método. A ausência de rede não substitui nem relaxa o gate do host.
+
+## Extensão de portfólio (US10/US11)
+
+Entradas opcionais: brief editorial, inventário explicitamente comparável, referência visual aprovada e superfície selecionada. Por campo, registrar origem e estado confirmed/provisional/historical/conflicting; ausências ficam unknown. Separar contexto do produto do papel editorial (Featured candidate, Strong supporting, Supporting/Technical, Archive/Playground ou unclassified) e marcar decisão humana versus recomendação do agente. Sem conjunto comparável, avaliar somente aderência individual; nunca emitir ranking global. Archive e Supporting não são excluídos automaticamente.
+
+A prontidão editorial inclui quick scan com produto/contexto, papel/equipe/período, plataforma/tecnologias, contribuições, aderência, estado público e ressalva, com caminho às provas detalhadas. Histórias usam contexto, ownership, problema, restrições, abordagem, trade-offs, evidência, resultado e reflexão apenas quando sustentados. Claims, media, recomendações profissionais, responsabilidades e permissões preservam fonte, estado e limites. A avaliação editorial permanece no único Markdown.
+
+#A prontidão editorial ocorre depois de B4 e antes da reconciliação/consolidação quando o objetivo de portfólio se aplica. A revisão de superfície ocorre depois dessa prontidão somente se o usuário incluir a superfície; suas lacunas não impedem a consolidação do conteúdo. Conflitos materiais de brief, papel ou decisão de design ficam em aberto e pedem posicionamento humano.
+
+## Revisão condicional de superfície
+
+Ativar somente quando o usuário selecionar explicitamente um site, protótipo ou material visual. Confirmar páginas/áreas e usar somente acesso público readonly. Não autenticar, submeter formulários, acionar contato/conversão, alterar estado, editar ou publicar. Registrar páginas, viewports e interações realmente observados. Cada dimensão do runbook tem evidência/localização e limites ou not_observed. Notas de 1 a 5 explicam o critério e são diagnóstico profissional, não pesquisa com usuários, benchmark ou certificação. Findings P0–P3 incluem impacto, recomendação, esforço, risco/dependência e confiança; registrar percurso, plano por fases e decisões humanas. Indisponibilidade não bloqueia análise de conteúdo/repositório.

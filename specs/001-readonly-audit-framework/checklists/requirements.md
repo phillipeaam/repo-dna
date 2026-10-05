@@ -37,13 +37,17 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - A spec preserva a ordem de seções do template resolvido pelo mecanismo local de overrides/presets.
 - Nomes de pastas, skills e readonly são interfaces/restrições do produto solicitadas. Referências a domínios de stack descrevem o que analisar, sem selecionar a stack de implementação.
 - A pesquisa técnica, as fontes locais e exemplos ficam em methodology.md, separadas dos requisitos WHAT/WHY.
-- Status Draft é intencional: artefatos prontos para planejamento, sem declarar framework implementado ou aprovação humana.
+- O status distingue o fluxo de auditoria existente da extensão de prontidão editorial/avaliação de superfície ainda pendente de planejamento e implementação; especificar não é aprovar publicação.
 - FR-006 limita afirmações de preservação à cobertura observada; git status sozinho não basta.
 - FR-007 e FR-041 resolvem a diferença entre B2 das fontes, que admite profiling, e o contrato readonly desta feature: medições existentes são dados; execução dinâmica é externa e não é iniciada nem orquestrada pelo framework.
 - FR-010 e FR-060 adaptam reconciliação das fontes para leitura: nenhuma edição ou exclusão no Notion.
 - FR-022 e FR-052 mantêm verificação por tipo de claim e confirmação pessoal identificada.
 - FR-054 permite encerramento com lacunas não bloqueantes, evitando recuperação infinita.
-- A constituição v2.0.0 foi atualizada explicitamente antes da implementação para governar skills, auditoria readonly e Markdown canônico; a data original de ratificação permanece TODO até confirmação.
+- A extensão de 2026-10-05 acrescenta brief editorial configurável, classificação/curadoria proporcional, conteúdo de leitura rápida e aprofundada, estrutura de histórias, pacote de evidência por tier, carreira/social proof e readiness sem incorporar fatos de projetos pesquisados.
+- A revisão opcional de site/protótipo é somente leitura, depende de seleção explícita, declara viewports/interações realmente vistos e trata notas como diagnóstico profissional; implementação, publicação, certificação e pesquisa com recrutadores continuam fora do escopo.
+- Critérios de Featured são metas de pacote, não gates para arquivar/documentar; Archive/Playground permanece explorável. Quantidade de histórias é guiada por evidência, sem número obrigatório.
+- Brief, estratégia, categorias e decisões de design permanecem configuráveis. Nenhum dado de caso específico, identidade profissional, layout ou decisão não aprovada das fontes privadas foi transferido como padrão universal.
+- A constituição v2.0.0 governou a migração inicial; a atualização v3.0.0 flexibilizou o gate de host mantendo aviso e preservação qualificada. A data original de ratificação permanece TODO até confirmação.
 - Clarificação original de 2026-10-04: host enforcement era gate obrigatório. Revisão posterior de 2026-10-04 substitui essa decisão: perfil sem prova avisa e permite análise estática, com preservação não verificada; ver FR-008 e SC-013 atualizados.
 - Clarificação de 2026-10-04: há exatamente um entregável Markdown local por produto; relatórios HTML, JSON/CSV publicados, anexos e escrita/exportação para Notion estão fora do escopo.
 - Clarificação de 2026-10-04: pessoas podem copiar o Markdown para Notion/Docs depois; agentes de IA são consumidores previstos. SC-006 mede respostas rastreáveis de IA, e SC-011 continua medindo o tempo para encontrar como iniciar.
@@ -56,7 +60,7 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 | Requisitos | Jornada | Resultado observável | Critério |
 |---|---|---|---|
 | FR-001–002 | US1, US6 | Seleção inequívoca e agrupamento explícito | SC-007, SC-011 |
-| FR-003–008 | US1 | Resultados externos, baseline, comparação e enforcement readonly pelo host antes da inspeção substantiva | SC-001–002, SC-013 |
+| FR-003–008 | US1 | Saída externa, baseline/comparação e divulgação do estado de proteção do host antes da inspeção substantiva | SC-001–002, SC-013 |
 | FR-009–012 | US1, US5 | Instruções em fontes não governam fluxo; dados/exclusões/privacidade respeitados; nenhuma escrita externa | SC-001–002, SC-004–005 |
 | FR-013–018 | US2, US7 | Etapas com contratos, combinação registrada, checkpoints e falhas declaradas | SC-003, SC-009, SC-011 |
 | FR-019–021 | US2, US6 | Mapa de cobertura, base genérica e execução sem serviços | SC-003, SC-008 |
@@ -72,13 +76,21 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 | FR-064–066 | US7 | Versões/migrações e atualização controlada | SC-007, SC-009, SC-012 |
 | FR-067–068 | US1–US7 | Handoff com cobertura, preservação e gates explícitos | SC-001–010, SC-013 |
 | FR-069–070 | US2, US7 | Orientação do framework e capacidades legadas reconciliadas | SC-011–012 |
+| FR-071–077 | US8, US9 | Privacidade de pesquisa, método local como autoridade e independência das fontes privadas | SC-014–016 |
+| FR-078–080 | US10 | Brief editorial, classificação e seleção explicadas sem ranking sem base comparável | SC-017–018, SC-024 |
+| FR-081–083 | US3, US10 | Leitura rápida, conteúdo seguro e histórias ligadas à evidência | SC-006, SC-019, SC-025 |
+| FR-084–086 | US5, US10 | Pacote visual proporcional e prontidão independente por evidência/claim | SC-010, SC-020–021, SC-026 |
+| FR-087–088 | US4, US6, US10 | Experiência profissional/social proof qualificados; lineage e agrupamento sem dupla contagem | SC-019, SC-021 |
+| FR-089–091 | US11 | Revisão opcional da superfície, scorecard justificado e comparação contextual de alternativas | SC-022–023, SC-027 |
+| FR-092–094 | US5, US9, US11 | Pesquisa referenciada, decisões com estado e preservação readonly/Markdown único | SC-015, SC-023–024, SC-027 |
 
 ## Iteration Log
 
 1. Revisão inicial: identificada necessidade de separar evidência existente de execução dinâmica; baseline de conteúdo de status Git; método de fatos particulares do Notion.
 2. Ajustes incorporados: FR-006–010, FR-022, FR-041, FR-054; limites da consulta registrados no inventário e metodologia.
-3. Revisão após clarificação do entregável: 16/16 itens de qualidade atendidos; 70/70 requisitos incluídos na matriz. A decisão de entregável único está refletida em FR-003, FR-055, FR-064, FR-067, FR-069 e SC-007–008.
-4. Revisão após decisão readonly do host: FR-008 e SC-013 exigem separação de permissões comprovada por fixture; constituição v2.0.0 atualizada. A data original de ratificação continua pendente.
+3. Revisão após clarificação do entregável: 16/16 itens de qualidade atendidos. A decisão de entregável único está refletida em FR-003, FR-055, FR-064, FR-067, FR-069 e SC-007–008.
+4. Revisão inicial da decisão readonly do host: foi especificado gate de separação de permissões; a revisão posterior de 2026-10-04 atualizou FR-008/SC-013 e a constituição v3.0.0 para aviso sem bloqueio. A data original de ratificação continua pendente.
 5. Revisão após decisão de consumo por IA: SC-006 substitui o prazo de leitura humana por recuperação de respostas com evidência; SC-011 mantém o prazo de início do fluxo. Notion/Docs permanecem cópias posteriores fora do framework.
 6. Revisão após reconciliação e multi-repo: classificações de fontes e linhagem de contribuições compartilhadas devem preservar procedência e evitar dupla contagem; a matriz cobre FR-059–061.
+7. Complemento speckit-specify de 2026-10-05: 94/94 requisitos aparecem na matriz; acrescentadas US10–11 e SC-017–027 para cobrir prontidão editorial de projetos e avaliação condicional da superfície do portfólio. A extensão mantém a autoridade local, o Markdown único, a leitura readonly e a exclusão de dados de casos específicos.
 

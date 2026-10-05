@@ -29,6 +29,8 @@ generalizados, sem alegar cópia integral ou revalidação dos fatos dos casos.
 | L12 | Casos generalizados: prazos, migrações, sucessores, pacotes e claims superadas | [Método §12](methodology.md) e [workflow multi-repo](../../.agents/skills/repodna-audit/references/workflow.md) |
 | L13 | Capacidades existentes: reuso sem promover heurísticas, retirada do pipeline antigo | [Método §13](methodology.md) e [plano](plan.md) |
 | L14 | Limites: sem execução dinâmica, sem afirmação inventada e aviso sobre proteção do host não comprovada | [Método §14](methodology.md) e [fronteira](contracts/readonly-boundary.md) |
+| L15 | Prontidão editorial: brief contextual, papel do projeto, escolha com evidência, narrativa proporcional, mídia/permissões e limites de claims | [Método §15](methodology.md) e [contrato editorial](contracts/portfolio-readiness.md) |
+| L16 | Revisão condicional de superfície: posicionamento, arquitetura, descoberta, mobile, acessibilidade/interação, conversão, manutenção e findings com observabilidade explícita | [Método §16](methodology.md), [contrato](contracts/portfolio-readiness.md) e [runbook local](../../.agents/skills/repodna-audit/references/portfolio-surface-review.md) |
 
 ## Autoridade e privacidade
 

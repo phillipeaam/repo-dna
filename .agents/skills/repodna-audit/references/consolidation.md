@@ -15,12 +15,19 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 ```markdown
 # <Nome do produto>
 
-> Documento <schema-version> | Estado: <status> | Atualizado: <date>
+> Documento 2.0.0 | Estado: <status> | Atualizado: <date>
 > Método: <method-version> | Baselines: <repo@ref, ...>
 
 ## Start Here
 ## At a Glance
 ## Study Map
+## Prontidão editorial do projeto
+### Brief e papel editorial
+### Quick scan e relevância
+### Case(s) e rota de evidências
+### Pacote de mídia e claims
+### Matriz de prontidão editorial
+## Revisão opcional da superfície do portfólio
 ## Identidade e contexto
 ## Papel, equipe e contribuições
 ## Sistemas e arquitetura
@@ -39,6 +46,8 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 ### Reconciliação de fontes
 ## Histórico de verificação
 ```
+
+Novos documentos usam schema 2.0.0. Ao atualizar registro 1.0.0, preservar IDs, fontes e histórico recuperáveis, migrar no mesmo Markdown e documentar o mapeamento/gaps no histórico. Seções editoriais/superfície ausentes significam não avaliadas, não aprovação. Nunca gerar cópia paralela para migração.
 
 Headings são estáveis para consulta; mudança da versão do contrato registra migração e compatibilidade. Se uma seção não se aplica, registrar `not_applicable` e motivo em vez de removê-la silenciosamente.
 
@@ -88,3 +97,11 @@ Citar cada fonte com data/snapshot quando disponíveis. Para conflito, conservar
 Antes de reaproveitar material legado, registrar origem, versão/schema, baseline e significado dos campos. Mapear explicitamente somente estados semanticamente compatíveis. Manter rótulos de heurística como pistas; não elevar `possible_use`, score, confiança implícita ou ausência de medição a finding verificado. Se proveniência/semântica não puderem ser determinadas, manter `not_verified` ou recusar a migração com motivo e evidência necessária. Não reescrever a fonte externa.
 
 A migração atualiza o mesmo arquivo canônico, mantém a proveniência e uma nota histórica do mapeamento/recusa; não cria relatório legado paralelo.
+
+## Prontidão editorial do projeto e superfície opcional
+
+Quando aplicável, registrar brief com origem/estado por campo, contexto do projeto separado do papel editorial, recomendação separada de decisão humana e rationale de comparação. Sem conjunto explícito comparável, não declarar ranking. Preservar Featured candidate, Strong supporting, Supporting/Technical, Archive/Playground e unclassified sem exclusão automática. O quick scan mostra identidade/contexto, papel/equipe/período, stack, contribuição, relevância, estado público e ressalva e liga ao case.
+
+Case usa contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão, deixando lacunas. Inventário Featured acompanha imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links e confidencialidade. Separar disponibilidade da seleção; publicação recomenda 4–7 itens visuais significativos. Pacote não é gate.
+
+A seção de superfície só aparece após seleção explícita de site/protótipo/design. Registrar fonte, páginas, viewports e interações realmente vistos. Usar uma linha por cada dimensão/subdimensão de `positioning`, `narrative-information-architecture`, `discovery-grouping`, `cases-evidence`, `visual-readability`, `mobile-reflow`, `tablet-reflow`, `reading-order`, `touch-targets`, `keyboard-navigation`, `focus-visibility`, `accessible-names`, `semantic-structure`, `contrast`, `reduced-motion`, `animated-media-controls`, `contact-conversion`, `maintenance-consistency`, `unavailable-media` e `performance`; cada linha recebe finding fundamentado ou `not_observed`, evidência/localização e limite. Falhas de mídia só são registradas quando diretamente observáveis. Performance aceita apenas sinais estáticos observados sem execução ou medições já existentes/fornecidas com sua proveniência; não iniciar teste de carregamento, profiler, benchmark ou execução do alvo. O scorecard inclui status e, quando aplicável, nota/critério/confiança, evidência, impacto e limite. O registro também contém resumo executivo, percurso do visitante, findings priorizados, arquitetura/direção recomendada, gaps de conteúdo/evidência, plano por fases, decisões/perguntas pendentes e limitações. Recomendações apontam evidência e não equivalem a decisão/aprovação. Nota 1–5 tem critério/localização e é diagnóstico profissional. Finding inclui prioridade P0–P3, impacto, recomendação, esforço, risco/dependência e confiança. Não autenticar, submeter, acionar conversão, editar ou publicar; indisponibilidade não bloqueia análise de conteúdo.

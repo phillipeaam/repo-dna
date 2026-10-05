@@ -342,6 +342,7 @@ Task: T021 publication-b4.md
 | FR-062–063 | US4: T037; US3: T026 |
 | FR-064–066 | US7: T052–T057 |
 | FR-067–070 | US3: T027–T030; US2: T022–T023; US6: T050; Polish: T058–T063 |
+| FR-071–077 | US8/US9: T064–T074; Polish: T072–T074 |
 | SC-001 | US1: T006–T013; US2: T014–T023; US4: T031–T038 |
 | SC-002 | US1: T006–T013; US3: T024–T030; Polish: T059, T063 |
 | SC-003 | US2: T014–T023; US4: T031–T038; US6: T045–T051 |
@@ -355,6 +356,7 @@ Task: T021 publication-b4.md
 | SC-011 | US2: T014, T022; Polish: T062 |
 | SC-012 | US6: T050; Polish: T060–T063 |
 | SC-013 | Foundation: T005; US1: T007–T008, T013; Polish: T059 |
+| SC-014–016 | US8/US9: T064–T074 |
 
 ## Notes
 
@@ -375,3 +377,127 @@ Task: T021 publication-b4.md
 - As fontes privadas incorporadas nesta feature não tinham commits identificados nos caminhos de inventário/método. Exemplos pessoais da documentação e dos testes antigos já existem no histórico do projeto; a limpeza atual não elimina essa exposição. Histórico não foi reescrito.
 - Revisão automática cobre padrões de metadados e termos privados conhecidos; revisão humana de informações desconhecidas e binários continua necessária. Histórico: a matriz Codex era unverified e bloqueava; Phase 16 remove esse bloqueio, mantendo aviso e preservação observacional.
 - Converge identificou uma limitação: caminhos pessoais eram verificados apenas em Markdown/texto simples. T074 removeu a restrição por extensão e acrescentou casos em `.py`, `.sh` e `.json`; os 11 contratos, a prova de redaction e o guard final de working tree/índice passaram em 2026-10-04.
+
+## Fases planejadas — extensão US10/US11 (2026-10-05)
+
+As fases abaixo complementam esta mesma feature e preservam T001–T078 como histórico concluído. T079 em diante está pendente. Nenhuma tarefa autoriza execução ou alteração do repositório/superfície auditados. Os cenários usam somente fixtures do framework.
+
+### Phase 17: Fundação editorial compartilhada
+
+**Purpose**: Definir vocabulário e contrato opcional comum a conteúdo editorial e avaliação de superfície no documento canônico.
+
+- [x] T079 Atualizar `specs/001-readonly-audit-framework/data-model.md` com brief, contexto e papel editorial, história, pacote/ativo, registro profissional, observação e finding de superfície e suas validações.
+- [x] T080 [P] Criar `specs/001-readonly-audit-framework/contracts/portfolio-readiness.md` com entradas opcionais, estados, seção editorial, seção de superfície e limites readonly.
+- [x] T081 Atualizar `specs/001-readonly-audit-framework/contracts/source-of-truth-markdown.md` e `specs/001-readonly-audit-framework/contracts/input-output.md` para incorporar as seções opcionais mantendo um único Markdown por produto e compatibilidade com registros sem elas.
+- [x] T082 Atualizar `specs/001-readonly-audit-framework/research.md` com decisões D1–D7 de compatibilidade, provenance, comparação, diagnóstico e inspeção condicional.
+
+**Checkpoint**: Termos, compatibilidade e contrato do único arquivo canônico definidos sem transformar recomendação em fato/decisão.
+
+### Phase 18: User Story 10 - Preparar conteúdo de projeto para decisão editorial (Priority: P1)
+
+**Goal**: Tornar contribuição, adequação ao portfólio e gaps encontráveis e sustentados por evidência sem inventar copy ou excluir projetos.
+
+**Independent Test**: Usar fixtures fictícias com e sem brief, inventário comparável e não comparável, contexto profissional/independente/técnico/arquivo, contribuição individual/equipe, claims sem suporte e permissões distintas. Verificar referências, unknowns, decisão vs sugestão e pacotes proporcionais.
+
+#### Acceptance tasks
+
+- [x] T083 [P] [US10] Criar cenários sintéticos para origem/estado de brief, classificação sem exclusão, ausência de ranking global, atribuição claim-evidência e pacote Featured vs Archive, incluindo pacote Featured com seleção de 4–7 itens visuais significativos ou lacunas explícitas de mídia/permissão, em `tests/fixtures/readonly-audit/portfolio-readiness/README.md`.
+- [x] T084 [P] [US10] Definir verificações de contrato dos cenários US10 para quick scan, lacunas de história, permissão, afirmações profissionais e critérios mensuráveis de SC-025: leitor não familiarizado localiza produto/contexto e contribuição em até 60 segundos e alcança uma rota de evidência aprofundada em cerca de 5–10 minutos, em `tests/portfolio_readiness_contract_test.sh`.
+
+#### Implementation tasks
+
+- [x] T085 [US10] Integrar brief, contexto e papel editorial com origem, status, racional e comparação condicionada a inventário explícito em `.agents/skills/repodna-audit/references/workflow.md`.
+- [x] T086 [US10] Definir quick scan, navegação à evidência profunda e estrutura proporcional da história de engenharia em `.agents/skills/repodna-audit/references/forensic-a1.md`.
+- [x] T087 [US10] Atualizar pacote de claims, mídia, evidência demonstrada, permissão e prontidão proporcional por papel em `.agents/skills/repodna-audit/references/publication-b4.md`; para Featured, registrar metas desejáveis de imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs de sistemas, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links e confidencialidade, distinguindo inventário disponível dos 4–7 elementos significativos realmente selecionados.
+- [x] T088 [US10] Incorporar papéis, cases, pacotes e matriz independente de readiness no esqueleto canônico, sem tornar Featured gate, em `.agents/skills/repodna-audit/references/consolidation.md`.
+- [x] T089 [P] [US10] Atualizar estados/vocabulário para origem do brief, papel editorial, sugestão/decisão humana, ativo e prontidão em `.agents/skills/repodna-audit/references/evidence-vocabulary.md`.
+- [x] T090 [US10] Atualizar a seção editorial, linhagem profissional/recomendações e regras de não duplicação no `specs/001-readonly-audit-framework/methodology.md`.
+- [x] T091 [P] [US10] Incluir cenários editoriais, leitura rápida e limites de comparação no `specs/001-readonly-audit-framework/quickstart.md`, registrando no roteiro SC-025 a medição de até 60 segundos para achar contexto/contribuição e o percurso de 5–10 minutos até evidência aprofundada.
+
+**Checkpoint**: Brief ausente não bloqueia; projeto sem comparáveis não recebe ranking; claims e mídia permanecem qualificadas e arquivo/supporting continuam documentáveis.
+
+### Phase 19: User Story 11 - Revisar superfície de portfólio selecionada (Priority: P2)
+
+**Goal**: Avaliar a experiência observável do site/protótipo de forma localizada, priorizada, condicional e readonly.
+
+**Independent Test**: Com fixture contratual e observações sintéticas, verificar cobertura de dimensões com finding fundamentado ou `not_observed`, escopo de viewport/interação, placar explicado, percurso e prioridades. Repetir com superfície indisponível. Não visitar ou alterar um site real como parte do teste.
+
+#### Acceptance tasks
+
+- [x] T092 [P] [US11] Criar fixture sintética de observações disponíveis e indisponíveis, incluindo páginas/viewports/interações e findings priorizados em `tests/fixtures/readonly-audit/portfolio-surface/README.md`.
+- [x] T093 [P] [US11] Definir checagem contratual para dimensões observadas/`not_observed`, notas fundamentadas, prioridade/esforço/risco e integridade readonly em `tests/portfolio_surface_contract_test.sh`.
+
+#### Implementation tasks
+
+- [x] T094 [US11] Criar runbook condicional para posicionamento, arquitetura, descoberta, cases, visual, mobile, acessibilidade/interação, conversão e manutenção, incluindo método de observação e falhas em `.agents/skills/repodna-audit/references/portfolio-surface-review.md`.
+- [x] T095 [US11] Integrar escopo explícito, acesso público somente leitura, carregamento local seguro de referência visual e gates de confirmação humana para conflito em `.agents/skills/repodna-audit/references/workflow.md`.
+- [x] T096 [US11] Definir campos de sumário, percurso do visitante, notas 1–5, finding P0–P3, esforço/risco/confiança e plano por fases no contrato `specs/001-readonly-audit-framework/contracts/portfolio-readiness.md`.
+- [x] T097 [US11] Integrar uma seção condicional de superfície ao registro canônico, com fonte/localização/viewport e `not_observed`, em `.agents/skills/repodna-audit/references/consolidation.md`.
+- [x] T098 [US11] Atualizar `specs/001-readonly-audit-framework/methodology.md` e `source-inventory.md` para mapear o método generalizado e suas instruções locais sem depender do Notion.
+- [x] T099 [P] [US11] Documentar cenários de avaliação disponível/indisponível e inspeção sem mudança de estado em `specs/001-readonly-audit-framework/quickstart.md`.
+
+**Checkpoint**: Superfície não selecionada não ativa o runbook; dimensões sem observação ficam explícitas; nada é autenticado, submetido, alterado ou publicado.
+
+### Phase 20: Polish e cobertura cruzada US10/US11
+
+**Purpose**: Ligar a navegação da skill, fixtures, critérios e requisitos atualizados mantendo escopo e saída canônicos.
+
+- [x] T100 Atualizar o ponto de entrada e o índice de referências de `.agents/skills/repodna-audit/SKILL.md` para oferecer prontidão editorial e revisão de superfície somente sob as condições das US10/US11.
+- [x] T101 Atualizar a matriz de cenários e roteiro de uso em `specs/001-readonly-audit-framework/quickstart.md`, `specs/001-readonly-audit-framework/methodology.md` e `specs/001-readonly-audit-framework/source-inventory.md` para cobrir FR-078–094 e SC-017–027.
+- [x] T102 Atualizar `tests/run.sh` para executar os contratos editoriais/de superfície apenas com fixtures do framework e nunca executar conteúdo de alvo selecionado.
+- [x] T103 Atualizar a seção Requirements Traceability em `specs/001-readonly-audit-framework/tasks.md` para mapear FR-078–094 e SC-017–027 a T079–T102.
+- [x] T104 Revisar referências locais, compatibilidade do Markdown antigo, privacidade e uso de uma única saída; registrar gaps restantes nos artefatos da feature, sem executar alvo em `specs/001-readonly-audit-framework/quickstart.md`.
+
+## Dependências e ordem da extensão
+
+- Phase 17 precede ambas as histórias porque estabelece contrato e vocabulário compartilhados.
+- US10 (P1) pode prosseguir após Phase 17 e fornece o método de conteúdo que a superfície da US11 referencia.
+- US11 (P2) depende do contrato da Phase 17; para integrar conteúdo/cases de maneira coerente, conclui-se após US10. T092/T093 são fixtures independentes da escrita do runbook, após o contrato.
+- Phase 20 depende das duas histórias.
+
+## Oportunidades paralelas
+
+- T080 pode ser feito em paralelo com T079 depois de estabilizar a linguagem; T081/T082 tratam arquivos diferentes.
+- Na US10, T083/T084 e T089/T091 podem ocorrer em paralelo; T086 e T087 são arquivos diferentes após T085 fixar vocabulário; T088 integra ambos.
+- Na US11, T092/T093 podem ocorrer em paralelo; T094 pode ser elaborado em paralelo aos fixtures; T096 e T097 dependem da rubrica e do template concordarem.
+- T100/T101/T102 tratam arquivos distintos e podem ocorrer em paralelo depois dos contratos; T103/T104 fecham rastreabilidade e revisão.
+
+## Estratégia incremental do complemento
+
+1. Fechar contrato e vocabulário compartilhados (Phase 17).
+2. Entregar US10 como primeiro incremento utilizável para auditorias de conteúdo.
+3. Acrescentar US11 de forma opt-in sem condicionar a auditoria de repositório.
+4. Fechar cobertura, referências locais, privacidade e validação com fixtures fictícias.
+
+## Rastreabilidade adicional
+
+| Requisitos | Histórias/tarefas |
+|---|---|
+| FR-078–080 | US10: T083–T085, T089 |
+| FR-081–083 | US10: T084, T086, T088 |
+| FR-084–086 | US10: T083–T089 |
+| FR-087–088 | US10: T085–T090 |
+| FR-089–091 | US11: T092–T097, T106 |
+| FR-092–093 | US11: T094–T096; Polish: T100–T104 |
+| FR-094 | US10/US11: T084, T087, T093–T097; Polish: T102, T104 |
+| SC-017–021 | US10: T083–T091; Polish: T103–T104 |
+| SC-022–023, SC-027 | US11: T092–T099, T106; Polish: T102–T104 |
+| SC-024 | US10: T083–T091; Polish: T100–T104 |
+| SC-025 | US10: T084, T086, T091; Polish: T104 |
+| SC-026 | US10: T083, T087, T088; Polish: T104 |
+
+## Phase 21: Convergence
+
+**Purpose**: Fechar gaps residuais identificados ao comparar a implementação atual com a spec, o plano e a constituição.
+
+- [X] T106 Completar a matriz sintética de `tests/fixtures/readonly-audit/portfolio-surface/README.md` com finding fundamentado ou `not_observed` para cada dimensão/subdimensão de FR-089 (posicionamento; narrativa/arquitetura; descoberta; cases/evidência; visual/legibilidade; mobile/tablet; todos os aspectos de acessibilidade/interação; contato/conversão; manutenção/consistência; mídia indisponível e performance observável) e reforçar `tests/portfolio_surface_contract_test.sh` para verificar cobertura integral da matriz per FR-089 / SC-027 (partial).
+
+## Phase 22: Validação final
+
+**Purpose**: Executar a validação editorial com participante humano depois que a análise estiver registrada e pronta para revisão.
+
+- [ ] T105 Conduzir e registrar uma sessão cronometrada com leitor humano sem contexto usando a fixture editorial; medir a localização de produto/contexto e contribuição (meta ≤60 s) e a rota até evidência aprofundada (meta ~5–10 min), anotar perfil não identificável, tarefa, tempos e resultado observado em `specs/001-readonly-audit-framework/quickstart.md` per SC-025 (partial; validação final após registro).
+
+## Phase 23: Convergence
+
+- [X] T107 Completar o procedimento e o esqueleto canônico para orientar a avaliação por dimensão de FR-089, incluindo falha/indisponibilidade de mídia e sinais de performance somente quando já observáveis sem execução, e garantir os campos de resumo executivo, arquitetura/direção recomendada e gaps de conteúdo/evidência de FR-090; ampliar `tests/portfolio_surface_contract_test.sh` para validar o runbook e a saída canônica per FR-089–090 / SC-022 / SC-027 (partial).

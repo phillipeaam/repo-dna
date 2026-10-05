@@ -104,3 +104,20 @@
 - docs/author-system-ownership.md descreve proxies quantitativos; atividade será sinal investigativo, não score de autoria.
 - docs/architecture.md especifica direção de dependência e separação collector/renderer; coletar esses fatos não exige preservar renderers.
 - A skill local speckit-plan prevê agentes de pesquisa. Nesta sessão, a política de colaboração proíbe delegação salvo pedido explícito; pesquisa foi feita diretamente no workspace.
+# Complemento de pesquisa e decisões — US10/US11 (2026-10-05)
+
+## Decisões
+
+- **D1 — Uma autoridade e compatibilidade**: adicionar seções opcionais no documento canônico existente e avançar a versão do esquema nele; não gerar saídas ou serviços novos. Relatórios antigos sem essas seções continuam válidos.
+- **D2 — Estado editorial explícito**: brief e decisões guardam origem/estado, e classificação do projeto fica separada de seu contexto. Sugestão automatizada não equivale a aprovação.
+- **D3 — Comparação limitada**: papel editorial relativo só é comparado dentro de inventário informado e comparável; análise isolada oferece aderência e lacunas, sem ranking.
+- **D4 — Evidência primeiro**: resumos/cases derivam de claims localizáveis. Histórias, mídia e pacotes são proporcionais ao papel e ao suporte existente; Featured é recomendação, Archive/Supporting não é exclusão.
+- **D5 — Superfície condicional**: site/protótipo é avaliado apenas quando selecionado; escopo observado e limitações ficam explícitos. Dimensão não acessível vira `not_observed`; não há login, formulário ou mudança de estado.
+- **D6 — Diagnóstico sem certificação**: escala 1–5 tem critério/observação; findings priorizados incluem impacto, esforço, risco e confiança. Não se afirma teste de usuário, conversão ou certificação sem evidência apropriada.
+- **D7 — Pesquisa externa restrita**: usar apenas para questão aberta relevante, citando fonte direta e data; julgamento do analista permanece distinto.
+
+## Racional e alternativas
+
+As decisões derivam diretamente de FR-078–094, SC-017–027, dos contratos existentes de saída/readonly e da constituição v3.0.0. Uma seção nova no mesmo Markdown preserva navegação e compatibilidade com o objetivo da fonte de verdade única. Arquivo separado, export de Notion, implementação visual e perfil universal de portfólio contradizem a autoridade local, o limite de privacidade ou o escopo explicitado e foram descartados.
+
+Nenhuma dependência de tecnologia ou questão factual externa está pendente para planejar este complemento. Regras de acessibilidade e benchmarks só serão pesquisados durante uma avaliação quando houver decisão concreta que dependa disso; pesquisa não bloqueia a execução genérica.

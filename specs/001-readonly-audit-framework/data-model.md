@@ -20,7 +20,20 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 | **Asset/mídia** | Origem/criador/licença/crédito, integração, era/snapshot, uso, permissões e legenda | Sustenta comportamento/release; não concede autoria/licença por inferência |
 | **Questão/conflito** | Tema, afirmações/fontes em conflito, estado, evidência necessária, bloqueio/resolução | Uma seção atual, ligada ao histórico quando muda |
 | **Cobertura** | Domínio, aplicabilidade, estado, escopo, motivo/fallback | Um resultado por domínio da matriz |
-| **Registro canônico** | Estado/baseline, resumo humano, facts atuais, claims, apêndices, índice e histórico | Um registro persistente Markdown por produto |
+| **Registro canônico** | `schema_version`, estado/baseline, resumo humano, facts atuais, claims, apêndices, índice e histórico | Um registro persistente Markdown por produto; versão identificada e migração no mesmo arquivo |
+
+## Entidades complementares — US10/US11
+
+| Entidade | Campos essenciais | Relações e validações |
+|---|---|---|
+| **Brief editorial** | cargos/público, idioma, canais, sinais prioritários, restrições, decisões visuais, origem, estado (`confirmed`, `provisional`, `historical`, `conflicting`) | Opcional por produto; cada campo sem suporte permanece desconhecido; não define identidade por padrão. |
+| **Contexto do projeto** | profissional/comercial, independente, jam, técnico ou desconhecido; equipe, período, plataforma | Descreve o projeto e não determina papel editorial nem título profissional. |
+| **Papel editorial** | Featured candidate, Strong supporting, Supporting/Technical, Archive/Playground ou unclassified; rationale; decisão humana/recomendação provisória | Recomendação comparativa referencia inventário explicitamente selecionado; ausência desse inventário proíbe ranking global. Não remove o projeto. |
+| **História de engenharia** | contexto, ownership, problema, restrições, abordagem, trade-offs, evidência, resultado, reflexão, estado de suporte | Campos podem ficar ausentes; cada claim factual referencia finding/evidência e limite. Relato pessoal é marcado como tal. |
+| **Ativo/pacote editorial** | ativo desejável, presença, origem/proveniência, comportamento demonstrado, permissão/atribuição, claim, lacuna e prioridade | Pacote é proporcional ao papel; checklist Featured é meta recomendada e não gate. Asset sem permissão não se torna claim/uso aprovado. |
+| **Registro profissional/recomendação** | texto exato, autor, fonte, contexto, período, permissão, relação com contribuição | Recomendação é testemunho atribuído e não prova automática de autoria, cargo ou impacto. Título formal e responsabilidade observada são dimensões separadas. |
+| **Observação de superfície** | URL/artefato, página, viewport, estado de acesso, interação realmente observada, evidência, dimensão, limite | Somente leitura e sem autenticação/submissão/alteração de estado. Dimensão indisponível recebe `not_observed`. |
+| **Finding de superfície** | dimensão, nota 1–5 opcional, critério, evidência/localização, impacto, prioridade P0–P3, esforço, risco/dependência, confiança, recomendação | Nota é diagnóstico profissional; finding aponta observação real. Lacunas são explicitadas sem alegação de teste/certificação/conversão. |
 
 ## Vocabulários controlados
 
@@ -49,6 +62,8 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 7. Intermediários, se necessários, são efêmeros, ficam fora do alvo e podem ser descartados.
 8. Um finding atualizado não sobrescreve silenciosamente a história; estado atual e checkpoints superados permanecem distinguíveis.
 9. Uma contribuição compartilhada mantém identidade estável entre repositórios e baselines; a linhagem alteração do pacote → versão → produto consumidor → release liga todas as evidências e a contribuição é contabilizada uma única vez.
+10. Brief, classificação editorial, observação de superfície e recomendações são contextuais/opcionais e não alteram evidência técnica nem aprovação humana.
+11. Uma avaliação de superfície ocupa uma seção do registro canônico do produto e não cria outro arquivo persistente.
 
 ## Ciclo de estados
 

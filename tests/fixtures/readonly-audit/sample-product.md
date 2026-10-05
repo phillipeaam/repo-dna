@@ -1,6 +1,6 @@
 # Fixture Atlas
 
-> Documento 1.0.0 | Estado: partial | Atualizado: 2026-01-02
+> Documento 2.0.0 | Estado: partial | Atualizado: 2026-01-02
 > Método: fixture-1 | Baselines: repo-a@abc123
 
 ## Start Here
@@ -13,6 +13,12 @@ Fixture Atlas contém cliente e pacote compartilhado. [E-001]
 - Contribuição: seção Papel, equipe e contribuições.
 - Arquitetura: seção Sistemas e arquitetura.
 - Release: seção Timeline e releases.
+
+## Prontidão editorial do projeto
+not_applicable: fixture não define um brief ou um plano de portfólio real.
+
+## Revisão opcional da superfície do portfólio
+not_applicable: nenhum site/protótipo foi incluído nesta fixture.
 
 ## Baseline e preservação
 Snapshot sintético `repo-a@abc123`; fixture não corresponde a repositório real. [E-001]

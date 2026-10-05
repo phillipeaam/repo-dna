@@ -15,6 +15,7 @@ fixture_dir = Path(sys.argv[2]).resolve()
 text = document.read_text(encoding="utf-8")
 required = [
     "## Start Here", "## At a Glance", "## Study Map",
+    "Documento 2.0.0", "## Prontidão editorial do projeto", "## Revisão opcional da superfície do portfólio",
     "## Baseline e preservação", "## Evidências e índice",
     "## Cobertura e estado das etapas", "## Questões, conflitos e bloqueios",
     "## Histórico de verificação", "### A1 — Forense", "### B1 — Produção e arquitetura",
