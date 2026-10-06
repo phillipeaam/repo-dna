@@ -20,9 +20,9 @@ show_usage() {
         '  --privacy-mode <mode>     Privacy level: standard or strict.' \
         '  -h, --help                Show this help.' '' 'Examples:' \
         '  bash dna-analysis.sh' \
-        '  bash /path/to/dna-analysis.sh "/c/Users/Name/Project"' \
-        '  bash dna-analysis.sh --repository "C:\Users\Name\Project"' \
-        '  bash dna-analysis.sh --author "Phillipe Augusto"' \
+        '  bash /path/to/dna-analysis.sh "/c/Users/<user>/Project"' \
+        '  bash dna-analysis.sh --repository "C:\Users\<user>\Project"' \
+        '  bash dna-analysis.sh --author "Example Contributor"' \
         '  bash dna-analysis.sh --since 2020-01-01 --until 2025-12-31' \
         '  bash dna-analysis.sh --owned-root Assets/_Project' \
         '  bash dna-analysis.sh --include-source' \

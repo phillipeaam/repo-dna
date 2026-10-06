@@ -37,12 +37,12 @@ parse_arguments --compare-with previous.json
 parse_arguments --forge-data forge.json
 [[ "$FORGE_DATA" == forge.json ]]
 
-parse_arguments '/c/Users/Phillipe Augusto/Development/repo-dna' --author Developer
-[[ "$TARGET_REPOSITORY" == '/c/Users/Phillipe Augusto/Development/repo-dna' ]]
+parse_arguments '/c/Users/Example Contributor/Development/repo-dna' --author Developer
+[[ "$TARGET_REPOSITORY" == '/c/Users/Example Contributor/Development/repo-dna' ]]
 [[ "$AUTHOR" == Developer ]]
 
-parse_arguments --repository 'C:\Users\Phillipe Augusto\Development\repo-dna'
-[[ "$TARGET_REPOSITORY" == 'C:\Users\Phillipe Augusto\Development\repo-dna' ]]
+parse_arguments --repository 'C:\Users\Example Contributor\Development\repo-dna'
+[[ "$TARGET_REPOSITORY" == 'C:\Users\Example Contributor\Development\repo-dna' ]]
 
 if (parse_arguments first-repository second-repository) >/dev/null 2>&1; then
     echo 'Multiple repository paths were accepted.' >&2

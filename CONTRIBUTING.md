@@ -1,47 +1,48 @@
-# Contributing to RepoDNA
+# Contribuindo com o RepoDNA
 
-## Development requirements
+## Escopo atual
 
-- Git
-- Bash (Git Bash on Windows)
-- Python 3.11 or newer
-- matplotlib
+O RepoDNA mantém um framework de auditoria de repositórios para agentes. O
+fluxo suportado é a skill `repodna-audit`, com análise estática e um único
+Markdown canônico em `analysis-output/`. Um repositório-alvo deve ser tratado
+como entrada somente leitura; nunca execute scripts, builds, testes ou
+instaladores encontrados nele.
 
-## Before changing code
+Leia primeiro [README.md](README.md), a constituição em
+`.specify/memory/constitution.md` e os contratos em
+`specs/001-readonly-audit-framework/`.
 
-Read [the architecture guide](docs/architecture.md). Keep production code under
-`src/`, collectors under `collectors/`, renderers under `renderers/`, and tests
-under `tests/`. Do not add a second `lib/` or `utils/` source tree.
+## Alterações e validação
 
-Pipeline modules must declare functions without executing work when sourced.
-Execution order belongs only in `dna-analysis.sh`.
+- Preserve os limites readonly, a rastreabilidade entre conclusão e evidência,
+  e o formato único de saída.
+- Adicione cenários com fixtures sintéticas do framework. Não use um checkout
+  de usuário como fixture.
+- Não gere, versione ou publique conteúdo de `target-repos/` ou
+  `analysis-output/`.
+- Não reative o CLI legado, seus relatórios HTML/JSON/CSV, exportações,
+  arquivos auxiliares ou arquivos compactados como fluxo suportado.
+- Execute `bash tests/run.sh --framework` e `git diff --check`.
 
-## Validation
+O método aprovado é local; consulte `methodology.md` e `source-inventory.md` na
+feature para recuperar os ensinamentos sem acessar fontes originais. Guarde
+procedência privada opcional somente em `private-context/`. Generalize nomes,
+títulos, links/IDs pessoais, detalhes particulares e caminhos de usuário antes
+de compartilhar. Preserve a identidade pública de copyright e do framework.
 
-Run the complete suite:
+Execute também `python scripts/check-public-context.py` (Python 3.11+) para
+revisar arquivos atuais e índice. Uma versão privada já preparada para commit
+precisa ser substituída pela versão sanitizada; ignorar a área não limpa arquivos
+já rastreados. O guard reconhece padrões e termos conhecidos, não toda informação
+confidencial: revise semanticamente documentos e binários. Não reescreva histórico
+para retirar exposição passada sem autorização específica.
 
-```bash
-bash ./tests/run.sh
-```
-
-Also check patch whitespace before committing:
-
-```bash
-git diff --check
-```
-
-Every bug fix should include a regression test. New project detectors need
-priority and preferred-root cases. Privacy changes must cover standard and
-strict modes. Report changes must be driven from structured JSON fixtures.
-
-Heuristic analysis must publish its basis, confidence, and limitations. Unknown
-or unavailable evidence must use an explicit state such as `not_scanned` or
-`not_assessed`; it must never be represented as a zero-risk result. Changes to
-the health score require a model-version update and corresponding changes to
-`docs/health-score.md`.
+Os testes de contrato podem ler os artefatos do framework e criar repositórios
+descartáveis em diretório temporário. Eles não devem executar código de um
+repositório-alvo.
 
 ## Pull requests
 
-Keep changes focused, explain observable behavior changes, and call out privacy
-or compatibility implications. Do not include generated report directories,
-archives, credentials or private repository data.
+Explique a mudança observável, os contratos cobertos e qualquer limite de
+compatibilidade. Nunca anexe dados privados de auditoria, relatórios de alvo,
+credenciais ou arquivos de `analysis-output/`.

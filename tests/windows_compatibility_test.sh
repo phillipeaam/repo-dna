@@ -8,10 +8,10 @@ TEMP="$(mktemp -d "${TMPDIR:-/tmp}/RepoDNA Windows compat.XXXXXX")"
 trap 'rm -rf "$TEMP"' EXIT
 
 # Windows-native separators and Git Bash drive paths normalize consistently.
-native='C:\Users\Phillipe Augusto\Development\repo-dna'
+native='C:\Users\Example Contributor\Development\repo-dna'
 normalized="$(normalize_repository_path "$native")"
-[[ "$normalized" == 'C:/Users/Phillipe Augusto/Development/repo-dna' || "$normalized" == '/c/Users/Phillipe Augusto/Development/repo-dna' ]]
-[[ "$(normalize_repository_path '/c/Users/Phillipe Augusto/Development/repo-dna')" == '/c/Users/Phillipe Augusto/Development/repo-dna' ]]
+[[ "$normalized" == 'C:/Users/Example Contributor/Development/repo-dna' || "$normalized" == '/c/Users/Example Contributor/Development/repo-dna' ]]
+[[ "$(normalize_repository_path '/c/Users/Example Contributor/Development/repo-dna')" == '/c/Users/Example Contributor/Development/repo-dna' ]]
 
 # Runtime resolution supports python3, python, and the Windows Python Launcher.
 (

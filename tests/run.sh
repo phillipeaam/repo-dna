@@ -1,101 +1,43 @@
 #!/usr/bin/env bash
 
-set -uo pipefail
+set -euo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUTPUT_FILE=""
-MODE="fast"
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --json)
-            [[ -n "${2:-}" ]] || { printf '%s\n' 'Usage: tests/run.sh [--unit|--contract|--integration|--all] [--json output.json]' >&2; exit 2; }
-            OUTPUT_FILE="$2"; shift 2 ;;
-        --unit|--contract|--integration|--all)
-            MODE="${1#--}"; shift ;;
-        *)
-            printf 'Unknown option: %s\n' "$1" >&2; exit 2 ;;
-    esac
-done
+MODE="${1:---framework}"
+if [[ "$#" -gt 1 || ( "$MODE" != "--framework" && "$MODE" != "--all" ) ]]; then
+    printf '%s\n' 'Usage: bash tests/run.sh [--framework]' >&2
+    exit 2
+fi
 
-# Fast tests validate functions, collectors, schemas, and renderer contracts.
-unit_tests=(
-    architecture_test.sh arguments_test.sh project_detection_test.sh exclusions_test.sh
-    ownership_test.sh author_system_ownership_test.sh bus_factor_test.sh
-    system_documentation_test.sh onboarding_test.sh technical_impact_test.sh
-    achievement_candidates_test.sh git_history_test.sh delivery_analysis_test.sh
-    forge_import_test.sh security_scan_test.sh generic_collector_test.sh
-    author_alias_validation_test.sh ast_analysis_test.sh framework_analysis_test.sh
-    unity_analysis_test.sh android_analysis_test.sh flutter_analysis_test.sh
-    godot_analysis_test.sh unreal_analysis_test.sh module_graph_test.sh
-    architecture_insights_test.sh quality_importers_test.sh dependency_inventory_test.sh
-    period_comparison_test.sh health_trends_test.sh canonical_schema_test.sh
-    canonical_model_test.sh runtime_fallbacks_test.sh
+# --all remains a compatibility alias, but runs only the supported framework
+# contracts. Legacy target-analysis tests are intentionally not invoked.
+tests=(
+    readonly_audit_boundary_test.sh
+    readonly_audit_scope_test.sh
+    audit_workflow_contract_test.sh
+    canonical_markdown_contract_test.sh
+    evidence_separation_test.sh
+    publication_readiness_test.sh
+    portfolio_readiness_contract_test.sh
+    portfolio_surface_contract_test.sh
+    technical_tags_contract_test.sh
+    contributor_attribution_contract_test.sh
+    engineering_reconstruction_contract_test.sh
+    multirepo_audit_test.sh
+    audit_resume_migration_test.sh
+    private_paths_test.sh
+    public_context_test.sh
+    local_method_test.sh
 )
 
-contract_tests=(
-    cli_test.sh installation_test.sh dependency_layers_test.sh reporting_test.sh
-    charts_test.sh release_workflow_test.sh
-)
-
-# These intentionally execute a full analysis, copy complete repositories, or
-# validate archives and platform behavior. They remain available on demand.
-integration_tests=(
-    fixtures_test.sh logging_test.sh artifact_contract_test.sh
-    privacy_modes_test.sh edge_cases_test.sh windows_compatibility_test.sh
-)
-
-case "$MODE" in
-    unit) tests=("${unit_tests[@]}") ;;
-    contract) tests=("${contract_tests[@]}") ;;
-    integration) tests=("${integration_tests[@]}") ;;
-    all) tests=("${unit_tests[@]}" "${contract_tests[@]}" "${integration_tests[@]}") ;;
-    fast) tests=("${unit_tests[@]}" "${contract_tests[@]}") ;;
-    *) printf 'Invalid test mode: %s\n' "$MODE" >&2; exit 2 ;;
-esac
-
-started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-start_seconds=$SECONDS
-passed=0 failed=0 skipped=0
-result_rows=()
+# The US14 reconstruction contract and public-context guard cover provenance
+# metadata, source-fit dimensions, shared origins, and private-value redaction.
 
 for test_file in "${tests[@]}"; do
     printf '\n==> %s\n' "$test_file"
-    test_start=$SECONDS
-    if bash "$TEST_DIR/$test_file"; then
-        status=passed; passed=$((passed + 1))
-    else
-        status=failed; failed=$((failed + 1))
-    fi
-    result_rows+=("$test_file|$status|$((SECONDS - test_start))")
+    bash "$TEST_DIR/$test_file"
 done
 
-duration=$((SECONDS - start_seconds))
-total=${#tests[@]}
-status=passed; [[ "$failed" -eq 0 ]] || status=failed
+python "$TEST_DIR/../scripts/check-public-context.py"
 
-if [[ -n "$OUTPUT_FILE" ]]; then
-    mkdir -p "$(dirname "$OUTPUT_FILE")"
-    {
-        printf '{\n  "$schema": "./test-execution-1.0.0.schema.json",\n'
-        printf '  "schema_version": "1.0",\n  "artifact_type": "repodna_test_execution",\n'
-        printf '  "started_at": "%s",\n  "test_execution": {\n' "$started_at"
-        printf '    "status": "%s",\n    "total": %d,\n    "passed": %d,\n    "failed": %d,\n    "skipped": %d,\n    "duration_seconds": %d\n  },\n' "$status" "$total" "$passed" "$failed" "$skipped" "$duration"
-        printf '  "tests": [\n'
-        for index in "${!result_rows[@]}"; do
-            IFS='|' read -r name test_status test_duration <<< "${result_rows[$index]}"
-            printf '    {"name": "%s", "status": "%s", "duration_seconds": %d}' "$name" "$test_status" "$test_duration"
-            [[ "$index" -eq $((total - 1)) ]] || printf ','
-            printf '\n'
-        done
-        printf '  ]\n}\n'
-    } > "$OUTPUT_FILE"
-    printf '\nTest execution evidence: %s\n' "$OUTPUT_FILE"
-fi
-
-if [[ "$failed" -eq 0 ]]; then
-    printf '\nAll %d RepoDNA tests passed in %d seconds.\n' "$total" "$duration"
-else
-    printf '\n%d of %d RepoDNA tests failed in %d seconds.\n' "$failed" "$total" "$duration" >&2
-fi
-[[ "$failed" -eq 0 ]] && exit 0
-exit 1
+printf '\nAll %d RepoDNA framework contract tests passed.\n' "${#tests[@]}"

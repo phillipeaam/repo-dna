@@ -66,3 +66,8 @@ career_project_analysis/
 tmp/
 temp/
 .cache/
+
+# Private inputs and generated audit workspaces
+/target-repos/
+/analysis-output/
+/private-context/

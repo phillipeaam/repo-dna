@@ -7,7 +7,7 @@ source "$ROOT/src/core/logging.sh"
 REPODNA_LOG_LEVEL=DEBUG
 logger_init
 logger_attach_file "$TEMP/repodna-debug.log"
-log_debug 'request=https://internal.example token=super-secret-value user@example.com C:\Users\Private\repo' >/dev/null
+log_debug 'request=https://internal.example token=super-secret-value user@example.com C:\Users\<user>\repo' >/dev/null
 logger_cleanup
 
 grep -q '\[DEBUG\]' "$TEMP/repodna-debug.log"

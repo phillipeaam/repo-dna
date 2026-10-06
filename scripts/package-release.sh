@@ -15,6 +15,9 @@ git rev-parse --verify --quiet "refs/tags/$TAG^{commit}" >/dev/null || {
 }
 
 VERSION="${TAG#v}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Validate the archived commit as well as staged and current framework content.
+python "$SCRIPT_DIR/check-public-context.py" --ref "$TAG"
 PACKAGE_NAME="repodna-$VERSION"
 mkdir -p "$OUTPUT_DIR"
 rm -f "$OUTPUT_DIR/$PACKAGE_NAME.zip" "$OUTPUT_DIR/$PACKAGE_NAME.tar.gz" "$OUTPUT_DIR/SHA256SUMS"
