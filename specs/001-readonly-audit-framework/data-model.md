@@ -11,7 +11,7 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 | **Baseline** | Identidade do alvo, HEAD/branch/refs acessíveis, instante, conteúdo/inventário verificável, alterações locais, método/versão, estado de enforcement do host | Sessão usa uma ou mais; findings referenciam sua baseline |
 | **Sessão de auditoria** | Data, método/versão, etapas, cobertura, checkpoints, término/falha, enforcement informado e estado de preservação (`verified`, `observed_unchanged`, `changed`, `partial`, `inconclusive`) | Atualiza o registro canônico; não é arquivo entregue independente |
 | **Etapa** | ID, pré-condição, entrada, domínio/aplicabilidade, estado, resultado, motivo de falha | Pertence a uma sessão: preparação, A1, B1–B4, consolidação, reconciliação, revisão |
-| **Fonte/evidência** | ID estável, path/commit/URL, tipo, data, repo/snapshot, síntese permitida, divulgação, confiança e limites | Sustenta findings/claims; fonte primária ou contexto |
+| **Fonte/evidência** | ID estável, origem/autoria quando conhecida, datas relevantes, repo/baseline/snapshot/versão, localização recuperável, natureza (direta/secundária/relato etc.), atualidade, divulgação, limites e proveniência | Sustenta findings/claims; adequação é avaliada para cada dimensão da afirmação, sem hierarquia universal |
 | **Finding/conclusão** | ID, fato/inferência/relato/conflito, descrição, estado, confiança justificada, limites | Cita evidências; alimenta sistema, contribuição, release ou claim |
 | **Sistema/feature** | Nome, comportamento/limite, estado de implementação, repo/snapshot, dependências | Possui evidência e ownership separados |
 | **Identidade/contribuição** | Identidades observadas/candidatas, sistema, tipo de contribuição, ownership (pessoal/compartilhado/desconhecido), confiança e wording | Conecta pessoa/claim a sistema e diffs |
@@ -52,9 +52,10 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 
 | Entidade | Campos essenciais | Relações e validações |
 |---|---|---|
-| **Reconstrução técnica (`R-###`)** | pergunta/tema, claim candidata, sistema/feature, contribuição(s), escopo/baseline e janela, tipo (`fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown`), confiança (`high`, `medium`, `low` ou sem nota quando sem suporte) e rationale, limites, alternativas, estado de revisão | Sempre referencia findings/claims anteriores e `E-###` recuperáveis; hipótese é interpretação editável, jamais fonte ou conclusão factual. Desconhecido/conflito podem ser resultados finais válidos. |
+| **Reconstrução técnica (`R-###`)** | pergunta/tema, claim candidata, sistema/feature, contribuição(s), escopo/baseline e janela, tipo (`fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown`), confiança (`high`, `medium`, `low` ou sem nota quando sem suporte) e rationale, limites, alternativas, estado de revisão e necessidade de verificação | Sempre referencia findings/claims anteriores e `E-###` recuperáveis; cada relação fonte→claim identifica dimensão sustentada e adequação da fonte para essa dimensão, separadas da confiança da claim. Hipótese é interpretação editável, jamais fonte ou conclusão factual. Desconhecido/conflito podem ser resultados finais válidos. |
 | **Destaque de engenharia (`H-###`)** | texto conciso em prosa livre, público/contexto se fornecido, relações a `R-###`/`K-###`/sistema, claims/evidências citadas, gaps e estado editorial (`draft`, `accepted`, `corrected`, `rejected`) | Zero a três por síntese, sem campos/headings/ordem obrigatórios. Todo claim factual material preserva evidência, baseline e limite. Alteração editorial não apaga finding ou texto anterior com procedência. |
 | **Relação de suporte evidencial** | evidência/localização, baseline/escopo, dimensão suportada (`authorship`, `behavior`, `decision_or_intent`, `collaboration`, `validation`, `outcome`), relação (`supports`, `limits`, `contradicts`, `context_only`) e justificativa | Força é específica à dimensão: commit pode sustentar metadado de autoria registrada, mas não decisão/colaboração/resultado por si só. |
+| **Procedência e adequação da fonte (US14)** | origem/canal e autor/publicador quando conhecidos; datas disponíveis; baseline/snapshot/versão; localização recuperável; natureza direta/secundária/relato/outro tipo justificado; atualidade; relação com outras fontes e corroboração independente quando disponível; adequação à dimensão da claim | Metadados ausentes ficam `unknown`. Procedência e adequação da fonte não são a confiança da claim nem formam score/ranking global. Hashes e cópias preservadas não são obrigatórios. Dados pessoais ou privados desnecessários são omitidos/mascarados conforme privacidade. |
 
 ### Regras de serialização dos IDs US12/US13
 
@@ -120,6 +121,7 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 18. Evidência de teste/configuração e resultado observado têm IDs/escopos distintos; resultados sempre indicam baseline/snapshot e cenário/ambiente conhecidos.
 19. Ausência de memória, arquivo ou acesso externo não significa que o evento não aconteceu; usar `unknown`, `not_observed`, `unavailable` ou conflito conforme o motivo.
 20. A sequência contexto→ownership→problema→restrições→abordagem→trade-offs→evidência→resultado→reflexão é checklist de investigação; o relatório pode omitir dimensões sem suporte e compor prosa em qualquer ordem.
+21. Procedência/atualidade/independência da fonte, adequação por dimensão e confiança da claim são campos analíticos distintos; atributos não recuperáveis permanecem desconhecidos, sem reduzir automaticamente o valor nem promover a fonte.
 
 ## Ciclo de estados
 

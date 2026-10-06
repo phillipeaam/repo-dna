@@ -254,3 +254,34 @@ Primeiro ajustar modelo e contrato de claim/evidência; depois atualizar regras 
 ### Pesquisa e questões restantes
 
 Não há decisão factual, tecnológica ou de acesso que exija pesquisa externa ou pergunta adicional ao usuário: spec, constituição e contratos locais fixam as fronteiras. O ponto antes conflitante (ordem narrativa fixa vs. prosa flexível) foi resolvido pela decisão de que FR-083 fornece dimensões de investigação opcionais; os contratos serão alinhados. Nenhuma nova integração é necessária.
+
+## Complemento de design — US14: procedência e adequação das fontes (2026-10-06)
+
+### Decisão de produto
+
+Implementar FR-127/SC-050 aditivamente ao modelo de evidência e à reconstrução US14. Cada relação fonte→claim avalia a adequação da fonte à dimensão afirmada e mantém essa avaliação separada da confiança da claim. Registrar origem/autoria conhecida, datas disponíveis, snapshot/versão, localização recuperável, natureza da fonte, atualidade e independência/corroboração quando houver suporte. Atributos ausentes ficam `unknown`; não há ranking universal, score de confiabilidade da fonte, hash ou cópia preservada obrigatórios.
+
+### Contexto técnico e limites
+
+- **Plataforma/stack/dependências**: extensão documental do framework e dos validadores/fixtures existentes; nenhuma nova linguagem, pacote, serviço, rede ou acesso a conta é necessário.
+- **Persistência**: campos aditivos nos registros do mesmo Markdown schema 2.1.0; nenhum artefato persistente adicional.
+- **Privacidade**: metadados de autor/origem só entram na saída se forem necessários e autorizados; segredos, identidade civil/contato e contexto privado desnecessário permanecem mascarados ou omitidos.
+- **Validação**: casos sintéticos cobrem procedência completa/parcial, autor/data desconhecidos, fonte direta versus relato, fontes não independentes e claim para dimensão inadequada. Validador lê fixtures do framework apenas; nunca executa nem lê `target-repos/`.
+- **Execução**: análise de alvo permanece estática/readonly. Proveniência registrada não certifica autenticidade nem elimina necessidade de validação externa.
+
+### Artefatos de design
+
+- `research.md`: D26 e alternativas; decisão incorporada.
+- `data-model.md`: ampliar Fonte/evidência e Relação de suporte para procedência, atualidade, natureza, independência e adequação por dimensão, sem score universal.
+- `contracts/source-of-truth-markdown.md`: definir campos requeridos ou `unknown` para fontes de claims materiais; manter confiança da claim separada.
+- `methodology.md` e `.agents/skills/repodna-audit/references/engineering-reconstruction.md`: acrescentar matriz de procedência/adequação e verificação de independência/origem comum.
+- `.agents/skills/repodna-audit/references/evidence-vocabulary.md` e `consolidation.md`: vocabulário/campos canônicos no mesmo Markdown; preservar minimização de dados e schema.
+- `.agents/skills/repodna-audit/SKILL.md`: navegação e regra de inspeção local.
+- `quickstart.md` e `tests/fixtures/readonly-audit/engineering-reconstruction/`: casos de aceitação sintéticos ligados a SC-050.
+- `tests/engineering_reconstruction_contract_test.sh`: verificar campos, estados desconhecidos, adequação contextual separada de confidence, corroboração independente e ausência de ranking/hash obrigatório.
+
+### Estratégia e gates constitucionais
+
+Ordem: formalizar campos e semântica no modelo/contrato; atualizar vocabulário e runbook; ampliar fixtures e verificador; integrar consolidação e navegação; revisar quickstart, privacidade e rastreabilidade. Não reabrir ou renumerar tarefas concluídas de US14. As novas tarefas devem ser acrescentadas antes da T105, que continua sendo a última validação humana após todos os registros estarem prontos.
+
+**Constitution Check: PASS** — atende princípios I/III/IV/V: fonte e adequação ficam rastreáveis e sem alegar autenticidade; o alvo não é executado; nenhum dado privado é exposto por padrão; a saída segue sendo um Markdown único; validação usa somente fixtures sintéticas controladas.

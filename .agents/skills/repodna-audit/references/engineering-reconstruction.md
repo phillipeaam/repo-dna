@@ -25,7 +25,7 @@ Reutilize `E-###`, `F-###`, `C-###`, `K-###` e `O-###` existentes. Para nova obs
 
 Para cada afirmação candidata, registre se a evidência `supports`, `limits`, `contradicts` ou `context_only` a afirmação. Identifique que dimensão a fonte pode sustentar: autoria registrada; estrutura/comportamento; decisão/intenção relatada; colaboração; validação; ou resultado/impacto. Uma fonte adequada para uma dimensão não prova automaticamente as demais.
 
-Tipos possíveis de conclusão: `fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown` ou `not_observed`. Hipótese é uma explicação editável derivada, nunca uma fonte ou resultado factual. Preserve conflitos e alternativas plausíveis.
+Tipos possíveis de conclusão: `fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown` ou `not_observed`. Hipótese é uma explicação editável derivada, nunca uma fonte ou resultado factual. Preserve conflitos e alternativas plausíveis. Registre em campo separado a necessidade de verificação adicional: nenhuma identificada, confirmação humana, validação runtime externa ou ambas, incluindo pergunta/evidência necessária. Esse campo descreve trabalho futuro, não muda a natureza epistêmica da conclusão; não execute runtime no alvo.
 
 ### 4. Construir a interpretação mais estreita que as fontes sustentam
 

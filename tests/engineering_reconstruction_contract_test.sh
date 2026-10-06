@@ -29,24 +29,38 @@ for path in paths:
 docs = {p: p.read_text(encoding="utf-8") for p in paths}
 
 case_ids = re.findall(r"(?m)^\| ([a-z0-9-]+) \|", docs[fixture])
-assert len(case_ids) >= 12 and len(case_ids) == len(set(case_ids)), (
+assert len(case_ids) >= 23 and len(case_ids) == len(set(case_ids)), (
     "fixture needs unique source, attribution, confidence, result, narrative and review cases"
 )
 
 corpus = "\n".join(docs.values()).casefold()
 required = {
-    "fr-114", "fr-125", "sc-038", "sc-047", "r-###", "h-###",
+    "fr-114", "fr-125", "fr-126", "fr-127", "sc-038", "sc-047", "sc-048", "sc-049", "sc-050", "r-###", "h-###",
     "supports", "limits", "contradicts", "context_only", "hypothesis",
     "unknown", "not_observed", "unavailable", "high", "medium", "low",
     "corroboração", "contradições", "escopo", "autoria registrada",
     "colaboração", "validação", "resultado", "zero a três", "draft",
     "accepted", "corrected", "rejected", "sem autenticação",
-    "prosa", "ordem", "sc-025", "2.1.0",
+    "prosa", "ordem", "sc-025", "2.1.0", "procedência", "adequação",
+    "independência", "origem compartilhada", "unknown", "hashes não são obrigatórios",
+    "natureza da conclusão", "necessidade de verificação",
 }
 missing = sorted(term for term in required if term not in corpus)
 assert not missing, f"reconstruction contract omits terms/criteria: {missing}"
 
 assert "engineering-reconstruction.md" in docs[skill], "main skill must expose the applicable runbook"
+assert "evidence-vocabulary.md" in docs[skill], "main skill must expose shared evidence/provenance vocabulary"
+assert "fr-127" in docs[quickstart].casefold() and "sc-050" in docs[quickstart].casefold(), (
+    "quickstart must trace provenance and source-fit requirements"
+)
+assert "hashes não são obrigatórios" in docs[quickstart].casefold(), (
+    "quickstart must not require source hashes"
+)
+for case in ("no-git-or-supporting-material", "direct-source-fit", "secondary-source-fit",
+             "personal-account-fit", "unknown-source-metadata", "stale-snapshot-source",
+             "shared-origin-sources", "independent-corroboration", "dimension-mismatch",
+             "source-fit-vs-claim-confidence", "conclusion-vs-verification-need"):
+    assert f"| {case} |" in docs[fixture], f"missing source-provenance case: {case}"
 assert "unavailable" in docs[forensic].casefold(), "A1 must preserve inaccessible private sources as unavailable"
 assert "draft" in docs[consolidation].casefold() and "não publicar" in docs[consolidation].casefold(), (
     "consolidation must preserve review provenance and prohibit automatic publication"

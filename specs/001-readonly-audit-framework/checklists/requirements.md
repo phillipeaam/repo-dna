@@ -2,7 +2,7 @@
 
 **Purpose**: Validar completude e qualidade da especificação antes do planejamento.
 **Created**: 2026-10-03
-**Updated**: 2026-10-05
+**Updated**: 2026-10-06
 **Feature**: [spec.md](../spec.md)
 **Marker Semantics**: [x] indica qualidade de requisitos revisada; não indica implementação concluída.
 
@@ -56,10 +56,14 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - O foco técnico permanece consultável por leitores não técnicos: cada etiqueta exige finalidade, sistema, estado e rota até sua evidência. Jargão de tags serve a filtro; o relatório também deve permitir uma explicação em linguagem comum.
 - FR-095–113 foram revistos quanto a critérios observáveis: estado de pacote/uso, suporte estrutural de padrão, classes de sinal IA, identidade e créditos, perfis, migração, execução local e privacidade. Os SC-028–037 cobrem essas jornadas e os casos negativos.
 - A nova pesquisa não identifica tecnologias ou pessoas de qualquer repositório real; exemplos são explicitamente sintéticos. A especificação preserva atribuição qualificada e não calcula domínio, liderança ou percentuais de autoria.
-- O complemento de 2026-10-05 acrescenta US14, FR-114–125 e SC-038–047 para reconstrução baseada em evidências, memória limitada, hipóteses qualificadas, rastreabilidade por afirmação, validação delimitada, síntese editorial flexível e calibração justificada da confiança. Critérios de qualidade continuam revisados no nível da spec; evidência de implementação ainda não foi produzida nesta etapa.
+- O complemento de 2026-10-05 acrescenta US14, FR-114–126 e SC-038–049 para reconstrução baseada em evidências, memória limitada, hipóteses qualificadas, rastreabilidade por afirmação, validação delimitada, síntese editorial flexível, calibração justificada da confiança e projetos com fontes escassas. Critérios de qualidade continuam revisados no nível da spec; evidência de implementação ainda não foi produzida nesta etapa.
 - Lacunas de planejamento resolvidas nesta sessão: FR-083 e contratos usam dimensões editoriais sem sequência mandatória; modelo/vocabulário formalizam reconstrução, hipótese e rascunho; metodologia, quickstart e tasks cobrem fontes, limitações e aceitação. Implementação e validação continuam pendentes.
 - O escopo de fontes foi delimitado sem nova integração: issues/reviews/releases só contam quando locais, fornecidas ou públicas sem autenticação; não há pressuposto de acesso a Notion, serviço privado, credenciais ou memória completa.
 - A rubrica de confiança da US14 define `high`/`medium`/`low` por suporte/direção da fonte, corroboração, contradições e escopo; ausência de suporte fica unknown/unsupported sem nota. T133/T134 verificam aplicação e SC-047 mede consistência sem percentuais.
+- FR-126 separa estado/natureza da conclusão de confirmação humana ou validação futura. A validação runtime permanece fora do fluxo e não executada; SC-048 verifica essa separação.
+- US14 inclui cenário de evidência forte, parcial, conflitante e ausente, incluindo projeto sem Git, documentação, testes, runtime ou métricas; SC-049 exige limites explícitos sem preencher lacunas por inferência.
+- FR-127 separa procedência/adequação da fonte da confiança da claim; origem, autoria/data/snapshot, localização, natureza, atualidade e corroboração são registrados quando disponíveis, sem ranking universal ou hash obrigatório.
+- A resposta de clarify de 2026-10-06 escolheu a opção A. D26 e os artefatos de planejamento/desenho cobrem FR-127/SC-050; as tarefas de implementação T145–T153 e a validação humana T105 permanecem pendentes.
 - Clarificação original de 2026-10-04: host enforcement era gate obrigatório. Revisão posterior de 2026-10-04 substitui essa decisão: perfil sem prova avisa e permite análise estática, com preservação não verificada; ver FR-008 e SC-013 atualizados.
 - Clarificação de 2026-10-04: há exatamente um entregável Markdown local por produto; relatórios HTML, JSON/CSV publicados, anexos e escrita/exportação para Notion estão fora do escopo.
 - Clarificação de 2026-10-04: pessoas podem copiar o Markdown para Notion/Docs depois; agentes de IA são consumidores previstos. SC-006 mede respostas rastreáveis de IA, e SC-011 continua medindo o tempo para encontrar como iniciar.
@@ -104,6 +108,8 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 | FR-119–122 | US14 | Memória/fonte ausente, perguntas materiais, mecanismo, consequência e validação delimitada | SC-041–043 |
 | FR-123–125 | US14 | Síntese flexível e rascunho humano, destaques proporcionais e baseline qualitativa de avaliação | SC-044–046 |
 | FR-115 | US14 | Níveis qualitativos de confiança e rationale uniforme, sem converter falta de suporte em confiança baixa | SC-039, SC-047 |
+| FR-126 | US14 | Natureza da conclusão e necessidade de confirmação/validação registradas separadamente | SC-048–049 |
+| FR-127 | US14 | Procedência e adequação contextual da fonte separadas da confiança da afirmação | SC-050 |
 
 ## Focused Review: extensão de tags e contribuidores (2026-10-05)
 
@@ -125,6 +131,10 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 - [x] Histórias podem usar ordem e prosa próprias; zero a três destaques são possíveis e cada um permanece rascunho rastreável.
 - [x] Fontes externas privadas não viram integração/requisito; acesso permitido e estado de indisponibilidade são explícitos.
 - [x] Contradições com sequência narrativa fixa, modelo/vocabulário, metodologia e tarefas foram registradas para alinhamento posterior; não se declara implementação.
+- [x] Natureza da conclusão e necessidade de confirmação/validação não se confundem; validação runtime continua fora do fluxo readonly.
+- [x] Casos fortes, parciais, conflitantes e sem evidência incluem limites para projetos sem Git, documentação, testes, runtime ou métricas.
+- [x] FR-126 e SC-048–049 estão especificados; plano/modelo/contratos/metodologia e cobertura das tarefas correspondentes foram alinhados antes desta nova fase de implementação.
+- [x] FR-127 e SC-050 distinguem contexto/adequação de fonte da confiança da claim; campos desconhecidos ficam explícitos e não há ranking universal ou hash obrigatório.
 
 ## Iteration Log
 
@@ -138,4 +148,6 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 8. Complemento speckit-specify de 2026-10-05: incorporadas as lacunas de tags/ocorrências, dependências e pacotes, padrões, IA, codecs e autoria individual em US12–13, FR-095–113 e SC-028–037; a matriz agora cobre FR-001–113. O núcleo reusa requisitos anteriores de evidência, privacidade, autoria e Markdown único. Nenhuma dúvida material sem default seguro permaneceu; implementação e validação permanecem pendentes.
 9. Complemento speckit-specify de 2026-10-05: US14, FR-114–125 e SC-038–047 definem reconstrução de contribuição e raciocínio a partir de fontes permitidas, claims rastreáveis, hipóteses qualificadas, limites de autoria/resultado, perguntas materiais e síntese editorial flexível. A matriz agora cobre FR-001–125. O alinhamento de modelo, contratos, metodologia, fixtures, plano e tarefas ocorreu nas fases subsequentes; implementação continua pendente.
 10. Ajuste após speckit-analyze: a confiança de FR-115 tem rubrica `high`/`medium`/`low`, com rationale por suporte/direção, corroboração, contradição e escopo; ausência de suporte fica sem nota. SC-047 e tasks/quickstart cobrem consistência da rubrica. Implementação segue pendente.
+11. Complemento solicitado: revisão confirmou que o núcleo de US14 já cobria rastreabilidade, autoria, decisão, mecanismo, consequências, limites, perguntas materiais e rascunhos opcionais. Foram adicionados FR-126 e SC-048–049 para separar estado epistêmico de verificação futura e tornar explícito o cenário de projeto sem histórico, documentação, testes, runtime ou métricas. Alinhamento dos artefatos de planejamento permanece pendente e não foi declarado concluído.
+12. Clarificação/planejamento 2026-10-06: procedência e adequação por fonte foram separadas da confiança da claim em FR-127/SC-050 e alinhadas no modelo/contrato, metodologia, plano e tarefas T145–T153; qualidade da spec permaneceu 16/16, enquanto implementação e T105 estão pendentes.
 

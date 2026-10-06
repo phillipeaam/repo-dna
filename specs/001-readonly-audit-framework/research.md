@@ -160,3 +160,19 @@ As decisões decorrem de FR-114–125, SC-038–047 e princípios I, III e IV da
 Estas decisões incorporam [research-tags-and-contributors.md](research-tags-and-contributors.md) e FR-095–113/SC-028–037. A relação `tag → registro → ocorrência → sistema/baseline → evidência` permite consultar tecnologia sem apagar qualificadores. O vínculo separado pessoa → contribuição → ocorrência impede converter stack coletiva em experiência individual. Um catálogo externo, detector instalado, saída SBOM, analytics de popularidade, coleta de prompts ou classificação por estilo aumentariam dependências ou produziriam alegações fora da evidência disponível e não foram escolhidos.
 
 Não há escolha de linguagem ou plataforma de implementação pendente: trata-se de extensão documental do framework e dos seus validadores de contrato. O detalhamento de tarefas estabelecerá a sequência por arquivos. Não foi necessária decisão adicional do usuário na clarificação; configuração versus atividade de IA e pessoa versus stack do produto já têm defaults normativos nesta spec.
+
+## Decisão de clarificação — procedência e adequação por fonte (2026-10-06)
+
+### Decisão D26
+
+Para cada afirmação material, registrar procedência e adequação de cada fonte para a dimensão afirmada, separadas da confiança atribuída à claim. Metadados incluem origem/autoria quando conhecida, datas disponíveis, baseline/snapshot/versão, localização recuperável, natureza direta/secundária/relato, atualidade e independência/corroboração quando disponível. Valores que não puderem ser recuperados permanecem `unknown`. Não haverá hierarquia universal de fontes, score de confiabilidade da fonte, hash obrigatório ou cópia preservada obrigatória.
+
+### Racional e alternativas
+
+A decisão permite que pessoas e agentes confiram as fontes e entendam os limites de cada conclusão. Uma fonte pode ser adequada para uma dimensão (por exemplo, código para mecanismo presente ou relato atribuído para memória pessoal) e inadequada para outra; seu contexto não substitui a avaliação da claim. Corroboração considera se fontes são realmente independentes ou derivam da mesma origem.
+
+Alternativas consideradas: (B) exigir hash/trilha de preservação, rejeitada por adicionar custo e não ser aplicável a todos os tipos de fonte; (C) manter apenas metadados/confiança atuais, rejeitada por deixar implícita a proveniência e adequação contextual. Uma classificação universal em que tipos de fonte sempre superam outros também foi rejeitada; autoridade é relativa à pergunta, baseline e dimensão. Hash de release/binário continua podendo ser registrado quando disponível e relevante, sem obrigação geral.
+
+### Limites e arquivos a alinhar
+
+Não é necessária pesquisa online nem nova decisão tecnológica. Procedência não é certificado de autenticidade: origem, autoria, data e independência só são afirmadas quando sustentadas, e o framework registra desconhecidos. Privacidade vigente continua prevalecendo; dados pessoais ou metadados privados desnecessários não são reproduzidos no documento canônico. O desenho aditivo permanece no Markdown 2.1.0 e será alinhado em `data-model.md`, contratos, metodologia, runbook de reconstrução, vocabulário, consolidação, skill, quickstart e fixtures/validador sintéticos.

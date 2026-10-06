@@ -57,6 +57,8 @@ with tempfile.TemporaryDirectory(prefix='repodna-public-context-') as tmp:
         ('Tag or credit: ', 'Synthetic Framework Vendor Alias'),
         ('R-001 hypothesis and source attribution: ', 'Synthetic Reconstruction Alias'),
         ('H-001 personal_account and decision note: ', 'Synthetic Private Decision Detail'),
+        ('E-099 source author and channel: ', 'Synthetic Private Source Author'),
+        ('E-099 source locator and snapshot: ', 'Synthetic Confidential Snapshot Locator'),
     )
     for field, private_value in reconstruction_fields:
         terms.write_text(private_value + '\n', encoding='utf-8')

@@ -17,6 +17,17 @@ All examples below are fictional and contain no real person, employer, project, 
 | no-supported-highlight | The available evidence supports facts but no concise narrative highlight | Zero highlights is valid; do not fill gaps for symmetry. |
 | confidence-calibration | One direct scoped record, one partial source, one ambiguous source, and one unsupported claim | Apply high/medium/low with rationale to supported claims; unsupported remains unknown with no confidence note. |
 | editorial-review-state | A suggested paragraph is corrected after human review | Preserve draft and correction provenance; review state never changes evidence type or strength. |
+| no-git-or-supporting-material | A selected snapshot has no accessible Git history, documentation, tests, runtime result, or metrics | Preserve those dimensions as `not_observed`/`unavailable`; do not infer that the work or outcome did not exist. |
+| direct-source-fit | A source file at the stated baseline directly shows a structural behavior | Mark source nature and locator; it may support static behavior but not execution or benefit. |
+| secondary-source-fit | A maintained technical summary describes a behavior but the underlying source is unavailable | Attribute the secondary account and limit the claim to what it supports. |
+| personal-account-fit | A contributor describes a decision from memory with incomplete date and no corroboration | Label it `personal_account`; do not elevate it to independently verified fact. |
+| unknown-source-metadata | A supplied note has no identifiable author or date | Record missing provenance fields as `unknown`; do not discard or score the source automatically. |
+| stale-snapshot-source | A document describes an earlier version than the selected baseline | Record its snapshot/temporal scope and do not treat recency as universal authority. |
+| shared-origin-sources | Two summaries repeat wording from the same original note | Record the origem compartilhada; repetition is not independent corroboration. |
+| independent-corroboration | A source file and independently authored, scoped record support the same narrow claim | Record the separate origins and what each corroborates; calibrate confidence at claim level. |
+| dimension-mismatch | A release note is offered as proof of individual authorship | Mark it unsuitable for authorship while retaining any release context it actually supports. |
+| source-fit-vs-claim-confidence | A strong source supports one dimension but the claim also asserts an unsupported outcome | Separate source suitability by dimension from confidence in the broader claim; narrow or split the claim. |
+| conclusion-vs-verification-need | A plausible explanation remains a hypothesis and separately needs human confirmation and runtime validation | Record the conclusion nature as `hypothesis` and the verification need as separate follow-up dimensions; runtime validation remains unexecuted. |
 
 ## Expected fields
 

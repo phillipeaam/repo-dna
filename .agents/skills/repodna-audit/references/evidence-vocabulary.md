@@ -46,7 +46,11 @@ Atividade, volume, heurísticas ou etiqueta numérica isolada não estabelecem c
 - Não confundir teste/configuração com execução ou resultado; limitar observações ao snapshot, cenário e ambiente conhecidos. Consequência estática não prova benefício de usuário/negócio, impacto ou causalidade.
 ## Evidência e procedência
 
-Cada evidência usa identificador estável (`E-###`) e registra, quando aplicável: tipo, caminho/URL/commit, repositório e baseline, intervalo temporal, síntese permitida, método de obtenção, status de verificação, limites e condição de divulgação. Findings usam `F-###`; claims usam `C-###`; perguntas/gaps usam `Q-###`. IDs não são reutilizados após supersessão.
+Cada evidência usa identificador estável (`E-###`) e registra, quando aplicável: tipo, origem/canal, autor ou publicador conhecido, datas relevantes, repositório e baseline/snapshot/versão, localização recuperável, natureza direta/secundária/relato/outro tipo justificado, atualidade, síntese permitida, método de obtenção, status de verificação, limites e condição de divulgação. Campo ausente fica `unknown`; não inventar valor nem descartar automaticamente a fonte.
+
+Para cada relação fonte→claim, registrar a dimensão específica sustentada e a adequação da fonte para essa dimensão. Procedência/adequação da fonte, independência/corroboração e confiança da claim são avaliações distintas. Fontes que derivam da mesma origem não contam como corroboração independente; registrar relação conhecida entre elas. Avaliar atualidade dentro do escopo temporal da claim, sem preferência universal por fonte recente ou por uma hierarquia fixa. Confiança continua justificada no nível da claim por suporte, escopo, contradições e alternativas. Não calcular score/ranking global de fonte nem exigir hash ou cópia preservada. Omitir dados pessoais/privados que não sejam necessários e autorizados.
+
+Findings usam `F-###`; claims usam `C-###`; perguntas/gaps usam `Q-###`. IDs não são reutilizados após supersessão.
 
 Tipos incluem `repository_file`, `git_history`, `release_artifact`, `public_source`, `user_context`, `measurement` e `tool_observation`. Ausência de observação é estado de cobertura, não evidência negativa.
 

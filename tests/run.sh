@@ -30,6 +30,9 @@ tests=(
     local_method_test.sh
 )
 
+# The US14 reconstruction contract and public-context guard cover provenance
+# metadata, source-fit dimensions, shared origins, and private-value redaction.
+
 for test_file in "${tests[@]}"; do
     printf '\n==> %s\n' "$test_file"
     bash "$TEST_DIR/$test_file"
