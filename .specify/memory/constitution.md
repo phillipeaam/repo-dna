@@ -22,8 +22,8 @@ Added sections: none
 Rewritten sections: Product and Technology Constraints; Development Workflow
 Removed obligations: canonical structured JSON, multi-format reports, Bash CLI as the
   primary product, and mandatory src/pipeline/ module layout
-Follow-up TODO: confirm the original ratification date; it is not established by the
-  current constitution or the available feature context.
+Ratification date note: the original adoption date was not established by the
+available project records and remains unknown.
 -->
 
 # RepoDNA Constitution
@@ -127,4 +127,4 @@ expands governance; PATCH clarifies wording without changing obligations. The
 ratification date records the original adoption date and MUST NOT be replaced with
 the amendment date. The last-amended date changes whenever this document changes.
 
-**Version**: 3.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-10-04
+**Version**: 3.0.0 | **Ratified**: Unknown (original adoption date not established) | **Last Amended**: 2026-10-04

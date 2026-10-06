@@ -6,7 +6,7 @@
 
 **Tests**: Incluídas tarefas de aceitação porque a especificação define testes independentes e cenários observáveis por história. Não executar build/testes/código do repositório-alvo.
 
-**Organization**: Tarefas agrupadas pelas treze histórias da especificação e precedidas pelos gates compartilhados de governança e vocabulário; as extensões US12/US13 estão nas Phases 24–27.
+**Organization**: Tarefas agrupadas pelas quatorze histórias da especificação e precedidas pelos gates compartilhados de governança e vocabulário; US12/US13 estão nas Phases 24–27 e US14 na Phase 28. A validação humana SC-025 permanece a última tarefa, após o registro dos demais incrementos.
 
 **Revisão de decisão 2026-10-04**: Phase 16 atualiza o contrato de host readonly. T001–T074 preservam o registro da decisão original (gate obrigatório); para o comportamento vigente, Phase 16 e os artefatos atualizados prevalecem: enforcement não comprovado gera aviso, não bloqueio, e a preservação não pode ser chamada de garantida.
 
@@ -494,9 +494,7 @@ As fases abaixo complementam esta mesma feature e preservam T001–T078 como his
 
 ## Phase 22: Validação final
 
-**Purpose**: Executar a validação editorial com participante humano depois que a análise estiver registrada e pronta para revisão.
-
-- [ ] T105 Conduzir e registrar uma sessão cronometrada com leitor humano sem contexto usando a fixture editorial; medir a localização de produto/contexto e contribuição (meta ≤60 s) e a rota até evidência aprofundada (meta ~5–10 min), anotar perfil não identificável, tarefa, tempos e resultado observado em `specs/001-readonly-audit-framework/quickstart.md` per SC-025 (partial; validação final após registro).
+**Checkpoint reservado**: A validação originalmente numerada T105 continua pendente e foi posicionada como a última tarefa na Phase 30, depois de todos os incrementos e registros.
 
 ## Phase 23: Convergence
 
@@ -604,6 +602,60 @@ As fases abaixo complementam esta mesma feature e preservam T001–T078 como his
 | SC-035–036 | Integração: T129–T131 |
 | SC-037 | US13: T122–T123; Integração: T130–T131 |
 
-## Phase 28: Convergence
+## Phase 28: User Story 14 — Reconstruir contribuição e raciocínio técnico com evidências (Priority: P1)
 
-- [ ] T132 Conduzir com leitor humano sem contexto a validação cronometrada do registro canônico sintético atualizado para schema 2.1.0 em `tests/fixtures/readonly-audit/sample-product.md`; medir localização de produto/contexto e contribuição (meta ≤60 s) e percurso até evidência aprofundada (meta ~5–10 min), registrar perfil não identificável, tarefa, tempos, resultado e eventuais findings em `specs/001-readonly-audit-framework/quickstart.md` per SC-025 (partial).
+**Goal**: Reconstruir histórias antigas a partir de fontes autorizadas com inferências qualificadas, rastreabilidade por afirmação e prosa editorial flexível, sem extrapolar autoria, motivação, validação ou resultado.
+
+**Independent Test**: Executar o contrato sobre fixtures sintéticas cobrindo fontes convergentes/conflitantes/indisponíveis, memória limitada, autoria coletiva, benefício não medido, teste sem execução, resultado delimitado, ordem narrativa livre, zero destaques e revisão humana. A inspeção confirma os limites e rotas de evidência sem executar qualquer alvo.
+
+### Acceptance tasks
+
+- [x] T132 [P] [US14] Criar fixtures sintéticas com diffs/documentos convergentes e conflitantes, commit de grupo, teste configurado sem resultado, log com baseline/ambiente, fonte privada indisponível e narrativas em ordens variadas em `tests/fixtures/readonly-audit/engineering-reconstruction/README.md`.
+- [x] T133 [P] [US14] Criar verificador de contrato para FR-114–125 e SC-038–045/047 cobrindo relação claim→evidência, baseline/escopo, limites, tipo de conclusão, papéis de fonte, atribuição, hipótese/alternativas, justificativa de confiança (direção da fonte, corroboração, contradições e escopo), consequência/validação, flexibilidade editorial e estado draft em `tests/engineering_reconstruction_contract_test.sh`.
+
+### Implementation tasks
+
+- [x] T134 [P] [US14] Estender os tipos, estados, confiança qualitativa e relações claim→evidência, incluindo `hypothesis`, `unknown`/`not_observed`, rubrica `high`/`medium`/`low` (sem nota para claim sem suporte) e draft editorial com distinção de autoria/decisão/colaboração/validação/resultado, em `.agents/skills/repodna-audit/references/evidence-vocabulary.md`.
+- [x] T135 [P] [US14] Documentar para A1 o uso permitido de fontes locais/fornecidas/públicas anônimas, o que cada fonte sustenta, e os limites de autoria pessoal e intenção em `.agents/skills/repodna-audit/references/forensic-a1.md`.
+- [x] T136 [P] [US14] Criar o runbook de reconstrução com rota claim→fonte→dimensão, síntese de alternativas/contraevidência, confiança e limite, perguntas seletivas e casos de memória indisponível em `.agents/skills/repodna-audit/references/engineering-reconstruction.md`.
+- [x] T137 [US14] Integrar a reconstrução opcional no fluxo de auditoria, vinculando-a a A1, contribuições/tecnologias existentes e consolidação, sem adicionar acesso a serviço privado nem etapas dinâmicas, em `.agents/skills/repodna-audit/references/workflow.md`.
+- [x] T138 [US14] Atualizar a consolidação para permitir de zero a três destaques em prosa e ordem livres, links por afirmação, limites, lacunas e estados draft/accepted/corrected/rejected sem apagar findings/fonte, em `.agents/skills/repodna-audit/references/consolidation.md`.
+- [x] T139 [US14] Alinhar os prompts editoriais do case às dimensões opcionais, remover sequência/headings mandatórios e manter outcomes, evidência e relato pessoal qualificados em `.agents/skills/repodna-audit/references/publication-b4.md`.
+- [x] T140 [P] [US14] Atualizar navegação, escopo de fontes e referência ao runbook de reconstrução na skill principal em `.agents/skills/repodna-audit/SKILL.md`.
+- [x] T141 [US14] Adicionar roteiro reprodutível para reconstrução e cenários SC-038–047, incluindo zero destaques, avaliação qualitativa e exemplos para calibrar confidence rationale, em `specs/001-readonly-audit-framework/quickstart.md`.
+
+**Checkpoint**: US14 permite sintetizar histórias parciais em ordem livre com toda afirmação material rastreável, hipótese revisável, contribuição qualificada e ausência de resultado devidamente declarada.
+
+## Phase 29: Integração e revisão final US14
+
+**Purpose**: Integrar validação de contrato, fixtures e proteção de privacidade após a implementação documental da US14.
+
+- [x] T142 [US14] Integrar o contrato e as fixtures de reconstrução à execução seletiva do harness, mantendo acesso exclusivamente aos dados sintéticos do framework, em `tests/run.sh`.
+- [x] T143 [US14] Incluir os campos e exemplos de reconstrução no guard de privacidade sem exibir valores encontrados em seus diagnósticos em `tests/public_context_test.sh`.
+- [x] T144 [US14] Rever traceabilidade FR-114–125/SC-038–047, links, Markdown 2.1.0, fontes autorizadas, prosa flexível, compatibilidade e ausência de dados privados no roteiro de aceite em `specs/001-readonly-audit-framework/quickstart.md`.
+
+**Dependências**: T132–133 definem os casos; T134–141 implementam vocabulário e fluxo. T137 depende de T134 e T136; T138–139 usam os tipos consolidados em T134; T142–144 fecham integração e revisão. T132, T134–136 e T140 podem avançar em paralelo por tratarem arquivos distintos; T133 pode ser preparado em paralelo à fixture, mas só é aceito após T132. T142–143 dependem de T132–141.
+
+## Phase 30: Validação humana final
+
+- [ ] T105 Conduzir com leitor humano sem contexto a validação cronometrada do registro canônico sintético atualizado para schema 2.1.0 em `tests/fixtures/readonly-audit/sample-product.md`; medir localização de produto/contexto e contribuição (meta ≤60 s) e percurso até evidência aprofundada (meta ~5–10 min), registrar perfil não identificável, tarefa, tempos, resultado e eventuais findings em `specs/001-readonly-audit-framework/quickstart.md` conforme SC-025, somente depois de todos os registros e incrementos estarem prontos.
+
+## Dependências e execução incremental de US14
+
+- US14 depende das entidades compartilhadas de evidência/contribuição consolidadas pelas fases anteriores; não depende de US11 (revisão opcional da superfície) e pode ser entregue incrementalmente após US12/US13.
+- Fase 28 produz capacidade de reconstrução independentemente da avaliação de superfície. Fase 29 integra privacidade e rastreabilidade. Fase 30/T105 permanece a última validação humana, conforme decisão registrada para SC-025.
+- SC-046 usa cenários representativos, perfil, perguntas e critérios qualitativos definidos previamente, sem criar taxa/limiar não aprovado. Casos de automação estática não substituem a observação humana requerida por SC-025.
+
+## Rastreabilidade adicional US14
+
+| Requisitos | Tarefas |
+|---|---|
+| FR-114–116 | T132–137; contrato T133 |
+| FR-117–120 | T132, T134–138; T144 |
+| FR-121–122 | T132–133, T136, T138, T141–144 |
+| FR-123–124 | T133, T136, T138–141, T144 |
+| FR-125 | T133, T141, T144 |
+| SC-038–045 | T132–144 |
+| SC-046 | T133, T141, T144 |
+| SC-047 | T133–134, T141, T144 |
+| SC-025 | T105 (última tarefa; executar após registro final) |

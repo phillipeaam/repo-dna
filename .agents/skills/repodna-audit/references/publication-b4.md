@@ -16,6 +16,11 @@ Por asset: origem e versão/era, criador atribuído versus verificado, integraç
 
 Separar texto, links, imagens, vídeo, áudio e quantitativos. Cada linha usa `complete`, `complete_with_conditions`, `incomplete_blocking`, `incomplete_nonblocking` ou `optional`, com evidência, condição e próxima ação. Uma mídia bloqueada não bloqueia automaticamente texto factual seguro; conclusão da auditoria não é aprovação humana.
 
+## Reconstrução de engenharia e prompts editoriais (US14)
+
+Ao transformar findings em uma história, use dimensões opcionais: contexto/problema/restrições, contribuição/ownership, mecanismo, decisão/trade-off, consequência, colaboração, validação, resultado e reflexão. Escolha a ordem e forma de prosa que melhor preservam entendimento e evidência; estes itens não são headings, campos mandatórios nem checklist de preenchimento. Não force storytelling quando as fontes sustentam apenas um registro técnico curto.
+
+Cada afirmação material de R-###/H-### conserva referência e localização de evidência, baseline/escopo, tipo, relação de suporte, limite, confiança justificada e alternativas quando relevantes. Diferencie autoria registrada de decisão, colaboração, validação e resultado; consequência técnica observável não é benefício/impacto medido. Hipótese e wording sugerido ficam draft; aceitação/correção/rejeição mantém procedência. Destaques são de zero a três, breves e proporcionais à evidência. Sem fonte ou memória recuperável, mantenha unknown ou personal_account atribuído, sem completar narrativa por plausibilidade.
 ## Saída e checkpoint
 
 Claims e readiness entram no registro canônico com IDs e evidências. Recomendação editorial pode ser feita; publicação, alteração ou upload são fora do escopo.

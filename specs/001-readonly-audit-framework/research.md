@@ -124,6 +124,22 @@ Nenhuma dependência de tecnologia ou questão factual externa está pendente pa
 
 # Complemento de pesquisa e decisões — US12/US13 (2026-10-05)
 
+## Complemento de pesquisa e decisões — US14 (2026-10-05)
+
+### Decisões
+
+- **D20 — Reconstrução deriva das fontes existentes**: não adicionar integração de CRM/issues/reviews/chat; usar fontes locais, fornecidas ou públicas sem autenticação e já autorizadas pelo escopo. Serviço inacessível é cobertura unavailable/not_observed.
+- **D21 — Tipagem sem confundir hipótese com evidência**: cada claim material tem fonte/localização, baseline, dimensão suportada, tipo, caveat e rationale de confiança; `hypothesis` é interpretação candidata, com contraevidência/alternativas, preservando findings originais. Confiança usa `high` para suporte direto e adequado ao escopo sem contradição material; `medium` para suporte parcial/indireto ou limitado sem alternativa equivalente; `low` para suporte fraco/ambíguo ou alternativas igualmente plausíveis. Sem suporte suficiente, deixar unknown/unsupported sem nota. Rationale considera tipo/direção da fonte, corroboração, contradição e escopo, sem probabilidade percentual.
+- **D22 — Atribuição multidimensional**: autoria em commit, mudança, decisão, colaboração, comportamento, validação e resultado são relações separadas. Nenhuma inferência de intenção, ownership total, qualidade ou resultado decorre automaticamente de uma delas.
+- **D23 — Editorial sem ordem fixa**: a lista FR-083 é checklist de investigação. Documento pode usar prosa e ordem livres, deixar campos sem suporte em aberto e destacar de zero a três histórias curtas proporcionais à evidência.
+- **D24 — Validação já observada e qualificada**: não executar nada do alvo. Artefato/configuração de teste e resultado fornecido são distintos; cada resultado limita-se ao snapshot, cenário e ambiente conhecidos.
+- **D25 — Perguntas seletivas e qualidade qualitativa**: perguntar só para fatos recuperáveis cuja resposta mudaria a interpretação/atribuição/claim. Avaliar cenários e leitores representativos usando perguntas e critérios definidos previamente, sem porcentagem ou promessa de contratação inventadas.
+
+### Racional e alternativas
+
+As decisões decorrem de FR-114–125, SC-038–047 e princípios I, III e IV da constituição. Banco, integração privada, questionário extenso e template de case obrigatório foram descartados porque criariam novas dependências, reduziriam a flexibilidade editorial ou favoreceriam preenchimento especulativo. Não é necessária pesquisa online: não há fato técnico ou decisão de produto dependente de fonte externa.
+
+
 ## Decisões
 
 - **D8 — Vocabulário local de tags**: usar facetas, chaves estáveis, rótulos e aliases versionados no método local. Catálogos, PURL, SKOS e SBOM ajudam a estruturar ou desambiguar dados quando disponíveis, mas não viram autoridade online nem formato obrigatório.

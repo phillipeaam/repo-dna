@@ -22,11 +22,28 @@ Etapas usam `pending`, `in_progress`, `complete`, `partial`, `blocked` ou `not_a
 | `fact` | Afirmação diretamente sustentada por evidência recuperável no escopo. |
 | `inference` | Interpretação derivada; explicita premissas e limites. |
 | `personal_account` | Contexto fornecido por uma pessoa, identificado como relato sem verificação independente. |
+| `hypothesis` | Explicação candidata que relaciona evidências e alternativas; permanece revisável e não é evidência nem fato. |
 | `conflict` | Fontes relevantes discordam; posições e resolução pendente ficam visíveis. |
-| `unresolved` | Questão sem suporte suficiente ou sem decisão. |
+| `unknown` / `not_observed` | A fonte acessível não permite concluir se a afirmação ocorreu; não equivale a evidência negativa. |
+| `unresolved` | Questão sem suporte suficiente ou sem decisão; preservado em registros legados quando aplicável. |
 
-Confiança é descrita e justificada pelas relações de evidência; atividade, volume, heurísticas ou etiqueta numérica isolada não a estabelecem.
+Confiança descreve suporte evidencial, não certeza subjetiva ou probabilidade. Use uma nota somente quando há suporte suficiente e justifique-a por tipo/direção da fonte, corroboração, contradições e escopo:
 
+| Nível | Critério |
+|---|---|
+| `high` | Suporte direto e adequado ao escopo, sem contradição material aberta. |
+| `medium` | Suporte parcial, indireto ou limitado, sem alternativa igualmente sustentada. |
+| `low` | Suporte fraco/ambíguo ou alternativas igualmente plausíveis. |
+| sem nota | Suporte insuficiente; registrar `unknown`/`unsupported`, nunca atribuir `low` por padrão. |
+
+Atividade, volume, heurísticas ou etiqueta numérica isolada não estabelecem confiança. Tipos de conclusão diferentes não podem ser promovidos silenciosamente uns aos outros.
+
+## Reconstrução de engenharia (US14)
+
+- `R-###` identifica uma reconstrução técnica; `H-###`, um destaque narrativo candidato. Ambos são projeções derivadas, não fontes nem substitutos de `F-###`, `C-###` ou `E-###`.
+- Cada afirmação material deve ligar localização e baseline/escopo à evidência recuperável e declarar a relação `supports`, `limits`, `contradicts` ou `context_only`. Registre o que a fonte pode sustentar — autoria registrada, estrutura/comportamento, decisão/intenção relatada, colaboração, validação ou resultado — sem transferir prova entre dimensões.
+- Reconstruções preservam tipo de conclusão, limites, alternativas/contraevidência, confiança com rationale e estado editorial `draft`, `accepted`, `corrected` ou `rejected`. Revisão editorial não altera procedência nem transforma hipótese em fato.
+- Não confundir teste/configuração com execução ou resultado; limitar observações ao snapshot, cenário e ambiente conhecidos. Consequência estática não prova benefício de usuário/negócio, impacto ou causalidade.
 ## Evidência e procedência
 
 Cada evidência usa identificador estável (`E-###`) e registra, quando aplicável: tipo, caminho/URL/commit, repositório e baseline, intervalo temporal, síntese permitida, método de obtenção, status de verificação, limites e condição de divulgação. Findings usam `F-###`; claims usam `C-###`; perguntas/gaps usam `Q-###`. IDs não são reutilizados após supersessão.

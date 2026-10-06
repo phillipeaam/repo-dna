@@ -22,6 +22,7 @@ tests=(
     portfolio_surface_contract_test.sh
     technical_tags_contract_test.sh
     contributor_attribution_contract_test.sh
+    engineering_reconstruction_contract_test.sh
     multirepo_audit_test.sh
     audit_resume_migration_test.sh
     private_paths_test.sh

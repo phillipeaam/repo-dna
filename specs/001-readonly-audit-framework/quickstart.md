@@ -130,6 +130,28 @@ Para `legacy-2.0.0`, atualizar o mesmo arquivo para 2.1.0, conservar IDs/fontes/
 
 **Cobertura US12/US13**: o harness `bash tests/run.sh --framework` inclui os dois contratos novos, o contrato do Markdown 2.1.0 e a revisão de privacidade com valores sintéticos de tags/contribuidores. Os casos são documentação/fixtures do framework e nunca executam conteúdo de `target-repos/`.
 
+## Reconstrução de contribuição e narrativa técnica (US14)
+
+Siga o [runbook de reconstrução](../../.agents/skills/repodna-audit/references/engineering-reconstruction.md) e os limites de fonte do [A1](../../.agents/skills/repodna-audit/references/forensic-a1.md). Use somente fontes locais, fornecidas ou públicas sem autenticação. A fixture sintética `tests/fixtures/readonly-audit/engineering-reconstruction/README.md` e o verificador estático cobrem os cenários abaixo; ambos passaram na suíte seletiva do framework. Nenhum exemplo usa dado pessoal, empresa ou projeto real, e nenhum conteúdo de `target-repos/` é lido ou executado por esse contrato.
+
+| Caso | Comportamento esperado |
+|---|---|
+| Memória limitada + diff/documentação convergentes | Criar reconstrução parcial com claims ligados a baseline/localização e confiança justificada; motivação sem prova permanece desconhecida/inferida. |
+| Fontes conflitantes ou issue/review privada indisponível | Preservar conflito/unavailable/not_observed; não alegar consulta nem ausência do evento. |
+| Commit de grupo e sistema existente | Atribuir somente mudança/metadado sustentados; não inventar quem decidiu, colaborou ou possui o sistema inteiro. |
+| Mecanismo plausível sem dado de resultado | Explicar efeito estático separadamente do benefício possível; sem métrica/causalidade factual. |
+| Teste configurado sem resultado | Registrar configuração, sem declarar execução, aprovação ou qualidade. |
+| Log com escopo delimitado | Associar resultado ao snapshot, cenário e ambiente conhecidos; não generalizar para produto/release. |
+| História escrita fora da sequência FR-083 | Aceitar ordem e prosa livres, deixando dimensão sem suporte como lacuna e rastreando afirmações. |
+| Evidência fraca/insuficiente | Permitir zero destaques; os que forem sustentados permanecem concisos, draft e corrigíveis sem mudar fontes/findings. |
+| Leitura compreensível | Definir antes perfil, perguntas e critérios; registrar observações qualitativas sem percentual inventado ou promessa de contratação. |
+
+Para cada afirmação material, valide localização recuperável, baseline/escopo, relação (`supports`, `limits`, `contradicts`, `context_only`), tipo (`fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown`/`not_observed`), caveat e rationale de confiança. `high` requer suporte direto sem contradição material aberta; `medium` representa suporte parcial/indireto ou limitado sem alternativa igualmente sustentada; `low` representa suporte fraco/ambíguo ou alternativas igualmente plausíveis. Sem suporte suficiente, mantenha `unknown`/`unsupported` sem nota. Justifique pela direção/tipo de fonte, corroboração, contradições e escopo. Não confunda teste/configuração com resultado nem autoria registrada com decisão/colaboração. Separe consequência estática de impacto.
+
+Antes de avaliar compreensibilidade, defina perfil do leitor, perguntas e critérios de rastreabilidade/clareza. Registre tarefa, observações, lacunas e limitações qualitativas; não invente percentuais ou promessa de contratação. Essa avaliação é diferente da validação cronometrada SC-025, que continua reservada à T105 como última validação humana. O fluxo permanece offline e não executa conteúdo de `target-repos/`.
+
+**Rastreabilidade revisada para US14:** FR-114–116 e SC-038–040 cobrem fontes permitidas e dimensões que cada fonte sustenta; FR-117–120 e SC-040/043 limitam inferências sobre pessoa, decisão e desafio; FR-121–122 e SC-041–042 separam consequência, validação e resultado; FR-123–124 e SC-044–045 mantêm prosa flexível e drafts revisáveis; FR-125 e SC-046 definem revisão qualitativa com critérios prévios. SC-039/047 são cobertos pela rota de evidência e rubrica desta seção. T132–T133 criam fixtures e verificador; T142–T143 integram o contrato ao harness e cobrem campos de reconstrução no guard de privacidade. Os 16 contratos do harness seletivo passaram. Essa automação não substitui a revisão humana cronometrada SC-025/T105, que permanece pendente e será a validação final.
+
 ## Consulta por agente de IA
 
 1. Fornecer ao agente somente o Markdown canônico gerado para o produto e usar os casos registrados em `tests/fixtures/readonly-audit/ai-retrieval-cases.md`.

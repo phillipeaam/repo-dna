@@ -12,9 +12,18 @@ O usuário pode fornecer público/cargos, idioma, canais, competências/provas, 
 
 1. Leitura rápida: contexto, papel/equipe/período quando conhecidos, papel editorial, plataforma/tecnologia, contribuição individual, aderência ao brief, estado público e principal ressalva.
 2. Rationale de seleção: papel editorial e confiança; conjunto comparado e critérios quando seleção relativa for solicitada; sem ranking global fora de conjunto explicitamente comparável.
-3. Case: contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão, preenchido somente quando sustentado. Relato pessoal e inferência recebem rótulos claros.
+3. História técnica: dimensões de investigação incluem contexto/problema/restrições, contribuição/ownership, mecanismo/decisão/trade-off, evidência, consequência/resultado, colaboração, validação e reflexão. Esta lista é um conjunto de prompts, não sequência, headings ou campos obrigatórios; a prosa e sua ordem são flexíveis e omissões sem suporte permanecem lacunas. Relato pessoal, inferência e hipótese recebem rótulos claros e links para evidência/limites.
 4. Pacote de mídia/evidência proporcional ao papel, com lacunas e status de permissão/atribuição visíveis. Para Featured, o inventário desejável acompanha imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs de sistemas, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links públicos e confidencialidade quando pertinente. Distinguir itens disponíveis de itens selecionados; um case publicado recomenda cerca de 4–7 elementos visuais significativos. São metas, não barreiras para documentar/publicar texto factual seguro.
 5. Matriz independente para texto, contribuição, resultados, mídia/áudio, permissões, experiência profissional e claims. Uma recomendação não equivale a aprovação.
+
+### Reconstrução quando a memória é limitada
+
+- Gerar uma ou mais interpretações candidatas somente a partir de fontes autorizadas; relacionar evidência favorável/contrária, alternativas, baseline, escopo, confiança qualitativa justificada e o que permanece desconhecido.
+- Calibrar confiança pela rubrica de `source-of-truth-markdown.md` e justificar nível com tipo/direção da fonte, corroboração, contradição e escopo. Ausência de suporte significa unknown/unsupported sem nota, não confiança baixa.
+- Diferenciar autoria em metadata de commit de evidência de decisão, colaboração, ownership total, comportamento ou resultado. Código pode indicar um mecanismo; não prova motivação pessoal nem benefício de negócio.
+- Classificar um resultado de teste só se houver resultado observável; existência de suite/configuração é somente evidência de mecanismo de validação disponível. Declarar cenário, snapshot e ambiente conhecidos.
+- Perguntar à pessoa apenas quando a resposta puder mudar materialmente interpretação, atribuição ou wording; não pedir para confirmar detalhes sem rota razoável de recuperação.
+- Propostas de 0–3 destaques permanecem rascunhos editáveis/rejeitáveis com procedência original preservada. Sem publicação automática nem metas de contratação.
 
 ## Critério observável de leitura rápida
 

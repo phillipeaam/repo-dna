@@ -34,6 +34,7 @@ Esta referência define a única saída persistente: `analysis-output/<safe-prod
 ## Papel, equipe e contribuições
 ## Sistemas e arquitetura
 ## Decisões e trade-offs
+## Reconstruções e destaques técnicos
 ## Timeline e releases
 ## Projeção pública e claims
 ## Evidências e índice
@@ -76,10 +77,17 @@ No fechamento, atualizar a mesma seção com comparação final por categoria, d
 
 ## Histórias de engenharia e talking points
 
-História de engenharia usa problema → restrição → abordagem → trade-off → resultado → evidência. Cada trecho separa o que o snapshot comprova, a inferência e o contexto pessoal; motivação/resultado sem suporte fica como lacuna ou relato atribuído.
+Histórias e reconstruções usam as dimensões que melhor explicam o projeto e podem organizar a prosa livremente: contexto/problema/restrições, contribuição/ownership, mecanismo/decisão/trade-off, evidência, consequência, colaboração, validação, resultado e reflexão. São prompts de investigação, não sequência fixa, campos obrigatórios ou headings. Separar o que o snapshot comprova, inferência e relato pessoal; motivação/resultado sem suporte fica como lacuna ou relato atribuído.
 
 Talking points priorizam contribuição tecnicamente relevante e recuperável. Cada ponto traz `C-###`/`F-###` e `E-###`, baseline, limite e formulação segura. Não exigir quantidade fixa nem preencher lacunas pessoais. O agente sugere wording; a pessoa revisa a própria narrativa antes de qualquer uso externo.
 
+## Reconstrução técnica e destaques (US14)
+
+Reconstrução opcional registra R-###; destaque narrativo derivado registra H-###. São sínteses no mesmo Markdown, não fontes nem substitutos de finding, claim ou evidência. Manter zero a três destaques concisos conforme suporte/relevância; zero é resultado válido.
+
+Cada afirmação material aponta para finding/evidência e localização recuperável, baseline/escopo e janela, relação (supports, limits, contradicts, context_only), tipo da conclusão, dimensão sustentada, justificativa de confiança e limite. Registre alternativas/contraevidência e distinção entre autoria, comportamento, intenção relatada, colaboração, validação e resultado. Sem suporte suficiente, mantenha unknown/unsupported e sem nota de confiança.
+
+As dimensões narrativas são flexíveis; não exigir a sequência histórica contexto → ownership → problema → restrições → abordagem → trade-offs → resultado → evidência. Síntese e sugestão pública começam em draft; accepted, corrected e rejected registram a decisão editorial sem apagar versão anterior, procedência, finding ou fonte. Correção de wording não eleva confiança nem muda tipo de evidência. Não publicar ou enviar automaticamente.
 ## Hierarquia e reconciliação de fontes
 
 A força da fonte depende do tipo de claim:

@@ -21,6 +21,22 @@ Reconstruir identidade do produto, período, contexto, equipe e contribuições 
 - Relato pessoal fica `personal_account`, com origem; não se transforma em verificação independente.
 - Releases com datas próximas não estabelecem binário ou commit publicado. Delegar cadeia de procedência a B3.
 
+## Fontes permitidas e reconstrução histórica (US14)
+
+Para reconstrução, use somente material local no escopo, material fornecido pelo usuário ou fonte pública acessível sem autenticação. Issues, reviews e releases de serviços privados só entram quando exportados/materializados localmente ou fornecidos. Não solicitar credenciais, autenticar, inferir conteúdo de serviço privado nem declarar uma fonte consultada sem tê-la observado. Registre a fonte inacessível como `unavailable`/`not_observed`, nunca como prova de inexistência.
+
+Avalie separadamente o que cada fonte sustenta:
+
+| Dimensão | Fontes que podem sustentá-la | Não conclua apenas a partir de |
+|---|---|---|
+| Autoria registrada | author/committer/co-author e metadados Git no escopo | autoria exclusiva, liderança ou decisão |
+| Estrutura/comportamento | diff, código e configuração da baseline | intenção, execução ou benefício |
+| Decisão/intenção relatada | relato atribuído, documento contemporâneo ou registro explícito | presença de commit, feature ou arquitetura |
+| Colaboração | coautoria, review, coordenação ou relato com vínculo identificável | autoria/committer isolado ou existência de sistema |
+| Validação | resultado de teste/revisão/experimento materializado, com contexto | arquivo de teste, configuração ou menção a teste |
+| Resultado/impacto | medição ou evidência de resultado com procedência e escopo | mecanismo plausível, release ou proxy de atividade |
+
+Quando memória pessoal for limitada, trate-a como lacuna, não como evidência de que algo não aconteceu. Proponha uma hipótese somente se fontes autorizadas sustentarem uma reconstrução útil; registre evidência favorável/contrária e alternativas. Faça pergunta à pessoa somente quando a resposta puder mudar materialmente atribuição, interpretação ou wording seguro. Se não houver rota razoável de recuperação, preserve `unknown` e prossiga com as demais áreas.
 ## Saída e checkpoint
 
 Findings `F-###` ligados a `E-###`, matriz sistema/contribuição, timeline com intervalos e incertezas, aliases não resolvidos e perguntas `Q-###`. Estado `partial` quando identidade/histórico ou cobertura forem limitados. Não criar documento separado.

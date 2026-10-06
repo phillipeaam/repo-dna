@@ -18,7 +18,7 @@ Run this skill from the RepoDNA checkout. It is the only supported entry point f
 
 ## Required references
 
-Read [workflow.md](references/workflow.md) first. Then load only applicable runbooks: [forensic A1](references/forensic-a1.md), [production B1](references/production-b1.md), [runtime B2](references/runtime-b2.md), [provenance B3](references/provenance-b3.md), [publication B4](references/publication-b4.md), optional [portfolio surface review](references/portfolio-surface-review.md), and [consolidation](references/consolidation.md). Use [evidence vocabulary](references/evidence-vocabulary.md) as shared contract and the [portfolio readiness contract](../../../specs/001-readonly-audit-framework/contracts/portfolio-readiness.md) when applicable.
+Read [workflow.md](references/workflow.md) first. Then load only applicable runbooks: [forensic A1](references/forensic-a1.md), [production B1](references/production-b1.md), [runtime B2](references/runtime-b2.md), [provenance B3](references/provenance-b3.md), [publication B4](references/publication-b4.md), optional [portfolio surface review](references/portfolio-surface-review.md), and [consolidation](references/consolidation.md). Use [evidence vocabulary](references/evidence-vocabulary.md) as shared contract, the [engineering reconstruction runbook](references/engineering-reconstruction.md) when applicable, and the [portfolio readiness contract](../../../specs/001-readonly-audit-framework/contracts/portfolio-readiness.md) when applicable.
 
 For technology/tag questions, follow the local `faceta:slug` index to `T-###`, `O-###`, system, baseline and evidence; use the qualified profiles in the production runbook. For contributor/experience questions, follow `P-###` → `K-###` → `O-###`/`T-###` and the attribution limits in forensic A1. Neither query profile creates an alternate report or database.
 
@@ -28,9 +28,10 @@ For technology/tag questions, follow the local `faceta:slug` index to `T-###`, `
 2. Run the boundary preflight in workflow.md. Resolve real paths and Git storage; record the current operating system, agent runtime, and effective permission policy against `tests/fixtures/readonly-audit/README.md` when known.
 3. An unverified profile, writable-root overlap, or unavailable host policy is a visible risk, not a blocker. Warn the user before inspection, do not claim enforced read-only access, and continue with static inspection under the no-write/no-execution procedure. Stop only for an ambiguous target, an unsafe/unresolvable scope, or an output collision that cannot be resolved.
 4. Capture baseline and run applicable A1/B1/B2/B3/B4 phases. Record applicability, evidence, gaps, conflicts, and checkpoints; never silently skip a domain.
-5. Reconcile permitted external context read-only, then consolidate using references/consolidation.md.
-6. When portfolio representation is in scope, add project-specific editorial readiness and evidence-proportional case material. Include surface review only when the user explicitly selects a public site, prototype or design artifact.
-7. Verify the canonical Markdown contract, single-output rule, citations, claims, target preservation coverage, baseline and task checkpoints. If a check is incomplete, report partial rather than claiming full preservation.
+5. When historical technical reasoning or contribution reconstruction is requested or materially useful to the goal, follow references/engineering-reconstruction.md after A1 and relevant technical evidence is gathered, before consolidation. Reuse linked contributors, systems, technologies and evidence rather than infer a person’s experience from the project stack.
+6. Reconcile permitted external context read-only, then consolidate with references/consolidation.md; keep claims, confidence, limits and review states in the one canonical Markdown.
+7. When portfolio representation is in scope, add project-specific editorial readiness and evidence-proportional case material. Include surface review only when the user explicitly selects a public site, prototype or design artifact.
+8. Verify the canonical Markdown contract, single-output rule, citations, claims, target preservation coverage, baseline and task checkpoints. If a check is incomplete, report partial rather than claiming full preservation.
 
 ## Completion states
 

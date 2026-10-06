@@ -269,7 +269,35 @@ Reconciliação registra localmente classificação, conflitos e recomendações
 
 Freeze exige cobertura, rastreabilidade, uma autoridade atual, questões classificadas e preservação. Lacunas legítimas continuam visíveis. Review humano e publicação são decisões posteriores.
 
-## 12. Aprendizados específicos dos casos, generalizados
+## 13. Aprendizados específicos dos casos, generalizados
+
+## 12. Reconstrução de contribuição e raciocínio (US14)
+
+Use essa etapa quando houver uma necessidade de explicar trabalho, decisão ou dificuldade que não está registrada como uma narrativa pronta. Ela não substitui A1, evidência ou reconciliação; organiza interpretações derivadas de fontes locais autorizadas.
+
+### Rota de reconstrução
+
+1. Delimitar claim/pergunta, sistema, baseline, intervalo e pessoa/contribuição em investigação. Enumerar fontes acessíveis: diffs/commits, documentação, código/configuração, testes e resultados já existentes; usar issue/review/release somente se local, fornecida ou pública sem autenticação. Registrar indisponíveis/não observadas.
+2. Fazer uma matriz claim → fonte/localização → o que ela sustenta → o que não sustenta. A autoria em metadata prova apenas autoria registrada; código/configuração sustenta estrutura/mecanismo estático; notas/entrevistas sustentam relato atribuído; teste/log/releases sustentam somente o resultado/elo observado no escopo deles.
+3. Construir cronologia e alternativas quando necessário. Separar fato observável, inferência, relato pessoal, hipótese, conflito e desconhecido. Para hipótese, registrar fontes favoráveis e contrárias, explicações alternativas, confiança qualitativa com razão e limites. Calibrar `high`/`medium`/`low` conforme a rubrica em `data-model.md`; sem suporte suficiente, usar unknown/unsupported sem nota, não `low`. Nunca atribuir motivação a partir de diff sozinho.
+4. Explicar mecanismo e trade-off com vocabulário que o leitor possa entender. Descrever efeito direto estático separadamente de impacto/benefício potencial. Benefício, causalidade ou métrica exige dado apropriado com snapshot, método, unidade, cenário e ambiente; caso contrário deixar como hipótese ou pergunta.
+5. Distinguir teste/configuração presente, resultado de execução existente, revisão, experimento e release. Nunca iniciar build/teste/executável no alvo. Escopo de um resultado não se amplia além do snapshot, cenário e ambiente observados.
+6. Perguntar à pessoa somente se a resposta puder alterar materialmente atribuição, interpretação ou wording seguro. Ausência de resposta/memória não é evidência negativa; se não houver rota razoável de recuperação, manter unknown/not_observed e prosseguir nas demais dimensões.
+7. Redigir zero a três destaques concisos, somente quando evidência e relevância justificarem. Contexto, problema, restrição, mecanismo, decisão, colaboração, consequência, validação e resultado podem aparecer em qualquer ordem; não exigir heading, preenchimento total nem história simétrica. Linkar cada afirmação material e manter limites visíveis.
+8. Manter proposta em draft até revisão humana. Aceitar, corrigir ou rejeitar wording não modifica nem apaga findings e fontes; nenhuma saída é publicada automaticamente.
+
+### Matriz de relação fonte → dimensão
+
+| Fonte observada | Pode sustentar | Não sustenta automaticamente |
+|---|---|---|
+| Metadata/diff/histórico Git | Alteração registrada e identidade técnica conforme metadados | Motivação, decisão pessoal, colaboração, ownership total, qualidade ou impacto |
+| Código/configuração/documentação | Estrutura ou intenção textual no snapshot | Execução, adoção, benefício real ou estado publicado |
+| Relato pessoal identificado | Memória/explicação atribuída e passível de correção | Confirmação independente ou resultado medido |
+| Arquivo de testes/CI | Verificação planejada/configurada ou instrumentação presente | Que foi executada ou passou |
+| Log/resultado de teste fornecido | Resultado daquele cenário/snapshot/ambiente e limites registrados | Qualidade global, experiência real de usuário ou ganho comercial |
+| Release/artefato público observado | Elo específico da cadeia de publicação | Que commit/diff candidato foi incluído sem relação de procedência |
+
+Não combinar evidência de dimensões diferentes como se fosse uma só. Se duas fontes discordam, manter ambas e classificar conflito; resolver apenas com suporte que discrimine a divergência. `unknown`, `not_observed` e `unavailable` são resultados informativos, não falha da narrativa.
 
 | Exemplo consultado | Aprendizado para o framework | Requisitos |
 |---|---|---|
@@ -283,7 +311,7 @@ Freeze exige cobertura, rastreabilidade, uma autoridade atual, questões classif
 
 Esses exemplos sustentam o desenho do método. Seus commits, pessoas, datas, métricas e claims particulares não foram revalidados nos repositórios originais nesta sessão.
 
-## 13. Reconciliação com a base existente
+## 14. Reconciliação com a base existente
 
 | Capacidade / fonte local inspecionada | Decisão de produto | Motivo / mudança exigida |
 |---|---|---|
@@ -308,7 +336,7 @@ A constituição 1.0.0 protegia evidência, núcleo genérico, privacidade, cont
 
 Antes da implementação do runtime, uma atualização constitucional explícita para v2.0.0 substituiu o contrato de CLI/relatórios múltiplos pelo framework de skills readonly e pela fonte de verdade Markdown. A data de ratificação original continua TODO porque não há confirmação disponível.
 
-## 14. Fronteiras de implementação desta sessão
+## 15. Fronteiras de implementação desta sessão
 
 Entregues para esta feature SDD: spec, síntese do método, inventário de fontes, checklists, plano, contratos, modelo e tarefas. A especificação do produto limita a futura entrega de cada auditoria a um único Markdown em `analysis-output/`.
 
@@ -316,7 +344,7 @@ A skill, os runbooks, contratos, template de consolidação e contratos de aceit
 
 Criar pasta ignorada ou escrever “readonly” em prompt não comprova isolamento. Na versão atual, o agente segue o procedimento sem escrita intencional e declara a limitação; enforcement e prova de host são melhorias futuras para elevar a garantia de preservação.
 
-## 15. Prontidão editorial para portfólio
+## 16. Prontidão editorial para portfólio
 
 Brief de público, cargos, idioma, canais, provas e restrições é opcional e recebe origem/estado por campo. Separar o contexto (profissional, independente, jam, técnico ou desconhecido) do papel editorial sugerido/decidido. Só comparar seleção relativa quando existe conjunto explicitamente comparável; sem ele, registrar aderência possível sem ranking.
 
@@ -328,8 +356,20 @@ Validar SC-025 com leitor não familiarizado: cronometar busca de produto/contex
 
 Avaliar separadamente prontidão de texto, contribuição, resultados, mídia/áudio, permissões e claims. Recomendações e testemunhos profissionais são atribuídos ao autor/contexto e não comprovam sozinhos cargo, autoria ou impacto. Linhagem de produto/sucessor preserva contribuição compartilhada sem duplicação. Uma lacuna material pede decisão humana.
 
-## 16. Revisão opcional da superfície de portfólio
+## 17. Revisão opcional da superfície de portfólio
 
 Executar somente se URL, protótipo ou material de design for explicitamente incluído. Registrar URL/artefato, páginas, viewports, estados e interações efetivamente inspecionados. Percorrer posicionamento, narrativa/arquitetura, descoberta, cases e evidências, visual/legibilidade, reflow móvel/tablet, acessibilidade e controles, contato/conversão, consistência/manutenção. Pontuações 1–5 são diagnóstico profissional com critério e evidência localizada; não representam pesquisa de recrutador, benchmark ou certificação.
 
 Cada finding recebe prioridade P0–P3, impacto, recomendação, esforço, risco/dependência e confiança; incluir rota concisa do visitante e plano por fases. Cobrir cada dimensão com observação fundamentada ou `not_observed`. Comparar alternativas abertas com descoberta, escaneabilidade, profundidade, mobile, acessibilidade, manutenção e brief fornecido. Usar apenas leitura: sem autenticação, formulários, ações de estado, edição ou publicação. Sinais ausentes não viram propriedades testadas ou medidas.
+
+## 18. Reconstrução de contribuição e raciocínio técnico (US14)
+
+Ativar quando a pessoa solicitar reconstrução histórica/técnica ou quando ela fizer parte da preparação editorial. A etapa é opcional, usa fontes locais, fornecidas ou públicas sem autenticação e não depende de Notion, conta privada ou serviço externo. Consultar o runbook local `engineering-reconstruction.md`; o fluxo relaciona A1, sistemas/tecnologias já observados, evidências e consolidação no mesmo Markdown.
+
+Começar por uma pergunta e escopo: produto/sistema, baseline e janela. Reutilizar IDs e evidências existentes; para cada afirmação material, registrar localização, relação de suporte/limite/contradição/contexto, dimensão que a fonte sustenta, tipo de conclusão e limite. Separar autoria registrada, comportamento/estrutura, decisão/intenção relatada, colaboração, validação e resultado. Commit, existência de sistema, teste configurado ou mecanismo plausível não transferem prova para essas outras dimensões.
+
+Quando fontes convergentes permitem uma explicação, redigir o menor enunciado que elas sustentam. Quando houver conflito, alternativas ou contraevidência, preservar ambos os lados e justificar a interpretação candidata. `hypothesis` é uma interpretação revisável, não evidência; `unknown`, `not_observed` e `unavailable` não provam que algo não ocorreu. A confiança (`high`, `medium`, `low`) segue a rubrica do vocabulário comum: tipo/direção de fonte, corroboração, contradição e escopo; sem suporte suficiente, não atribuir nota. Não inventar percentuais, motivação, qualidade, autoria exclusiva, causalidade, benefício ou resultado.
+
+Perguntar à pessoa somente quando a resposta puder alterar materialmente atribuição, interpretação ou wording seguro e não houver rota razoável de recuperação. Detalhes irrecuperáveis podem permanecer desconhecidos sem bloquear o restante. Sugestões de apresentação ficam `draft`, ligadas à procedência e abertas a aceitação/correção/rejeição; revisão editorial não apaga findings ou fontes. Prosa e ordem são livres, com zero a três destaques curtos conforme suporte e relevância.
+
+A avaliação de compreensibilidade define antes do leitor/perfil, perguntas, tarefa e critérios; depois registra observações qualitativas e limitações. Não criar taxas, limiares empíricos, previsão de contratação ou aprovação sem dados. Fixtures de aceitação são sintéticas e não executam conteúdo de `target-repos/`.

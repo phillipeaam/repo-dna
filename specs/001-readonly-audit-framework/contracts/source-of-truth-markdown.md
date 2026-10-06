@@ -24,6 +24,20 @@
 
 ## Regras
 
+### Reconstrução e destaques técnicos (US14)
+
+- Uma reconstrução/destaque pode resumir evidências já registradas no mesmo Markdown; não constitui arquivo, fonte ou segunda autoridade.
+- Dimensões investigativas: contexto/problema/restrições, contribuição/ownership, mecanismo/decisão/trade-off, colaboração, efeito/consequência, validação, resultado e reflexão. São prompts opcionais, não headings ou sequência obrigatórios. Registrar lacuna quando relevante; prosa concisa pode ordenar dimensões livremente.
+- Cada afirmação material referencia finding/evidência e localização recuperável, baseline/escopo, relação de suporte, tipo de conclusão, limite e confiança justificada. Para conclusão reconstrutiva, tipos incluem `fact`, `inference`, `personal_account`, `hypothesis`, `conflict` e `unknown`/`not_observed`; indisponibilidade de fonte mantém `unavailable` em cobertura.
+- Confiança usa a rubrica comum: `high` = suporte direto adequado ao escopo sem contradição material aberta; `medium` = suporte parcial/indireto ou limitado sem alternativa igualmente sustentada; `low` = suporte fraco/ambíguo ou alternativas igualmente plausíveis. Justificar com tipo/direção da fonte, corroboração, contradições e escopo. Claim sem suporte fica `unknown`/`unsupported`, sem nota; não é rebaixada automaticamente a `low`.
+- Evidência é tipada pelo que sustenta: autoria registrada, comportamento, decisão/intenção relatada, colaboração, validação ou resultado. Nenhuma dessas relações é automaticamente herdada por outra.
+- Hipótese mantém suportes, alternativas/contraevidência, justificativa e incerteza; não vira fato por revisão editorial. Um destaque conserva `draft`/`accepted`/`corrected`/`rejected` e sua procedência, sem publicação automática.
+- O conjunto editorial pode conter zero a três destaques. Eles são curtos e rastreáveis; não exigem simetria nem alegação de benefício, métrica, causalidade ou contratação sem evidência adequada.
+- Teste presente/configurado, execução e resultado existente são estados distintos. Resultado é limitado a snapshot, cenário e ambiente; nenhum implica qualidade global ou impacto comercial.
+- Atualização no schema 2.1.0 adiciona conteúdo opcional ao mesmo documento. Leitores de documentos legados tratam ausência como não avaliada/não migrada, nunca como inexistência ou conclusão negativa.
+
+- Sources allowed for this narrative are consistent with the local, user-supplied, or anonymous-public-only boundary; private services and credentials are not a workflow dependency.
+
 - Síntese concisa com termos técnicos necessários explicados.
 - Novos documentos usam schema `2.1.0`. Registros `1.0.0`/`2.0.0` permanecem legíveis; a próxima atualização migra no mesmo Markdown para `2.1.0`, preservando IDs, significados e histórico e registrando os mapeamentos/lacunas. Seções/editoriais, superfície, tags ou pessoas ausentes em versão legada significam não avaliadas/não migradas, não inexistência, falha nem aprovação.
 - Headings e identificadores estáveis MUST permitir que humanos e agentes recuperem respostas por tema e citem findings/evidências diretamente.

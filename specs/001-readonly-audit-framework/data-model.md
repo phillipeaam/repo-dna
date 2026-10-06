@@ -46,6 +46,15 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 | **Contribuição (`K-###`)** | Tipo de trabalho, sistema/feature, repo/baseline/intervalo, estado individual/compartilhado/relatado/desconhecido, autoria, wording e fontes | Reutiliza evidências/findings; inclui código, design, arte, áudio, QA, revisão, documentação, acessibilidade/localização, build e operação quando evidenciados. |
 | **Vínculo de experiência** | `P-###` + `K-###` + `O-###`/`T-###`, papel na ocorrência, prova e limites | Relação explícita pessoa → contribuição → tecnologia/sistema. Não herda stack da equipe nem duplica contribuição compartilhada. |
 | **Perfil de consulta** | Finalidade/filtro e inclusão de estados, datas, escopo e prova mínima | Projeção efêmera do registro Markdown; não vira banco, catálogo/índice paralelo nem novo deliverable. |
+| **Reconstrução técnica / destaque (`R-###` / `H-###`)** | Claim/síntese candidata; tipo de conclusão; contribuição/sistema; evidências favoráveis e contrárias; baseline/escopo; confiança e justificativa; limitações; alternativas; estado editorial (`draft`, `accepted`, `corrected`, `rejected`) e proveniência | Registra uma interpretação derivada de findings/claims e nunca substitui suas fontes. `H-###` pode ser hipótese de narrativa; zero destaques também é válido. R/H são IDs locais do documento, nunca IDs de fonte ou prova. |
+
+### Entidades complementares — US14
+
+| Entidade | Campos essenciais | Relações e validações |
+|---|---|---|
+| **Reconstrução técnica (`R-###`)** | pergunta/tema, claim candidata, sistema/feature, contribuição(s), escopo/baseline e janela, tipo (`fact`, `inference`, `personal_account`, `hypothesis`, `conflict`, `unknown`), confiança (`high`, `medium`, `low` ou sem nota quando sem suporte) e rationale, limites, alternativas, estado de revisão | Sempre referencia findings/claims anteriores e `E-###` recuperáveis; hipótese é interpretação editável, jamais fonte ou conclusão factual. Desconhecido/conflito podem ser resultados finais válidos. |
+| **Destaque de engenharia (`H-###`)** | texto conciso em prosa livre, público/contexto se fornecido, relações a `R-###`/`K-###`/sistema, claims/evidências citadas, gaps e estado editorial (`draft`, `accepted`, `corrected`, `rejected`) | Zero a três por síntese, sem campos/headings/ordem obrigatórios. Todo claim factual material preserva evidência, baseline e limite. Alteração editorial não apaga finding ou texto anterior com procedência. |
+| **Relação de suporte evidencial** | evidência/localização, baseline/escopo, dimensão suportada (`authorship`, `behavior`, `decision_or_intent`, `collaboration`, `validation`, `outcome`), relação (`supports`, `limits`, `contradicts`, `context_only`) e justificativa | Força é específica à dimensão: commit pode sustentar metadado de autoria registrada, mas não decisão/colaboração/resultado por si só. |
 
 ### Regras de serialização dos IDs US12/US13
 
@@ -57,7 +66,7 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 
 ### Campos/estados técnicos
 
-- Reutilizar a natureza existente `fact`, `inference`, `personal_account`, `conflict`, `unresolved` e os estados `installed`, `possible_use`, `observed_use`, `active_configuration`.
+- Reutilizar a natureza existente `fact`, `inference`, `personal_account`, `conflict`, `unresolved` e os estados `installed`, `possible_use`, `observed_use`, `active_configuration`. US14 acrescenta `hypothesis` como status provisório de interpretação, `unknown`/`not_observed` para ausência de conhecimento e estados editoriais de draft/revisão; hipótese não é fonte nem autorização para promover um claim.
 - `declared` e `resolved` qualificam declaração/resolução da dependência; não substituem estado de uso. `installed` exige prova local de disponibilidade material instalada, não só manifest/lock. Versão declarada, resolvida, observada e release são distintas.
 - Relação de dependência (`direct`, `transitive`, `peer`, `optional`, `vendored`, `bundled`, `unknown`) e contexto (`runtime`, `editor`, `build`, `test`, `ci`, `documentation`, `sample`, `asset_pipeline`, `unknown`) são eixos independentes; usar apenas os valores justificáveis no ecossistema.
 - Origem distingue implementação própria, implementação/asset de terceiro, integração própria de terceiro, gerado e desconhecido.
@@ -71,6 +80,8 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 
 - **Cobertura**: complete, partial, not_observed, not_applicable, unavailable, not_verified.
 - **Conclusão**: fact, inference, personal_account, conflict, unresolved.
+- **Conclusão para reconstrução US14**: fact, inference, personal_account, hypothesis, conflict, unknown/not_observed. Preservar `unresolved` em registros existentes; `hypothesis` é candidata explicativa e exige relações a suporte, contraevidência, alternativa, limites e confiança justificada.
+- **Estado de destaque**: draft, accepted, corrected, rejected. Estado humano/editorial não altera o tipo nem a força da evidência citada.
 - **Sistema**: implemented, partial, prototype, planned_only, not_found_in_scope.
 - **Contribuição**: individually_verified, strongly_supported_shared, shared, unknown, unverified.
 - **Tecnologia**: installed, possible_use, observed_use, active_configuration.
@@ -85,7 +96,7 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 - **Questão**: resolved, partially_resolved, open_blocking, open_nonblocking, closed_with_reason.
 - **Etapa**: pending, in_progress, complete, partial, blocked, not_applicable.
 
-“Confiança” descreve suporte evidencial e requer justificativa. Volume de atividade não estabelece confiança de autoria.
+“Confiança” descreve suporte evidencial, não certeza subjetiva nem probabilidade, e requer justificativa baseada em tipo/direção da fonte, corroboração, contradições e escopo: `high` = suporte direto adequado ao escopo sem contradição material aberta; `medium` = suporte parcial/indireto ou limitado, sem alternativa igualmente sustentada; `low` = suporte fraco/ambíguo ou alternativas igualmente plausíveis. Sem suporte suficiente, registrar `unknown`/`unsupported` sem nota, nunca `low` por padrão. Volume de atividade não estabelece confiança de autoria.
 
 ## Relações e invariantes
 
@@ -105,6 +116,10 @@ Este modelo descreve os dados que o processo precisa avaliar e consolidar. Não 
 14. Um conceito técnico pode ter várias ocorrências com contexto/estado diferentes; o filtro deriva delas e não reduz o conceito a um único estado global contraditório.
 15. A lista de pessoas declara fontes e cobertura; incompletude é permitida, mas não pode ser reportada como roster total comprovado.
 16. Todos os registros são serializados e atualizados no Markdown canônico 2.1.0; metadados fora dele são temporários e descartáveis.
+17. Cada reconstrução/destaque é projeção de findings, contribuições e fontes autorizadas; autoria, comportamento, decisão, colaboração, validação e consequência permanecem dimensões separadas.
+18. Evidência de teste/configuração e resultado observado têm IDs/escopos distintos; resultados sempre indicam baseline/snapshot e cenário/ambiente conhecidos.
+19. Ausência de memória, arquivo ou acesso externo não significa que o evento não aconteceu; usar `unknown`, `not_observed`, `unavailable` ou conflito conforme o motivo.
+20. A sequência contexto→ownership→problema→restrições→abordagem→trade-offs→evidência→resultado→reflexão é checklist de investigação; o relatório pode omitir dimensões sem suporte e compor prosa em qualquer ordem.
 
 ## Ciclo de estados
 

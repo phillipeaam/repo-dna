@@ -56,6 +56,10 @@ Revisão de qualidade realizada nesta etapa por speckit-specify. Critérios desc
 - O foco técnico permanece consultável por leitores não técnicos: cada etiqueta exige finalidade, sistema, estado e rota até sua evidência. Jargão de tags serve a filtro; o relatório também deve permitir uma explicação em linguagem comum.
 - FR-095–113 foram revistos quanto a critérios observáveis: estado de pacote/uso, suporte estrutural de padrão, classes de sinal IA, identidade e créditos, perfis, migração, execução local e privacidade. Os SC-028–037 cobrem essas jornadas e os casos negativos.
 - A nova pesquisa não identifica tecnologias ou pessoas de qualquer repositório real; exemplos são explicitamente sintéticos. A especificação preserva atribuição qualificada e não calcula domínio, liderança ou percentuais de autoria.
+- O complemento de 2026-10-05 acrescenta US14, FR-114–125 e SC-038–047 para reconstrução baseada em evidências, memória limitada, hipóteses qualificadas, rastreabilidade por afirmação, validação delimitada, síntese editorial flexível e calibração justificada da confiança. Critérios de qualidade continuam revisados no nível da spec; evidência de implementação ainda não foi produzida nesta etapa.
+- Lacunas de planejamento resolvidas nesta sessão: FR-083 e contratos usam dimensões editoriais sem sequência mandatória; modelo/vocabulário formalizam reconstrução, hipótese e rascunho; metodologia, quickstart e tasks cobrem fontes, limitações e aceitação. Implementação e validação continuam pendentes.
+- O escopo de fontes foi delimitado sem nova integração: issues/reviews/releases só contam quando locais, fornecidas ou públicas sem autenticação; não há pressuposto de acesso a Notion, serviço privado, credenciais ou memória completa.
+- A rubrica de confiança da US14 define `high`/`medium`/`low` por suporte/direção da fonte, corroboração, contradições e escopo; ausência de suporte fica unknown/unsupported sem nota. T133/T134 verificam aplicação e SC-047 mede consistência sem percentuais.
 - Clarificação original de 2026-10-04: host enforcement era gate obrigatório. Revisão posterior de 2026-10-04 substitui essa decisão: perfil sem prova avisa e permite análise estática, com preservação não verificada; ver FR-008 e SC-013 atualizados.
 - Clarificação de 2026-10-04: há exatamente um entregável Markdown local por produto; relatórios HTML, JSON/CSV publicados, anexos e escrita/exportação para Notion estão fora do escopo.
 - Clarificação de 2026-10-04: pessoas podem copiar o Markdown para Notion/Docs depois; agentes de IA são consumidores previstos. SC-006 mede respostas rastreáveis de IA, e SC-011 continua medindo o tempo para encontrar como iniciar.
@@ -96,6 +100,10 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 | FR-102–104 | US12 | Assistência IA versus produto, atividade/modelo qualificados, codec versus contêiner e privacidade | SC-031–032, SC-037 |
 | FR-105–108 | US13 | Lista qualificada de pessoas, fontes/aliases, créditos além de código e vínculo individual evidenciado | SC-033–034, SC-037 |
 | FR-109–113 | US12–13 | Perfis de consulta, histórico/migração, Markdown único, operação local e privacidade | SC-028, SC-034–037 |
+| FR-114–118 | US14 | Fontes permitidas e claims tipadas, com rotas, papéis de evidência, atribuição e hipótese revisável | SC-038–040 |
+| FR-119–122 | US14 | Memória/fonte ausente, perguntas materiais, mecanismo, consequência e validação delimitada | SC-041–043 |
+| FR-123–125 | US14 | Síntese flexível e rascunho humano, destaques proporcionais e baseline qualitativa de avaliação | SC-044–046 |
+| FR-115 | US14 | Níveis qualitativos de confiança e rationale uniforme, sem converter falta de suporte em confiança baixa | SC-039, SC-047 |
 
 ## Focused Review: extensão de tags e contribuidores (2026-10-05)
 
@@ -108,6 +116,16 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 - [x] Migração preserva histórico no Markdown único; T105/SC-025 segue reservado às validações finais.
 - [x] Exemplos e fixtures futuros não devem conter referências particulares ou identificadores de fontes privadas.
 
+## Focused Review: reconstrução de contribuição e narrativa técnica (2026-10-05)
+
+- [x] Memória incompleta não bloqueia reconstrução parcial nem se torna evidência negativa.
+- [x] Afirmações materiais distinguem fato, inferência, hipótese, desconhecido e conflito e preservam fonte, baseline, limite e confiança justificada.
+- [x] Autoria registrada, comportamento técnico, decisão, colaboração, validação e resultado têm papéis evidenciais independentes.
+- [x] Benefício plausível sem medição permanece hipótese; presença de teste não equivale a execução nem resultado.
+- [x] Histórias podem usar ordem e prosa próprias; zero a três destaques são possíveis e cada um permanece rascunho rastreável.
+- [x] Fontes externas privadas não viram integração/requisito; acesso permitido e estado de indisponibilidade são explícitos.
+- [x] Contradições com sequência narrativa fixa, modelo/vocabulário, metodologia e tarefas foram registradas para alinhamento posterior; não se declara implementação.
+
 ## Iteration Log
 
 1. Revisão inicial: identificada necessidade de separar evidência existente de execução dinâmica; baseline de conteúdo de status Git; método de fatos particulares do Notion.
@@ -118,4 +136,6 @@ Os requisitos têm observações binárias ou estados explícitos verificáveis.
 6. Revisão após reconciliação e multi-repo: classificações de fontes e linhagem de contribuições compartilhadas devem preservar procedência e evitar dupla contagem; a matriz cobre FR-059–061.
 7. Complemento speckit-specify de 2026-10-05: US10–11 e SC-017–027 cobrem prontidão editorial e revisão de superfície; a matriz cobre FR-001–094.
 8. Complemento speckit-specify de 2026-10-05: incorporadas as lacunas de tags/ocorrências, dependências e pacotes, padrões, IA, codecs e autoria individual em US12–13, FR-095–113 e SC-028–037; a matriz agora cobre FR-001–113. O núcleo reusa requisitos anteriores de evidência, privacidade, autoria e Markdown único. Nenhuma dúvida material sem default seguro permaneceu; implementação e validação permanecem pendentes.
+9. Complemento speckit-specify de 2026-10-05: US14, FR-114–125 e SC-038–047 definem reconstrução de contribuição e raciocínio a partir de fontes permitidas, claims rastreáveis, hipóteses qualificadas, limites de autoria/resultado, perguntas materiais e síntese editorial flexível. A matriz agora cobre FR-001–125. O alinhamento de modelo, contratos, metodologia, fixtures, plano e tarefas ocorreu nas fases subsequentes; implementação continua pendente.
+10. Ajuste após speckit-analyze: a confiança de FR-115 tem rubrica `high`/`medium`/`low`, com rationale por suporte/direção, corroboração, contradição e escopo; ausência de suporte fica sem nota. SC-047 e tasks/quickstart cobrem consistência da rubrica. Implementação segue pendente.
 

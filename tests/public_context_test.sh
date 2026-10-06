@@ -51,11 +51,16 @@ with tempfile.TemporaryDirectory(prefix='repodna-public-context-') as tmp:
     (root / 'notes.md').write_text('Fictional Confidential Client', encoding='utf-8')
     result = check(False, terms)
     assert 'Fictional Confidential Client' not in result
-    # Sensitive values used to simulate private technical/contributor metadata
-    # must be detected without echoing the synthetic value into diagnostics.
-    for private_value in ('Synthetic Framework Vendor Alias', 'Synthetic Contributor Alias'):
+    # Sensitive values used in technical/contributor and reconstructed
+    # narrative fields must be detected without appearing in diagnostics.
+    reconstruction_fields = (
+        ('Tag or credit: ', 'Synthetic Framework Vendor Alias'),
+        ('R-001 hypothesis and source attribution: ', 'Synthetic Reconstruction Alias'),
+        ('H-001 personal_account and decision note: ', 'Synthetic Private Decision Detail'),
+    )
+    for field, private_value in reconstruction_fields:
         terms.write_text(private_value + '\n', encoding='utf-8')
-        (root / 'notes.md').write_text('Tag or credit: ' + private_value, encoding='utf-8')
+        (root / 'notes.md').write_text(field + private_value, encoding='utf-8')
         result = check(False, terms)
         assert private_value not in result
     (root / 'notes.md').write_text('Clean method.', encoding='utf-8')

@@ -35,6 +35,7 @@ Não normalizar nem corrigir o estado. Construir snapshot de conteúdo/inventár
 | B2 Runtime | Inspeção estática e medições pré-existentes | Riscos estáticos, medidas com procedência ou plano futuro |
 | B3 Procedência | refs, eventos, artefatos, versões e destinos | Elo por elo, estado e confiança |
 | B4 Publicação | texto, mídia, créditos, claims e permissões | Readiness por ação e bloqueios |
+| Reconstrução (US14) | Após A1 e fontes técnicas pertinentes, se solicitada/aplicável | Claims rastreáveis, alternativas, confiança e lacunas no Markdown |
 | Reconciliação | Contexto externo autorizado e fontes antigas | Classificação, conflitos e motivo |
 | Consolidação | Evidências e respostas por assunto | Um Markdown canônico |
 | Revisão | Cobertura, links, segurança, preservação | `complete`, `partial` ou `blocked` |
@@ -69,10 +70,16 @@ No Codex, se as permissões tornam o checkout gravável, ainda é permitido anal
 - FR-055–058, FR-062–064, FR-067–068: contrato canônico, reconciliação, histórias e revisão final.
 - FR-059–061: reconciliação e relação multi-repo.
 - FR-065–066: migração e atualização após mudança de baseline.
+- FR-114–125 e SC-038–047: reconstrução evidencial opcional ligada a A1, fontes pertinentes e consolidação; limitações e confiança ficam explícitas.
 - FR-069–070: orientação de uso e inventário de capacidades legadas.
 
 Cada requisito é fechado pela correspondência de tarefas em `specs/001-readonly-audit-framework/tasks.md`; esta lista orienta a fase e não substitui aquela matriz.
 
+## Reconstrução de engenharia (US14)
+
+Quando o usuário solicitar reconstrução histórica/técnica ou ela for parte do objetivo editorial, executar o runbook engineering-reconstruction.md depois de A1 e das fontes B1/B2/B3 pertinentes, antes da consolidação. Reutilizar as contribuições e tecnologias já identificadas; não inferir a experiência de uma pessoa a partir da stack do projeto.
+
+A etapa é opcional e pode resultar em not_applicable, partial ou unavailable com motivo. Limitar fontes a conteúdo local, fornecido ou público sem autenticação. Fonte privada inacessível fica unavailable/not_observed; não adiciona conexão de serviço, credencial, publicação nem etapa dinâmica. Incluir no mesmo Markdown afirmações, relações às evidências, escopo, alternativas, justificativa de confiança, desconhecidos e estado editorial draft/review.
 ## Produtos com vários repositórios
 
 Antes de combinar, registrar nome/slug do produto e, por repositório: ID, caminho canônico, papel (`client`, `service`, `package`, `tooling` ou outro explicado), remote/ref/HEAD, baseline e relação confirmada por quem ou por qual evidência. Relação desconhecida bloqueia fusão. Sucessor ou produto parecido conserva slug/registro separado.

@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from /specs/001-readonly-audit-framework/spec.md
 
-**Status do planejamento**: O corpo histórico abaixo documenta a implementação-base e os complementos US8–US11. Esta atualização planeja US12–US13 (tags técnicas, consultas qualificadas e contribuição individual). Requisitos atuais são governados pela spec e constituição v3.0.0.
+**Status do planejamento**: O corpo histórico abaixo documenta a implementação-base e os complementos US8–US13. O complemento final planeja US14 (reconstrução de contribuição e narrativa técnica baseada em evidências). Requisitos atuais são governados pela spec e constituição v3.0.0.
 
 ## Complemento de design — US10/US11 (2026-10-05)
 
@@ -26,7 +26,7 @@ Estender a mesma fonte de verdade Markdown com prontidão editorial por projeto 
 
 1. **Compatibilidade do relatório**: adicionar seções opcionais e versionar a estrutura do Markdown; leitores de relatórios existentes devem tolerar ausência delas. Uma auditoria sem brief ou sem superfície continua válida.
 2. **Separação semântica**: guardar contexto do projeto, papel editorial, recomendação do agente e decisão humana em campos distintos. Ranking é permitido somente sobre inventário comparável explicitamente selecionado (FR-079/080).
-3. **Camadas editoriais**: uma leitura rápida aponta para evidência profunda no mesmo documento. Storytelling segue os campos FR-083 quando há suporte; pacote Featured é recomendação proporcional (FR-084), não gate de inclusão.
+3. **Camadas editoriais**: uma leitura rápida aponta para evidência profunda no mesmo documento. As dimensões FR-083 são prompts investigativos de ordem livre; pacote Featured é recomendação proporcional (FR-084), não gate de inclusão.
 4. **Proveniência e autorização**: cada claim, ativo, recomendação profissional e observação de superfície aponta para evidência/origem, status, baseline/contexto e limites. Permissão ou aprovação não é inferida (FR-085–088).
 5. **Avaliação da superfície**: usar contrato condicional independente do runbook de conteúdo. Registrar páginas, viewports e interações realmente vistas; pontuações 1–5 são julgamentos profissionais justificados, não benchmark/certificação. Cada dimensão ausente vira `not_observed` (FR-089–091).
 6. **Pesquisa externa**: opcional e limitada a decisões abertas relevantes; referências com título, URL e data, separadas de julgamentos (FR-092). Não é requisito para produzir análise.
@@ -126,7 +126,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 - Gravar somente a entrega Markdown em analysis-output/; temporários de execução devem ficar fora dos alvos e ser removidos.
 - Não emitir HTML, relatórios JSON/CSV, pacotes ZIP, anexos por sistema, export para Notion ou publicação externa.
 - Não usar dna-analysis.sh nem src/pipeline/context.sh inalterados: a pipeline atual resolve OUTPUT_DIR para dentro de REPO_ROOT, muda o diretório de trabalho e cria estrutura/arquivos de relatório.
-- A constituição v2.0.0 atualiza o contrato do produto para skills, fluxo readonly e Markdown canônico; mantê-la no mesmo conjunto revisável da implementação. A data de ratificação original continua TODO até que haja evidência.
+- A constituição vigente v3.0.0 governa skills, análise estática procedural, privacidade e Markdown canônico; sua data de ratificação original não foi estabelecida nos registros disponíveis e permanece desconhecida.
 - Nenhuma confirmação humana, licença, autoria, liderança, publicação ou métrica pode ser inventada a partir de sinais estáticos.
 
 **Scale/Scope**: Primeiro ciclo suporta vários alvos explicitamente agrupados em um produto, ou um único repositório; publica um arquivo Markdown por produto. Monorepos são um alvo com sistemas/domínios internos. Serviços/repositórios distintos permanecem ligados somente quando essa relação é indicada ou demonstrada.
@@ -137,7 +137,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 
 ### Gate após a emenda constitucional
 
-| Princípio/contrato 2.0.0 | Resultado | Tratamento neste plano |
+| Princípio/contrato v3.0.0 | Resultado | Tratamento neste plano |
 |---|---|---|
 | I. Evidence-Based Analysis | PASS | Preservar distinção fato/inferência, evidência/limite e desconhecido; não elevar análise estática a prova de runtime. |
 | II. Generic Core and Additive Methods | PASS | Preservar base genérica; especializações aditivas não substituem evidência comum. |
@@ -147,7 +147,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 | Product and Technology Constraints | PASS | O produto é local e Codex-guided; Bash/Python são ferramentas opcionais somente se respeitarem os contratos. |
 | Development Workflow | PASS WITH MIGRATION | Atualizar documentação, CI e retenção legada para refletir a experiência de skill/Markdown. |
 
-**Estado do gate**: A constituição v3.0.0 substituiu o bloqueio por aviso e preservação observada quando enforcement não foi comprovado. A data original de ratificação permanece TODO até confirmação.
+**Estado do gate**: A constituição v3.0.0 substituiu o bloqueio por aviso e preservação observada quando enforcement não foi comprovado. A data original de ratificação não foi estabelecida nos registros disponíveis e permanece desconhecida, conforme indicado na constituição.
 
 ### Gate após design
 
@@ -182,7 +182,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 - target-repos/: ignored selected local inputs
 - analysis-output/: ignored; exactly one <slug>.md per product
 - README.md: new Codex skill quickstart and replacement for legacy report tour
-- .specify/memory/constitution.md: proposed v2.0.0 before implementation
+- .specify/memory/constitution.md: autoridade vigente v3.0.0
 - tests/ and .github/workflows/: retain/adapt only checks relevant to delivered skills
 
 **Structure Decision**: Uma skill audit principal mantém um ponto de entrada claro e carrega runbooks de referência focados por etapa. Isso permite reusar análises profundas sem repetir o método e permite auditorias parciais sem criar várias saídas. Skills e runbooks são instruções do produto; cada auditoria de projeto ainda entrega um único Markdown. Coletores existentes permanecem somente quando conseguem ler o alvo sem executar código e sem gravar nele; renderers que produzem muitos arquivos saem do caminho padrão. Não haverá um segundo aplicativo de relatório, suíte de exports ou integração Notion.
@@ -219,3 +219,38 @@ O guard automatiza padrões conhecidos, não certifica ausência universal de da
 | Migração constitucional v2.0.0 | O produto muda de CLI/relatórios para skill readonly e Markdown canônico, alterando contratos obrigatórios. | Manter os contratos v1.0.0 deixaria o produto novo em violação permanente da governança. |
 | Runbooks por etapa | A auditoria exige regras distintas de autoria, produção, runtime, release e publicação. | Um prompt longo e indiferenciado é difícil de revisar e fácil de executar parcialmente; uma única skill continua sendo o ponto de entrada. |
 | Enforcement de escrita do host | gitignore e texto de skill não impedem escrita no filesystem. | Nesta fase, não bloqueará o fluxo: o método declara o risco, não promete garantia e mantém prova de host como evolução futura. |
+
+## Complemento de design — US14: reconstrução de contribuição e narrativa técnica (2026-10-05)
+
+### Objetivo e decisões
+
+Adicionar ao método de auditoria a reconstrução de contribuição, decisões e raciocínio de projetos antigos a partir de fontes autorizadas, dentro do mesmo Markdown 2.1.0. A reconstrução pode ser parcial quando a memória ou fontes forem limitadas; desconhecido não é convertido em ausência, e a evidência sempre precede a redação.
+
+1. **Autoridade e fontes**: usar o repositório/baseline local, histórico Git local, documentos/logs fornecidos pelo usuário e fontes públicas sem autenticação explicitamente selecionadas. Não adicionar integração ou acesso a conta privada. Issues, reviews e releases só são fontes quando materializadas localmente, fornecidas ou publicamente legíveis.
+2. **Modelo de alegação**: cada claim de reconstrução referencia evidências recuperáveis e seu escopo; registra relação de suporte, tipo, caveat, confiança qualitativa justificada e estado de revisão. `hypothesis` é uma classificação de trabalho, não evidência e não substitui `fact`, `inference`, relato, conflito ou unknown. `high`/`medium`/`low` usam critérios compartilhados de direção/tipo de fonte, corroboração, contradição e escopo; ausência de suporte fica sem nota.
+3. **Papéis independentes**: autoria registrada, mudança/contribuição, comportamento técnico, decisão/intenção relatada, colaboração, validação e efeito são relações distintas. Não inferir decisão, colaboração ou propriedade integral apenas de commit/roster/sistema.
+4. **Narrativa editorial**: os itens de FR-083 tornam-se perguntas/dimensões de investigação, não sequência fixa, headings mandatórios ou preenchimento simétrico. Prosa pode variar; selecionar zero a três destaques concisos, conforme evidência e relevância, todos como drafts revisáveis.
+5. **Consequência e validação**: explicar efeitos diretos observáveis separadamente de benefícios hipotéticos. Distinguir teste presente/configurado, resultado existente, revisão, experimento e release; qualquer resultado fica limitado a snapshot, cenário e ambiente. Não executar o alvo.
+6. **Memória e perguntas**: reconstruir candidatos com evidência, alternativas/contraevidência, confiança e limitações. Perguntar à pessoa somente quando a resposta puder mudar materialmente atribuição, interpretação ou redação segura; lacuna irrecuperável não bloqueia o restante.
+7. **Avaliação de qualidade**: validar com projetos/fixtures representativos, perguntas predefinidas e perfis de revisão; capturar observações e gaps qualitativos. Não inventar score percentual, taxa de sucesso ou promessa de contratação sem baseline empírico aprovado.
+8. **Evolução do contrato**: manter schema 2.1.0 e expandir aditivamente os registros existentes de evidência/claim/contribuição; não criar artefato de saída ou identidade paralela. Alterações incompatíveis futuras exigem migração explícita no mesmo Markdown.
+
+### Design documental
+
+- `data-model.md`: formalizar `Engineering Reconstruction`/`Highlight`, tipo `hypothesis`, relação claim–evidência, rubrica de confiança e confidence rationale; definir campos de autoria, suporte/contraevidência, escopo e review status.
+- `contracts/source-of-truth-markdown.md` e `contracts/portfolio-readiness.md`: substituir a sequência narrativa fixa por dimensões opcionais e ordem livre; exigir rastreabilidade, caveats e status de draft.
+- `methodology.md` e runbooks locais de evidência/consolidação: descrever reconstrução, matriz de força por tipo de fonte, limites de inferência e perguntas de alto valor.
+- `quickstart.md` e `tests/fixtures/readonly-audit/`: acrescentar cenários sintéticos para memória limitada, conflito, autoria coletiva, benefício plausível sem medição, teste sem resultado, fonte privada indisponível, prosa fora da ordem antiga, zero destaques e revisão de draft.
+- `spec.md` e checklist: US14, FR-114–125 e SC-038–047 são autoridade do escopo; SC-046 usa observação qualitativa e perguntas/critérios prévios, e SC-047 verifica calibração justificada da confiança.
+
+### Estratégia de implementação
+
+Primeiro ajustar modelo e contrato de claim/evidência; depois atualizar regras de investigação e síntese editorial; em seguida produzir fixtures e validação de contrato; por fim atualizar índice/navegação e critérios de aceitação. US14 pode ser entregue como processo documental e de validação independente da avaliação opcional da superfície (US11), mas reutiliza entidades da US13 (pessoas/contribuições) e bases comuns A1/claim. Nenhum teste será executado contra `target-repos/`.
+
+### Checagem constitucional pós-design
+
+**PASS**: evidência e confiança são explícitas; hipótese não substitui fonte; autoria e impacto não são superestimados; fontes privadas não viram dependência; alvo continua somente leitura; uma única página Markdown permanece canônica; lacunas, limites e revisão humana ficam visíveis. O desenvolvimento dos validadores/fixtures do framework não executa conteúdo do alvo.
+
+### Pesquisa e questões restantes
+
+Não há decisão factual, tecnológica ou de acesso que exija pesquisa externa ou pergunta adicional ao usuário: spec, constituição e contratos locais fixam as fronteiras. O ponto antes conflitante (ordem narrativa fixa vs. prosa flexível) foi resolvido pela decisão de que FR-083 fornece dimensões de investigação opcionais; os contratos serão alinhados. Nenhuma nova integração é necessária.
