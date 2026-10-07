@@ -43,3 +43,7 @@ Notas de 1 a 5 incluem critério e suporte localizado e são diagnóstico profis
 - Decisões humanas e recomendações provisórias são estados separados. Conflito material fica aberto para posicionamento humano.
 - Brief e revisão são opcionais; sua ausência não bloqueia análise de repositório ou prontidão editorial básica.
 - Nenhum anexo, relatório, export ou arquivo persistente adicional é produzido.
+
+## Consolidação/aplicação — contrato vigente da revisão 3
+
+Constituição 4.0.0 / FR-021/027–030: um relatório Markdown por produto; audit externo existente explicitamente escolhido permanece canônico com autorização de escrita e destino fora do alvo/Git. Não exigir importação ou segunda cópia. Consolidar material editorial único/histórico, verificar incorporação antes de remover duplicata e atualizar referências. Derivados HTML/CSS solicitados são privados, sem autoridade factual própria, vinculados à versão/decisão/configurações no audit. Estas regras substituem as restrições anteriores de importação obrigatória e proibição de derivados; não autorizam outro relatório, exportador, preview, execução ou publicação. Fatos 2.1.0 e extensão opcional 1.0 permanecem compatíveis. Preservar versões antigas como histórico, separar recomendações de decisões humanas e não usar nota subjetiva como aprovação. Modelo neutro define responsabilidade de blocos; identidade visual continua particular. Validação da página já fornecida pelo usuário não é repetida nem chamada de teste independente.

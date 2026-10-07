@@ -22,6 +22,16 @@
 - A migração `2.0.0` → `2.1.0` atualiza o mesmo arquivo; conserva IDs e significado válidos, registra baseline/vocabulário e gaps, preserva ocorrências removidas como históricas e marca evidências dependentes como stale até revalidação. Heading ausente em documento legado não equivale a avaliação concluída.
 - Exemplos e fixtures versionados são fictícios. A única saída persistente continua sendo este Markdown; tabelas e índices são projeções dos registros dentro do mesmo documento, nunca catálogo/JSON/banco paralelo.
 
+## Extensão opcional de apresentação 1.0
+
+O schema factual permanece **2.1.0**. `presentation_version: 1.0` identifica subseções opcionais `### Seleção editorial` e `### Representações por canal` dentro de `## Projeção pública e claims`. Não criar arquivo por canal nem família nova de IDs factuais; chaves editoriais locais identificam seleções/variantes.
+
+Fonte, seleção e representação compartilham o mesmo Markdown. A seleção registra público/finalidade/idioma/canal, orientações de voz e referências do autor com origem/estado confirmed/provisional/unknown, itens escolhidos/omitidos, rationale e lacunas. Variante registra texto público delimitado, metadados/mídia/ações separados, matriz trecho→C/F/E (P/K/T/O/R/H quando pertinentes), baseline/natureza/limites e histórico.
+
+Decisão draft/accepted/corrected/rejected e freshness current/stale são independentes de confiança factual e prontidão B4. Accepted exige referência recuperável à decisão humana explícita, com escopo/responsável/data conhecidos ou unknown. Sugestão do agente permanece draft; corrected exige nova aceitação. Mudança material de baseline/evidência/seleção/redação/canal invalida aprovação afetada e marca dependências stale, preservando versão anterior e exigindo revalidação. Texto seguro pode continuar revisável com mídia bloqueada quando o canal permitir.
+
+Registros sem extensão continuam legíveis e recebem editorial not_observed, sem reavaliar facts. Migração acrescenta a extensão no mesmo registro, conserva headings/IDs/semântica e histórico, informa versão/baseline/limites e não herda aprovação antiga. Audit externo escolhido é entrada preservada; a cópia de trabalho canônica deve registrar origem e rebasear links sem fingir nova auditoria ou revalidação do alvo. Ver [runbook](../../../.agents/skills/repodna-audit/references/presentation-format.md).
+
 ## Regras
 
 ### Reconstrução e destaques técnicos (US14)
@@ -64,3 +74,7 @@
 - Roster indica contribuidores identificados no escopo, fontes, janela observada, aliases pendentes e completude. Não é declarado total sem base; inclui trabalho não codificado quando evidenciado.
 - Uma tag de projeto não vira experiência de uma pessoa sem vínculo sustentado pessoa → contribuição → ocorrência. Cargo formal, participação compartilhada, bots/agentes, responsáveis por revisão e terceiros permanecem identificados de forma distinta.
 - Disponibilidade de rede, catálogo, ferramenta ou parser não é requisito; descrições externas não comprovam ocorrência no alvo. O índice técnico e suas ocorrências não criam relatório persistente, catálogo ou banco separado.
+
+## Consolidação/aplicação — contrato vigente da revisão 3
+
+Constituição 4.0.0 / FR-021/027–030: um relatório Markdown por produto; audit externo existente explicitamente escolhido permanece canônico com autorização de escrita e destino fora do alvo/Git. Não exigir importação ou segunda cópia. Consolidar material editorial único/histórico, verificar incorporação antes de remover duplicata e atualizar referências. Derivados HTML/CSS solicitados são privados, sem autoridade factual própria, vinculados à versão/decisão/configurações no audit. Estas regras substituem as restrições anteriores de importação obrigatória e proibição de derivados; não autorizam outro relatório, exportador, preview, execução ou publicação. Fatos 2.1.0 e extensão opcional 1.0 permanecem compatíveis. Preservar versões antigas como histórico, separar recomendações de decisões humanas e não usar nota subjetiva como aprovação. Modelo neutro define responsabilidade de blocos; identidade visual continua particular. Validação da página já fornecida pelo usuário não é repetida nem chamada de teste independente.

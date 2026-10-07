@@ -1,6 +1,6 @@
 ---
 name: repodna-audit
-description: Conduct a static, evidence-led repository audit and consolidate one product source of truth in analysis-output/.
+description: Conduct a static, evidence-led repository audit and consolidate one factual Markdown report per product at the selected canonical location.
 ---
 
 # RepoDNA Audit
@@ -13,7 +13,7 @@ Run this skill from the RepoDNA checkout. It is the only supported entry point f
 - Do not execute code, scripts, builds, tests, hooks, plugins, macros, editor code, package managers, or profiling from the selected target. This feature is static only; dynamic validation is an independent external process and is never launched or orchestrated here.
 - Do not write, format, install into, checkout, fetch, stash, refresh, or otherwise mutate a target or its real Git metadata. Do not use an analyzer that may write in the target.
 - The workflow is read-only by agent procedure, not by guaranteed host enforcement. `.gitignore`, instructions, hashes, a clean `git status`, filesystem attributes, or a final comparison do not prevent writes. If the host profile is unverified, warn the user and continue only with static readers; report preservation as unverified/observed, never guaranteed.
-- Persistent user-facing output is exactly one Markdown file per product in `analysis-output/`. Never create a second report, export, attachment, or target-local output. Transient state must stay outside targets and be discardable.
+- The audit has exactly one factual Markdown report per product, in `analysis-output/` by default or at the user-selected existing external path. Requested private application derivatives reference that report. Never create a second report, export pipeline, or target-local output. Transient state must stay outside targets and be discardable.
 - Mask secrets and minimize sensitive/proprietary excerpts. Prefer evidence references and short permitted summaries over source copies.
 
 ## Required references
@@ -57,3 +57,9 @@ to locate all sixteen incorporated themes. Do not reduce the extended rules to
 only the runbook summary. Apply the [privacy contract](../../../specs/001-readonly-audit-framework/contracts/privacy-local-authority.md)
 when changing or sharing the framework. Optional external evidence supplied for
 an audited target never changes these local method rules automatically.
+
+## Handoff to project presentation
+
+The audit skill owns factual investigation and the sole report. For itch.io copy or application, the separate [repodna-itch-format skill](../repodna-itch-format/SKILL.md) consumes that report; it uses [presentation-format.md](references/presentation-format.md) and [the neutral model](references/presentation-template.md) as shared internal references.
+
+After an audit, indicate `$repodna-itch-format` as an optional next command. Do not execute it automatically: presentation requires a user request. Shared references do not add editorial execution to the audit by default. The report remains at its selected canonical path; application derivatives are private and decisions stay in that report.

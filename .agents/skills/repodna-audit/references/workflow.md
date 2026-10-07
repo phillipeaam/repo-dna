@@ -120,3 +120,7 @@ Reconcilie roster após as fontes A1/B4: crie `P-###`/`K-###`, mantenha pessoa/g
 Na retomada/migração, mantenha `T/O/P/K` e IDs legados válidos, atualize no mesmo Markdown para 2.1.0, anote schema/baseline/vocabulário e mapeamentos, preserve removidos como históricos e marque conclusões afetadas como stale até revalidar. Heading não verificado nunca significa domínio completo.
 
 O inventário técnico e o roster entram na reconciliação/consolidação após B1/A1; devem compartilhar evidências sem substituir os registros genéricos. A seção de tags aponta para registros/ocorrências e o roster aponta para contribuições. A projeção de experiência individual usa somente vínculos explicitamente sustentados.
+
+## Handoff editorial (feature 002)
+
+Ao encerrar o audit, pode indicar a [skill repodna-itch-format](../../repodna-itch-format/SKILL.md) com o relatório gerado. Não iniciar composição/aplicação automaticamente sem pedido. Investigação e registro factual pertencem ao audit; composição itch.io pertence à skill editorial. O [método compartilhado](presentation-format.md) e o [modelo neutro](presentation-template.md) continuam referências internas únicas, não formulários obrigatórios para o usuário. Fonte única, rastreabilidade e privacidade permanecem no mesmo Markdown; nenhum alvo/site é alterado pelo handoff.

@@ -1,13 +1,13 @@
 # Contrato de consolidação Markdown
 
-Esta referência define a única saída persistente: `analysis-output/<safe-product-slug>.md`, um arquivo por produto. O documento é legível por pessoas e recuperável por agentes. Consulte [evidence-vocabulary.md](evidence-vocabulary.md) para estados e IDs normativos.
+Esta referência define o relatório factual único: `analysis-output/<safe-product-slug>.md` por padrão, ou audit externo existente explicitamente selecionado. O documento é legível por pessoas e recuperável por agentes. Consulte [evidence-vocabulary.md](evidence-vocabulary.md) para estados e IDs normativos.
 
 ## Identidade, destino e integridade
 
 1. Confirmar nome/identidade do produto e relação explícita entre repositórios antes de consolidar. Sem confirmação, manter registros separados e perguntar.
 2. Gerar slug previsível e seguro; se o caminho colidir com outro produto ou arquivo existente de identidade incerta, bloquear para escolha explícita. Nunca sobrescrever ou fundir por semelhança de nome.
-3. Confirmar que destino não intersecta alvo, Git externo ou submódulo selecionado; o destino continua apenas `analysis-output/`, mesmo quando o restante do checkout é gravável.
-4. Criar/atualizar integralmente o mesmo Markdown do produto. Validar estrutura, IDs, links e conteúdo antes de substituir o arquivo. Não produzir anexos, JSON/HTML/CSV, diretórios por sistema, exports Notion ou segundo relatório.
+3. Confirmar que destino não intersecta alvo, Git externo ou submódulo selecionado; o destino padrão é `analysis-output/`; um audit externo existente escolhido pode permanecer canônico quando autorizado e fora do alvo/Git.
+4. Criar/atualizar integralmente o mesmo Markdown do produto. Validar estrutura, IDs, links e conteúdo antes de substituir o arquivo. Não produzir relatórios anexos JSON/HTML/CSV, diretórios por sistema, exports Notion ou segundo relatório. Derivados de aplicação explicitamente solicitados são privados e vinculados ao único relatório.
 5. Em falha ou bloqueio, registrar estado e causa no documento canônico quando for seguro gravá-lo; não gerar relatório de erro separado.
 
 ## Esqueleto estável do registro
@@ -63,7 +63,7 @@ Headings são estáveis para consulta; mudança da versão do contrato registra 
 - Paths e URLs incluem contexto para revalidar a fonte. Não incorporar código grande, segredos, dados pessoais ou material não autorizado.
 - Produtos distintos ficam em Markdown distintos. Trabalho ou pacote compartilhado recebe identidade estável e links para cada repo/baseline, mas conta como uma contribuição consolidada.
 - Atualizações preservam histórico identificável, marcam conclusões afetadas como stale e registram baseline anterior/nova, decisões modificadas e checkpoints superados.
-- A única saída é o Markdown canônico. Estado de sessão é efêmero e descartável; não há arquivo auxiliar persistente entregue.
+- A única saída factual é o Markdown canônico. Estado de sessão é efêmero e descartável; derivados privados de aplicação só existem por pedido explícito, sem relatório auxiliar.
 
 ## Autoridade e reconciliação
 
@@ -112,7 +112,7 @@ A migração atualiza o mesmo arquivo canônico, mantém a proveniência e uma n
 
 Quando aplicável, registrar brief com origem/estado por campo, contexto do projeto separado do papel editorial, recomendação separada de decisão humana e rationale de comparação. Sem conjunto explícito comparável, não declarar ranking. Preservar Featured candidate, Strong supporting, Supporting/Technical, Archive/Playground e unclassified sem exclusão automática. O quick scan mostra identidade/contexto, papel/equipe/período, stack, contribuição, relevância, estado público e ressalva e liga ao case.
 
-Case usa contexto → ownership → problema → restrições → abordagem → trade-offs → evidência → resultado → reflexão, deixando lacunas. Inventário Featured acompanha imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links e confidencialidade. Separar disponibilidade da seleção; publicação recomenda 4–7 itens visuais significativos. Pacote não é gate.
+Case pode usar contexto, ownership, problema, restrições, abordagem, trade-offs, evidência, resultado e reflexão como dimensões opcionais, em prosa e ordem livres, deixando lacunas sem suporte. Inventário Featured acompanha imagem/clipe principal, vídeo curto, 2–4 clipes/GIFs, 3–6 screenshots, role/team/duration/platform/tech, 3–5 contribuições, 1–3 desafios, trade-offs, resultado/estado, links e confidencialidade. Separar disponibilidade da seleção; publicação recomenda 4–7 itens visuais significativos. Pacote não é gate.
 
 A seção de superfície só aparece após seleção explícita de site/protótipo/design. Registrar fonte, páginas, viewports e interações realmente vistos. Usar uma linha por cada dimensão/subdimensão de `positioning`, `narrative-information-architecture`, `discovery-grouping`, `cases-evidence`, `visual-readability`, `mobile-reflow`, `tablet-reflow`, `reading-order`, `touch-targets`, `keyboard-navigation`, `focus-visibility`, `accessible-names`, `semantic-structure`, `contrast`, `reduced-motion`, `animated-media-controls`, `contact-conversion`, `maintenance-consistency`, `unavailable-media` e `performance`; cada linha recebe finding fundamentado ou `not_observed`, evidência/localização e limite. Falhas de mídia só são registradas quando diretamente observáveis. Performance aceita apenas sinais estáticos observados sem execução ou medições já existentes/fornecidas com sua proveniência; não iniciar teste de carregamento, profiler, benchmark ou execução do alvo. O scorecard inclui status e, quando aplicável, nota/critério/confiança, evidência, impacto e limite. O registro também contém resumo executivo, percurso do visitante, findings priorizados, arquitetura/direção recomendada, gaps de conteúdo/evidência, plano por fases, decisões/perguntas pendentes e limitações. Recomendações apontam evidência e não equivalem a decisão/aprovação. Nota 1–5 tem critério/localização e é diagnóstico profissional. Finding inclui prioridade P0–P3, impacto, recomendação, esforço, risco/dependência e confiança. Não autenticar, submeter, acionar conversão, editar ou publicar; indisponibilidade não bloqueia análise de conteúdo.
 
@@ -125,3 +125,32 @@ Em cada `T-###`, incluir categoria/namespace quando aplicável, função demonst
 Em `## Roster de contribuidores`, declarar “contribuidores identificados no escopo”, fontes, janela/baseline, completude e limites. Cada `P-###` tem tipo (pessoa, grupo, bot, ferramenta IA), fonte e estado de identidade/divulgação. Cada `K-###` tem natureza do trabalho, sistema, intervalo, repo/baseline, estado (individual, compartilhado, declarado/relatado ou desconhecido), evidência e wording seguro. Contribuição sem commit é válida quando evidenciada e relato pessoal continua identificado. Aliases conflitantes ficam separados.
 
 Experiência individual é uma projeção derivada do vínculo explícito `P-###` → `K-###` → `O-###`/`T-###`; exige E/F recuperável, baseline e caveat. Não herdar stack coletiva, usar CODEOWNERS como prova de implementação, creditar código a autor de asset, somar repetidamente trabalho compartilhado ou inferir cargo/liderança por atividade. Dados civis/de contato ou não autorizados são omitidos/mascarados; exemplos no método permanecem fictícios.
+
+## Extensão opcional de apresentação (1.0, feature 002)
+
+Usar [presentation-format.md](presentation-format.md) após seleção factual.
+Acrescentar presentation_version: 1.0, Seleção editorial e Representações por
+canal dentro de Projeção pública e claims. Manter schema factual 2.1.0,
+headings/IDs e autoridade de evidências; ausência é editorial not_observed.
+
+Texto público delimitado não contém IDs/paths privados ou marcadores de trabalho;
+matriz interna liga trechos/campos a C/F/E e P/K/T/O/R/H pertinentes com natureza,
+baseline e limites no mesmo documento. Não substituir facts pela redação.
+Preservar escolhas de voz com origem/estado, omissões, lacunas, decisões anteriores
+e prontidão por dimensão. Accepted exige decisão humana explícita; mudança
+material invalida aprovação e marca dependências stale até revalidação.
+
+Audit externo existente escolhido permanece canônico; mudança de destino autorizada
+registra origem e preservação antes de remover cópia. Manter a base dos links ou
+rebasear pela localização original. Nunca alegar revalidação por consolidar. Não criar
+relatório por canal, catálogo, exportador ou relatório companheiro. HTML/CSS pedidos
+são derivados privados de aplicação.
+
+Na apresentação por canal, dimensões narrativas e inventários Featured são
+opcionais/proporcionais; não impõem sequência, quantidade de blocos/mídias
+ou estilo ao texto. Aplicar o perfil [itch.io](../../repodna-itch-format/references/channel-itch.md) e canal fictício
+do runbook, sem presumir compatibilidade real adicional.
+
+## Consolidação editorial e aplicação — revisão vigente
+
+Para apresentação de audit existente, o destino original explicitamente escolhido pode permanecer canônico; não copiar obrigatoriamente para analysis-output/. A regra de saída única significa um relatório factual por produto. Derivados HTML/CSS explicitamente solicitados são arquivos privados de aplicação, não relatórios; registrar sua versão/configuração e decisão no mesmo audit. Novos audits continuam no destino padrão; os derivados dependem de pedido explícito. Seguir [modelo neutro](presentation-template.md) e manter fatos/IDs/histórico. Não escrever/executar no alvo, publicar ou repetir testes da página já validados pelo usuário.

@@ -32,3 +32,26 @@ Separar contexto do projeto, papel editorial e estado da decisão. Conjunto não
 Para Featured, inventariar como metas desejáveis: imagem/clipe principal; vídeo curto; 2–4 clipes/GIFs de sistemas; 3–6 screenshots; role/team/duration/platform/tech; 3–5 contribuições; 1–3 desafios; trade-offs; resultado/impacto/estado final; links públicos e confidencialidade quando necessária. Separar itens disponíveis dos selecionados. Case publicado recomenda 4–7 elementos visuais significativos. Supporting/Technical e Archive/Playground recebem pacote mais leve e continuam no inventário.
 
 Cada mídia declara a claim/comportamento demonstrado e distingue captura real, diagrama, proxy e placeholder. Proveniência, era, autoria, terceiros, legenda e permissões são registradas por ação. Falta de autorização deixa o item como lacuna, sem bloquear texto factual seguro.
+
+## Apresentação por público e canal (feature 002)
+
+Seguir [presentation-format.md](presentation-format.md) e o perfil
+[itch.io](../../repodna-itch-format/references/channel-itch.md) para derivar representações dos fatos de B4. Seleção,
+texto e rastreabilidade permanecem no canônico. Inventário Featured acima é
+contexto opcional de portfólio; não impõe pacote, headings, sequência ou estética
+à apresentação por canal. Voz orientada pelo autor e dados sustentados governam
+a composição proporcional.
+
+Avaliar texto, ownership/contribuição, resultados, mídia/permissões e campos
+essenciais separadamente, reutilizando complete, complete_with_conditions,
+incomplete_blocking, incomplete_nonblocking e optional. Mídia permission_unknown
+bloqueia só a ação dependente; texto seguro independente continua revisável.
+Execução externa e estado público observado são dimensões independentes.
+Accepted exige decisão humana explícita; aprovação não é confiança factual,
+licença, runtime ou publicação. Mudança material de baseline/evidência/seleção/
+redação/canal invalida aprovação afetada e marca stale até revalidação, com
+versão anterior preservada. Não escrever/rodar alvo ou enviar conteúdo externo.
+
+## Consolidação editorial e aplicação — revisão vigente
+
+Para apresentação de audit existente, o destino original explicitamente escolhido pode permanecer canônico; não copiar obrigatoriamente para analysis-output/. A regra de saída única significa um relatório factual por produto. Derivados HTML/CSS explicitamente solicitados são arquivos privados de aplicação, não relatórios; registrar sua versão/configuração e decisão no mesmo audit. Novos audits continuam no destino padrão; os derivados dependem de pedido explícito. Seguir [modelo neutro](presentation-template.md) e manter fatos/IDs/histórico. Não escrever/executar no alvo, publicar ou repetir testes da página já validados pelo usuário.

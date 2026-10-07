@@ -18,6 +18,7 @@ tests=(
     canonical_markdown_contract_test.sh
     evidence_separation_test.sh
     publication_readiness_test.sh
+    publication_format_contract_test.sh
     portfolio_readiness_contract_test.sh
     portfolio_surface_contract_test.sh
     technical_tags_contract_test.sh
