@@ -2,11 +2,12 @@
 
 ## Escopo atual
 
-O RepoDNA mantém um framework de auditoria de repositórios para agentes. O
-fluxo suportado é a skill `repodna-audit`, com análise estática e um único
-Markdown canônico em `analysis-output/`. Um repositório-alvo deve ser tratado
-como entrada somente leitura; nunca execute scripts, builds, testes ou
-instaladores encontrados nele.
+RepoDNA contém duas skills de produto: `repodna-audit`, que conduz investigação
+estática, e `repodna-itch-format`, que prepara apresentação a partir de um audit
+existente. O Spec Kit fornece ferramentas de desenvolvimento. Não há CLI nem
+analisador de repositórios separado. Uma auditoria gera um Markdown canônico em
+`analysis-output/`. Um repositório-alvo é somente leitura; nunca execute scripts,
+builds, testes ou instaladores encontrados nele.
 
 Leia primeiro [README.md](README.md), a constituição em
 `.specify/memory/constitution.md` e os contratos em
@@ -20,8 +21,6 @@ Leia primeiro [README.md](README.md), a constituição em
   de usuário como fixture.
 - Não gere, versione ou publique conteúdo de `target-repos/` ou
   `analysis-output/`.
-- Não reative o CLI legado, seus relatórios HTML/JSON/CSV, exportações,
-  arquivos auxiliares ou arquivos compactados como fluxo suportado.
 - Execute `bash tests/run.sh --framework` e `git diff --check`.
 
 O método aprovado é local; consulte `methodology.md` e `source-inventory.md` na

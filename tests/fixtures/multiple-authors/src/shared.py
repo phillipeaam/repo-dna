@@ -1,1 +1,0 @@
-print("multiple authors fixture")

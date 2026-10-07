@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def main() -> int:
-    roots = [Path(value) for value in sys.argv[1:]] or [Path("collectors"), Path("renderers"), Path("src/reports"), Path("scripts")]
+    roots = [Path(value) for value in sys.argv[1:]] or [Path("scripts")]
     failures: list[str] = []
     files = sorted(path for root in roots for path in ([root] if root.is_file() else root.rglob("*.py")))
     for path in files:

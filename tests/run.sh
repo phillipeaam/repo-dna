@@ -4,13 +4,12 @@ set -euo pipefail
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODE="${1:---framework}"
-if [[ "$#" -gt 1 || ( "$MODE" != "--framework" && "$MODE" != "--all" ) ]]; then
+if [[ "$#" -gt 1 || "$MODE" != "--framework" ]]; then
     printf '%s\n' 'Usage: bash tests/run.sh [--framework]' >&2
     exit 2
 fi
 
-# --all remains a compatibility alias, but runs only the supported framework
-# contracts. Legacy target-analysis tests are intentionally not invoked.
+# Run the skills' supported framework contracts against synthetic fixtures.
 tests=(
     readonly_audit_boundary_test.sh
     readonly_audit_scope_test.sh

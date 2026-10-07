@@ -3,7 +3,9 @@
 [![Quality, tests, and fixtures](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml/badge.svg)](https://github.com/phillipeaam/repo-dna/actions/workflows/quality-tests-and-fixtures.yml)
 [![License](https://img.shields.io/github/license/phillipeaam/repo-dna)](LICENSE)
 
-RepoDNA is a Codex-guided framework for static, evidence-led repository audits. Its primary entry point is the `repodna-audit` skill under `.agents/skills/repodna-audit/`.
+![RepoDNA: static audits, traceable evidence and presentation](assets/images/banner.png)
+
+RepoDNA is a Codex-guided framework for static, evidence-led repository audits. Its two product skills live under `.agents/skills/`: `repodna-audit` investigates a selected repository, and `repodna-itch-format` prepares itch.io copy from an existing audit. The methodology, tests and specifications support those skills; there is no separate analyzer CLI or runtime.
 
 Each audited product has exactly one factual Markdown report, defaulting to `analysis-output/<safe-product-slug>.md`. A user-selected existing external audit can remain the sole authority. The document combines the current project record, evidence, coverage, claims, questions and audit history. The framework does not create alternate HTML or JSON/CSV reports, archives or Notion exports. Explicitly requested HTML/CSS application derivatives remain private and reference the sole report.
 
@@ -58,10 +60,6 @@ alternate reports, create previews or execute the target. The
 [synthetic scenarios](tests/fixtures/readonly-audit/presentation-model/README.md)
 verify the framework contract, not a real product's behavior or audience response.
 
-## Migration status
-
-The former `repodna analyze` CLI, installer and multi-format report flow are retired. Their old entry points now stop with a migration message and do not inspect repositories. Historical collectors and renderers remain in the repository for reference, but are not part of the supported audit path; reuse requires an explicit readonly review and separation from the legacy output pipeline.
-
 ## Validate framework contracts
 
 Original research provenance can be kept under `private-context/`, which is
@@ -76,8 +74,6 @@ terms in `private-context/known-sensitive-terms.txt` help identify known private
 names. Patterns cannot identify all confidential information: review the content
 manually too, including binary files. Current cleanup does not remove information
 from existing Git history.
-The release packager also checks the exact tag tree with `--ref` before creating
-an archive, so a clean checkout does not bypass metadata checks on an older tag.
 
 Acceptance scripts use only synthetic framework fixtures; they must never inspect or execute a selected target. The CI runs these contracts on Linux, macOS and Windows. This validates portability of the fixture tests, not the Codex host's effective filesystem permissions.
 
@@ -85,7 +81,7 @@ Acceptance scripts use only synthetic framework fixtures; they must never inspec
 bash tests/run.sh --framework
 ```
 
-Codex host profiles may remain `unverified` in the [host matrix](tests/fixtures/readonly-audit/README.md); that status now warns and limits preservation claims instead of blocking static audits. Legacy report-generation tests are excluded from the supported runner.
+Codex host profiles may remain `unverified` in the [host matrix](tests/fixtures/readonly-audit/README.md); that status now warns and limits preservation claims instead of blocking static audits.
 
 ## License
 

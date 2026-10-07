@@ -99,13 +99,13 @@ Estender a mesma fonte canônica para responder que tecnologia, framework, packa
 
 Entregar um fluxo de auditoria local guiado por uma skill principal do Codex, com processos reutilizáveis para preparação, A1, B1–B4, reconciliação, consolidação e revisão. O resultado persistente será exatamente um Markdown por produto em analysis-output/<slug>.md, com conclusões, evidências, índice, histórico e apêndices no mesmo arquivo.
 
-Os repositórios serão selecionados em target-repos/. A análise será exclusivamente estática: nenhum fluxo desta feature inicia ou orquestra execução de código, scripts, builds, testes, hooks, plugins, macros, código de editor ou profiling do alvo. Validação dinâmica fica fora do framework e pertence a processo externo independente. O agente segue um procedimento de não escrita; enforcement do host é recomendado, mas a falta dele gera aviso e limitação de preservação, não bloqueio. O plano também não chamará o CLI legado como está: seu pipeline entra no repositório e cria resultados ali. Capacidades úteis dos coletores existentes serão reaproveitadas seletivamente, após expor interfaces que não escrevam no alvo nem entreguem outros relatórios. A constituição foi atualizada para v3.0.0 para refletir o fluxo procedural e a limitação explícita de preservação.
+Os repositórios são selecionados em target-repos/. A análise é exclusivamente estática: nenhum fluxo inicia ou orquestra execução de código, scripts, builds, testes, hooks, plugins, macros, código de editor ou profiling do alvo. Validação dinâmica fica fora do framework e pertence a processo externo independente. O agente segue um procedimento de não escrita; enforcement do host é recomendado, mas a falta dele gera aviso e limitação de preservação, não bloqueio. O produto implementado consiste nas skills repodna-audit e repodna-itch-format, referências e testes de contrato; CLI, instalador, coletores, renderizadores, schemas e pipeline de análise separados foram removidos. A constituição v3.0.0 reflete o fluxo procedural e a limitação explícita de preservação.
 
 ## Technical Context
 
-**Language/Version**: Markdown de skills, runbooks e contrato de saída; Bash 4.3+ e Python 3.11+ são capacidades opcionais de coletores locais confiáveis já existentes, não linguagem obrigatória do fluxo principal.
+**Language/Version**: Markdown de skills, runbooks e contrato de saída. Bash executa os testes de contrato; Python 3.11+ executa o verificador de privacidade.
 
-**Primary Dependencies**: Codex agent skill discovery em .agents/skills/; Git para leituras de histórico; acesso a arquivos somente leitura; ferramentas locais atuais somente por interfaces auditadas. Nenhum serviço externo é requisito.
+**Primary Dependencies**: Descoberta de skills Codex em .agents/skills/; Git para leituras de histórico; acesso somente de leitura aos arquivos do alvo. Nenhum serviço externo é requisito.
 
 **Storage**: Entradas em target-repos/<nome-do-repositorio>/; uma entrega persistente por produto em analysis-output/<slug-do-produto>.md. Estado intermediário é descartável, fora do alvo e nunca entregue como arquivo paralelo.
 
@@ -125,7 +125,7 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 - git status sozinho não comprova preservação; comparar conteúdo e estado observável dos arquivos dentro do escopo.
 - Gravar somente a entrega Markdown em analysis-output/; temporários de execução devem ficar fora dos alvos e ser removidos.
 - Não emitir HTML, relatórios JSON/CSV, pacotes ZIP, anexos por sistema, export para Notion ou publicação externa.
-- Não usar dna-analysis.sh nem src/pipeline/context.sh inalterados: a pipeline atual resolve OUTPUT_DIR para dentro de REPO_ROOT, muda o diretório de trabalho e cria estrutura/arquivos de relatório.
+- CLI, instalador e pipeline independentes foram removidos em 2026-10-07; o fluxo suportado usa somente as duas skills de produto e as referências locais.
 - A constituição vigente v3.0.0 governa skills, análise estática procedural, privacidade e Markdown canônico; sua data de ratificação original não foi estabelecida nos registros disponíveis e permanece desconhecida.
 - Nenhuma confirmação humana, licença, autoria, liderança, publicação ou métrica pode ser inventada a partir de sinais estáticos.
 
@@ -181,11 +181,11 @@ Os repositórios serão selecionados em target-repos/. A análise será exclusiv
 - .agents/skills/repodna-audit/references/evidence-vocabulary.md: shared states, confidence and references
 - target-repos/: ignored selected local inputs
 - analysis-output/: ignored; exactly one <slug>.md per product
-- README.md: new Codex skill quickstart and replacement for legacy report tour
+- README.md: Codex quickstart for the two supported RepoDNA skills
 - .specify/memory/constitution.md: autoridade vigente v3.0.0
 - tests/ and .github/workflows/: retain/adapt only checks relevant to delivered skills
 
-**Structure Decision**: Uma skill audit principal mantém um ponto de entrada claro e carrega runbooks de referência focados por etapa. Isso permite reusar análises profundas sem repetir o método e permite auditorias parciais sem criar várias saídas. Skills e runbooks são instruções do produto; cada auditoria de projeto ainda entrega um único Markdown. Coletores existentes permanecem somente quando conseguem ler o alvo sem executar código e sem gravar nele; renderers que produzem muitos arquivos saem do caminho padrão. Não haverá um segundo aplicativo de relatório, suíte de exports ou integração Notion.
+**Structure Decision**: A skill de auditoria fornece um ponto de entrada e carrega runbooks por etapa. A skill de apresentação consome um audit existente. As duas skills e suas referências definem o produto; cada auditoria entrega um Markdown por produto. A implementação anterior de coletores, renderizadores, CLI e schemas foi removida após a adoção do método guiado por skills.
 
 ## Complemento: US8 e US9 — privacidade e autoridade local
 

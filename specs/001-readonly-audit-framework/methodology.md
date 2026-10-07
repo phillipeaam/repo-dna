@@ -311,24 +311,22 @@ Não combinar evidência de dimensões diferentes como se fosse uma só. Se duas
 
 Esses exemplos sustentam o desenho do método. Seus commits, pessoas, datas, métricas e claims particulares não foram revalidados nos repositórios originais nesta sessão.
 
-## 14. Reconciliação com a base existente
+## 14. Registro histórico da base anterior à remoção (2026-10-07)
+
+Esta matriz descreve a implementação anterior que foi removida; não é um
+inventário do checkout atual. O produto atual consiste nas duas skills RepoDNA,
+seus runbooks e referências, contratos, fixtures sintéticas e ferramentas de
+validação do framework. Não há runtime de análise, CLI ou instalador separado.
 
 | Capacidade / fonte local inspecionada | Decisão de produto | Motivo / mudança exigida |
 |---|---|---|
-| README, repodna, install.sh e dna-analysis.sh | Experiência legada aposentada; entrypoints são stubs fail-closed | A skill é o fluxo suportado; os comandos antigos não podem iniciar análise nem instalar o gerador de relatórios |
-| src/pipeline/context.sh e demais pipeline/renderers | Mantidos como histórico, fora do caminho suportado | OUTPUT_DIR padrão fica dentro de REPO_ROOT; pipeline troca diretório, grava relatórios múltiplos e depende de JSON persistido; reuso exigirá separação e revisão readonly |
-| Inventário / stack / adaptadores | Reaproveitar na investigação interna e consolidar findings no Markdown | Preservar análise genérica, cobertura e evidência de configuração sem entregar relatórios paralelos |
-| docs/architecture.md | Preservar responsabilidades; revisar contratos para o Markdown único | Modelo atual fixa CLI e JSON como saídas centrais |
-| docs/evidence-classification.md | Preservar fact/inference/not_observed | Resultado não observado continua diferente de zero |
-| docs/author-system-ownership.md | Rebaixar proxy a sinal investigativo | Volume de touches/churn não comprova autoria; confiança de volume não é força de prova |
-| docs/system-documentation.md | Reaproveitar mapas e perguntas | Documento por sistema alimenta registro de produto e apêndices |
-| docs/local-delivery-analysis.md | Reaproveitar tags e CI estático | Arquivos/versões não provam execução CI ou publicação |
-| docs/canonical-json-contracts.md | Reaproveitar versão e procedência no contrato Markdown | O JSON de relatório legado deixa de ser saída entregue; intermediários não criam segunda autoridade |
+| README, repodna, install.sh e dna-analysis.sh | Removidos do checkout atual | O único fluxo mantido é guiado pelas skills |
+| src/pipeline/, collectors/, renderers/ e schemas/ | Removidos do checkout atual | Os componentes pertenciam ao analisador independente descontinuado |
+| Lógica de coletores e documentação técnica anterior | Removidas; ensinamentos selecionados incorporados às instruções locais | As skills não dependem de módulos do analisador legado |
 | Privacidade e portfolio drafts | Preservar limites, mascaramento e confirmação identificada | Confirmação humana não torna narrativa prova de runtime/release |
-| Snapshots/comparações/onboarding/LLM | Reavaliar e aposentar como relatórios entregues | Insights úteis são incorporados ao Markdown; nenhum consumidor recebe relatório alternativo |
-| Dashboard, charts, CSV e archives | Remover da experiência e dos entregáveis | O agente consolida no Markdown; formatos alternativos não fazem parte do produto |
+| Snapshots, dashboards, charts, exports e archives | Removidos com a implementação anterior | Formatos alternativos não fazem parte do produto atual |
 
-Esta matriz decorre das fontes listadas e da leitura de configuração/contratos. Não é um inventário linha por linha de toda a implementação ou uma validação de execução do legado.
+Esta matriz registra decisões e contexto histórico, não sugere que os arquivos listados permaneçam disponíveis.
 
 ### Governança que precisa evoluir
 
@@ -340,7 +338,7 @@ Antes da implementação do runtime, uma atualização constitucional explícita
 
 Entregues para esta feature SDD: spec, síntese do método, inventário de fontes, checklists, plano, contratos, modelo e tarefas. A especificação do produto limita a futura entrega de cada auditoria a um único Markdown em `analysis-output/`.
 
-A skill, os runbooks, contratos, template de consolidação e contratos de aceitação estão disponíveis localmente. O CLI antigo está aposentado. A procedência original da pesquisa é privada e opcional; o mapa público mantém correspondência temática. Perfis de host não verificados permitem auditoria estática com aviso; preservação observada não é garantia de isolamento.
+A skill, os runbooks, contratos, template de consolidação e contratos de aceitação estão disponíveis localmente. O CLI e o analisador anteriores foram removidos do checkout em 2026-10-07. A procedência original da pesquisa é privada e opcional; o mapa público mantém correspondência temática. Perfis de host não verificados permitem auditoria estática com aviso; preservação observada não é garantia de isolamento.
 
 Criar pasta ignorada ou escrever “readonly” em prompt não comprova isolamento. Na versão atual, o agente segue o procedimento sem escrita intencional e declara a limitação; enforcement e prova de host são melhorias futuras para elevar a garantia de preservação.
 

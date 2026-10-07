@@ -108,8 +108,8 @@ validated and recorded separately to improve preservation confidence.
 
 Contributors MUST keep the agent skill and its references under
 `.agents/skills/repodna-audit/` for investigation and `.agents/skills/repodna-itch-format/`
-for itch.io presentation, with shared generic references kept once; document legacy code according to
-its actual supported role. Tests MUST validate skill/process contracts, Markdown
+for itch.io presentation, with shared generic references kept once; keep the
+repository focused on the supported framework. Tests MUST validate skill/process contracts, Markdown
 structure, privacy boundaries, and controlled fixtures. Tests MUST NOT execute
 selected target repositories. CI MUST run the checks applicable to the supported
 host platforms and MUST prevent private targets and analysis outputs from entering

@@ -1,1 +1,0 @@
-print("caminho com acentos")

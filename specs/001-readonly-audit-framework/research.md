@@ -66,11 +66,11 @@
 
 **Condition**: Marcar o perfil de host como `enforced` somente após prova controlada. Enquanto isso, permitir uso procedural com aviso e preservar a distinção entre intenção do agente, estado observado e prevenção efetiva.
 
-### 5. Reusar análise legada seletivamente
+### 5. Decisão histórica sobre análise legada
 
-**Decision**: Inspecionar coletores e reaproveitar detecção, Git, grafos, dependências, privacidade, secrets e adaptadores que possam consumir o alvo sem executar seus programas nem gerar outputs nele. Não chamar dna-analysis.sh nem o pipeline atual de entrega. Remover do caminho principal os documentos que anunciam HTML/JSON/CSV/archives como produto.
+**Decision histórica**: Na transição, a pesquisa avaliou reaproveitar seletivamente os coletores, mas eles nunca foram conectados às skills. Em 2026-10-07, o CLI, instalador, pipeline, coletores, renderizadores, schemas, configurações e testes exclusivos do analisador foram removidos; as skills e suas instruções locais são o produto mantido.
 
-**Rationale**: Os coletores genéricos e adaptadores contêm análise útil, mas src/pipeline/context.sh cria uma árvore de relatórios e muda para o repositório; o pipeline atual escreve arquivos sob esse root. Renderers hoje exigem JSON persistido e produzem múltiplos relatórios separados.
+**Rationale histórica**: Essa leitura orientou a separação de produto documentada na especificação. Os caminhos e componentes avaliados não existem mais no checkout atual.
 
 **Alternatives considered**:
 - Copiar todo RepoDNA para um novo analisador: duplica lógica e aumenta risco de inconsistência.
@@ -92,17 +92,12 @@
 
 **Version note**: A v2.0.0 registra a mudança incompatível de produto, princípios alterados, justificativa, impacto e migração. A data original de ratificação continua explicitamente TODO; não foi inventada.
 
-## Existing project evidence
+## Historical project evidence inspected before the cleanup
 
 - .agents/skills/speckit-* são comandos Codex em Markdown; Spec Kit já opera com .specify/feature.json, convenções de specs e workflow SDD.
 - .specify/integrations/codex.manifest.json e .specify/workflows/speckit/workflow.yml descrevem a integração existente.
-- README.md anuncia análise Bash/Python que grava relatórios timestamped sob o repo analisado, vários formatos e caminhos.
-- src/pipeline/context.sh resolve output padrão como $REPO_ROOT/$REPORT_NAME, faz cd "$REPO_ROOT", cria diretórios e registra log dentro da saída.
-- src/pipeline/structured-reports.sh cria vários arquivos, inclusive links de navegação para JSON/HTML/Notion/LLM/SBOM/onboarding.
-- src/pipeline/security-archive.sh e renderers dependem de JSON persistido e geração múltipla; reuso exige separar coleta da entrega.
-- docs/evidence-classification.md separa fact, inference e not_observed, incluindo não observado diferente de zero.
-- docs/author-system-ownership.md descreve proxies quantitativos; atividade será sinal investigativo, não score de autoria.
-- docs/architecture.md especifica direção de dependência e separação collector/renderer; coletar esses fatos não exige preservar renderers.
+- O produto anterior reunia um analisador Bash/Python, coletores, pipeline e relatórios em vários formatos; esses componentes foram removidos do checkout em 2026-10-07.
+- Esta seção registra as fontes e a análise que orientaram a transição. Seus paths antigos são contexto histórico e não indicam arquivos disponíveis no checkout atual.
 - A skill local speckit-plan prevê agentes de pesquisa. Nesta sessão, a política de colaboração proíbe delegação salvo pedido explícito; pesquisa foi feita diretamente no workspace.
 # Complemento de pesquisa e decisões — US10/US11 (2026-10-05)
 
