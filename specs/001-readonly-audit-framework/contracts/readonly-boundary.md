@@ -31,3 +31,7 @@
 - Verificar conteúdo/estado observável, incluindo paths untracked e ignored no escopo.
 - Concorrência ou cobertura incompleta resulta em preservação inconclusiva/parcial. Comparação sem diferenças permite dizer `observed_unchanged` somente para o escopo examinado; `verified` exige enforcement efetivo comprovado mais comparação suficiente. Sem enforcement, não há garantia preventiva.
 - git status limpo isoladamente nunca justifica declaração de preservação verificada.
+
+## Consolidação/aplicação — contrato vigente da revisão 3
+
+Constituição 4.0.0 / FR-021/027–030: um relatório Markdown por produto; audit externo existente explicitamente escolhido permanece canônico com autorização de escrita e destino fora do alvo/Git. Não exigir importação ou segunda cópia. Consolidar material editorial único/histórico, verificar incorporação antes de remover duplicata e atualizar referências. Derivados HTML/CSS solicitados são privados, sem autoridade factual própria, vinculados à versão/decisão/configurações no audit. Estas regras substituem as restrições anteriores de importação obrigatória e proibição de derivados; não autorizam outro relatório, exportador, preview, execução ou publicação. Fatos 2.1.0 e extensão opcional 1.0 permanecem compatíveis. Preservar versões antigas como histórico, separar recomendações de decisões humanas e não usar nota subjetiva como aprovação. Modelo neutro define responsabilidade de blocos; identidade visual continua particular. Validação da página já fornecida pelo usuário não é repetida nem chamada de teste independente.

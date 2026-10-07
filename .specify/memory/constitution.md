@@ -63,11 +63,16 @@ qualified until supported and reviewed.
 
 ### IV. Versioned Markdown Source of Truth
 Each audited product MUST have exactly one persistent user-facing deliverable:
-a local Markdown document under `analysis-output/`. That document MUST use an
+a local Markdown document, defaulting to `analysis-output/`. An existing external
+audit explicitly selected by the user MAY remain the sole canonical document
+when its destination is authorized, private, and outside all audited targets/Git. That document MUST use an
 explicitly versioned structure and contain the current findings, coverage, evidence
 index, limitations, unresolved questions, and verification history needed by its
 reader. HTML, JSON/CSV reports, archives, dashboards, Notion exports, and companion
-report files MUST NOT be generated as alternate deliverables. Any transient state
+report files MUST NOT be generated as alternate deliverables. Explicitly requested
+HTML/CSS application files MAY be saved as private derivatives of an editorial
+representation; they MUST reference that sole report and MUST NOT establish
+another factual authority or imply publication. Any transient state
 MUST stay outside the selected target and MUST be discardable. Changes to the
 Markdown contract MUST document compatibility and migration implications.
 
@@ -85,7 +90,9 @@ platform limitations MUST remain visible to the human reviewer.
 RepoDNA is a local, Codex-guided repository audit framework. The primary entry
 point is the audit skill under `.agents/skills/repodna-audit/`. Selected local
 repositories are placed in `target-repos/` and persistent results are written only
-to `analysis-output/<safe-product-slug>.md`. A Git ignore rule protects against
+to `analysis-output/<safe-product-slug>.md` by default. User-selected existing
+external audits may be updated in place under Principle IV. Application derivatives
+remain private, outside audited targets, and excluded from distribution. A Git ignore rule protects against
 accidental commits but does not establish a read-only boundary.
 
 The workflow MUST be usable without Notion or another external service. It MAY use
@@ -100,7 +107,8 @@ validated and recorded separately to improve preservation confidence.
 ## Development Workflow
 
 Contributors MUST keep the agent skill and its references under
-`.agents/skills/repodna-audit/` and document any retained legacy code according to
+`.agents/skills/repodna-audit/` for investigation and `.agents/skills/repodna-itch-format/`
+for itch.io presentation, with shared generic references kept once; document legacy code according to
 its actual supported role. Tests MUST validate skill/process contracts, Markdown
 structure, privacy boundaries, and controlled fixtures. Tests MUST NOT execute
 selected target repositories. CI MUST run the checks applicable to the supported
@@ -127,4 +135,13 @@ expands governance; PATCH clarifies wording without changing obligations. The
 ratification date records the original adoption date and MUST NOT be replaced with
 the amendment date. The last-amended date changes whenever this document changes.
 
-**Version**: 3.0.0 | **Ratified**: Unknown (original adoption date not established) | **Last Amended**: 2026-10-04
+**Version**: 4.1.0 | **Ratified**: Unknown (original adoption date not established) | **Last Amended**: 2026-10-04
+
+## Amendment 4.0.0 — 2026-10-07
+
+Requested consolidation makes an existing external audit the sole authority and permits explicitly requested HTML/CSS application derivatives. Principle IV and output constraints change incompatibly; Principles I–III/V retain evidence, privacy and no-target-execution boundaries. Migration selects one authorized canonical path, incorporates unique editorial material/history, verifies preservation before deleting the redundant copy, and updates references. Application files carry only derived presentation, never a second report. Old audits retain factual schema 2.1.0; no factual ID migration is required.
+
+
+## Amendment 4.1.0 — 2026-10-07
+
+User-requested independent presentation skill adds a focused entry point alongside the audit. Development Workflow now permits its channel references in that skill folder. Shared generic evidence/editorial rules remain maintained once. No change to factual schema, output authority, private derivatives, target boundaries or publication authorization. Update moved local links; historical tasks retain their original locations as history.

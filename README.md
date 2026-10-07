@@ -5,7 +5,7 @@
 
 RepoDNA is a Codex-guided framework for static, evidence-led repository audits. Its primary entry point is the `repodna-audit` skill under `.agents/skills/repodna-audit/`.
 
-Each audited product has exactly one persistent user-facing result: `analysis-output/<safe-product-slug>.md`. The document combines the current project record, evidence, coverage, claims, questions and audit history. The framework does not create HTML, JSON/CSV reports, archives, Notion exports or attachments.
+Each audited product has exactly one factual Markdown report, defaulting to `analysis-output/<safe-product-slug>.md`. A user-selected existing external audit can remain the sole authority. The document combines the current project record, evidence, coverage, claims, questions and audit history. The framework does not create alternate HTML or JSON/CSV reports, archives or Notion exports. Explicitly requested HTML/CSS application derivatives remain private and reference the sole report.
 
 ## Start an audit
 
@@ -30,6 +30,33 @@ not change the local method automatically.
 The workflow includes preparation, A1 forensic analysis, B1 production and architecture, B2 static runtime review, B3 release provenance, B4 publication readiness, source reconciliation, Markdown consolidation and final preservation checks. It records facts, inferences, personal accounts, conflicts and unknowns separately. It never executes target code, scripts, builds, tests, hooks, plugins, editor code or profiling. Dynamic validation belongs to a separate external process and is not started or orchestrated by this framework.
 
 Start with [the skill entry point](.agents/skills/repodna-audit/SKILL.md) and [the workflow](.agents/skills/repodna-audit/references/workflow.md). The design and acceptance scenarios live in [the feature specification](specs/001-readonly-audit-framework/spec.md), [quickstart](specs/001-readonly-audit-framework/quickstart.md) and [fixture guide](tests/fixtures/readonly-audit/README.md).
+
+## Prepare a project presentation
+
+Use the [repodna-itch-format skill](.agents/skills/repodna-itch-format/SKILL.md) to prepare itch.io copy from a selected audit. The audit skill owns factual investigation; the presentation skill consumes its report.
+The [presentation runbook](.agents/skills/repodna-audit/references/presentation-format.md)
+selects claims for an audience, purpose, language and channel, keeping drafts,
+evidence routes, omissions and review history in the same product Markdown.
+Update the selected existing audit in place with authorized access, preserving
+source, IDs, baseline and limitations. Do not create a second working report.
+
+The optional `presentation_version: 1.0` extension retains factual schema 2.1.0.
+The MVP includes [itch.io guidance](.agents/skills/repodna-itch-format/references/channel-itch.md)
+and a fictional plain-text channel for controlled validation. Other real stores
+require their own documented capabilities before compatibility can be claimed.
+Descriptions, metadata, media and native actions are considered separately.
+Clarity and accurate crediting guide the writing; author-provided tone, humor,
+vocabulary and atmosphere remain project choices, with provisional suggestions
+when no brief exists. There is no fixed visual template or required narrative.
+
+Draft/acceptance, freshness, factual confidence, media permissions and observed
+public state remain independent. A material change invalidates affected approval;
+acceptance requires an explicit human decision. Requested application files go
+under ignored `private-context/presentation-applications/<slug>/`; versions and
+configuration are recorded in the audit. The method does not publish, generate
+alternate reports, create previews or execute the target. The
+[synthetic scenarios](tests/fixtures/readonly-audit/presentation-model/README.md)
+verify the framework contract, not a real product's behavior or audience response.
 
 ## Migration status
 
@@ -63,3 +90,22 @@ Codex host profiles may remain `unverified` in the [host matrix](tests/fixtures/
 ## License
 
 See [LICENSE](LICENSE).
+
+## Reuse the presentation model
+
+Follow [the neutral model](.agents/skills/repodna-audit/references/presentation-template.md): existing audit → editorial selection → channel text → optional visual application → recorded validated version. Select supported blocks and project-specific voice/visuals; missing information is omitted or qualified. Preserve previous drafts as history. User-validated page checks need not be repeated. Subjective scores are not audit results or approval criteria. Private real examples stay in their sole reports and application files, never shared fixtures.
+
+
+### Call the presentation skill
+
+```text
+Use $repodna-itch-format com o audit E:/caminho/relatorio.md.
+Prepare em inglês e entregue HTML e CSS separados.
+```
+
+```text
+Use $repodna-itch-format com o audit que acabamos de gerar.
+Prepare o texto para a página do jogo no itch.io.
+```
+
+Explicit paths take precedence; an unambiguous conversational audit needs no repeated path. Ambiguity requires only source identification. The neutral model guides the agent internally. An audit may suggest this next command but does not run presentation automatically. No real-project rewriting, publishing or runtime testing occurs when creating the skill.
