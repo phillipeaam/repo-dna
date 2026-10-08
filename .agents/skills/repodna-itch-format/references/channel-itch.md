@@ -34,3 +34,5 @@ Concluir com fonte/data do perfil, descrição/metadados/mídia/ações separado
 ## Aplicação visual opcional
 
 Selecionar conteúdo pelo [modelo neutro](../../repodna-audit/references/presentation-template.md). Registrar separadamente fonte/tamanho do tema, overrides CSS, paleta e ordem aprovada. A documentação oferece Google Fonts, mas não enumera os valores do seletor Size: não inventar opções. Preservar o último HTML/CSS validado ao registrar uma aplicação, sem mudar texto silenciosamente. UI de acesso/comunidade continua nativa. Mudança visual não certifica runtime nem compatibilidade com outra loja; validação já relatada pelo usuário não precisa ser repetida.
+
+Para projetos de jam/evento, aplicar a abertura padronizada: nome do evento, período com dias/mês/ano e tema antes de How to play, usando somente informações sustentadas. Não repetir esses dados em um bloco de contexto posterior; esse bloco exige conteúdo novo. Controles, premissa e mecânicas devem ter funções distintas. Essa ordem é preferência editorial do modelo, não exigência da plataforma.

@@ -22,6 +22,8 @@ Ler o [método compartilhado](../repodna-audit/references/presentation-format.md
 
 Priorizar experiência/acesso, controles úteis, mecânicas, contexto, créditos, links e mídia conforme suporte e relevância. Reutilizar escolhas registradas e pedidos atuais; escolher ordem/extensão/voz adequadas, sem impor paleta, fonte ou narrativa de um exemplo real. Evitar repetir a mesma explicação entre controles, abertura e mecânicas. Propostas sem confirmação permanecem provisional.
 
+Em projetos de jam/evento, abrir com nome, período incluindo dias e tema antes de How to play, conforme o modelo neutro. Evitar repetição entre cabeçalho, controles, premissa e contexto; omitir contexto que apenas reproduz os outros blocos. Dias desconhecidos permanecem uma lacuna, não um intervalo inventado.
+
 Preparar texto público sem IDs internos, paths privados ou linguagem de trabalho. Preservar ressalvas essenciais, autoria coletiva e distinção entre fato, relato e inferência. Não inventar funções, inputs, links, métricas ou compatibilidade. Notas subjetivas de 0–10 não são resultado de audit nem aprovação.
 
 Consultar as fontes oficiais já datadas do perfil; revalidar somente capacidades atuais necessárias e incertas. Não navegar/autenticar uma página real para configurar ou publicar. Idioma público solicitado não prova idioma do jogo.

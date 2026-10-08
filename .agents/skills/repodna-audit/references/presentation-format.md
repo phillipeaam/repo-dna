@@ -50,6 +50,12 @@ Segundo canal MVP é **fictício em texto simples**: nome e resumo essenciais, d
 
 Campo essencial ausente bloqueia campo/representação dependente. Se limite real não comporta ressalva essencial, reformular/omitir claim ou bloquear campo; nunca esconder caveat. Variantes independentes continuam. Limites unknown não recebem teto inventado.
 
+### Ordem de abertura e concisão em projetos de evento
+
+Para projetos de jam/evento, apresentar primeiro o nome do evento, seu período com dias, mês e ano e o tema; How to play vem em seguida quando os controles são conhecidos. Usar datas sustentadas, distinguir calendário do evento de dias trabalhados e registrar fuso quando necessário para explicar diferenças entre fontes. Não inferir dias pela janela de commits. Se os dias forem desconhecidos, manter a precisão sustentada e registrar a lacuna, sem fabricar um intervalo.
+
+Evento, datas e tema aparecem uma única vez. Controles explicam inputs/ações; apresentação situa personagens e premissa; mecânicas acrescentam consequências; contexto posterior só existe se trouxer informação adicional recuperável. Unir ou omitir blocos que apenas recontam a perseguição, o objetivo ou a abertura. A ligação entre tema e experiência pode aparecer na apresentação sem repetir o cabeçalho nem inventar intenção privada.
+
 ## Representação e rastreabilidade
 
 Criar `### Representações por canal`, com chave local, seleção/canal, versão, baseline/limites, texto público, metadados/mídia sugeridos e lacunas. Delimitar início/fim do texto público com headings/blocos claros; IDs internos, segredos, paths privados e marcadores de trabalho ficam fora. Ressalvas necessárias ficam inteligíveis no texto.
