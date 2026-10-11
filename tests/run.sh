@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODE="${1:---framework}"
+if [[ "$#" -gt 1 || "$MODE" != "--framework" ]]; then
+    printf '%s\n' 'Usage: bash tests/run.sh [--framework]' >&2
+    exit 2
+fi
+
+# Run the skills' supported framework contracts against synthetic fixtures.
+tests=(
+    readonly_audit_boundary_test.sh
+    readonly_audit_scope_test.sh
+    audit_workflow_contract_test.sh
+    canonical_markdown_contract_test.sh
+    evidence_separation_test.sh
+    publication_readiness_test.sh
+    publication_format_contract_test.sh
+    portfolio_readiness_contract_test.sh
+    portfolio_surface_contract_test.sh
+    technical_tags_contract_test.sh
+    contributor_attribution_contract_test.sh
+    engineering_reconstruction_contract_test.sh
+    multirepo_audit_test.sh
+    audit_resume_migration_test.sh
+    private_paths_test.sh
+    public_context_test.sh
+    local_method_test.sh
+)
+
+# The US14 reconstruction contract and public-context guard cover provenance
+# metadata, source-fit dimensions, shared origins, and private-value redaction.
+
+for test_file in "${tests[@]}"; do
+    printf '\n==> %s\n' "$test_file"
+    bash "$TEST_DIR/$test_file"
+done
+
+python "$TEST_DIR/../scripts/check-public-context.py"
+
+printf '\nAll %d RepoDNA framework contract tests passed.\n' "${#tests[@]}"

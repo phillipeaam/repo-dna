@@ -1,0 +1,40 @@
+name: Read-only audit framework contracts
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: framework-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  framework-contracts:
+    name: Framework fixtures (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout framework
+        uses: actions/checkout@v5
+
+      - name: Set up Python for framework privacy checks
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Run framework contracts and privacy checks
+        run: bash ./tests/run.sh --framework
+
+      - name: Check patch whitespace
+        if: runner.os != 'Windows'
+        run: git diff --check
